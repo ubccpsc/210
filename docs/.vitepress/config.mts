@@ -3,7 +3,7 @@ import { defineConfig } from "vitepress";
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: "CPSC 210 Course Reader",
-  base: "/reader-210-temp/",
+  base: "/210/",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
