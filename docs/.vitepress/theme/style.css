@@ -1,0 +1,12 @@
+/* Hide navbar, sidebar and footer when 'embed' parameter is present */
+.is-embedded .VPNavBar,
+.is-embedded .VPSidebar,
+.is-embedded .VPFooter,
+.is-embedded .VPDocFooter {
+  display: none !important;
+}
+
+.is-embedded .VPContent {
+  padding-top: 0 !important;
+  margin-left: 0 !important;
+}
