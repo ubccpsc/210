@@ -3,7 +3,7 @@
 These resources were from the prior version of the course that was Java-based and fully focused on object orientation.
 
 * [Learning Objectives](learning-objectives_schedule.pdf)
-* [Video Links](video-links.pdf)
+* [Video Links](video-links.pdf) (might need to download the PDF for the links to actually work)
 
 ## Readings
 1. [Preamble](CPSC_210_-_Preamble.pdf)
