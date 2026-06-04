@@ -31,16 +31,16 @@ Core to doing all these tasks is the skill of **code fluency**. When you are flu
 
 Unlike a natural language, you probably won't be *speaking* code or *listening* code, per-se. But software rarely exists in a vaccuum: it exists to accomplish some task. Users will use it without looking at the code. But fellow maintainers will interact with the code directly. To *speak* code and design to other, you'll need to get familiar with language *about* code. In CPSC 210, you'll learn this language as you go. We'll introduce you to both the practice of coding and the language to describe that practice. 
 
-<details style="background-color: #f0fbff; border: 1px solid #127e96; padding: 10px; border-radius: 5px;">
-  <summary style="font-weight: bold; color: #127e96; cursor: pointer;">
-    📖 The Language of Coding
+<details class="tooltip deep-dive">
+  <summary>The Language of Coding
   </summary>
   <p style="margin-top: 10px; color: #333333;">
-    By the end of the course, you'll understand what these terms mean: <b>type-driven development</b>, <b>test-driven development</b>, <b>functional programming</b>, <b>imperative programming</b>, <b>object-oriented programming</b>, <b>functions</b>, <b>expressions</b>, <b>statements</b>, <b>types</b>, <b>structs</b>, <b>values</b> <b>classes</b>, <b>recursion</b>, <b>iteration</b> <b>object</b>, <b>primitives</b>, <b>unit test</b>, <b>cohesion</b>, <b>coupling</b>.</p>
-    <p style="margin-top: 10px; color: #333333;">Don't worry, we won't quiz you on these! We want you to learn these terms for the long run through applying them, rather than through flash card definitions.</p>
-    <details open style="background-color: #defac5; border: 1px solid #2e7d32; padding: 10px; border-radius: 5px;">
-  <summary style="font-weight: bold; color: #2e7d32; cursor: pointer;">
-    ✍️ Exercise: What do you know?
+    By the end of the course, you'll understand what these terms mean: <b>type-driven development</b>, <b>test-driven development</b>, <b>functional programming</b>, <b>imperative programming</b>, <b>object-oriented programming</b>, <b>functions</b>, <b>expressions</b>, <b>statements</b>, <b>types</b>, <b>structs</b>, <b>values</b> <b>classes</b>, <b>recursion</b>, <b>iteration</b> <b>object</b>, <b>primitives</b>, <b>unit test</b>, <b>cohesion</b>, <b>coupling</b>. (TODO: convert back to markdown now that I know how, add other terms, organize into order)</p>
+    
+   Don't worry, we won't quiz you on these! We want you to learn these terms for the long run through applying them, rather than through flash card definitions.    
+ 
+ <details open class="tooltip exercise">
+  <summary>Exercise: What do you know?
   </summary>
     <p style="margin-top: 10px; color: #333333;">Some of these words may be familiar to you already—which ones? Try writing down a definition for them yourself, before starting the course. This will reveal the current boundaries of your knowledge. (<b>Don't peek at existing definitions before trying to write your own: else you won't find the boundary!</b>)</p> 
     <p>Revisit the exercise again as we cover the material throughout the course, to assess how the boundaries of your knowledge are pushing out.</p>       
@@ -57,23 +57,18 @@ We're using TypeScript for this course because it allows us to cover many differ
 
 As of 2026, TypeScript is also used widely in the software industry, particularly in web development. We chose it instead of JavaScript because TypeScript includes <b>types</b> as a first-class feature. Types are a core programming concept, and we find it easier to discuss them when they are explicitly part of the language. Types are also common in many programming languages (C, C++, Java, Rust, Go, Swift, Haskell, etc.), and being comfortable with them will help you pick up one of these typed languages. 
 
-<details style="background-color: #f0fbff; border: 1px solid #127e96; padding: 10px; border-radius: 5px;">
-  <summary style="font-weight: bold; color: #127e96; cursor: pointer;">
-    📖 Typed Languages
-  </summary>
+<details class="tooltip deep-dive">
+  <summary>Typed Languages</summary>
   <p style="margin-top: 10px; color: #333333;">
     Nearly all programming languages have types; any variable <code>x</code> takes on a value (say, 3) that has a type (say, <code>number</code> or <code>integer</code>). A <b>typed language</b> (more precisely: <b>statically-typed</b> or <b>strongly-typed</b>), in contrast with an <b>untyped language</b> (more precise: <b>dynamically-typed</b>) has those types written in the code explicitly. These types allow us to catch more bugs before the program runs, and communicate more precisely what the code does.</p>
 </details>
 
 If you don't know TypeScript, this reader will introduce TypeScript syntax as we go. Beyond that, it's up to you to learn: we won't dwell on explaining the syntax in lecture or exercises. 
 
-<details style="background-color: #f0f8ff; border: 1px solid #2363b0; padding: 10px; border-radius: 5px;">
-  <summary style="font-weight: bold; color: #2363b0; cursor: pointer;">
-    <span style="font-weight:bold; color: #ffffff; background-color: #2363b0; white-space: pre;">  ₜₛ</span> Semicolons in TypeScript
-  </summary>
-  <p style="margin-top: 10px; color: #333333;">
-    In the TypeScript presented in the reader, we'll put semicolons after single-line statements. For instance:
-   </p>
+<details class="tooltip ts-tips">
+  <summary>Semicolons</summary>
+  
+   In the TypeScript presented in the reader, we'll put semicolons after single-line statements. For instance:
    
    ```typescript
    3 + 2;
@@ -98,30 +93,23 @@ We'll assume in lecture you've read the reader chapters as indicated on the cour
 
 You'll have noticed this reader includes some nested content. All this nested content is intended as a *parenthetical*: it's relevant to what's discussed in the main text, but the main text is designed to be readable without expanding this content.
 
-<details style="background-color: #fff8dc; border: 1px solid #8c5600; padding: 10px; border-radius: 5px;">
-  <summary style="font-weight: bold; color: #8c5600; cursor: pointer;">
-    📙 Deeper Dives
-  </summary>
-  Deeper dives are our catch-all parenthetical: they're things we would *like* to tell you, but we recognize are divergent from the main point we are trying to make.
+<details class="tooltip deep-dive">
+  <summary>Deep Dives</summary>
+  
+  Deep dives are our catch-all parenthetical: they're things we would *like* to tell you, but we recognize are divergent from the main point we are trying to make.
 </details>
 
-<br/>
- <details style="background-color: #defac5; border: 1px solid #2e7d32; padding: 10px; border-radius: 5px;">
-  <summary style="font-weight: bold; color: #2e7d32; cursor: pointer;">
-    🌿 Exercises
+ <details class="tooltip exercise">
+  <summary>Exercises
   </summary>
      
-   Exercises will contain precise instructions to prompt you to engage with the content. Finishing the exercises isn't enough to understanding the content; we'll insert them when we see a particularly good opportunity to grow your understanding with a simple task.
+   Exercises will contain precise instructions to prompt you to engage with the content. Note that finishing the exercises on their own isn't enough to understanding the content; that's what the lecture exercises, labs, and project are for. We'll simply insert reader execises when we see a particularly good opportunity to grow your understanding with a simple task.
     
-   For example: find the other exercise on this page.
+   Here's an exercise: find the other exercise on this page.
 </details>
 
-<br/>
-
-<details style="background-color: #f0f8ff; border: 1px solid #2363b0; padding: 10px; border-radius: 5px;">
-  <summary style="font-weight: bold; color: #2363b0; cursor: pointer;">
-    <span style="font-weight:bold; color: #ffffff; background-color: #2363b0; white-space: pre;">  ₜₛ</span> TypeScript Tips
-  </summary>
+<details class="tooltip ts-tips">
+  <summary>TypeScript Tips</summary>
  
  TypeScript Tips will give you information about TypeScript, particularly about its syntax. We talk about the syntax in parenthetical to better separate the coding concepts (the main text) from syntax (in parentheticals like these). Here's a recursive `fib` in TypeScript:
  
@@ -134,15 +122,10 @@ You'll have noticed this reader includes some nested content. All this nested co
     return fib(n-1) + fib(n-2);
  }
  ```
- 
 </details>
 
-<br/>
-
-<details style="background-color: #f8edff; border: 1px solid #2363b0; padding: 10px; border-radius: 5px;">
-  <summary style="font-weight: bold; color: #620999; cursor: pointer;">
-    <span style="font-weight:bold; color: #ffffff; background-color: #620999;">λ</span> Links To Prior Knowledge
-  </summary>
+<details class="tooltip link-110">
+  <summary>Links To Prior Knowledge</summary>
  
  These links will explicitly remind you of CPSC 110 concepts that are relevant to the material at hand. If you've taken CPSC 103+107, the high-level concepts should be familiar to you. However, any code examples we'll give here will be in the CPSC 110 teaching languages.* 
  
