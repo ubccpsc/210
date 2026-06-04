@@ -24,98 +24,148 @@ layout: home
 #     link: /02-contracts/00-overview
 ---
 
-# Course Overview: Building from Fundamentals to OOP
+# CPSC 210: Software Construction
+The goal of this course is to teach you to design, build, and update multi-file software. Designing such  software requires breaking down an imprecise problem statement into programmable pieces. Building requires you to implement code that fits that design, and validate that the code does what it is intended to do. Updating requires you to understand the intent of the update, identify what part of the code needs updating, and perform this update in a manner that maintains the design of the code base. 
+ 
+Core to doing all these tasks is the skill of **code fluency**. When you are fluent in a natural language, you can write, read, listen, and speak in that language without requiring lengthy translation in your head. Code fluency aims to get you to the same place with code. We want you to be able to easily translate ideas in your head to concrete code; we want you to be able to read code and grasp the underlying logic and design. As with any natural language, getting to this place requires you to read and write a lot of code.
 
-This course is organized around one core belief:
+Unlike a natural language, you probably won't be *speaking* code or *listening* code, per-se. But software rarely exists in a vaccuum: it exists to accomplish some task. Users will use it without looking at the code. But fellow maintainers will interact with the code directly. To *speak* code and design to other, you'll need to get familiar with language *about* code. In CPSC 210, you'll learn this language as you go. We'll introduce you to both the practice of coding and the language to describe that practice. 
 
-Good software design starts with fundamentals.
+<details style="background-color: #f0fbff; border: 1px solid #127e96; padding: 10px; border-radius: 5px;">
+  <summary style="font-weight: bold; color: #127e96; cursor: pointer;">
+    📖 The Language of Coding
+  </summary>
+  <p style="margin-top: 10px; color: #333333;">
+    By the end of the course, you'll understand what these terms mean: <b>type-driven development</b>, <b>test-driven development</b>, <b>functional programming</b>, <b>imperative programming</b>, <b>object-oriented programming</b>, <b>functions</b>, <b>expressions</b>, <b>statements</b>, <b>types</b>, <b>structs</b>, <b>values</b> <b>classes</b>, <b>recursion</b>, <b>iteration</b> <b>object</b>, <b>primitives</b>, <b>unit test</b>, <b>cohesion</b>, <b>coupling</b>.</p>
+    <p style="margin-top: 10px; color: #333333;">Don't worry, we won't quiz you on these! We want you to learn these terms for the long run through applying them, rather than through flash card definitions.</p>
+    <details open style="background-color: #defac5; border: 1px solid #2e7d32; padding: 10px; border-radius: 5px;">
+  <summary style="font-weight: bold; color: #2e7d32; cursor: pointer;">
+    ✍️ Exercise: What do you know?
+  </summary>
+    <p style="margin-top: 10px; color: #333333;">Some of these words may be familiar to you already—which ones? Try writing down a definition for them yourself, before starting the course. This will reveal the current boundaries of your knowledge. (<b>Don't peek at existing definitions before trying to write your own: else you won't find the boundary!</b>)</p> 
+    <p>Revisit the exercise again as we cover the material throughout the course, to assess how the boundaries of your knowledge are pushing out.</p>       
+</details>
+</details>
 
-We begin with precise data modeling and function design, then progressively add richer tools for managing complexity. The final destination is object-oriented programming (OOP), presented as a powerful way of organizing the same core ideas at larger scales.
+If you've ever become fluent in a natural language as an adult, you'll know this takes time. We expect you'll continue developing code fluency throughout your studies. To jump-start your code fluency in CPSC 210, we'll be asking you to read and write *a lot* of code.
 
-## How to use the reader effectively
+## Choice of Programming Language
 
-TBD
+In this course, you'll be writing code in [TypeScript](https://www.typescriptlang.org/).
+ 
+We're using TypeScript for this course because it allows us to cover many different programming paradigms (functional, imperative, object-oriented) and coding structures. In particular, it allows us to gradually build up these concepts and have you understand each part, rather than asking you to trust strange syntax ahead of time. 
 
-## Why This Course Is Structured This Way
+As of 2026, TypeScript is also used widely in the software industry, particularly in web development. We chose it instead of JavaScript because TypeScript includes <b>types</b> as a first-class feature. Types are a core programming concept, and we find it easier to discuss them when they are explicitly part of the language. Types are also common in many programming languages (C, C++, Java, Rust, Go, Swift, Haskell, etc.), and being comfortable with them will help you pick up one of these typed languages. 
 
-The course emphasizes design ideas that transfer across features and paradigms:
+<details style="background-color: #f0fbff; border: 1px solid #127e96; padding: 10px; border-radius: 5px;">
+  <summary style="font-weight: bold; color: #127e96; cursor: pointer;">
+    📖 Typed Languages
+  </summary>
+  <p style="margin-top: 10px; color: #333333;">
+    Nearly all programming languages have types; any variable <code>x</code> takes on a value (say, 3) that has a type (say, <code>number</code> or <code>integer</code>). A <b>typed language</b> (more precisely: <b>statically-typed</b> or <b>strongly-typed</b>), in contrast with an <b>untyped language</b> (more precise: <b>dynamically-typed</b>) has those types written in the code explicitly. These types allow us to catch more bugs before the program runs, and communicate more precisely what the code does.</p>
+</details>
 
-- represent information precisely
-- derive code structure from data structure
-- reason about correctness with contracts and tests
-- control complexity through abstraction and modularity
+If you don't know TypeScript, this reader will introduce TypeScript syntax as we go. Beyond that, it's up to you to learn: we won't dwell on explaining the syntax in lecture or exercises. 
 
-This gives you a durable model of programming that supports both language fluency and software design.
+<details style="background-color: #f0f8ff; border: 1px solid #2363b0; padding: 10px; border-radius: 5px;">
+  <summary style="font-weight: bold; color: #2363b0; cursor: pointer;">
+    <span style="font-weight:bold; color: #ffffff; background-color: #2363b0; white-space: pre;">  ₜₛ</span> Semicolons in TypeScript
+  </summary>
+  <p style="margin-top: 10px; color: #333333;">
+    In the TypeScript presented in the reader, we'll put semicolons after single-line statements. For instance:
+   </p>
+   
+   ```typescript
+   3 + 2;
+   ```
+   
+   Semicolons are actually optional in TypeScript, so this is the same code:
+   
+   ```typescript
+   3 + 2
+   ``` 
+   
+   We'll include semicolons in all our code examples for clarity.
+</details>
 
-## The Arc of the Course
-
-### 1. Types and Data-Oriented Design
-
-We start by modeling information with types.
-You will learn how unions, objects, recursion, and generics shape both your data and your functions.
-
-Key outcome:
-you can move from a problem description to a clear data model and a correct function structure.
-
-### 2. Built-In Abstractions over Common Patterns
-
-Once patterns become common, we do not keep rewriting them from scratch.
-You will see how arrays and their operations (`map`, `filter`, `reduce`) package recurring list-processing patterns.
-
-Key outcome:
-you recognize when to use language abstractions to reduce boilerplate while keeping the design clear.
-
-### 3. Testing and Behavioral Reasoning
-
-Types catch many mistakes, but not all semantic errors.
-You will learn to derive tests systematically from data structure, boundaries, relationships, and expected outcomes.
-
-Key outcome:
-you can justify test suites based on the specification rather than guesswork.
-
-### 4. Contracts, Invariants, and Ownership
-
-As systems grow, we need stronger guarantees about behavior and state.
-You will learn how contracts describe function behavior, invariants capture always-true properties, and module boundaries help preserve those invariants.
-
-Key outcome:
-you can design APIs that make correct usage easier and incorrect usage harder.
-
-### 5. Mutation and State
-
-Not all problems are naturally solved with immutable transformations.
-You will study when mutation is useful, what risks it introduces, and how to manage those risks with disciplined design.
-
-Key outcome:
-you can reason about changing state without losing correctness.
-
-### 6. Object-Oriented Programming
-
-Finally, we transition to OOP.
-This style can represent certain problem domains more directly and can scale more naturally to larger systems with long-lived state and interacting components.
-
-Crucially, OOP is built on the same fundamentals from earlier in the course:
-
-- data modeling still matters
-- contracts still matter
-- invariants still matter
-- testing still matters
-
-Key outcome:
-you understand OOP as a principled extension of foundational design ideas, not as a disconnected set of features.
-
-## What You Should Expect
-
-By the end of the course, you should be able to:
-
-1. Design data and functions from clear specifications.
-2. Use type information to guide implementation decisions.
-3. Build meaningful tests for behavioral correctness.
-4. Enforce correctness with contracts and invariants.
-5. Choose between functional and object-oriented organization based on the problem.
-
-Throughout the course, you will learn language features in the context of design decisions.
-The goal is to build a durable toolkit that works across languages, paradigms, and larger software systems.
+That being said, we *will* explain the coding concepts *behind* the syntax. Those concepts will help you learn new programming languages as you go on in your studies.
 
 
+
+## Using This Reader
+
+We'll assume in lecture you've read the reader chapters as indicated on the course website. We'll cover the key points in lecture, but we'll devote most of lecture to writing and reading code. The reader is intended to provide you with the authority on what we covered in lecture. We'll provide lecture slides, but those should be a subset of what's discussed in the reader.
+
+You'll have noticed this reader includes some nested content. All this nested content is intended as a *parenthetical*: it's relevant to what's discussed in the main text, but the main text is designed to be readable without expanding this content.
+
+<details style="background-color: #fff8dc; border: 1px solid #8c5600; padding: 10px; border-radius: 5px;">
+  <summary style="font-weight: bold; color: #8c5600; cursor: pointer;">
+    📙 Deeper Dives
+  </summary>
+  Deeper dives are our catch-all parenthetical: they're things we would *like* to tell you, but we recognize are divergent from the main point we are trying to make.
+</details>
+
+<br/>
+ <details style="background-color: #defac5; border: 1px solid #2e7d32; padding: 10px; border-radius: 5px;">
+  <summary style="font-weight: bold; color: #2e7d32; cursor: pointer;">
+    🌿 Exercises
+  </summary>
+     
+   Exercises will contain precise instructions to prompt you to engage with the content. Finishing the exercises isn't enough to understanding the content; we'll insert them when we see a particularly good opportunity to grow your understanding with a simple task.
+    
+   For example: find the other exercise on this page.
+</details>
+
+<br/>
+
+<details style="background-color: #f0f8ff; border: 1px solid #2363b0; padding: 10px; border-radius: 5px;">
+  <summary style="font-weight: bold; color: #2363b0; cursor: pointer;">
+    <span style="font-weight:bold; color: #ffffff; background-color: #2363b0; white-space: pre;">  ₜₛ</span> TypeScript Tips
+  </summary>
+ 
+ TypeScript Tips will give you information about TypeScript, particularly about its syntax. We talk about the syntax in parenthetical to better separate the coding concepts (the main text) from syntax (in parentheticals like these). Here's a recursive `fib` in TypeScript:
+ 
+ ```typescript
+ function fib(n : number) : number {
+    if (n <= 1) {
+        return n;
+    }
+    
+    return fib(n-1) + fib(n-2);
+ }
+ ```
+ 
+</details>
+
+<br/>
+
+<details style="background-color: #f8edff; border: 1px solid #2363b0; padding: 10px; border-radius: 5px;">
+  <summary style="font-weight: bold; color: #620999; cursor: pointer;">
+    <span style="font-weight:bold; color: #ffffff; background-color: #620999;">λ</span> Links To Prior Knowledge
+  </summary>
+ 
+ These links will explicitly remind you of CPSC 110 concepts that are relevant to the material at hand. If you've taken CPSC 103+107, the high-level concepts should be familiar to you. However, any code examples we'll give here will be in the CPSC 110 teaching languages.* 
+ 
+ These links are purple in honour of DrRacket's blue-and-red logo. Here's a `fib` you can contrast with the TypeScript in the TypeScript Tip above.
+ 
+ ```racket
+ (define (fib n) 
+    (cond [(<= n 1) n]
+          [else (+ (fib (- n 1) (- n 2))])
+ ```
+ 
+ **We'll format the code with Markdown's `racket` option, but it will be in the teaching languages.*
+</details>
+
+## Units
+
+The course is separated into 3 units.
+
+In Unit 1, 
+
+(TODO: write these up. Maybe once we settle on all three.)
+
+## Getting Started
+
+For logistics and syllabus, refer to the course website (TODO). 
 
