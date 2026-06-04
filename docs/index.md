@@ -60,10 +60,10 @@ As of 2026, TypeScript is also used widely in the software industry, particularl
 <details class="tooltip deep-dive">
   <summary>Typed Languages</summary>
   <p style="margin-top: 10px; color: #333333;">
-    Nearly all programming languages have types; any variable <code>x</code> takes on a value (say, 3) that has a type (say, <code>number</code> or <code>integer</code>). A <b>typed language</b> (more precisely: <b>statically-typed</b> or <b>strongly-typed</b>), in contrast with an <b>untyped language</b> (more precise: <b>dynamically-typed</b>) has those types written in the code explicitly. These types allow us to catch more bugs before the program runs, and communicate more precisely what the code does.</p>
+    Nearly all programming languages have types; any variable <code>x</code> takes on a value (say, `3`) that has a type (say, <code>number</code> or <code>integer</code>). A <b>typed language</b> (more precisely: <b>statically-typed</b> or <b>strongly-typed</b>), in contrast with an <b>untyped language</b> (more precise: <b>dynamically-typed</b>) has those types written in the code explicitly. These types allow us to catch more bugs before the program runs, and communicate more precisely what the code does.</p>
 </details>
 
-If you don't know TypeScript, this reader will introduce TypeScript syntax as we go. Beyond that, it's up to you to learn: we won't dwell on explaining the syntax in lecture or exercises. 
+If you don't know TypeScript, this reader will introduce relevant TypeScript syntax as we go. Beyond that, it's up to you to learn: we won't dwell on explaining the syntax in lecture or exercises. 
 
 <details class="tooltip ts-tips">
   <summary>Semicolons</summary>
@@ -71,16 +71,21 @@ If you don't know TypeScript, this reader will introduce TypeScript syntax as we
    In the TypeScript presented in the reader, we'll put semicolons after single-line statements. For instance:
    
    ```typescript
-   3 + 2;
+   function five() : number {
+      return 3 + 2;
+   }
    ```
    
    Semicolons are actually optional in TypeScript, so this is the same code:
    
    ```typescript
-   3 + 2
+   function five() : number {
+      return 3 + 2
+   }
    ``` 
    
-   We'll include semicolons in all our code examples for clarity.
+   But, we'll include semicolons in all our code examples for clarity.
+   (TODO: maybe semicolons are more complicated than I thought... some other trivial syntax thing could be used here.)
 </details>
 
 That being said, we *will* explain the coding concepts *behind* the syntax. Those concepts will help you learn new programming languages as you go on in your studies.
