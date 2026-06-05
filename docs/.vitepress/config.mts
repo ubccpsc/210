@@ -28,9 +28,11 @@ export default defineConfig({
 
 		sidebar: [{
 				text: "Introduction",
+				link: "/",
 				items: [],
 			}, {
 				text: "Part 1: Basics",
+				link: "/part1/",
 				items: [{
 					text: "Designing with Data",
 					collapsed: true,
@@ -79,10 +81,12 @@ export default defineConfig({
 			}, // end part 1
 			{
 				text: "Part 2: Design",
+				link: "/part2/",				
 				items: [],
 			}, // end part 2
 			{
 				text: "Part 3: Evolution",
+				link: "/part3/",				
 				items: [],
 			}, // end part 3
 		],
