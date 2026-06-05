@@ -71,7 +71,7 @@ If you don't know TypeScript, this reader will introduce relevant TypeScript syn
    In the TypeScript presented in the reader, we'll put semicolons after single-line statements. For instance:
    
    ```typescript
-   function five() : number {
+   function five(): number {
       return 3 + 2;
    }
    ```
@@ -79,7 +79,7 @@ If you don't know TypeScript, this reader will introduce relevant TypeScript syn
    Semicolons are actually optional in TypeScript, so this is the same code:
    
    ```typescript
-   function five() : number {
+   function five(): number {
       return 3 + 2
    }
    ``` 
@@ -119,7 +119,7 @@ You'll have noticed this reader includes some nested content. All this nested co
  TypeScript Tips will give you information about TypeScript, particularly about its syntax. We talk about the syntax in parenthetical to better separate the coding concepts (the main text) from syntax (in parentheticals like these). Here's a recursive `fib` in TypeScript:
  
  ```typescript
- function fib(n : number) : number {
+ function fib(n: number): number {
     if (n <= 1) {
         return n;
     }
