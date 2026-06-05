@@ -80,12 +80,45 @@ export default defineConfig({
 				}, ]
 			}, // end part 1
 			{
-				text: "Part 2: Design",
+				text: "Part 2: Designing Abstractions",
 				link: "/part2/",				
-				items: [],
+				items: [
+					{
+						text: "Abstraction",
+						link: "part2/01-abstraction"
+					},
+					{
+						text: "Decomposition",
+						link: "part2/02-decomposition"
+					},
+					{
+						text: "Verification",
+						link: "part2/03-verification"
+					},
+					{
+						text: "Error Handling",
+						link: "part2/04-errors"
+					},
+					{
+						text: "Encapsulation",
+						link: "part2/05-encapsulation"
+					},
+					{
+						text: "Boundaries",
+						link: "part2/06-boundaries"
+					},
+					{
+						text: "Extension",
+						link: "part2/07-extension"
+					},
+					{
+						text: "Open/Closed",
+						link: "part2/08-ocp"
+					}
+					],
 			}, // end part 2
 			{
-				text: "Part 3: Evolution",
+				text: "Part 3: Enabling Evolution",
 				link: "/part3/",				
 				items: [],
 			}, // end part 3
