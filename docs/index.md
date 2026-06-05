@@ -145,11 +145,11 @@ You'll have noticed this reader includes some nested content. All this nested co
  **We'll format the code with Markdown's `racket` option, but it will be in the teaching languages.*
 </details>
 
-## Units
+## Reader Structure
 
-The course is separated into 3 units.
+The course is separated into 3 parts.
 
-In Unit 1, 
+In Part 1, 
 
 (TODO: write these up. Maybe once we settle on all three.)
 
