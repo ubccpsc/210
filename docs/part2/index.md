@@ -1,5 +1,7 @@
-# Part 2: Defining Robust Abstractions (Class Design)
+# Part 2: Defining Abstractions
 
-> Design objects that enforce correctness
+In Part 1, programs were small enough for one person to keep an understanding of the code in their mental model. Invariants were maintained by careful factory function design and by personal discipline about how objects were constructed and modified.
 
-TBD
+In Part 2 we expand our scope. Real software is built by teams, is maintained for years, and solves problems too large for any one person to tackle alone. Three forces contribute to making real software systems different from smaller programs: contributor count exceeds what an individual can manage, duration exceeds what an individual can remember, and code volume exceeds what an individual can audit. These result in unmanageable complexity, lost understandability, and brittle evolvability.
+
+In response to these challenges, we move from programmer discipline to encoding invariants in the language itself. By encoding invariants into types, we shift the burden of consistency from individual care to language enforcement. In this module we develop class-based abstractions as the mechanism for that shift. Across eight lectures, we define classes, decompose systems into cohesive units, verify their invariants, design how failures are communicated, hide what is free to change, depend on abstractions through interfaces, organize classes into hierarchies, and write code that continues to apply as new types arrive.
