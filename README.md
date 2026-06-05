@@ -11,6 +11,7 @@ Content is written in markdown in the `docs/` directory and rendered using [vite
 You can preview your changes locally by running:
 
 ```sh
+pnpm install
 pnpm docs:dev
 ```
 
