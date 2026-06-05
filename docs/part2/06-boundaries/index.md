@@ -1,4 +1,4 @@
-# Interfaces
+# Interfaces as explicit boundaries
 
 ### Motivation
 

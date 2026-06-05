@@ -1,4 +1,4 @@
-#Encapsulation
+# Encapsulation
 
 ### Motivation 
 
