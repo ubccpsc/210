@@ -1,3 +1,8 @@
+:root {
+   color-scheme: light dark;
+}
+
+
 /* Base styles */
 
 details.tooltip {
@@ -22,6 +27,7 @@ details.tooltip summary::before {
 details.deep-dive {
   background-color: #fff8dc;
   border: 1px solid #8c5600;
+  color: #333333;
 }
 
 details.deep-dive summary {
@@ -33,6 +39,16 @@ details.deep-dive summary::before {
   content: "📙";
 }
 
+/* dark mode */
+html.dark details.deep-dive {
+  background-color: #8c5600;
+  border: 1px solid #fff8dc;
+  color: #ffffff;
+}
+
+html.dark details.deep-dive summary {
+  color: #fff8dc;
+}
 /*Exercises*/
 
 details.exercise {
