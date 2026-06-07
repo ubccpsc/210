@@ -186,22 +186,22 @@ const w2 = new CourseSection("CPSC 210w2", 200);
 // Register students into w1 until it is full
 let didReg = w1.register("s1");    // true
 didReg = w1.register("s2");        // true
-didReg = w1.register("s3");        // false — w1 is already at cap
+didReg = w1.register("s3");        // false: w1 is already at cap
 
 // Register students into w2 
-didReg = w2.register("s1");        // true — the same id can register here too
+didReg = w2.register("s1");        // true: the same id can register here too
 
 let w1atCap = w1.isFull();         // true
 let w2atCap = w2.isFull();         // false
 
-let isReg = w1.isRegistered("s3"); // false — never added to w1
+let isReg = w1.isRegistered("s3"); // false: never added to w1
 isReg = w1.isRegistered("s1");     // true
 isReg = w2.isRegistered("s1");     // true
 
 // Withdrawing from w1 frees a seat there, and only there.
 w1.withdraw("s1");
 isReg = w1.isRegistered("s1");     // false
-isReg = w2.isRegistered("s1");     // true — unaffected by the withdraw on w1
+isReg = w2.isRegistered("s1");     // true: unaffected by the withdraw on w1
 
 w1atCap = w1.isFull();             // false; removing s1 decreased enrolment
 ```
