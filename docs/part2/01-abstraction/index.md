@@ -114,6 +114,10 @@ Here we have added a `registered` field to track which students are in the secti
 
 One bit of syntactic sugar for fields is also demonstrated: it is often the case that there is a default initial value for a field that we want set but know we will not change in the constructor. In this case, the `registered` field has been initialised to the empty array. Setting the field's default value is the same as if it were set in the constructor itself, and is often convenient for fields that do not need per-instance customisation.
 
+<!--
+duplicate students not caught on purpose, we will notice this in verification
+-->
+
 ```typescript
 class CourseSection {
 
@@ -201,5 +205,22 @@ isReg = w2.isRegistered("s1");     // true — unaffected by the withdraw on w1
 
 w1atCap = w1.isFull();             // false; removing s1 decreased enrolment
 ```
+
+</details>
+
+### The value of the abstraction
+
+This division of responsibility is what makes the class a unit of _abstraction_. A client reasons about _what_ a class can do through the features exposed through its methods without needing to understand _how_ it manages its state invaiants. To use a class, a client only has to find the one that models the thing they care about and then call the methods that provide the behaviour they want. This is part of the reason why naming is so important in software design, because it lets software engineers _find_ the code they need to use. This leaves the work of storing state and of keeping that state consistent as it changes inside the class.
+
+This is valuable because it confines each concern to a single place. The class is the one location responsible for its own state, which frees every other part of the program from that responsibility. Because the operations that maintain the invariants live alongside the state they protect, rather than in the calling code, a client cannot accidentally leave an object in an inconsistent configuration.
+
+So far this is the class _offering_ an interface that a client has no need to look past. Guaranteeing that a client genuinely _cannot_ reach past it, so that an object's internal state is truly the class's alone, is the role of [encapsulation](../05-encapsulation/).
+
+<details class="tooltip deep-dive">
+  <summary>The abstraction at work in `CourseSection`</summary>
+
+Look back at how we used `w1` and `w2`. We called `register`, `isFull`, `isRegistered`, and `withdraw`, but we never read the `registered` array directly, never compared anything against `cap`, and never kept the list of students within its limit ourselves.
+
+That work still happened, it was just performed by `CourseSection`. When we called `w1.register("s3")` on a section that was already full, the cap invariant held because `register` checks `isFull()` before adding a student; the caller did not have to, and could not, get this wrong. As a client we only needed to know that a `CourseSection` can register students and can report when it is full. How it stores enrolment, and where it enforces the cap, were details we never had to see.
 
 </details>
