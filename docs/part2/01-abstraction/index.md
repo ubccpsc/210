@@ -4,7 +4,7 @@
 
 To move invariant enforcement out of programmer discipline, we need a language mechanism that bundles state with the operations that maintain it. Classes provide that unit through fields, methods, and constructors with an enforced construction path. A class bounds reasoning to one kind of thing at a time, reducing complexity at the system level and providing named types that can be depended upon.
 
-### The Problem
+### The problem
 
 As programs grew, managing state became a considerable problem. While keeping all state in a single location is appealing, it does not scale: any part of the program can still read from or write to that shared state, and nothing in the language specifies which parts *should*. When different parts of a program mutate shared state in conflicting ways, the program ends up in an inconsistent configuration that is hard to detect and harder to trace to its source. Spreading state across many global variables is no better; the same problem applies, just distributed across more locations. In both cases the only protection is programmer discipline, which does not hold as codebases and teams grow.
 
@@ -34,12 +34,12 @@ Classes are declared in the following way:
 class CourseSection {
 	
 	constructor() {
-		// class initialization
+		// class initialisation
 	}
 }
 ```
 
-This declares a class called `CourseSection`. The `constructor()` method defines a special method that must be called before the class is used. This provides a single point where a class can be configured.
+This declares a class called `CourseSection`. The `constructor()` is a special method that must be called before the class is used. This provides a single point where a class can be configured. Constructors do not declare their return type because it is always the type of the class itself.
 
 </details>
 
@@ -105,14 +105,14 @@ const cpsc310w1 = new CourseSection("CPSC 310", 160);
 
 While storing state is helpful, classes also provide a mechanism for collecting functionality. Within classes, functionality is provided by **methods**. Most classes contain many methods that enable programs to perform actions on the class's stored state. These actions often explicitly enforce the expected invariants on the fields to ensure the invariants are always true.
 
-In all languages, methods have a name, take zero or more parameters, and can either return a value or not. Methods have access to all of the class's fields and can call other methods within the class itself.
+In all languages, methods have a name, take zero or more parameters, and return either a value or `void`. It is good practice to declare that the method return type is `void` when a method does not return a value to signal to an engineer reading the code that the absence of a return value is intentional. Methods have access to all of the class's fields and can call other methods within the class itself.
 
 <details class="tooltip ts-tips">
   <summary>Methods</summary>
 
-Here we have added an `registered` field to track which students are in the section. Methods have been added to enrol and withdraw students and to check enrolment status. Notice that `register` enforces the cap: no caller can exceed it, regardless of how they try. The invariant is maintained by the class itself, not by discipline in the calling code.
+Here we have added a `registered` field to track which students are in the section. Methods have been added to enrol and withdraw students and to check enrolment status. Notice that `register` enforces the cap: no caller can exceed it, regardless of how they try. The invariant is maintained by the class itself, not by discipline in the calling code.
 
-One bit of syntatic sugar for fields is also demonstrated: it is often the case that there is a default initial value for a field that we want set but know we will not change in the constructor. In this case, the `registered` field has been initialized to the empty array. Setting the field's default value is the same as if it were set in the constructor itself, and is ofte convenient for fields that do not need per-instance customization.
+One bit of syntactic sugar for fields is also demonstrated: it is often the case that there is a default initial value for a field that we want set but know we will not change in the constructor. In this case, the `registered` field has been initialised to the empty array. Setting the field's default value is the same as if it were set in the constructor itself, and is often convenient for fields that do not need per-instance customisation.
 
 ```typescript
 class CourseSection {
@@ -144,9 +144,9 @@ class CourseSection {
 	
 	/**
 	 *  Withdraws a student. Does not return a value,
-	 *  regardless of wehther the withdraw was succcesful.
+	 *  regardless of whether the withdraw was successful.
 	 */
-	withdraw(studentId: string) {
+	withdraw(studentId: string): void {
 		const index = this.registered.indexOf(studentId);
 		if (index !== -1) {
 			this.registered.splice(index, 1);
@@ -161,6 +161,45 @@ class CourseSection {
 		return this.registered.length >= this.cap;
 	}
 }
+```
+
+</details>
+
+### Working with objects
+
+A class declaration on its own does nothing. The declaration only describes what its objects will look like. To perform work, we instantiate objects and interact with them by calling their methods. Methods are accessed using _dot notation_. The `.` separates an object from the method being called on it. Because every object stores its own field values, a method call on one object can never affect another, even if both are instances of the same class.
+
+<details class="tooltip ts-tips">
+  <summary>Calling methods on objects</summary>
+
+***TODO: should these be `checkExpect` to check the values?***
+
+```typescript
+// Two sections of the same course, with different caps
+const w1 = new CourseSection("CPSC 210w1", 2);
+const w2 = new CourseSection("CPSC 210w2", 200);
+
+// Register students into w1 until it is full
+let didReg = w1.register("s1");    // true
+didReg = w1.register("s2");        // true
+didReg = w1.register("s3");        // false — w1 is already at cap
+
+// Register students into w2 
+didReg = w2.register("s1");        // true — the same id can register here too
+
+let w1atCap = w1.isFull();         // true
+let w2atCap = w2.isFull();         // false
+
+let isReg = w1.isRegistered("s3"); // false — never added to w1
+isReg = w1.isRegistered("s1");     // true
+isReg = w2.isRegistered("s1");     // true
+
+// Withdrawing from w1 frees a seat there, and only there.
+w1.withdraw("s1");
+isReg = w1.isRegistered("s1");     // false
+isReg = w2.isRegistered("s1");     // true — unaffected by the withdraw on w1
+
+w1atCap = w1.isFull();             // false; removing s1 decreased enrolment
 ```
 
 </details>
