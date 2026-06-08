@@ -9,6 +9,7 @@ details.tooltip {
   padding: 10px;
   border-radius: 5px;
   margin-bottom: 15px;
+  color: #333333;
 }
 
 details.tooltip summary {
@@ -16,6 +17,25 @@ details.tooltip summary {
   cursor: pointer;
 }
 
+/* change code blocks to white within the
+tooltips. !important is necessary to make this
+work */
+details.tooltip pre {
+   background-color: #ffffff !important;
+}
+
+/* when in dark mode use dark code bg and
+and white text in general */
+
+html.dark details.tooltip pre {
+  background-color: revert !important;
+}
+
+html.dark details.tooltip {
+  color: #ffffff;
+}
+
+/* spacing for badges */
 details.tooltip summary::before {
   margin-right: 3pt;
 }
@@ -27,7 +47,6 @@ details.tooltip summary::before {
 details.deep-dive {
   background-color: #fff8dc;
   border: 1px solid #8c5600;
-  color: #333333;
 }
 
 details.deep-dive summary {
@@ -43,21 +62,21 @@ details.deep-dive summary::before {
 html.dark details.deep-dive {
   background-color: #8c5600;
   border: 1px solid #fff8dc;
-  color: #ffffff;
 }
 
 html.dark details.deep-dive summary {
   color: #fff8dc;
 }
+
 /*Exercises*/
 
 details.exercise {
   background-color: #defac5;
-  border: 1px solid #2e7d32;
+  border: 1px solid #266427;
 }
 
 details.exercise summary {
-  color: #2e7d32;
+  color: #266427;
 }
 
 /* Automatically injects the sprout--I had a hand before but it wasn't green :'( */
@@ -65,24 +84,43 @@ details.exercise summary::before {
   content: "🌿";
 }
 
+html.dark details.exercise {
+   background-color: #266427;
+   border: 1px solid #defac5;
+}
+
+html.dark details.exercise summary {
+   color: #defac5;
+}
+
+
 /*TypeScript Tips*/
 
 details.ts-tips {
   background-color: #f0f8ff;
-  border: 1px solid #2363b0;
+  border: 1px solid #1E589F;
 }
 
 details.ts-tips summary {
-  color: #2363b0;
+  color: #1E589F;
 }
 
 /* Automatically injects the typescript badge */
 details.ts-tips summary::before {
   content: "ₜₛ";
-  background-color: #2363b0;
+  background-color: #3178C6;
   color: #ffffff;
   padding-left: 5px;
   padding-right: 1px;
+}
+
+html.dark details.ts-tips {
+  background-color: #1E589F;
+  border: 1px solid #f0f8ff;
+}
+
+html.dark details.ts-tips summary {
+  color: #f0f8ff;
 }
 
 /*Links to 110 Content */
@@ -99,10 +137,17 @@ details.link-110 summary {
 /* Automatically injects the Lambda badge */
 details.link-110 summary::before {
   content: "λ";
-  background-color: #620999;
+  background-color: #9C4ACF;
   color: #ffffff;
   padding-left: 3px;
   padding-right: 2px;
 }
 
+html.dark details.link-110 {
+   background-color: #620999;
+   border: 1px solid #f8edff;
+}
 
+html.dark details.link-110 summary {
+   color: #f8edff;
+}
