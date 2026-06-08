@@ -134,7 +134,9 @@ For a class like this, where would you look to change how waitlisted students ar
 
 ### Cohesion as the design criterion
 
-A class is cohesive when everything it contains works toward a single purpose. We make "single purpose" precise by anchoring it to one invariant: a cohesive class enforces exactly one invariant, and every field and method exists to establish, preserve, or observe it. A cohesive class can be understood from its invariant alone and changed without reaching into the rest of the system. These are the properties L1 asked of an abstraction: that it bound reasoning to one kind of thing and offer a named type the rest of the program can depend on. Cohesion is the criterion we use to judge whether a decomposition keeps those properties true, and it answers both of the costs we have seen, the bloated class that is hard to reason about and the god class that is hard to navigate.
+A class is cohesive when everything it contains works toward a single purpose. We make "single purpose" precise by anchoring it to one invariant: a cohesive class enforces exactly one invariant, and every field and method exists to establish, preserve, or observe it. A cohesive class can be understood from its invariant alone and changed without reaching into the rest of the system. These are the properties of abstractions: that it bound reasoning to one kind of thing and offer a named type the rest of the program can depend on. Evaluating cohesion is how we judge whether a decomposition keeps those properties true. 
+
+Sometimes classes are not built around explicit invariants: a pure value object or a stateless helper holds no such invariant, and are cohesive around a single concept or operation instead. The underlying principle, one purpose per class, is unchanged, and a class that serves several purposes fails it however that purpose is expressed.
 
 Cohesion also shapes how a system behaves under change. When each invariant lives in exactly one class, a bug fix or a new feature for that invariant stays inside the class that owns it, instead of being spread across the system. The change stays localized, which makes it easier to make and far less likely to cause the cascading errors that follow when one edit forces matching edits in many other places.
 
@@ -142,7 +144,7 @@ Cohesion also shapes how a system behaves under change. When each invariant live
 
 This is the **Single Responsibility Principle** at the class level: one class, one invariant. A class should have exactly one reason to change, and that reason is the invariant it protects. Deciding where one class ends and another begins is the core activity of decomposition, and cohesion is how we differentiate a good split from a bad one.
 
-There is rarely a single correct decomposition. The same system can usually be split several reasonable ways, and competent engineers will sometimes disagree about which is best. What cohesion gives us is not the one *right* split but a reliable way to recognise a *poor* one. A class that is poorly decomposed leaves some clues you can detect from the code itself: the class enforces more than one invariant, it has one or more fields the invariant never mentions, it has methods that maintain some other invariants, or the class name itself seems disconnected from the fields and methods it contains. Those are easy to spot once you know to look for them, so the goal is less about finding the perfect decomposition than about steering clear of the clearly bad ones.
+There is rarely a single correct decomposition. The same system can usually be split several reasonable ways, and competent engineers will sometimes disagree about which is best. What cohesion gives us is not the one *right* split but a reliable way to recognise a *poor* one. A class that is poorly decomposed leaves some clues you can detect from the code itself: the class enforces more than one invariant, it has one or more fields the invariant never mentions, it has methods that maintain some other invariants, or the class name itself seems disconnected from the fields and methods it contains. Those are easy to spot once you know to look for them, so the goal is less about finding the perfect decomposition than about steering clear of the clearly bad ones. Invariants that range over disjoint state are natural points to split classes along; invariants that share mutable state belong together, even if the operations serve multiple invariants.
 
 <details class="tooltip deep-dive">
   <summary>A decision procedure for what belongs in a class</summary>
@@ -156,9 +158,15 @@ While software design is rarely a top-down activity with a set procedure, the pr
 
 </details>
 
+<details class="tooltip deep-dive">
+  <summary>When one class legitimately manages several invariants</summary>
+
+The Single Responsibility Principle reads as one invariant per class, but in reality, a practical  statement is one *cluster of coherent invariants* per class. Counting alone is unreliable because invariants compose: When several invariants constrain the *same* state and must hold together, for example an `Order` whose total must equal the sum of its line items and which may not ship before payment, they form a single consistency boundary and belong in one class. That is still cohesion: the unit is the smallest set of state that must stay mutually consistent. The `Waitlist` separates cleanly from `CourseSection` because capacity and waiting order have no such shared state.
+</details>
+
 ### Field cohesion
 
-Every field should participate in the invariant the class protects. Once the class invariant is known, each field can be checked against it: a field the invariant refers to belongs in the class, and a field the invariant never mentions is the clearest signal that a second responsibility has crept in. The usual exception is the field that holds the object's identity, such as a name or id; it names the thing the invariant is about rather than taking part in the invariant.
+Every field should participate in the invariant the class protects. Once the class invariant is known, each field can be checked against it: a field the invariant refers to belongs in the class, and a field the invariant never mentions is the clearest signal that a second responsibility has crept in. The usual exception is the field that holds the object's identity, such as a name or id; it names the thing the invariant is about rather than taking part in the invariant. This check assumes a class built around an invariant; for a value object or a stateless helper, the same test reads against the single concept the class represents, and a field that has nothing to do with that concept exhibits the same smell.
 
 ### Method cohesion
 
