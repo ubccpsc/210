@@ -7,7 +7,7 @@ Decomposing a system into classes only pays off if each class makes sense on its
 
 ### The problem
 
-[Abstraction](../01-abstraction) established the class as the unit of abstraction: classes bundle state with the operations that maintain an invariant, bounds reasoning to one kind of thing at a time, and gives the rest of the program a named type it can depend on. That tells us how to build an abstraction. This does not guide us towards building *good* abstractions. We still have to decide what each class should be, and what functionality and state belongs in each class, so that every class actually delivers those properties.
+[Abstraction](../01-abstraction/) established the class as the unit of abstraction: classes bundle state with the operations that maintain an invariant, bounds reasoning to one kind of thing at a time, and gives the rest of the program a named type it can depend on. That tells us how to build an abstraction. This does not guide us towards building *good* abstractions. We still have to decide what each class should be, and what functionality and state belongs in each class, so that every class actually delivers those properties.
 
 <!--
 The L1 `CourseSection` already did. It was organised around a single invariant, its capacity rule, so it could be understood, named, and depended on as one thing. That was not an accident, though we never named the principle behind it. 
