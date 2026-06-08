@@ -8,16 +8,18 @@ Unlike a natural language, you probably won't be *speaking* code or *listening* 
 <details class="tooltip deep-dive">
   <summary>The Language of Coding
   </summary>
-  <p style="margin-top: 10px; color: #333333;">
-    By the end of the course, you'll understand what these terms mean: <b>type-driven development</b>, <b>test-driven development</b>, <b>functional programming</b>, <b>imperative programming</b>, <b>object-oriented programming</b>, <b>functions</b>, <b>expressions</b>, <b>statements</b>, <b>types</b>, <b>structs</b>, <b>values</b> <b>classes</b>, <b>recursion</b>, <b>iteration</b> <b>object</b>, <b>primitives</b>, <b>unit test</b>, <b>cohesion</b>, <b>coupling</b>. (TODO: convert back to markdown now that I know how, add other terms, organize into order)</p>
+  
+  By the end of the course, you'll understand what these terms mean: **type-driven development**, **test-driven development**, **functional programming**, **imperative programming**, **object-oriented programming**, **functions**, **expressions**, **statements**, **types**, **structs**, **values** **classes**, **recursion**, **iteration** **object**, **primitives**, **unit test**, **cohesion**, **coupling**. (TODO:  add other terms, organize into order)
     
    Don't worry, we won't quiz you on these! We want you to learn these terms for the long run through applying them, rather than through flash card definitions.    
  
  <details open class="tooltip exercise">
   <summary>Exercise: What do you know?
   </summary>
-    <p style="margin-top: 10px; color: #333333;">Some of these words may be familiar to you already—which ones? Try writing down a definition for them yourself, before starting the course. This will reveal the current boundaries of your knowledge. (<b>Don't peek at existing definitions before trying to write your own: else you won't find the boundary!</b>)</p> 
-    <p>Revisit the exercise again as we cover the material throughout the course, to assess how the boundaries of your knowledge are pushing out.</p>       
+    
+   Some of these words may be familiar to you already—which ones? Try writing down a definition for them yourself, before starting the course. This will reveal the current boundaries of your knowledge. (**Don't peek at existing definitions before trying to write your own: else you won't find the boundary!**)
+    
+   Revisit the exercise again as we cover the material throughout the course, to assess how the boundaries of your knowledge are pushing out.       
 </details>
 </details>
 
@@ -29,12 +31,12 @@ In this course, you'll be writing code in [TypeScript](https://www.typescriptlan
  
 We're using TypeScript for this course because it allows us to cover many different programming paradigms (functional, imperative, object-oriented) and coding structures. In particular, it allows us to gradually build up these concepts and have you understand each part, rather than asking you to trust strange syntax ahead of time. 
 
-As of 2026, TypeScript is also used widely in the software industry, particularly in web development. We chose it instead of JavaScript because TypeScript includes <b>types</b> as a first-class feature. Types are a core programming concept, and we find it easier to discuss them when they are explicitly part of the language. Types are also common in many programming languages (C, C++, Java, Rust, Go, Swift, Haskell, etc.), and being comfortable with them will help you pick up one of these typed languages. 
+As of 2026, TypeScript is also used widely in the software industry, particularly in web development. We chose it instead of JavaScript because TypeScript includes **types** as a first-class feature. Types are a core programming concept, and we find it easier to discuss them when they are explicitly part of the language. Types are also common in many programming languages (C, C++, Java, Rust, Go, Swift, Haskell, etc.), and being comfortable with them will help you pick up one of these typed languages. 
 
 <details class="tooltip deep-dive">
   <summary>Typed Languages</summary>
-  <p style="margin-top: 10px; color: #333333;">
-    Nearly all programming languages have types; any variable <code>x</code> takes on a value (say, `3`) that has a type (say, <code>number</code> or <code>integer</code>). A <b>typed language</b> (more precisely: <b>statically-typed</b> or <b>strongly-typed</b>), in contrast with an <b>untyped language</b> (more precise: <b>dynamically-typed</b>) has those types written in the code explicitly. These types allow us to catch more bugs before the program runs, and communicate more precisely what the code does.</p>
+  
+   Nearly all programming languages have types; any variable `x` takes on a value (say, `3`) that has a type (say, `number` or `integer`). A **typed language** (more precisely: **statically-typed** or **strongly-typed**), in contrast with an **untyped language** (more precise: **dynamically-typed**) has those types written in the code explicitly. These types allow us to catch more bugs before the program runs, and communicate more precisely what the code does.
 </details>
 
 If you don't know TypeScript, this reader will introduce relevant TypeScript syntax as we go. Beyond that, it's up to you to learn: we won't dwell on explaining the syntax in lecture or exercises. 
@@ -59,7 +61,7 @@ If you don't know TypeScript, this reader will introduce relevant TypeScript syn
    ``` 
    
    But, we'll include semicolons in all our code examples for clarity.
-   (TODO: maybe semicolons are more complicated than I thought... some other trivial syntax thing could be used here.)
+   
 </details>
 
 That being said, we *will* explain the coding concepts *behind* the syntax. Those concepts will help you learn new programming languages as you go on in your studies.
