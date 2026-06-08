@@ -1,16 +1,16 @@
 # The class as a unit of abstraction
 
-### Motivation
+## Motivation
 
 To move invariant enforcement out of programmer discipline, we need a language mechanism that bundles state with the operations that maintain it. Classes provide that unit through fields, methods, and constructors with an enforced construction path. A class bounds reasoning to one kind of thing at a time, reducing complexity at the system level and providing named types that can be depended upon.
 
-### The problem
+## The problem
 
 As programs grew, managing state became a considerable problem. While keeping all state in a single location is appealing, it does not scale: any part of the program can still read from or write to that shared state, and nothing in the language specifies which parts *should*. When different parts of a program mutate shared state in conflicting ways, the program ends up in an inconsistent configuration that is hard to detect and harder to trace to its source. Spreading state across many global variables is no better; the same problem applies, just distributed across more locations. In both cases the only protection is programmer discipline, which does not hold as codebases and teams grow.
 
 The object-oriented paradigm emerged to provide a language mechanism for managing program state more systematically. The central solution is the `class`: a named unit that packages state together with the operations that are meant to act on it, and that can enforce rules about how that state is modified. All major programming languages that support object-orientation, including C++, Java, Rust, and TypeScript, do so primarily through classes.
 
-### Abstraction through classes
+## Abstraction through classes
 
 <!--- primary unit of organization -->
 As systems grow, we need a mechanism for organising state and functionality in a way that is understandable and scalable. The `class` can be thought of as a _template_ for a container and is the dominant unit of abstraction in object-oriented programs.
@@ -44,7 +44,7 @@ This declares a class called `CourseSection`. The `constructor()` is a special m
 </details>
 
 
-### Classes vs. objects
+## Classes vs. objects
 
 A class is just a template and cannot be directly used. To be usable, a class must be **instantiated**. An instantiated class is called an **object**. When a class is instantiated, an object is created in memory with its own independent storage for each field. Objects from the same class share the same structure and methods, but each holds its own field values, making objects completely independent of one another.
 
@@ -66,7 +66,7 @@ const cpsc310w1 = new CourseSection("CPSC 310");
 ```
 </details>
 
-### Class bodies
+## Class bodies
 
 To be useful, a class must both maintain some state and provide some functionality. State in classes is maintained using **field** variables that are declared in the class body. When the class is instantiated, a copy of these variables is initialised by the constructor. The contents of the fields are unique to each instantiated object; changes to a field in one object have no impact on the same field in another object.
 
@@ -169,7 +169,7 @@ class CourseSection {
 
 </details>
 
-### Working with objects
+## Working with objects
 
 A class declaration on its own does nothing. The declaration only describes what its objects will look like. To perform work, we instantiate objects and interact with them by calling their methods. Methods are accessed using _dot notation_. The `.` separates an object from the method being called on it. Because every object stores its own field values, a method call on one object can never affect another, even if both are instances of the same class.
 
@@ -208,9 +208,9 @@ w1atCap = w1.isFull();             // false; removing s1 decreased enrolment
 
 </details>
 
-### The value of the abstraction
+## The value of the abstraction
 
-This division of responsibility is what makes the class a unit of _abstraction_. A client reasons about _what_ a class can do through the features exposed through its methods without needing to understand _how_ it manages its state invaiants. To use a class, a client only has to find the one that models the thing they care about and then call the methods that provide the behaviour they want. This is part of the reason why naming is so important in software design, because it lets software engineers _find_ the code they need to use. This leaves the work of storing state and of keeping that state consistent as it changes inside the class.
+This division of responsibility is what makes the class a unit of _abstraction_. A client reasons about _what_ a class can do through the features exposed through its methods without needing to understand _how_ it manages its state invariants. To use a class, a client only has to find the one that models the thing they care about and then call the methods that provide the behaviour they want. This is part of the reason why naming is so important in software design, because it lets software engineers _find_ the code they need to use. This leaves the work of storing state and of keeping that state consistent as it changes inside the class.
 
 This is valuable because it confines each concern to a single place. The class is the one location responsible for its own state, which frees every other part of the program from that responsibility. Because the operations that maintain the invariants live alongside the state they protect, rather than in the calling code, a client cannot accidentally leave an object in an inconsistent configuration.
 
