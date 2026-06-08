@@ -144,8 +144,6 @@ Cohesion also shapes how a system behaves under change. When each invariant live
 
 This is the **Single Responsibility Principle** at the class level: one class, one invariant. A class should have exactly one reason to change, and that reason is the invariant it protects. Deciding where one class ends and another begins is the core activity of decomposition, and cohesion is how we differentiate a good split from a bad one.
 
-There is rarely a single correct decomposition. The same system can usually be split several reasonable ways, and competent engineers will sometimes disagree about which is best. What cohesion gives us is not the one *right* split but a reliable way to recognise a *poor* one. A class that is poorly decomposed leaves some clues you can detect from the code itself: the class enforces more than one invariant, it has one or more fields the invariant never mentions, it has methods that maintain some other invariants, or the class name itself seems disconnected from the fields and methods it contains. Those are easy to spot once you know to look for them, so the goal is less about finding the perfect decomposition than about steering clear of the clearly bad ones. Invariants that range over disjoint state are natural points to split classes along; invariants that share mutable state belong together, even if the operations serve multiple invariants.
-
 <details class="tooltip deep-dive">
   <summary>A decision procedure for what belongs in a class</summary>
 
@@ -155,8 +153,10 @@ While software design is rarely a top-down activity with a set procedure, the pr
 2. For each field, ask whether the invariant is stated in terms of it. If not, the field belongs elsewhere.
 3. For each method, ask whether it acts on the class invariant. If it serves a different invariant, it belongs with that invariant.
 4. When a second invariant emerges, extract it into its own class rather than letting the current class grow.
-
 </details>
+
+There is rarely a single correct decomposition. The same system can usually be split several reasonable ways, and competent engineers will sometimes disagree about which is best. What cohesion gives us is not the one *right* split but a reliable way to recognise a *poor* one. A class that is poorly decomposed leaves some clues you can detect from the code itself: the class enforces more than one invariant, it has one or more fields the invariant never mentions, it has methods that maintain some other invariants, or the class name itself seems disconnected from the fields and methods it contains. Those are easy to spot once you know to look for them, so the goal is less about finding the perfect decomposition than about steering clear of the clearly bad ones. Invariants that range over disjoint state are natural points to split classes along; invariants that share mutable state belong together, even if the operations serve multiple invariants.
+
 
 <details class="tooltip deep-dive">
   <summary>When one class legitimately manages several invariants</summary>
@@ -172,10 +172,10 @@ Every field should participate in the invariant the class protects. Once the cla
 
 The Single Responsibility Principle applies at the method level too: one method, one operation on the invariant. Every method should act in maintenance of the class invariant, and nothing else. A method that maintains a different invariant is the method-level version of the same smell, and it points to the same fix: the invariant it serves, and the method with it, belongs in another class.
 
-<details class="tooltip ts-tips">
+<details class="tooltip deep-dive">
   <summary>Diagnosing the bloated `CourseSection`</summary>
 
-Take the capacity invariant, `registered.length <= cap`, and test each member of the bloated class against it.
+For our `CourseSection` running example, you can evaluate the capacity invariant (`registered.length <= cap`) and check each field and method in the class against it.
 
 - `cap` and `registered`: named in the invariant, so they belong to the capacity invariant.
 - `id`: the section's identity, the permitted exception.
@@ -187,14 +187,11 @@ Take the capacity invariant, `registered.length <= cap`, and test each member of
 Everything that does not mention capacity is exactly the waitlist material. This represents a second complete responsibility with its own invariant, and should be decomposed into its own class.
 </details>
 
-<details class="tooltip deep-dive">
+<details class="tooltip ts-tips">
 	<summary>Decomposing `CourseSection`</summary>
 
 The fix is to give the second invariant its own class. We move the waitlist material into a `Waitlist` class that owns the waitlist invariant, and we leave `CourseSection` responsible for capacity alone. `CourseSection` no longer implements waitlisting; it collaborates with a `Waitlist`, holding one and delegating to it when a section fills or a seat opens. Each class is then understandable from a single invariant: `Waitlist` can change how it orders students without `CourseSection` knowing, and `CourseSection` owns the capacity invariant by itself.
 
-<!--<details class="tooltip ts-tips">
-  <summary>`CourseSection` and `Waitlist` after the split</summary>
--->
 ```typescript
 // Owns one invariant: a student waits at most once, served in arrival order.
 class Waitlist {
@@ -265,10 +262,9 @@ class CourseSection {
 
 The capacity invariant does not range over `waitlist`, so at first glance it looks like the same smell we just removed. The difference is ownership: `Waitlist` is a collaborator that `CourseSection` holds so it can delegate a responsibility it no longer maintains itself; it is not state that the capacity invariant constrains. 
 
-</details>
+**The decomposed classes working together**
 
-<details class="tooltip ts-tips">
-  <summary>The decomposed classes working together</summary>
+***TODO: Not sure if this is worth having (and if it is whether it should be `checkExpect`)***
 
 ```typescript
 const w1 = new CourseSection("CPSC 210w1", 2);
