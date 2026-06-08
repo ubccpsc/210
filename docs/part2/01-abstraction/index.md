@@ -39,8 +39,7 @@ class CourseSection {
 }
 ```
 
-This declares a class called `CourseSection`. The `constructor()` is a special method that must be called before the class is used. This provides a single point where a class can be configured. Constructors do not declare their return type because it is always the type of the class itself.
-
+This declares a class called `CourseSection`. The `constructor()` is a special method that must be called before the class is used. This provides a single point where a class can be configured. Constructors do not declare their return type because it is always the type of the class itself. If you have a class that does not need to initialize anything, the language will provide a default constructor (a constructor that takes no arguments, like the one above) automatically.
 </details>
 
 
@@ -68,7 +67,7 @@ const cpsc310w1 = new CourseSection("CPSC 310");
 
 ## Class bodies
 
-To be useful, a class must both maintain some state and provide some functionality. State in classes is maintained using **field** variables that are declared in the class body. When the class is instantiated, a copy of these variables is initialised by the constructor. The contents of the fields are unique to each instantiated object; changes to a field in one object have no impact on the same field in another object.
+To be useful, a class must both maintain some state and provide some functionality. State in classes is maintained using **field** variables that are declared in the class body. When the class is instantiated, a copy of these variables is initialised by the constructor. The contents of the fields are unique to each instantiated object; changes to a field in one object have no impact on the same field in another object. Declaring a field is relatively straightforward: 1) figure out what state you need to track and come up with a name that clearly describes the state; 2) identify what type the state is; 3) determine whether there is a default value for the state or whether it needs to be dynamically configured through a constructor. One challenging problem though is determining _what_ should be state at all, in contrast to a local variable within a method. As a rule of thumb, data should be stored in a field if the value must survive after a method returns or be visible to other methods.
 
 <details class="tooltip ts-tips">
   <summary>Fields and `this`</summary>
@@ -77,7 +76,7 @@ Our `CourseSection` class above was not very useful. Without state, every object
 
 One other piece of syntax emerges here as well. The `this` keyword is a special name that allows an object to refer to itself.
 
-Below we have extended the class with fields `id` and `cap`, each declared with its type. The constructor takes both as parameters. 
+Below we have extended the class with fields `id` and `cap`, each declared with its type. The constructor takes both as parameters. Here we must declare the constructor because we want to set the initial values of both `id` and `cap`.
 
 ```typescript
 class CourseSection {
@@ -105,7 +104,7 @@ const cpsc310w1 = new CourseSection("CPSC 310", 160);
 
 While storing state is helpful, classes also provide a mechanism for collecting functionality. Within classes, functionality is provided by **methods**. Most classes contain many methods that enable programs to perform actions on the class's stored state. These actions often explicitly enforce the expected invariants on the fields to ensure the invariants are always true.
 
-In all languages, methods have a name, take zero or more parameters, and return either a value or `void`. It is good practice to declare that the method return type is `void` when a method does not return a value to signal to an engineer reading the code that the absence of a return value is intentional. Methods have access to all of the class's fields and can call other methods within the class itself.
+In all languages, methods have a name, take zero or more parameters, and return either a value or `void`. It is good practice to declare that the method return type is `void` when a method does not return a value to signal to an engineer reading the code that the absence of a return value is intentional. Methods have access to all of the class's fields and can call other methods within the class itself. Declaring a method involves a few steps: 1) figuring out what the point of the method is and coming up with a name that succinctly and clearly captures that intent; 2) determining what parameters the method should take and what their names and types should be; 3) determining what the method should return and what it's type should be. It can be helpful to think of this process from a testing perspective: if you know the kinds of tests you would like for the functionality the method provides, can you both configure it with the parameters and evaluate it with the return type (or the return type of other methods already in the class)?
 
 <details class="tooltip ts-tips">
   <summary>Methods</summary>
