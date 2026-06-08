@@ -1,29 +1,3 @@
----
-# https://vitepress.dev/reference/default-theme-home-page
-layout: home
-
-# hero:
-#   name: "CPSC 210 Course Reader"
-#   actions:
-#     - theme: brand
-#       text: Markdown Examples
-#       link: /markdown-examples
-#     - theme: alt
-#       text: API Examples
-#       link: /api-examples
-
-# features:
-#   - title: Developing Language Fluency
-#     details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-#     link: /00-introduction/00-overview
-#   - title: Designing with Data
-#     details: All programs consume and transform data. This topic introduces how to represent information as types and design functions of those types.
-#     link: /01-data/00-overview
-#   - title: Contracts and Invariants
-#     details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-#     link: /02-contracts/00-overview
----
-
 # CPSC 210: Software Construction
 The goal of this course is to teach you to design, build, and update multi-file software. Designing such  software requires breaking down an imprecise problem statement into programmable pieces. Building requires you to implement code that fits that design, and validate that the code does what it is intended to do. Updating requires you to understand the intent of the update, identify what part of the code needs updating, and perform this update in a manner that maintains the design of the code base. 
  
@@ -145,11 +119,11 @@ You'll have noticed this reader includes some nested content. All this nested co
  **We'll format the code with Markdown's `racket` option, but it will be in the teaching languages.*
 </details>
 
-## Units
+## Reader Structure
 
-The course is separated into 3 units.
+The course is separated into 3 parts.
 
-In Unit 1, 
+In Part 1, 
 
 (TODO: write these up. Maybe once we settle on all three.)
 

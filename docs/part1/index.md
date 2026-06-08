@@ -1,4 +1,4 @@
-# Unit 1: Contracts and Safety
+# Part 1: Contracts and Safety
 
 > Prevent bugs before programs run
 
