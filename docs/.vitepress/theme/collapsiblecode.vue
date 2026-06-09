@@ -30,7 +30,7 @@ const expanded = ref(false)
 <style scoped>
 /*The basic code container cuts off at a height of 10rem (10*font size) */
 .code-container {
-  max-height: 10rem;
+  max-height: 12rem;
   overflow: hidden; /* Hide beyond max height */
   position: relative; /* gemini claims this is crucial for the fade overlay */
 }
