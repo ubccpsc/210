@@ -36,3 +36,50 @@ In Part 2, we'll see the same shift, but with more complex constraints than type
 </details>
 
 In this module we develop class-based abstractions as the mechanism for invariant enforcement. Across eight lectures, we define classes, decompose systems into cohesive units, verify their invariants, design how failures are communicated, hide what is free to change, depend on abstractions through interfaces, organize classes into hierarchies, and write code that continues to apply as new types arrive.
+
+<CollapsibleCode>
+
+```typescript
+// Owns one invariant: registered.length <= cap.
+class CourseSection {
+
+	id: string;
+	cap: number;
+	registered: string[] = [];
+	waitlist: Waitlist = new Waitlist();
+
+	constructor(courseId: string, cap: number) {
+		this.id = courseId;
+		this.cap = cap;
+	}
+
+	register(studentId: string): boolean {
+		if (this.isFull() === false) {
+			this.registered.push(studentId);
+			return true;
+		}
+		this.waitlist.add(studentId);
+		return false;
+	}
+
+	withdraw(studentId: string): void {
+		const index = this.registered.indexOf(studentId);
+		if (index !== -1) {
+			this.registered.splice(index, 1);
+			const next = this.waitlist.next();
+			if (next !== undefined) {
+				this.registered.push(next);
+			}
+		}
+	}
+
+	isFull(): boolean {
+		return this.registered.length >= this.cap;
+	}
+
+	isRegistered(studentId: string): boolean {
+		return this.registered.includes(studentId);
+	}
+}
+```
+</CollapsibleCode>
