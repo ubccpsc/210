@@ -1,20 +1,14 @@
 # Learning a new language
 
-## Motivation
-
-You already know how to program. In CPSC 110 (or equivalent course) you learned to design data, write functions, and reason about how a program is written using a teaching language (BSL). The core skills you learned previously are not tied to the lanugage you learned them with. Ideas like values, functions, conditionals, and data carry across every language; what changes is how each language writes them down and how much it checks your work for you. In this course we will use TypeScript, and we will introduce it by scaffolding from BSL. Where a concept is familiar we will point at the BSL idea it corresponds to, and where a concept differs from BSL we will call it out explicitly. Since all languages are related, if your first programming language was something other than BSL, that's ok too.
+You already know how to program. In CPSC 110 (or equivalent course) you learned to design data, write functions, and reason about how a program is written using a teaching language (BSL). The core skills you learned previously are not tied to the language you learned them with. Ideas like values, functions, conditionals, and data carry across every language; what changes is how each language writes them down and how much it checks your work for you. In this course we will use TypeScript, and we will introduce it by scaffolding from BSL. Where a concept is familiar we will point at the BSL idea it corresponds to, and where a concept differs from BSL we will call it out explicitly. Since all languages are related, if your first programming language was something other than BSL, that's ok too.
 
 ## Software systems and programming languages
 
-Every software system is written in a programming language, and every language has to provide the same handful of basic functionality: ways to name values, to make decisions, to repeat work, and to describe the data the program operates on.
+Every software system is written in a programming language, and every language has to provide the same handful of basic capabilities: ways to name values, to make decisions, to repeat work, and to describe the data the program operates on.
 
-The most obvious way languages differ is **syntax**. Syntax represent the required formatting and structure you must follow to express your thoughts in a way the computer can understand. A more important way languages differ though is in the **mechanisms the language enforces for you**. A language can check things about your program before it ever runs, or it can leave those checks to you. This is where TypeScript differs most from BSL: TypeScript makes **types** an explicit, checked part of the program, it evaluates and transforms your source code with a **compiler** before the program executes. The compiler catches many common programming mistakes and makes it easier to build large systems. 
+The most obvious way languages differ is **syntax**. Syntax represents the required formatting and structure you must follow to express your thoughts in a way the computer can understand. A more important way languages differ though is in the **mechanisms the language enforces for you**. A language can check things about your program before it ever runs, or it can leave those checks to you. This is where TypeScript differs most from BSL: TypeScript makes **types** an explicit, checked part of the program, and it analyses and transforms your source code with a **compiler** before the program executes. The compiler catches many common programming mistakes and makes it easier to build large systems. TypeScript also expresses control flow using **statements**, which differ from the expressions you used in BSL.
 
 ## Quick function primer
-
-TBD: what is a function, what does it look like
-
-TBD: need to include how to call a function, because the type part below requires it
 
 Functions provide a basic unit for containing functionality within a program. Function declarations are straightforward:
 
@@ -24,31 +18,31 @@ function letterGrade() {
 }
 ```
 
-The portion of the function name after the word `function` and before the first `{` is called its **signature**. When a function is called, its body is executed. The function above can be called by:
+The part of the declaration after the word `function` and before the first `{` is called its **signature**. When a function is called, its body is executed. The function above can be called by:
 
 ```typescript
 letterGrade();
 ```
 
-We will expand on function declarations more later in this reading.
+We will expand on function declarations later in this reading.
 
 ## Types as a language mechanism
 
-In BSL you documented types information as comments. A function's signature, like `Number -> String`, told the reader what the function expected (a value representing a `Number`) and produced (a value representing a `String`), but the language did not check that those types were honoured. If you passed a string where a number was expected, the language did not object; the mistake surfaced later, when you ran the program and it did not do what you expected.
+In BSL you documented type information as comments. A function's signature, like `Number -> String`, told the reader what the function expected (a value representing a `Number`) and produced (a value representing a `String`), but the language did not check that those types were honoured. If you passed a string where a number was expected, the language did not object; the mistake surfaced later, when you ran the program and it did not do what you expected.
 
 In TypeScript you annotate each value with its type directly in the code, and the language checks those annotations for you when you invoke the compiler. This does two things. First, the type communicates intent: a well-chosen type tells the next reader exactly which kinds of values are valid. Second, the type is enforced by a type checker within the compiler. Using the wrong kind of value becomes an error the compiler reports, rather than a bug you discover later. A whole category of mistakes is caught before the program runs.
 
-Extending our function signature above, we add the abilty to be passed a `score` that we want to calculate the corresponding letter grade for. The values that are passed to the function are called arguments or parameters.
+Extending our function signature above, we add the ability to be passed a `score` that we want to calculate the corresponding letter grade for. The named inputs a function declares (such as `score`) are its **parameters**, and the actual values passed in when it is called are its **arguments**.
 
-The type checker only helps where types are written down. In TypeScript the inputs and output of every function are annotated: each parameter gets a type, and so does the return value. These are the similar places you would have written type comments in BSL. 
+The type checker only helps where types are written down. In TypeScript the inputs and output of every function are annotated: each parameter gets a type, and so does the return value. These are the same places you would have written type comments in BSL.
 
-For example, a function signature for a function called `letterGrade` is shown below. Types are described following the `:` character. In this case, `letterGrade` takes a single paramater called `score` that must be a `number`. The return type is placed after a `:` after the parameter list; in this case the function returns a value that is always a `string`:
+For example, a function signature for a function called `letterGrade` is shown below. Types are described following the `:` character. In this case, `letterGrade` takes a single parameter called `score` that must be a `number`. The return type is placed after the parameter list, following a second `:`; in this case the function returns a value that is always a `string`:
 
 ```typescript
-function letterGrade(score: number): string
+letterGrade(score: number): string
 ```
 
-In BSL, this function would have captured the same type information like: 
+In BSL, this function would have captured the same type information like:
 
 ```racket
 ; Number -> String
@@ -64,55 +58,10 @@ TypeScript provides several basic types to describe individual values. Three of 
 As the course progresses we will examine a few more basic types, and will spend considerable time describing how to design and construct complex types.
 </details>
 
-<!-- type inference is intentionally deferred to 01-data/05 (the type checker lecture) -->
-
-<!-- 
-TODO remove?
-
-<details class="tooltip ts-tips">
-  <summary>Annotating a function</summary>
-
-```typescript
-function letterGrade(score: number): string {
-  if (score >= 90) {
-    return "A";
-  }
-  if (score >= 80) {
-    return "B";
-  }
-  return "F";
-}
-```
-
-These annotations are not just documentation. If a caller writes `letterGrade("ninety")`, the language reports an error, because `"ninety"` is a `string` and the parameter is declared as a `number`.
-
-</details>
-
-TODO: combine with above?
-
-<details class="tooltip deep-dive">
-  <summary>Coming from BSL</summary>
-
-The same function in BSL carried its types in the signature comment, where they documented the function but were not checked:
-
-```racket
-; Number -> String
-; produce the letter grade for a percentage score
-(define (letter-grade score)
-  (cond
-    [(>= score 90) "A"]
-    [(>= score 80) "B"]
-    [else "F"]))
-```
-
-The `Number -> String` line becomes `(score: number): string` in TypeScript. The information is the same; the difference is that TypeScript holds you to it.
-
-</details>
--->
 
 ## Compilation
 
-In CPSC 110, DrRacket executed your program the moment you pressed `Run`. TypeScript adds a step that must be performed before your code can be executed. Before your program runs, it is evaluated and transformed by **compiler**, a program called `tsc`, that checks your source code and ensures that the types are used consistently. If `tsc` finds a violation, it reports an error that you _must_ fix before your code can be executed.
+In CPSC 110, DrRacket executed your program the moment you pressed `Run`. TypeScript adds a step that must be performed before your code can be executed. Before your program runs, it is analysed and transformed by a **compiler**, a program called `tsc`, that checks your source code and ensures that the types are used consistently. If `tsc` finds a violation, it reports an error that you _must_ fix before your code can be executed.
 
 <details class="tooltip ts-tips">
   <summary>Anatomy of a type error</summary>
@@ -131,7 +80,6 @@ One nice thing about the compiler is that it will tell you both where the error 
 ```
 (A) Argument of type 'string' is not assignable to parameter of type 'number'.
 (B) Argument of type 'boolean' is not assignable to parameter of type 'number'.
-
 ```
 
 Until the invalid calls to `letterGrade` are fixed the code will not be executable.
@@ -140,7 +88,7 @@ Until the invalid calls to `letterGrade` are fixed the code will not be executab
 This changes when errors in your program are surfaced to you: in BSL a type mistake surfaced while the program was running, and only if you happened to exercise that path. In TypeScript, the compiler checks your types first and any inconsistencies in your entire program are flagged to you to fix before your code can execute. This is what is meant when we say that types catch bugs "before runtime": the compiler is the thing doing the catching.
 
 <details class="tooltip deep-dive">
-<summary>Tools for writing source code</summary>
+  <summary>Tools for writing source code</summary>
 
 Because the compiler is now part of how you write code, you should write TypeScript in an Integrated Development Environment (**IDE**) rather than a plain text editor. Visual Studio Code is a free IDE you can download, and will be used for both the midterms and final exam, so getting used to that one would be a good idea. But you can also use other IDEs like WebStorm (which is free for students as well).
 
@@ -181,27 +129,27 @@ These statements can also be chained to ensure subsequent conditions hold before
 ```typescript
 function letterGrade(score: number): string {
     if (score >= 80) {
-        // function should evauate to "A"
+        // function should evaluate to "A"
     } else if (score >= 68) {
-        // function should evauate to "B"
+        // function should evaluate to "B"
     } else if (score >= 55) {
-        // function should evauate to "C"
+        // function should evaluate to "C"
     } else if (score >= 50) {
-        // function should evauate to "D"
+        // function should evaluate to "D"
     } else {
-        // function should evauate to "F"
+        // function should evaluate to "F"
     }
 }
 ```
-<details>
+</details>
 
-Another control flow statement is performed by the `return` keyword. The `return` statement hands a value back to whoever called the function and stops the function there. Because `if` does not produce a value, you combine the two: inside each branch you `return` the value for that case. This is a real change in how control flow is written, so it is worth reading these constructs carefully even though the underlying logic is the same as the `cond` you already know. The simplest example of a return statement looks like the function `getString` below; in this case the `return` statement ensures we always return the value `STRING` when this function is executed:
+Another control flow statement is performed by the `return` keyword. The `return` statement hands a value back to whoever called the function and stops the function there. Because `if` does not produce a value, you combine the two: inside each branch you `return` the value for that case. This is a real change in how control flow is written, so it is worth reading these constructs carefully even though the underlying logic is the same as the `cond` you already know. The simplest example of a return statement looks like the function `getString` below; in this case the `return` statement ensures we always return the string `"STRING"` when this function is executed:
 
 ```typescript
-
 function getString(): string {
     return "STRING";
 }
+```
 
 <details class="tooltip ts-tips">
   <summary>Combining `if` and `return` for `letterGrade`</summary>
@@ -229,12 +177,15 @@ Each `return` exits the function immediately, so the order of the checks matters
 An equivalent BSL function would look like:
 
 ```racket
-(cond
-  [(>= score 90) "A"]
-  [(>= score 68) "B"]
-  [(>= score 55) "C]
-  [(>= score 50) "D"]
-  [else "F"])
+; Number -> String
+; produce the letter grade for a percentage score
+(define (letter-grade score)
+  (cond
+    [(>= score 80) "A"]
+    [(>= score 68) "B"]
+    [(>= score 55) "C"]
+    [(>= score 50) "D"]
+    [else "F"]))
 ```
 
 The TypeScript version says the same thing with statements: each `cond` clause becomes an `if` whose body returns that clause's value, and `else` becomes the final `return`. The logic is identical; what changed is that you spell out the control flow step by step rather than as a single expression.
@@ -243,21 +194,19 @@ The TypeScript version says the same thing with statements: each `cond` clause b
 
 ## Static and dynamic views of a program
 
-TBD: build this around `checkExpect`
-
 There are two natural perspectives through which you can view any program. The **static** view is what you see when you look at your source code. It is fixed text sitting in a file, and it can be read and analysed without being executed. The types, the structure of your functions, and the way the pieces fit together are all static properties, because they are true of the text itself. The compiler works entirely in this static world, which is exactly why it can check your types before the program runs.
 
 But we do not just write programs for them to sit as text on a filesystem. We write programs to do things, which gives rise to the **dynamic** view of the program. When the code executes it takes on actual values, follows particular paths, and produces behaviour that unfolds over time. Which branch an `if` takes, what a variable holds at a given moment, and how many times a piece of code runs are dynamic facts, decided as the program runs and often different from one run to the next.
 
 Keeping these two views apart is useful because different problems live in each. The compiler can rule out a whole class of mistakes statically, just by reading the text, but it cannot know what will actually happen once the program runs. That is why static checking, however good, never removes the need to run and test a program, a theme we will return to throughout the course.
 
-While the TypeScript compiler checks static values for us, we need to check dynamic properties ourselves. We do this through a process called testing. Similar to CPSC 110, we will use a `checkExpect` mechanism to validate that our program does not contain known errors when it executes dynamically. For example, to ensure that `95` evaluates to `"A"`, we can write the following check:
+While the TypeScript compiler checks static values for us, we need to check dynamic properties ourselves. We do this through a process called testing. Similar to CPSC 110, we will use a `checkExpect` mechanism to validate that our program does not contain known errors when it executes dynamically. For example, to ensure that `letterGrade(88)` evaluates to `"A"`, we can write the following check:
 
 ```typescript
 checkExpect(letterGrade(88), "A");
 ```
 
-This cannot be checked statically; we must execute the `checkExpect` statement to verify the program behaviour. If `letterGrade` satisfies this behaviour, the program will execute successfully, if it does not the program will crash.
+This cannot be checked statically; we must execute the `checkExpect` statement to verify the program behaviour. If `letterGrade` satisfies this behaviour, the program will execute successfully; if it does not, the program will crash with an error that describes the expected behaviour that was violated.
 
 Suppose we had a more fine-grained expectation of how letter grades should be computed and wrote the following check:
 
@@ -265,7 +214,7 @@ Suppose we had a more fine-grained expectation of how letter grades should be co
 checkExpect(letterGrade(95), "A+");
 ```
 
-In this case the program would crash, because `letterGrade(90)` evaluates to `"A"` in our current implementation. The type system cannot detect this failure statically, we rely on tests written and executed dynamically to detect this fault.
+In this case the program would crash, because `letterGrade(95)` evaluates to `"A"` in our current implementation. The type system cannot detect this failure statically; we rely on tests written and executed dynamically to detect this fault.
 
 ## Moving forward in this course
 
