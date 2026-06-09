@@ -51,7 +51,7 @@ In BSL, this function would have captured the same type information like:
 ```
 
 <details class="tooltip deep-dive">
-  <summary>Basic types: `number`, `string`, and `boolean`</summary>
+  <summary>Basic types: <code>number</code>, <code>string</code>, and <code>boolean</code></summary>
 
 TypeScript provides several basic types to describe individual values. Three of the most common are `number`, `string`, and `boolean`. `number` is the standard numeric type that can be used for both integer (e.g., `3`) and floating point (e.g., `3.14`) values. `string` is used to describe textual data; these values are enclosed in either single quotes `'CPSC'` or double quotes `"CPSC"`, although it is best practice to be consistent about the kind of quote used in a program. `boolean` values provide means for capturing whether a value is `true` or `false`.
 
@@ -95,7 +95,7 @@ Because the compiler is now part of how you write code, you should write TypeScr
 An IDE runs the language's type checker continuously in the background as you type and shows each error in place, on the line that caused it, the moment it appears. You no longer have to run `tsc` by hand and read through a list of errors; you see the same static checks reported right where you are working, which tightens the feedback loop as you write your code and make it work correctly. Live type checking is the feature that matters most to us today, but as the course continues we will engage in other features within the IDE as well.
 </details>
 
-## Control flow statements (`if` and `return`)
+## Control flow statements (<code>if</code> and <code>return</code>)
 
 There are two main kinds of syntax in all programming languages: expressions and statements. BSL is built almost entirely from **expressions**. Every chunk of BSL code is evaluated to produce a value, and that value is passed into the expression that contains it. TypeScript has expressions too, but it adds a second kind of construct: the **statement**. A statement does not produce a value; it performs an action, such as making a decision or returning from a function. A TypeScript program is written as a sequence of statements that run in order.
 
@@ -122,7 +122,7 @@ if (<condition>) {
 ```
 
 <details class="tooltip ts-tips">
-  <summary>Applying `if` to `letterGrade`</summary>
+  <summary>Applying <code>if</code> to <code>letterGrade</code></summary>
 
 `if` statements can also be chained to ensure subsequent conditions hold before directing the control flow of the program. In this example, once a true branch of one of the `if` statements is taken, no other code is executed. This code has one important flaw, that we will discuss below.
 
@@ -152,7 +152,7 @@ function getString(): string {
 ```
 
 <details class="tooltip ts-tips">
-  <summary>Combining `if` and `return` for `letterGrade`</summary>
+  <summary>Combining <code>if</code> and <code>return</code> to <code>letterGrade</code></summary>
 
 The problem with our `letterGrade` function above is that it never actually returned the corresponding letter grade for the given `score`. Here we see the final function:
 
