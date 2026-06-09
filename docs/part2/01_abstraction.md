@@ -418,7 +418,7 @@ This division of responsibility is what makes the class a unit of _abstraction_.
 
 This is valuable because it confines each concern to a single place. The class is the one location responsible for its own state, which frees every other part of the program from that responsibility. Because the operations that maintain the invariants live alongside the state they protect, rather than in the calling code, a client cannot accidentally leave an object in an inconsistent configuration.
 
-So far this is the class _offering_ an interface that a client has no need to look past. Guaranteeing that a client genuinely _cannot_ reach past it, so that an object's internal state is truly the class's alone, is the role of [encapsulation](./05-encapsulation).
+So far this is the class _offering_ an interface that a client has no need to look past. Guaranteeing that a client genuinely _cannot_ reach past it, so that an object's internal state is truly the class's alone, is the role of [encapsulation](./05_encapsulation).
 
 <details class="tooltip deep-dive">
   <summary>The abstraction at work in `CourseSection`</summary>
