@@ -34,6 +34,9 @@ export default defineConfig({
 				text: "Part 1: Basics",
 				link: "/part1/",
 				items: [{
+					text: "Learning a New Language",
+					link: "/part1/01_new-language"
+				}, {
 					text: "Designing with Data",
 					collapsed: true,
 					items: [{
