@@ -82,7 +82,7 @@ One nice thing about the compiler is that it will tell you both where the error 
 (B) Argument of type 'boolean' is not assignable to parameter of type 'number'.
 ```
 
-Until the invalid calls to `letterGrade` are fixed the code will not be executable.
+The computer will not be able to execute the program until the invalid calls to `letterGrade` are fixed.
 </details>
 
 This changes when errors in your program are surfaced to you: in BSL a type mistake surfaced while the program was running, and only if you happened to exercise that path. In TypeScript, the compiler checks your types first and any inconsistencies in your entire program are flagged to you to fix before your code can execute. This is what is meant when we say that types catch bugs "before runtime": the compiler is the thing doing the catching.
@@ -95,7 +95,7 @@ Because the compiler is now part of how you write code, you should write TypeScr
 An IDE runs the language's type checker continuously in the background as you type and shows each error in place, on the line that caused it, the moment it appears. You no longer have to run `tsc` by hand and read through a list of errors; you see the same static checks reported right where you are working, which tightens the feedback loop as you write your code and make it work correctly. Live type checking is the feature that matters most to us today, but as the course continues we will engage in other features within the IDE as well.
 </details>
 
-## Control flow statements
+## Control flow statements (`if` and `return`)
 
 There are two main kinds of syntax in all programming languages: expressions and statements. BSL is built almost entirely from **expressions**. Every chunk of BSL code is evaluated to produce a value, and that value is passed into the expression that contains it. TypeScript has expressions too, but it adds a second kind of construct: the **statement**. A statement does not produce a value; it performs an action, such as making a decision or returning from a function. A TypeScript program is written as a sequence of statements that run in order.
 
@@ -110,9 +110,6 @@ if (<condition>) {
 // (B)
 ```
 
-<details class="tooltip ts-tips">
-  <summary>Applying `if` to `letterGrade`</summary>
-
 `if` statements (in TypeScript, and most languages) are extremely flexible and expressive. The most explicit extension to the example above involves the `else` statement. This means that if `<condition>` is true, `(A)` executes, followed by `(C)`, but if `<condition>` is false, `(B)` executes, followed by `(C)`.
 
 ```typescript
@@ -124,7 +121,10 @@ if (<condition>) {
 // (C)
 ```
 
-These statements can also be chained to ensure subsequent conditions hold before directing the control flow of the program. In this example, once a true branch of one of the `if` statements is taken, no other code is executed. This code has one important flaw, that we will discuss below.
+<details class="tooltip ts-tips">
+  <summary>Applying `if` to `letterGrade`</summary>
+
+`if` statements can also be chained to ensure subsequent conditions hold before directing the control flow of the program. In this example, once a true branch of one of the `if` statements is taken, no other code is executed. This code has one important flaw, that we will discuss below.
 
 ```typescript
 function letterGrade(score: number): string {
@@ -200,7 +200,9 @@ But we do not just write programs for them to sit as text on a filesystem. We wr
 
 Keeping these two views apart is useful because different problems live in each. The compiler can rule out a whole class of mistakes statically, just by reading the text, but it cannot know what will actually happen once the program runs. That is why static checking, however good, never removes the need to run and test a program, a theme we will return to throughout the course.
 
-While the TypeScript compiler checks static values for us, we need to check dynamic properties ourselves. We do this through a process called testing. Similar to CPSC 110, we will use a `checkExpect` mechanism to validate that our program does not contain known errors when it executes dynamically. For example, to ensure that `letterGrade(88)` evaluates to `"A"`, we can write the following check:
+## Validating the dynamic view with testing
+
+While the TypeScript compiler checks the static view of the program, we need to check dynamic view ourselves. We do this through a process called testing. Similar to CPSC 110, we will use a `checkExpect` mechanism to validate that our program does not contain known errors when it executes dynamically. For example, to ensure that `letterGrade(88)` evaluates to `"A"`, we can write the following check:
 
 ```typescript
 checkExpect(letterGrade(88), "A");
@@ -216,6 +218,6 @@ checkExpect(letterGrade(95), "A+");
 
 In this case the program would crash, because `letterGrade(95)` evaluates to `"A"` in our current implementation. The type system cannot detect this failure statically; we rely on tests written and executed dynamically to detect this fault.
 
-## Moving forward in this course
+## Moving forward with new languages
 
 Learning TypeScript is not starting over. The way you design data, break a problem into functions, and reason about behaviour is the same as in CPSC 110. What is new is mostly enforcement and form. Types are written into the program and checked rather than left in a comment. Control flow is written with statements like `if` and `return` rather than as a single expression. Mapping constructs in a new language back to the ideas you already know from prior languages is what makes new languages quick to pick up. While this transition can be tricky this first time, each subsequent language you learn will be easier and easier.
