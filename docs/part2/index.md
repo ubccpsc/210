@@ -1,6 +1,6 @@
 # Part 2: Defining Abstractions
 
-In Part 1, we saw program small enough for one person to keep an understanding of the code in their mental model. We maintained invariants by careful factory function design and by personal *programmer discipline* about how objects were constructed and modified.
+In Part 1, we saw programs small enough for one person to keep an understanding of the code in their mental model. We maintained invariants by careful factory function design and by personal *programmer discipline* about how objects were constructed and modified.
 
 In Part 2, we expand our scope. Real software is built by teams, is maintained for years, and solves problems too large for any one person to tackle alone. In particular, unlike small program in real software systems: (1) the contributor count exceeds what an individual can manage, (2) the longevity of the codebase exceeds what an individual can remember, and (3) the code volume exceeds what an individual can audit. All of this means we cannot trust that other programmers will use the code we write correctly (i.e., adhere to programmer discipline). 
 

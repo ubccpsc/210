@@ -1,16 +1,45 @@
-# The class as a unit of abstraction
+# The Class as a Unit of Abstraction
 
-## Motivation
+(TODO: Example of an invariant we couldn't enforce thru types alone in Part 1)
 
-To move invariant enforcement out of programmer discipline, we need a language mechanism that bundles state with the operations that maintain it. Classes provide that unit through fields, methods, and constructors with an enforced construction path. A class bounds reasoning to one kind of thing at a time, reducing complexity at the system level and providing named types that can be depended upon.
+To move invariant enforcement from programmer discipline to language enforcement, we need a language mechanism that bundles *state* with the *operations that maintain it*. 
 
-## The problem
+*Classes* provide this unit. Classes bundle *fields*, *methods*, and *constructors*. Constructors in particular provide an enforced construction path. Overall, a class:
+- bounds reasoning to one group of concerns at a time, 
+- reduces complexity at the system level, and 
+- provides named types that can be depended upon.
 
-As programs grew, managing state became a considerable problem. While keeping all state in a single location is appealing, it does not scale: any part of the program can still read from or write to that shared state, and nothing in the language specifies which parts *should*. When different parts of a program mutate shared state in conflicting ways, the program ends up in an inconsistent configuration that is hard to detect and harder to trace to its source. Spreading state across many global variables is no better; the same problem applies, just distributed across more locations. In both cases the only protection is programmer discipline, which does not hold as codebases and teams grow.
+## The Problem: How Do We Manage State?
 
-The object-oriented paradigm emerged to provide a language mechanism for managing program state more systematically. The central solution is the `class`: a named unit that packages state together with the operations that are meant to act on it, and that can enforce rules about how that state is modified. All major programming languages that support object-orientation, including C++, Java, Rust, and TypeScript, do so primarily through classes.
+In Part 1, we moved from purely functional programs to ones involving *state*. We saw how state can be a handy abstraction, allowing us to (TODO: what?). 
 
-## Abstraction through classes
+However, managing state becomes tricky as we grow programs. It might be appealing to keep all state in a single shared location, but this doesn't scale. If all state is centralized, then any part of the program can read and write to the shared state, and there's no enforcement of which parts of the program *should* read and write that state. 
+
+Even worse, if different parts of the program aren't clear to each other about who *should* modify state, they might modify it in inconsistent ways, and we may end up in a state that no programmer expected. This usually leads to bugs. Even if we were to spread state into different files, if that state is captured in global variables, we have the same problem: any part of the program can modify those global variables. To ensure that state is correctly modified, we need to rely on *programmer discipline*—which is not reliable to large systems. 
+
+**Object-oriented programming** provides a language mechanism for systematically managing program state. The central solution is the **class**: a named unit that packages *state* together with the *operations that are meant to act on it*, and that can *enforce rules* about how that state is modified. All major programming languages that support object-orientation, including C++, Java, Rust, and TypeScript, do so primarily through classes.
+
+<details class="tooltip ts-tips">
+<summary>The "Object" in Object-Oriented Programming</summary>
+
+What's new about *object*-oriented programming? We already saw objects in TypeScript:
+```typescript
+const song: Song = {
+  title: "Two Hundred the Ages",
+  artist: "Precise Musician",
+  durationSeconds: 200
+};
+```
+Here, the variable `song` is an `object` with 3 properties. In TypeScript, any collection of named properties is an `object`. It inherits this characteristic from JavaScript, which is dynamically-typed and allows modification of `object`s on the fly (i.e., adding and removing properties). 
+
+In languages with stricter object-oriented programming, such as Java, objects are instead *instances* of classes. You'll see this definition of object below. So, with the TypeScript you know so far, you should understand *object-oriented* as *class-oriented*.
+</details>
+
+
+
+## Abstraction Through Classes
+
+### The Basics: Classes, Constructors, and Objects
 
 <!--- primary unit of organization -->
 As systems grow, we need a mechanism for organising state and functionality in a way that is understandable and scalable. The `class` can be thought of as a _template_ for a container and is the dominant unit of abstraction in object-oriented programs.
@@ -18,7 +47,7 @@ As systems grow, we need a mechanism for organising state and functionality in a
 <details class="tooltip deep-dive">
   <summary>Where classes are stored</summary>
 
-In all languages, classes must be stored in files. In some languages (like Java), a file must contain only a single class. This restriction is not present in TypeScript, where a file can contain multiple classes. In practice, it is most predictable for a file to contain a single class and for the filename to match the class name.
+In all languages, classes must be stored in files. In some languages (like Java), a file must contain *only* a single class. This restriction is not present in TypeScript, where a file can contain multiple classes. In practice, it is most predictable for a file to contain a single class and for the filename to match the class name.
 
 <!-- Intentional: don't talk about class-to-directory, that will come next class when we talk about cohesion -->
 </details>
@@ -26,64 +55,103 @@ In all languages, classes must be stored in files. In some languages (like Java)
 Each class declares a type, specified by its name. As with `type` earlier in the course, this name is carefully chosen as it is the most compact signal that communicates the intent of the class.
 
 <details class="tooltip ts-tips">
-  <summary>Declaring a class</summary>
+<summary>Class Declarations</summary>
 
-Classes are declared in the following way:
+The class declaration 
+```typescript
+class X {
+   // ...
+}
+```
+is a *statement* that declares the name *X* as a type.
+</details>
+
+
+
+For instance, here is a class called `CourseSection`:
 
 ```typescript
+// CourseSection V0: a blank class
 class CourseSection {
 	
-	constructor() {
-		// class initialisation
+	constructor(courseId: str) {
+		// TODO: class initialisation
 	}
 }
 ```
 
-This declares a class called `CourseSection`. The `constructor()` is a special method that must be called before the class is used. This provides a single point where a class can be configured. Constructors do not declare their return type because it is always the type of the class itself. If you have a class that does not need to initialize anything, the language will provide a default constructor (a constructor that takes no arguments, like the one above) automatically.
+So far, it contains only a *constructor*. The *constructor* will be called when an *instance* of the class will be created (or, constructed). It provides a single point where the class will be configured: e.g., setting properties to certain values, calling set-up code to set-up the invariants. Unlike other callables, constructors are never annotated with a return type: they always return the type defined by the class itself. 
+
+<details class="tooltip ts-tips">
+<summary>Constructors</summary>
+
+Within a class, the `constructor()` statement:
+```typescript
+class T {
+   constructor() {
+     // empty default constructor
+   }
+}
+```
+defines how objects of type `T` are created. We don't call `constructor()` explicitly: instead, it is called with `T()` in the statement `new T()`.
+
+By default, TypeScript will provide a default constructor that takes in no arguments, like the one in the code example above. You could understand the code above as defining:
+```typescript
+class T {
+   T(): T { // NOT correct TypeScript Syntax
+     // empty default constructor
+   }
+}
+```
+
 </details>
 
 
-## Classes vs. objects
+A class on its own is essentially a fancier type definition. Just like we needed to create *values* of certain types to use a type, we need to **instantiate** a value of the class type to use a class. 
 
-A class is just a template and cannot be directly used. To be usable, a class must be **instantiated**. An instantiated class is called an **object**. When a class is instantiated, an object is created in memory with its own independent storage for each field. Objects from the same class share the same structure and methods, but each holds its own field values, making objects completely independent of one another.
-
-<details class="tooltip ts-tips">
-  <summary>Instantiating a class</summary>
-
-Instantiating classes uses the `new` operator. When `new` is called on a class, an object is returned and is usually stored in a variable. The `new` keyword automatically calls the declared class constructor, which returns the instance of the object. This ensures that _every_ class instance is fully configured by its constructor before it can be used.
+In particular, we call an instantiated class value an **object**.  When a class is instantiated, an object is created in memory with its own independent storage for each field. For instance, the following creates an variable, named `cpsc210`, whose value is an object of type 
+`CourseSection`, as returned by the constructor of `CourseSection`:
 
 ```typescript
 const cpsc210 = new CourseSection("CPSC 210");
 ```
 
-Multiple independent objects can be made from the same class:
+<details class="tooltip ts-tips">
+  <summary> <code>new</code> operator</summary>
+
+The statement
 
 ```typescript
-const cpsc210w1 = new CourseSection("CPSC 210");
-const cpsc210w2 = new CourseSection("CPSC 210");
-const cpsc310w1 = new CourseSection("CPSC 310");
+new T();
 ```
+instantiates an object of class `T`. In particular, when `new T()` is called, the `new` keyword automatically calls the declared constructor of class `T`, which returns the instance of `T`. 
 </details>
 
-## Class bodies
+Importantly, we can make multiple independent objects from the same class:
 
-To be useful, a class must both maintain some state and provide some functionality. State in classes is maintained using **field** variables that are declared in the class body. When the class is instantiated, a copy of these variables is initialised by the constructor. The contents of the fields are unique to each instantiated object; changes to a field in one object have no impact on the same field in another object. Declaring a field is relatively straightforward: 1) figure out what state you need to track and come up with a name that clearly describes the state; 2) identify what type the state is; 3) determine whether there is a default value for the state or whether it needs to be dynamically configured through a constructor. One challenging problem though is determining _what_ should be state at all, in contrast to a local variable within a method. As a rule of thumb, data should be stored in a field if the value must survive after a method returns or be visible to other methods.
-
-<details class="tooltip ts-tips">
-  <summary>Fields and `this`</summary>
-
-Our `CourseSection` class above was not very useful. Without state, every object was an identical copy that could not be modified. A course section has a unique id and an enrolment cap, so we add fields for both.
-
-One other piece of syntax emerges here as well. The `this` keyword is a special name that allows an object to refer to itself.
-
-Below we have extended the class with fields `id` and `cap`, each declared with its type. The constructor takes both as parameters. Here we must declare the constructor because we want to set the initial values of both `id` and `cap`.
+<!--- Intentional: break the pattern that the variable name is directly derivable from the first constructor argument, so students don't think that's necessary. --> 
 
 ```typescript
-class CourseSection {
+const math_prereq = new CourseSection("MATH 100");
+const cpsc210 = new CourseSection("CPSC 210");
+const cpsc310 = new CourseSection("CPSC 310");
+```
 
+Objects from the same class share the same structure, but hold different *data*.  This is one way we will manage state: by splitting data up between different objects. Conceptually, the 3 `CourseSection` objects above could help us split up the state for different classes.
+
+
+### Class Bodies
+
+We mentioned above that a class binds together *state* and *functionality*. But our `CourseSection` was blank except for a constructor.
+
+Let's first flesh out the `CourseSection` above to contain relevant *state*. A course section, should, at the very least, contain information about its name and capacity. When we create a course section object, we should set that name and capacity. We do that as follows: 
+
+```typescript
+// CourseSection V1: Add Some Data
+class CourseSection {
+   // the first field: the course ID
 	id: string;
-	
-	// course capacity
+	// the second field: the course capacity
 	cap: number;
 	
 	constructor(courseId: string, cap: number) {
@@ -93,31 +161,103 @@ class CourseSection {
 }
 ```
 
-Now when we instantiate multiple objects they can all be different:
+<details class="tooltip ts-tips">
+  <summary>Fields and `this`</summary>
+  
+The following defines a field with name `field_1` of type `X` within class `T`.
 
 ```typescript
-const cpsc210w1 = new CourseSection("CPSC 210", 180);
-const cpsc210w2 = new CourseSection("CPSC 210", 120);
-const cpsc310w1 = new CourseSection("CPSC 310", 160);
+class T {
+
+	field_1: X;
+	
+	constructor(field_val: X) {
+		this.field_1 = field_val;
+	}
+}
 ```
+
+The `this` keyword allows us to access the *current instance* of the class. It only makes sense So, within the constructor, `this.field_1` retrieves the value of `field_1` in the current *object being constructed*.
+
+If it makes things clearer, you could understand `this` as an extra argument to any callable within a class:
+
+```typescript
+  // For illustration purposes
+  constructor(this: T, field_val: X): X { // NOT VALID TYPESCRIPT
+  }
+```
+where TypeScript will automatically pass the current object to the `this` parameter. 
+
+_
+
 </details>
 
-While storing state is helpful, classes also provide a mechanism for collecting functionality. Within classes, functionality is provided by **methods**. Most classes contain many methods that enable programs to perform actions on the class's stored state. These actions often explicitly enforce the expected invariants on the fields to ensure the invariants are always true.
+In this version of CourseSection, we have two fields, `id`, and `cap`.  Fields are non-callable (i.e., not functions) properties of classes. The constructor above initializes the values of fields while the objects of type `CourseSection` are being created. For instance, now we create 
 
-In all languages, methods have a name, take zero or more parameters, and return either a value or `void`. It is good practice to declare that the method return type is `void` when a method does not return a value to signal to an engineer reading the code that the absence of a return value is intentional. Methods have access to all of the class's fields and can call other methods within the class itself. Declaring a method involves a few steps: 1) figuring out what the point of the method is and coming up with a name that succinctly and clearly captures that intent; 2) determining what parameters the method should take and what their names and types should be; 3) determining what the method should return and what it's type should be. It can be helpful to think of this process from a testing perspective: if you know the kinds of tests you would like for the functionality the method provides, can you both configure it with the parameters and evaluate it with the return type (or the return type of other methods already in the class)?
+```
+const math_prereq = new CourseSection("MATH 100", 400);
+const cpsc210 = new CourseSection("CPSC 210", 180);
+const cpsc310 = new CourseSection("CPSC 310", 160);
+```
+
+Note that the contents of the fields are unique to each instantiated object; changes to a field in one object have *no impact* on the same field in another object. In the above, `cpsc210.id` will hold the value `"CPSC 210"`, while `math_prereq.id` will hold the value `"MATH 100"`.
+
+<details class="tooltip deep-dive">
+<summary>When should I make a field?</summary>
+
+Declaring a field is relatively straightforward: 1) figure out what state you need to track and come up with a name that clearly describes the state; 2) identify what type the state is; 3) determine whether there is a default value for the state or whether it needs to be dynamically configured through a constructor. 
+
+One challenging problem though is determining _what_ should be state at all, in contrast to a local variable within a method. As a rule of thumb, data should be stored in a field if the value must survive after a method returns or be visible to other methods.
+</details>
+
+Let's now flesh out how classes can define *functionality*. 
+Within classes, functionality is provided by **methods**. Most classes contain many methods that enable programs to perform actions on the class's stored state. These actions often explicitly enforce the expected invariants on the fields to ensure the invariants are always true.
 
 <details class="tooltip ts-tips">
-  <summary>Methods</summary>
+<summary> Methods (and <code>this</code> again)
+</summary>
 
-Here we have added a `registered` field to track which students are in the section. Methods have been added to enrol and withdraw students and to check enrolment status. Notice that `register` enforces the cap: no caller can exceed it, regardless of how they try. The invariant is maintained by the class itself, not by discipline in the calling code.
+The following defines a method `method_1` for class `T`
+```typescript
+class T {
+    
+    method_1(x: X, y: Y): Z {
+       // do something with arg_1 and arg_2 to return a value of type Z 
+    }
+    
+}
+```
+Given an instance of the class, `const t = new T()`, we can call this method with `t.method_1(...)`. This call will only be able to see the data stored in the object `t`. 
 
-One bit of syntactic sugar for fields is also demonstrated: it is often the case that there is a default initial value for a field that we want set but know we will not change in the constructor. In this case, the `registered` field has been initialised to the empty array. Setting the field's default value is the same as if it were set in the constructor itself, and is often convenient for fields that do not need per-instance customisation.
+To call a method within a method, we use `this`, which represents the current instance of `T`: 
+
+```typescript
+class T {
+    
+    method_1(x: X, y: Y): Z {
+       if (this.method_2()) {
+         // ...
+       }
+       // do something with arg_1 and arg_2 to return a value of type Z 
+    }
+    
+    method_2(): bool {
+       // do something
+    }
+    
+}
+```
+
+</details>
+
+Let's add functionality to our `CourseSection`. Most functionality for a course section involves the students enrolled. So we'll first add a field `registered` in which we can store enrolled students. Then, we'll add functionality to register and withdraw students:
 
 <!--
 duplicate students not caught on purpose, we will notice this in verification
 -->
 
 ```typescript
+// CourseSection V2: Now we've got state and functionality
 class CourseSection {
 
 	id: string;
@@ -166,9 +306,44 @@ class CourseSection {
 }
 ```
 
+Methods have access to all of the class's fields and can call other methods within the class itself. For instance, `register` calls the `isFull` method to check whether the class is currently full. `isFull` itself looks at the `registered` and `cap` fields. 
+
+<details class="tooltip ts-tips">
+  <summary>Default Initialization of Fields</summary>
+
+It is often the case that there is a default initial value for a field that we want set but know we will not change in the constructor. For instance, `registered` in our example above is always initialized to the empty array. More generally:
+
+```typescript
+class T {
+    
+    field_n: X = some_x;
+    
+}
+``` 
+
+sets the default value for `field_n` to whatever value is in `some_x`. `some_x` can be any expression, not just a variable (TODO: can it be a call?). 
+
+Setting the field's default value is the same as if it were set in the constructor itself. This is convenient for fields that do not need per-instance customisation.
+
 </details>
 
+
+Notice that `register` enforces the enrolment cap: no caller can exceed it, regardless of how they try. The invariant is maintained *by the class itself*, not by *programmer discipline* in the calling code.
+
+In all languages, methods have a name, take zero or more parameters, and return either a value or `void`. 
+When a method does not reutrn a value, it is good practice to declare that the method return type is `void`. This signals to whoever is reading the code that the absence of a return value is intentional.
+
+<details class="tooltip deep-dive">
+<summary>When should I make a method?</summary>
+
+Declaring a method involves a few steps: 1) figuring out what the point of the method is and coming up with a name that succinctly and clearly captures that intent; 2) determining what parameters the method should take and what their names and types should be; 3) determining what the method should return and what it's type should be.
+
+It can be helpful to think of this process from a testing perspective: if you know the kinds of tests you would like for the functionality the method provides, can you both configure it with the parameters and evaluate it with the return type (or the return type of other methods already in the class)?
+</details>  
+
 ## Working with objects
+
+<!--- CL note: I have edited up to here.-->
 
 A class declaration on its own does nothing. The declaration only describes what its objects will look like. To perform work, we instantiate objects and interact with them by calling their methods. Methods are accessed using _dot notation_. The `.` separates an object from the method being called on it. Because every object stores its own field values, a method call on one object can never affect another, even if both are instances of the same class.
 
