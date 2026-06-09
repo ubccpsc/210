@@ -3,9 +3,10 @@ import './style.css'
 import './tooltips.css'
 import { onMounted, watch } from 'vue'
 import { useRoute } from 'vitepress'
+import CollapsibleCode from './collapsiblecode.vue'
 
 export default {
-  ...DefaultTheme,
+  extends: DefaultTheme,
   setup() {
     const route = useRoute()
     const updateEmbedMode = () => {
@@ -20,5 +21,8 @@ export default {
     }
     onMounted(updateEmbedMode)
     watch(() => route.path, updateEmbedMode)
+  },
+  enhanceApp({ app }) {
+     app.component('CollapsibleCode', CollapsibleCode)
   }
 }
