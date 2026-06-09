@@ -256,6 +256,8 @@ Let's add functionality to our `CourseSection`. Most functionality for a course 
 duplicate students not caught on purpose, we will notice this in verification
 -->
 
+<CollapsibleCode>
+
 ```typescript
 // CourseSection V2: Now we've got state and functionality
 class CourseSection {
@@ -305,6 +307,7 @@ class CourseSection {
 	}
 }
 ```
+</CollapsibleCode>
 
 Methods have access to all of the class's fields and can call other methods within the class itself. For instance, `register` calls the `isFull` method to check whether the class is currently full. `isFull` itself looks at the `registered` and `cap` fields. 
 
