@@ -162,7 +162,7 @@ class CourseSection {
 ```
 
 <details class="tooltip ts-tips">
-  <summary>Fields and `this`</summary>
+  <summary>Fields and <code>this</code></summary>
   
 The following defines a field with name `field_1` of type `X` within class `T`.
 
@@ -188,13 +188,11 @@ If it makes things clearer, you could understand `this` as an extra argument to 
 ```
 where TypeScript will automatically pass the current object to the `this` parameter. 
 
-_
-
 </details>
 
-In this version of CourseSection, we have two fields, `id`, and `cap`.  Fields are non-callable (i.e., not functions) properties of classes. The constructor above initializes the values of fields while the objects of type `CourseSection` are being created. For instance, now we create 
+In this version of CourseSection, we have two fields, `id`, and `cap`.  Fields are non-callable (i.e., not functions) properties of classes. The constructor above initializes the values of fields while the objects of type `CourseSection` are being created. For instance, now we can create objects with names and enrolment capacities for each class: 
 
-```
+```typescript
 const math_prereq = new CourseSection("MATH 100", 400);
 const cpsc210 = new CourseSection("CPSC 210", 180);
 const cpsc310 = new CourseSection("CPSC 310", 160);
@@ -210,8 +208,10 @@ Declaring a field is relatively straightforward: 1) figure out what state you ne
 One challenging problem though is determining _what_ should be state at all, in contrast to a local variable within a method. As a rule of thumb, data should be stored in a field if the value must survive after a method returns or be visible to other methods.
 </details>
 
+<!--- probably want a subseq -->
+
 Let's now flesh out how classes can define *functionality*. 
-Within classes, functionality is provided by **methods**. Most classes contain many methods that enable programs to perform actions on the class's stored state. These actions often explicitly enforce the expected invariants on the fields to ensure the invariants are always true.
+Within classes, functionality is provided by **methods**. Most classes contain many methods that enable programs to perform actions on the class's stored state. These actions can *explicitly enforce* any expected expected invariants on the fields.
 
 <details class="tooltip ts-tips">
 <summary> Methods (and <code>this</code> again)
