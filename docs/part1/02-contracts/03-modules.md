@@ -32,22 +32,7 @@ Design principle:
 
 If clients cannot create invalid states, many bugs disappear.
 
-## 3. Two Useful Strategies in This Course
-
-### Strategy A: Opaque/Branded Types
-
-Use a representation internally, but export an opaque type so clients cannot fabricate values.
-
-High-level pattern:
-
-1. Define internal representation type.
-2. Define exported type with a private brand.
-3. Export constructor and operations only.
-4. Keep representation constructors unexported.
-
-This is the idea in the branded BST example: clients can hold BST values but cannot create fake ones by object literal.
-
-### Strategy B: Closure-Based Object API
+## 3. Implementing Modules with Closure-Based Objects
 
 Return object values containing operations, with representation captured in closure.
 
