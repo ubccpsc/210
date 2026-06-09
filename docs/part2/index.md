@@ -1,10 +1,10 @@
 # Part 2: Defining Abstractions
 
-In Part 1, programs were small enough for one person to keep an understanding of the code in their mental model. We maintained invariants by careful factory function design and by personal *programmer discipline* about how objects were constructed and modified.
+In Part 1, we saw programs small enough for one person to keep an understanding of the code in their mental model. We maintained invariants by careful factory function design and by personal *programmer discipline* about how objects were constructed and modified.
 
-In Part 2, we expand our scope. Real software is built by teams, is maintained for years, and solves problems too large for any one person to tackle alone. Three forces contribute to making real software systems different from smaller programs: (1) contributor count exceeds what an individual can manage, (2) duration exceeds what an individual can remember, (3) and code volume exceeds what an individual can audit. These result (COMMENT: somewhat unclear sentence...) in unmanageable complexity, lost understandability, and brittle evolvability. All of this means we cannot trust that other programmers will use the code we write correctly (programmer discipline). 
+In Part 2, we expand our scope. Real software is built by teams, is maintained for years, and solves problems too large for any one person to tackle alone. In particular, unlike small program in real software systems: (1) the contributor count exceeds what an individual can manage, (2) the longevity of the codebase exceeds what an individual can remember, and (3) the code volume exceeds what an individual can audit. All of this means we cannot trust that other programmers will use the code we write correctly (i.e., adhere to programmer discipline). 
 
-In response to these challenges, we move from programmer discipline to encoding invariants in the language itself. By encoding invariants into types (COMMENT: is this from Part 1 or Part 2?), we shift the burden of consistency from individual care to language enforcement. 
+In response, we move from *programmer discipline* to encoding invariants *in the language* itself. By encoding invariants into classes, we will shift the burden of consistency from individual care to *language enforcement*. 
 
 <details class="tooltip link-110"> 
 <summary>Programmer Discipline vs Enforcement</summary>
@@ -35,4 +35,4 @@ In Part 2, we'll see the same shift, but with more complex constraints than type
  
 </details>
 
-In this module we develop class-based abstractions as the mechanism for invariant enforcement. Across eight lectures, we define classes, decompose systems into cohesive units, verify their invariants, design how failures are communicated, hide what is free to change, depend on abstractions through interfaces, organize classes into hierarchies, and write code that continues to apply as new types arrive.
+In this module we develop *class-based* abstractions as the mechanism for invariant enforcement. Across eight lectures, we define classes, decompose systems into cohesive units, verify their invariants, design how failures are communicated, hide what is free to change, depend on abstractions through interfaces, organize classes into hierarchies, and write code that continues to apply as new types arrive.
