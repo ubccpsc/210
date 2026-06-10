@@ -188,39 +188,6 @@ To see why these tests earn their place, consider a near-miss implementation in 
 
 Our original suite does catch this fault, but only by luck: we happened to choose the boundary value `3` as a representative of the accruing class. Had we chosen `4` and `12` instead, every test we wrote would have passed. That is the essence of boundary value analysis: off-by-one faults are often invisible everywhere except at a single input value, so those values must be in the suite by design rather than by chance.
 
-## White-Box Testing
-
-Everything so far has been **black-box testing**: we derived every test from the specification, treating the implementation as a box we cannot see into. Black-box tests check that the function does what it promises.
-
-**White-box testing** takes the complementary view. Once an implementation exists, we can read it and ask a different question: do our tests actually *exercise* the code that was written? Reading the code reveals its branches, and each branch is a place a fault could hide untested.
-
-Here is our finished `lateFee` again, with its branches identified:
-
-```typescript
-function lateFee(daysLate: number): number {
-    if (daysLate <= 2) {
-        return 0;                       // branch 1: grace period
-    }
-    const fee = 0.5 * (daysLate - 2);
-    if (fee > 10) {
-        return 10;                      // branch 2: capped
-    }
-    return fee;                         // branch 3: accruing
-}
-```
-
-Now map the test suite onto the branches: `lateFee(0)` and `lateFee(2)` execute branch 1, `lateFee(30)` executes branch 2, and `lateFee(3)` and `lateFee(12)` execute branch 3. Every branch is exercised by at least one test, so no part of this implementation runs only when no test is watching.
-
-### Coverage
-
-**Coverage** makes the white-box question measurable: how much of the program's code does the test suite actually execute? The most practical form is **branch coverage**: the fraction of branches executed by at least one test.
-
-Our suite executes all three branches of `lateFee`, for 100% branch coverage. If we deleted the maximum-fee test, branch 2 would never execute during testing: coverage drops to 2 of 3 branches, and a coverage report points at the exact lines no test reaches. That is what coverage is for—it finds the parts of your code that your suite silently ignores.
-
-But coverage has a sharp limit, and our own example demonstrates it. Recall the buggy implementation from earlier, the one missing the cap. It had only two branches—and our grace-period and accrual tests executed both of them. Its branch coverage was 100%, *and it was wrong*. Coverage could not reveal the fault, because the fault was not an untested branch; it was a missing one. Coverage measures the code you wrote, not the code the specification required.
-
-This is why white-box testing supplements black-box testing but never replaces it. Reading the code tells you whether your tests reach what is there; only the specification can tell you what ought to be there.
-
 ## Testing and Types Together
 
 The type checker and the test suite operate at different times: the type checker works statically on the source code, ruling out whole categories of invalid calls before the program runs. Tests work dynamically, verifying specific behaviours by actually executing the function. They are complementary approaches: a program that passes every type check can still return the wrong value for a given input. A program that passes all its tests may still fail on an input the test suite did not evaluate. The combination is what gives confidence: types narrow the space of programs that can even be written, and tests verify that the program you wrote does what you intended.
