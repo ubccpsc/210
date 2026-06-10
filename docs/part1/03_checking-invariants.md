@@ -291,7 +291,7 @@ type Result<T, E> =
   | { ok: false, error: E };
 ```
 
-A `Loan` whose `renewalsRemaining` is `-1`, by contrast, is an *unexpected* error: no sequence of correct operations can produce it, so if it appears, something else has already gone wrong. We can detect unexpected errors and signal them to our program using the `assert` operator. `assert` causes the program to immedeatly terminate.
+A `Loan` whose `renewalsRemaining` is `-1`, by contrast, is an *unexpected* error: no sequence of correct operations can produce it, so if it appears, something else has already gone wrong. We can detect unexpected errors and signal them to our program using the `assert` operator. These statements look like `assert(<condition>, <description>)`. When an assertion fails, the program is immedeatly terminated with the provided description. The presence of assertions in the implementation like this can make the code much easier to write, because your implementation can trust that the invariants are valid for the remainder of the function, which can reduce defensive checks you might otherwise need to make in your code.
 
 ```typescript
 /**
@@ -345,11 +345,6 @@ test("renew halts on a loan that violates non-negative invariant", () => {
 
 Expected errors should be tested analagously to how a user would interact with a function, which means we should use `checkExpect`: a refused renewal is not a malfunction but a specified result, and the contract tells you exactly what value to expect. Unexpected errors though are almost always the result of programming errors, which means validating them with `checkError` is more appropriate, since you're ensuring the program is refusing to process erroneous requests. As a rule of thumb, if the specification describes the outcome, check the outcome; if the outcome should be impossible, check that the program halts.
 
-<details class="tooltip deep-dive">
-<summary>Richer expected errors</summary>
-
-Returning `null` says only that the operation did not succeed; it cannot say why. When a function has several distinct failure reasons that callers need to tell apart, the same tagged-union idea from the previous reading applies to results: return `{ kind: "renewed", loan: ... } | { kind: "refused", reason: ... }`, and the type checker will force callers to branch on the outcome. Languages also provide a separate mechanism, exceptions, for signalling errors across many levels of a program at once; we look at it later in the course.
-</details>
 
 ## Testing and Types Together
 
