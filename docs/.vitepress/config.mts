@@ -33,125 +33,116 @@ export default defineConfig({
 			}, {
 				text: "Part 1: Basics",
 				link: "/part1/",
-				items: [
-				{
+				items: [{
 					text: "Learning a New Language",
 					link: "/part1/01_new-language"
-				}, 
-				{
-					text: "Using Types to Model Problems",
-					link: "/part1/02_model-types"
-				},
-				{
-					text: "Testing",
-					link: "/part1/03_testing"
-				},
-				{
-					text: "Arrays and Iteration",
-					link: "/part1/04_arrays"
-				},
-				{
-					text: "Mutation and Side Effects",
-					link: "/part1/05_state-mutation"
-				},
-				{
-					text: "Asynchronous Effects and Time",
-					link: "/part1/06_async"
-				},
-				{
-					text: "Designing with Data",
-					collapsed: true,
-					items: [{
-						text: "Overview",
-						link: "/part1/01-data/00-overview"
-					}, {
-						text: "Modelling Information as Data",
-						link: "/part1/01-data/01-modelling_data",
-					}, {
-						text: "Designing Functions that Operate on Data",
-						link: "/part1/01-data/02-working_with_data",
-					}, {
-						text: "Designing Tests from Data and Functions",
-						link: "/part1/01-data/03-testing_over_data",
-					}, {
-						text: "Abstract Patterns over Data (Arrays)",
-						link: "/part1/01-data/04-abstract_data_patterns",
-					}, {
-						text: "TypeScript's Type Checker",
-						link: "/part1/01-data/05-language_mechanics",
-					}, {
-						text: "Synthesis: Information as Data",
-						link: "/part1/01-data/06-synthesis",
-					}, ],
 				}, {
-					text: "Contracts and Invariants",
+					text: "Modelling With Types",
+					link: "/part1/02_model-types"
+				}, {
+					text: "Checking Invariants",
+					link: "/part1/03_checking-invariants"
+				}, {
+					text: "Maintaining Invariants",
+					link: "/part1/04_maintaining-invariants"
+				}, {
+					text: "Arrays and Iteration",
+					link: "/part1/05_arrays"
+				}, {
+					text: "Mutation and Side Effects",
+					link: "/part1/06_state-mutation"
+				}, {
+					text: "Asynchronousity",
+					link: "/part1/07_async"
+				}, {
+					text: "Prior Part 1 Readings",
 					collapsed: true,
 					items: [{
-						text: "Overview",
-						link: "/part1/02-contracts/00-overview",
+						text: "Designing with Data",
+						collapsed: true,
+						items: [{
+							text: "Overview",
+							link: "/part1/01-data/00-overview"
+						}, {
+							text: "Modelling Information as Data",
+							link: "/part1/01-data/01-modelling_data",
+						}, {
+							text: "Designing Functions that Operate on Data",
+							link: "/part1/01-data/02-working_with_data",
+						}, {
+							text: "Designing Tests from Data and Functions",
+							link: "/part1/01-data/03-testing_over_data",
+						}, {
+							text: "Abstract Patterns over Data (Arrays)",
+							link: "/part1/01-data/04-abstract_data_patterns",
+						}, {
+							text: "TypeScript's Type Checker",
+							link: "/part1/01-data/05-language_mechanics",
+						}, {
+							text: "Synthesis: Information as Data",
+							link: "/part1/01-data/06-synthesis",
+						}, ],
 					}, {
-						text: "Limits of Types and the Need for Contracts",
-						link: "/part1/02-contracts/01-type_limitations",
-					}, {
-						text: "Invariants",
-						link: "/part1/02-contracts/02-invariants",
-					}, {
-						text: "Owning Invariants with Modules",
-						link: "/part1/02-contracts/03-modules",
-					}, {
-						text: "Synthesis: Contracts and Invariant Ownership",
-						link: "/part1/02-contracts/04-synthesis",
-					}, ],
-				}, ]
+						text: "Contracts and Invariants",
+						collapsed: true,
+						items: [{
+							text: "Overview",
+							link: "/part1/02-contracts/00-overview",
+						}, {
+							text: "Limits of Types and the Need for Contracts",
+							link: "/part1/02-contracts/01-type_limitations",
+						}, {
+							text: "Invariants",
+							link: "/part1/02-contracts/02-invariants",
+						}, {
+							text: "Owning Invariants with Modules",
+							link: "/part1/02-contracts/03-modules",
+						}, {
+							text: "Synthesis: Contracts and Invariant Ownership",
+							link: "/part1/02-contracts/04-synthesis",
+						}, ],
+					}]
+				}]
 			}, // end part 1
-			{
-				text: "Part 2: Designing Abstractions",
-				link: "/part2/",				
-				items: [
-					{
-						text: "Abstraction",
-						link: "/part2/01-abstraction"
-					},
-					{
-						text: "Decomposition",
-						link: "/part2/02-decomposition"
-					},
-					{
-						text: "Verification",
-						link: "/part2/03-verification"
-					},
-					{
-						text: "Error Handling",
-						link: "/part2/04-errors"
-					},
-					{
-						text: "Encapsulation",
-						link: "/part2/05-encapsulation"
-					},
-					{
-						text: "Boundaries",
-						link: "/part2/06-boundaries"
-					},
-					{
-						text: "Extension",
-						link: "/part2/07-extension"
-					},
-					{
-						text: "Open/Closed",
-						link: "/part2/08-ocp"
-					}
-					],
-			}, // end part 2
-			{
-				text: "Part 3: Enabling Evolution",
-				link: "/part3/",				
-				items: [],
-			}, // end part 3
-		],
+		{
+			text: "Part 2: Designing Abstractions",
+			link: "/part2/",
+			items: [{
+				text: "Abstraction",
+				link: "/part2/01-abstraction"
+			}, {
+				text: "Decomposition",
+				link: "/part2/02-decomposition"
+			}, {
+				text: "Verification",
+				link: "/part2/03-verification"
+			}, {
+				text: "Error Handling",
+				link: "/part2/04-errors"
+			}, {
+				text: "Encapsulation",
+				link: "/part2/05-encapsulation"
+			}, {
+				text: "Boundaries",
+				link: "/part2/06-boundaries"
+			}, {
+				text: "Extension",
+				link: "/part2/07-extension"
+			}, {
+				text: "Open/Closed",
+				link: "/part2/08-ocp"
+			}],
+		}, // end part 2
+		{
+			text: "Part 3: Enabling Evolution",
+			link: "/part3/",
+			items: [],
+		}, // end part 3
+	],
 
-		socialLinks: [{
-			icon: "github",
-			link: "https://github.com/ubccpsc/210"
-		}, ],
-	},
+	socialLinks: [{
+		icon: "github",
+		link: "https://github.com/ubccpsc/210"
+	}, ],
+},
 });

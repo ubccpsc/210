@@ -1,8 +1,15 @@
-# Testing
+# Checking Invariants
+
+TBD: extend with checking invariant intro
 
 We previously introduced the distinction between the static and dynamic views of a program. The compiler checks the static view: it reads your source code, analyses your types, and flags inconsistencies before the program runs. But a program that passes the type checker can still produce the wrong results. Types tell you what *kind* of value a function returns; they do not tell you whether that value is *correct*. That gap is filled by automated testing. In this course we will mainly focus on what are known as unit tests, as they test individual units of a program, usually at the function level.
 
-## Anatomy of a Test Suite
+
+## Identifying Invariants
+
+TBD CONTENT HERE on identifying invariants; specifically pre- and post-condiditions
+
+## Checking Invariants With Tests
 
 Tests are commonly kept separate from the code they validate. In all of the code we look at in this course, in line with common best practice, production code is stored in the `src/` directory and all tests are stored in the `test/` directory. The `test/` directory can contain any number of test files, often in 1:1 correspondence with the files being tested in `src/`. Within each test file is a number of individual test cases. Each test case has a name and a body. The name describes what the test is checking; the body contains one or more assertions. The `checkExpect` call we have been using in this course is an example of an assertion. A concrete test case that ensures `letterGrade(88)` returns `"A"` looks like:
 
