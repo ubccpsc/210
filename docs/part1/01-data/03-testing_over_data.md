@@ -1,3 +1,5 @@
+# RTH: this has most been included in part1/03_testing.md
+
 # Designing Tests from Data and Functions
 
 Types tell us what values are allowed. They do not, by themselves, tell us that a function behaves correctly.

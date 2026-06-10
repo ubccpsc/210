@@ -1,3 +1,5 @@
+# RTH: this is only partially in part1/02_TBD.md; finish this transition
+
 # Designing Functions that Operate on Data
 
 Once you've designed your data types, writing the functions that operate on them becomes straightforward. The structure of your data directly determines the structure of your code.

@@ -1,3 +1,5 @@
+# RTH: mostly migrated to part1/index.md
+
 # Designing with Data
 
 Programs are built from both data and computation, and the two are tightly connected.

@@ -1,3 +1,5 @@
+# RTH: incorporated in the second half of part1/index.md (could be pulled out at the end once part1 is done)
+
 # Synthesis: Contracts and Invariant Ownership
 
 This section connected four ideas into one design workflow:

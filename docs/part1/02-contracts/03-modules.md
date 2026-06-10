@@ -1,3 +1,5 @@
+# RTH: I think this material will go in part 2 and does not need migration during the part1 effort
+
 # Owning Invariants with Modules
 
 If invariants matter, we must control how values are created and updated.
