@@ -16,7 +16,7 @@ type Song = {
 };
 ```
 
-The comment is hinting at work the type cannot: `number` includes `-30`, but real songs cannot have negative durations. The type checker will accept an object even though it violates this invariant:
+The comment is hinting at work the type cannot do: `number` includes `-30`, but real songs cannot have negative durations. The type checker will accept an object even though it violates this invariant:
 
 ```typescript
 // passes the type checker; violates the invariant
@@ -27,19 +27,20 @@ const broken: Song = {
 };
 ```
 
-This object has the right *shape*, so the static check passes. But its *meaning* is wrong, and any code that trusts it can behave incorrectly. Imagine a function summing the durations in a playlist: a negative duration would decrease a value one would expect to be montonically increasing. When an invariant fails, a value can no longer be trusted by the operations built on it, even though the code may type check.
+This object has the right *shape*, so the static check passes. But its *meaning* is wrong, and any code that trusts it can behave incorrectly. Imagine a function summing the durations in a playlist: a negative duration would decrease a value one would expect to be monotonically increasing. When an invariant fails, a value can no longer be trusted by the operations built on it, even though the code may type check.
 
-Invariants are everywhere once you look for them: durations are positive, percentage scores sit between 0 and 100, counts are whole numbers. None of these facts appear in the types `number`, `number`, `number`. They are constraints that exist in the space between what the type allows and what the requires.
+Invariants are everywhere once you look for them: durations are positive, percentage scores sit between 0 and 100, counts are whole numbers. None of these facts appear in the types `number`, `number`, `number`. They are constraints that exist in the space between what the type allows and what the problem requires.
 
 ## Identifying Invariants
 
-At the function level, invariants attach in two places: to a function's inputs and to its output. For the rest of this reading we will work with a single running example. 
+At the function level, invariants attach in two places: to a function's inputs and to its output. For the rest of this reading we will work with a single running example:
 
-TODO: reframe this as a role, goal, benefit statement:
-Suppose the campus library asks us to implement its late-fee policy: a book returned up to 2 days late incurs no fee; after that grace period, the fee is $0.50 for each additional day; and the total fee never exceeds $10. The function computing the fee will have this signature:
+> As the campus library, I want late fees computed from how many days late a book is returned, with a short grace period and a capped maximum, so that patrons are charged fairly and predictably.
+
+Concretely, the library's late-fee policy is: a book returned up to 2 days late incurs no fee; after that grace period, the fee is $0.50 for each additional day; and the total fee never exceeds $10. The function computing the fee will have this signature:
 
 ```typescript
-lateFee(daysLate: number): number;
+lateFee(daysLate: number): number
 ```
 
 A **precondition** is what must be true of the arguments when the function is called. The parameter type admits any number: `-4`, `3.7`, `40000`. But `daysLate` is a count of days, so the function is only meaningful when `daysLate` is a whole number and at least 0. That restriction is the precondition on `daysLate`.
@@ -51,7 +52,7 @@ To identify these in your own functions, you need to examine the gap between the
 - For each parameter, ask: *of all the values this type allows, which are actually meaningful?* Any restriction you state is a precondition. Look for ranges, wholeness, non-empty strings, and relationships between parameters (for example, `min <= max`).
 - For the result, ask: *what can the caller rely on beyond the return type?* Any guarantee you state is a postcondition.
 
-A useful invariant statement has three qualities. It is **precise**: terms must be backed by definitions, words like "valid" or "sensible" without qualification are not valuable. It is **testable**: you can programmaticaly validate whether the invariant is true. And it is **operational**: it is strong enough that an implementation can actually rely on it.
+A useful invariant statement has three qualities. It is **precise**: terms must be backed by definitions; words like "valid" or "sensible" without qualification are not valuable. It is **testable**: you can programmatically validate whether the invariant is true. And it is **operational**: it is strong enough that an implementation can actually rely on it.
 
 ```text
 Weak:   daysLate is reasonable
@@ -74,10 +75,11 @@ The compiler does not know about the invariants that restrict the values in your
  * day. The total fee never exceeds $10.
  *
  * Precondition: daysLate is a whole number and daysLate >= 0
- * 
- * TODO: add @param and @return here
+ *
+ * @param daysLate the number of days past the due date
+ * @returns the fee in dollars, between 0 and 10
  */
-function lateFee(daysLate: number): number;
+function lateFee(daysLate: number): number
 ```
 
 The `Precondition:` line restricts `daysLate` to the meaningful subset of `number`, and the clause "the total fee never exceeds $10" is a postcondition on the result. Together, a function's documented preconditions and postconditions are often called its **contract**: the caller promises the preconditions, and the function promises the postconditions in return. Writing the contract down is not bureaucracy; it is what makes the invariants detectable. The doc comment is where a test author will look to decide what to check, and as we will see below, every clause of a well-written contract becomes a test.
@@ -98,13 +100,11 @@ was an invariant statement: the type is Number, and the meaningful subset is 0 t
 
 ## Checking Invariants With Tests
 
-TODO: this should be about `Song` or `lateFee`; `letterGrade` is not part of this reading.
-
-Tests are commonly kept separate from the code they validate. In all of the code we look at in this course, in line with common best practice, production code is stored in the `src/` directory and all tests are stored in the `test/` directory. The `test/` directory can contain any number of test files, often in 1:1 correspondence with the files being tested in `src/`. Within each test file is a number of individual test cases. Each test case has a name and a body. The name describes what the test is checking; the body contains one or more assertions. The `checkExpect` call we have been using in this course is an example of an assertion. A concrete test case that ensures `letterGrade(88)` returns `"A"` looks like:
+Tests are commonly kept separate from the code they validate. In all of the code we look at in this course, in line with common best practice, production code is stored in the `src/` directory and all tests are stored in the `test/` directory. The `test/` directory can contain any number of test files, often in 1:1 correspondence with the files being tested in `src/`. Within each test file is a number of individual test cases. Each test case has a name and a body. The name describes what the test is checking; the body contains one or more assertions. The `checkExpect` call we have been using in this course is an example of an assertion. A concrete test case that ensures `lateFee(2)` returns `0` (the last day of the grace period in the contract above) looks like:
 
 ```typescript
-test("letterGrade returns A for a score of 88", () => {
-    checkExpect(letterGrade(88), "A");
+test("no fee at the grace period boundary", () => {
+    checkExpect(lateFee(2), 0);
 });
 ```
 
@@ -116,7 +116,7 @@ Assertions are the core of any test case: they validate that a dynamic behaviour
 BSL used `check-expect` as a standalone expression at the top level of a file. TypeScript's `test` wrapper is a small change in form: it names the test and groups related checks together. The underlying idea is the same: write down what you expect and let the framework compare.
 
 ```racket
-(check-expect (letter-grade 88) "A")
+(check-expect (late-fee 2) 0)
 ```
 
 </details>
@@ -149,7 +149,7 @@ test("fee never exceeds the maximum", () => {
 });
 ```
 
-The precondition also guides us towards situations may not result in a valid output. Since the precondition says `daysLate >= 0`; what happens if we pass `-5` is undefined. We will talk about how to write tests for errenous behaviours later.
+The precondition also guides us towards situations that may not result in a valid output. Since the precondition says `daysLate >= 0`, what happens if we pass `-5` is undefined: the caller has broken their half of the bargain, and the function promises nothing in return. What should happen when a precondition is violated anyway, and how to test for such erroneous behaviours, is a real question; we return to it at the end of this reading.
 
 To run these tests, `lateFee` must at least exist; otherwise the compiler will refuse to execute the program at all. So we begin with a **stub**: a function with the right signature that returns a clearly wrong value.
 
@@ -166,8 +166,8 @@ We chose `-1` deliberately. A fee is never negative, so every test is guaranteed
       Expected: 0
       Received: -1
 ✗ fee accrues for each day after the grace period
-      Expected: .5
-      Received: -2
+      Expected: 0.5
+      Received: -1
 ✗ fee never exceeds the maximum
       Expected: 10
       Received: -1
@@ -298,7 +298,7 @@ type Loan = {
 };
 ```
 
-Trying to renew a loan that has no renewals remaining is an *expected* error: it will happen at the front desk every day, and the contract should say exactly what the caller gets. While we could encode the result as a `null` value, it is not descriptive as `null` is often an overloaded concept in many lanugages. 
+Trying to renew a loan that has no renewals remaining is an *expected* error: it will happen at the front desk every day, and the contract should say exactly what the caller gets. While we could encode the result as a `null` value, it is not descriptive, as `null` is often an overloaded concept in many languages.
 
 Instead, we introduce a result type so we can be clear about the failure:
 
@@ -308,15 +308,19 @@ type Result<T, E> =
   | { ok: false, error: E };
 ```
 
-A `Loan` whose `renewalsRemaining` is `-1`, by contrast, is an *unexpected* error: no sequence of correct operations can produce it, so if it appears, something else has already gone wrong. We can detect unexpected errors and signal them to our program using the `assert` operator. These statements look like `assert(<condition>, <description>)`. When an assertion fails, the program is immedeatly terminated with the provided description. The presence of assertions in the implementation like this can make the code much easier to write, because your implementation can trust that the invariants are valid for the remainder of the function, which can reduce defensive checks you might otherwise need to make in your code.
+`Result` is generic over two type parameters: `T` is the type of a successful value, and `E` is the type of the error. This is the same tagged-union idea from the previous reading, with `ok` as the discriminator: a caller checks `ok` to learn whether it received a `value` or an `error`.
+
+A `Loan` whose `renewalsRemaining` is `-1`, by contrast, is an *unexpected* error: no sequence of correct operations can produce it, so if it appears, something else has already gone wrong. We can detect unexpected errors and signal them to our program using the `assert` function. These calls look like `assert(<condition>, <description>)`. When an assertion fails, the program is immediately terminated with the provided description. The presence of assertions in the implementation like this can make the code much easier to write, because your implementation can trust that the invariants are valid for the remainder of the function, which can reduce defensive checks you might otherwise need to make in your code.
 
 ```typescript
 /**
  * Renews a loan, consuming one renewal.
  *
  * Precondition: loan satisfies the Loan invariant
- * Postcondition: if any renewals remain, returns a new Loan with
- * one fewer renewal remaining; otherwise returns null
+ * Postcondition: if any renewals remain, returns ok: true with a new
+ * Loan with one fewer renewal remaining; otherwise returns ok: false
+ * with an explanatory error
+ * TODO: add @param and @return
  */
 function renew(loan: Loan): Result<Loan, string> {
     assert(loan.renewalsRemaining >= 0, "Loan invariant violated: negative renewals");
@@ -324,45 +328,52 @@ function renew(loan: Loan): Result<Loan, string> {
 
     if (loan.renewalsRemaining === 0) {
         // expected: running out of renewals is a normal outcome
-        return { ok: false, "No further loan renewals available" }
+        return { ok: false, error: "No further loan renewals available" };
     }
     return {
-        ok: true, 
+        ok: true,
         value: {
-        title: loan.title,
-        renewalsRemaining: loan.renewalsRemaining - 1
+            title: loan.title,
+            renewalsRemaining: loan.renewalsRemaining - 1
+        }
     };
 }
 ```
 
-The two `assert` calls at the top are **assertions**: checks placed inside the implementation that halt the program immediately, with an error, if their condition is false. `assert` takes the condition to check and a message to report when the check fails. Note where it lives: unlike `checkExpect`, which sits in `test/` and probes chosen inputs from the outside, `assert` sits in the source code in `src/` and is evaluated on *every* execution of the function, whoever the caller is. Halting may seem drastic, but it is the right response to an impossible state. 
+Note where the `assert` calls live: unlike `checkExpect`, which sits in `test/` and probes chosen inputs from the outside, `assert` sits in the source code in `src/` and is evaluated on *every* execution of the function, whoever the caller is. Halting may seem drastic, but it is the right response to an impossible state.
 
-We saw at the start of this reading that operations built on a value whose invariant has failed quietly produce nonsense; an assertion stops the program at the first sign of corruption, before the nonsense can spread or be written somewhere permanent. This is also the answer to the question we deferred earlier: when a caller violates a precondition, an assertion is how the function refuses to continue. One relaxation to this approach is for functions that take user-specified input: rather than crashing, user-specified input is often explicitly validated as expected errors (because in practice it is useful to expect users to do unreasonable things).
+We saw at the start of this reading that operations built on a value whose invariant has failed quietly produce nonsense; an assertion stops the program at the first sign of corruption, before the nonsense can spread or be written somewhere permanent. This is also the answer to the question we deferred earlier: when a caller violates a precondition, an assertion is how the function refuses to continue. One relaxation to this approach is for functions that take user-specified input: rather than crashing, user-specified input is often explicitly validated and rejected as expected errors (because in practice it is useful to expect users to do unreasonable things).
 
-Now the tests, and a distinction worth being careful about. The expected error is a *documented outcome*: the postcondition names the exact value the caller receives (`null`), so we test it with `checkExpect`, the same way we test every other clause of the contract:
+Now the tests, and a distinction worth being careful about. The expected error is a *documented outcome*: the postcondition names the exact value the caller receives (an `ok: false` result carrying the reason), so we test it with `checkExpect`, the same way we test every other clause of the contract:
 
 ```typescript
 test("renewal succeeds while renewals remain", () => {
     const fresh: Loan = { title: "Clean Code", renewalsRemaining: 2 };
-    checkExpect(renew(fresh), {ok: true, value: { title: "Clean Code", renewalsRemaining: 1 }});
+    checkExpect(renew(fresh), { ok: true, value: { title: "Clean Code", renewalsRemaining: 1 } });
 });
 
 test("renewal is refused when no renewals remain", () => {
     const exhausted: Loan = { title: "Clean Code", renewalsRemaining: 0 };
-    checkExpect(renew(exhausted), {ok: false, error: "No further loan renewals available" });
+    checkExpect(renew(exhausted), { ok: false, error: "No further loan renewals available" });
 });
 ```
 
-The unexpected error has no value to compare against, because the correct behaviour is to not produce a value at all. For this we use `checkError`, which runs the function it is given and passes only if an error occurs; if the call completes normally, the test *fails*:
+The unexpected error has no value to compare against, because the correct behaviour is to not produce a value at all. For this we use `checkError`, which runs the function it is given and passes only if an error occurs; if the call completes normally, the test *fails*. An optional second argument states the error message we expect the failure to carry:
 
 ```typescript
-test("renew halts on a loan that violates non-negative invariant", () => {
+test("renew halts on a loan that violates the non-negative invariant", () => {
     const corrupted: Loan = { title: "Clean Code", renewalsRemaining: -1 };
-    checkError(renew(corrupted), "Loan invariant violated: negative renewals");
+    checkError(() => renew(corrupted), "Loan invariant violated: negative renewals");
 });
 ```
 
-Expected errors should be tested analagously to how a user would interact with a function, which means we should use `checkExpect`: a refused renewal is not a malfunction but a specified result, and the contract tells you exactly what value to expect. Unexpected errors though are almost always the result of programming errors, which means validating them with `checkError` is more appropriate, since you're ensuring the program is refusing to process erroneous requests. As a rule of thumb, if the specification describes the outcome, check the outcome; if the outcome should be impossible, check that the program halts.
+<details class="tooltip ts-tips">
+<summary>Passing <code>() =></code></summary>
+
+(The `() =>` wrapper is the same one `test` itself uses: it hands `checkError` the anonymous function for it to execute, rather than running it first. Without the wrapper, `renew(corrupted)` would execute, and fail, before `checkError`, which will check the error, was ever called.)
+</details>
+
+Expected errors should be tested analogously to how a user would interact with a function, which means we should use `checkExpect`: a refused renewal is not a malfunction but a specified result, and the contract tells you exactly what value to expect. Unexpected errors though are almost always the result of programming errors, which means validating them with `checkError` is more appropriate, since you're ensuring the program is refusing to process erroneous requests. As a rule of thumb, if the specification describes the outcome, check the outcome; if the outcome should be impossible, check that the program halts.
 
 
 ## Triangulating Quality with Types and Testing
