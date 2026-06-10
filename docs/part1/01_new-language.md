@@ -181,6 +181,8 @@ Today we will introduce two kinds of statements. The `if` statement chooses whet
 
 The most basic if block is shown below; if the `<condition>` is `true`, the code in `(A)` will execute, followed by the code in `(B)`. If `<condition>` is false, `(A)` is _not_ executed, the program jumps straight to `(B)`. The `if` only guards code within the if statement, so `(B)` will always execute, regardless of the outcome of the `if` statement, because it appears below it.
 
+A contiguous sequence of expressions and statements that will always execute in order in a programming language is known as a **basic block**. In TypeScript, these represent statements following `{` until the next branch statement (e.g, `if`) is encountered, or a closing `}` is encountered. This means that several statement could be included at `(A)`, and all would be executed in order if `<condition>` were `true`.
+
 ```typescript
 if (<condition>) {
     // (A)
@@ -303,6 +305,18 @@ test("Return an A for a score of 88", () => {
 ```
 
 The first parameter to `test` is a string that describes the test case. The second parameter `() =>` is new syntax: what it is doing is creating an **anonymous function**, and that function is being passed as a parameter to `test` so the testing framework can control the execution of the test.
+
+<details class="tooltip link-110">
+<summary>Anonymous Functions are Lambdas</summary>
+
+You have seen anonymous functions before: in CPSC 110 they were called **lambda expressions**. When you wrote a `lambda` to pass to an abstract function like `filter`, you were creating a function without naming it, right at the place it was needed:
+
+```racket
+(filter (lambda (n) (> n 5)) (list 3 6 9))
+```
+
+TypeScript's arrow syntax does the same job: `(n) => n > 5` means the same thing as `(lambda (n) (> n 5))`. The `() =>` in the test above is simply a lambda that takes no parameters, like `(lambda () ...)`. The body of the test is wrapped in an anonymous function so that it can be handed to `test` and executed later—just as `filter` decided when to call your lambda.
+</details>
 
 ## Moving forward with new languages
 
