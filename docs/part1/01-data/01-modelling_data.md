@@ -1,3 +1,5 @@
+# RTH: Mostly migrated to part1/01_new-language.md
+
 # Modelling Information as Data
 
 A data definition is a precise description of what values are allowed.
