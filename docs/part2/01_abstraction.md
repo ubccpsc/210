@@ -37,9 +37,9 @@ In languages with stricter object-oriented programming, such as Java, objects ar
 
 
 
-## Abstraction Through Classes
+## The Solution: Abstraction Through Classes
 
-### The Basics: Classes, Constructors, and Objects
+### Class Basics: Classes, Constructors, and Objects
 
 <!--- primary unit of organization -->
 As systems grow, we need a mechanism for organising state and functionality in a way that is understandable and scalable. The `class` can be thought of as a _template_ for a container and is the dominant unit of abstraction in object-oriented programs.
@@ -140,9 +140,11 @@ const cpsc310 = new CourseSection("CPSC 310");
 Objects from the same class share the same structure, but hold different *data*.  This is one way we will manage state: by splitting data up between different objects. Conceptually, the 3 `CourseSection` objects above could help us split up the state for different classes.
 
 
-### Class Bodies
+### Class Bodies: Storing State and Functionality
 
 We mentioned above that a class binds together *state* and *functionality*. But our `CourseSection` was blank except for a constructor.
+
+#### State
 
 Let's first flesh out the `CourseSection` above to contain relevant *state*. A course section, should, at the very least, contain information about its name and capacity. When we create a course section object, we should set that name and capacity. We do that as follows: 
 
@@ -190,6 +192,36 @@ where TypeScript will automatically pass the current object to the `this` parame
 
 </details>
 
+<details class="tooltip ts-tips">
+  <summary>Default Initializating Fields</summary>
+
+It is often the case that there is a default initial value for a field that we want set but know we will not change in the constructor. If this is the case, rather than writing:
+```typescript
+class T {
+   field_n: X;
+   constructor() {
+      this.field_n = some_x;
+   } 
+}
+```
+
+We can write:
+
+```typescript
+class T {
+    
+    field_n: X = some_x;
+    
+}
+``` 
+
+This sets the default value for `field_n` to whatever value is in `some_x`. `some_x` can be any expression (including a function call), not just a variable. 
+
+Setting the field's default value is the same as if it were set in the constructor itself. This is convenient for fields that do not need per-instance customisation. For instance, if we wanted a CourseSection to have a list of students field, and initialize this to the empty list.
+
+</details>
+
+
 In this version of CourseSection, we have two fields, `id`, and `cap`.  Fields are non-callable (i.e., not functions) properties of classes. The constructor above initializes the values of fields while the objects of type `CourseSection` are being created. For instance, now we can create objects with names and enrolment capacities for each class: 
 
 ```typescript
@@ -209,6 +241,8 @@ One challenging problem though is determining _what_ should be state at all, in 
 </details>
 
 <!--- probably want a subseq -->
+
+#### Functionality
 
 Let's now flesh out how classes can define *functionality*. 
 Within classes, functionality is provided by **methods**. Most classes contain many methods that enable programs to perform actions on the class's stored state. These actions can *explicitly enforce* any expected expected invariants on the fields.
@@ -249,6 +283,8 @@ class T {
 ```
 
 </details>
+
+
 
 Let's add functionality to our `CourseSection`. Most functionality for a course section involves the students enrolled. So we'll first add a field `registered` in which we can store enrolled students. Then, we'll add functionality to register and withdraw students:
 
@@ -311,25 +347,6 @@ class CourseSection {
 
 Methods have access to all of the class's fields and can call other methods within the class itself. For instance, `register` calls the `isFull` method to check whether the class is currently full. `isFull` itself looks at the `registered` and `cap` fields. 
 
-<details class="tooltip ts-tips">
-  <summary>Default Initialization of Fields</summary>
-
-It is often the case that there is a default initial value for a field that we want set but know we will not change in the constructor. For instance, `registered` in our example above is always initialized to the empty array. More generally:
-
-```typescript
-class T {
-    
-    field_n: X = some_x;
-    
-}
-``` 
-
-sets the default value for `field_n` to whatever value is in `some_x`. `some_x` can be any expression, not just a variable (TODO: can it be a call?). 
-
-Setting the field's default value is the same as if it were set in the constructor itself. This is convenient for fields that do not need per-instance customisation.
-
-</details>
-
 
 Notice that `register` enforces the enrolment cap: no caller can exceed it, regardless of how they try. The invariant is maintained *by the class itself*, not by *programmer discipline* in the calling code.
 
@@ -341,21 +358,26 @@ When a method does not reutrn a value, it is good practice to declare that the m
 
 Declaring a method involves a few steps: 1) figuring out what the point of the method is and coming up with a name that succinctly and clearly captures that intent; 2) determining what parameters the method should take and what their names and types should be; 3) determining what the method should return and what it's type should be.
 
-It can be helpful to think of this process from a testing perspective: if you know the kinds of tests you would like for the functionality the method provides, can you both configure it with the parameters and evaluate it with the return type (or the return type of other methods already in the class)?
+It can be helpful to think of this process from a testing perspective. If you know what you'd like to test about a method's functionality, the parameters should encode the data you'd pass it, and the return value the result you'd look at to evaluate if the test is correct. Unlike a function, however, *fields* may encode part of the data in your test, and part of the result. 
 </details>  
 
-## Working with objects
+### Class Use: Working with objects
 
 <!--- CL note: I have edited up to here.-->
 
-A class declaration on its own does nothing. The declaration only describes what its objects will look like. To perform work, we instantiate objects and interact with them by calling their methods. Methods are accessed using _dot notation_. The `.` separates an object from the method being called on it. Because every object stores its own field values, a method call on one object can never affect another, even if both are instances of the same class.
+A class declaration only describes what its objects will look like. It does no work on its own.
 
-<details class="tooltip ts-tips">
-  <summary>Calling methods on objects</summary>
+To perform work, we instantiate objects and interact with them by calling their methods. Methods are accessed using _dot notation_. In `i.m()`, the `.` separates an object (`i`) from the method being called on it (`m`). This notation is common to nearly all languages providing classes as abstraction.
 
-***TODO: should these be `checkExpect` to check the values?***
+Because every object stores its own field values, a method call on one object can never affect another, even if both are instances of the same class.
+
+The following test shows a demonstration of using `CourseSection` objects. 
+
+<CollapsibleCode>
 
 ```typescript
+//TODO: test format
+
 // Two sections of the same course, with different caps
 const w1 = new CourseSection("CPSC 210w1", 2);
 const w2 = new CourseSection("CPSC 210w2", 200);
@@ -382,7 +404,12 @@ isReg = w2.isRegistered("s1");     // true: unaffected by the withdraw on w1
 
 w1atCap = w1.isFull();             // false; removing s1 decreased enrolment
 ```
+</CollapsibleCode>
 
+<br/>
+<details class="tooltip exercise">
+<summary>Exercise: Testing</summary>
+The code above has many check-expects in a single test case. Does this test respect the notion that each test should check one specific concept? (TODO: what do we talk about in testability) What may be a challenge with separating this into multiple test cases?
 </details>
 
 ## The value of the abstraction
