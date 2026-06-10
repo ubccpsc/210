@@ -34,6 +34,8 @@ In TypeScript we write:
 While the characters are different (syntax), both have exactly the same meaning. In programming languages, we call that meaning *semantics*.
 </details>
 
+(TODO: prefix vs infix?)
+
 A more important way languages differ though is in the **mechanisms the language enforces for you**. A language can check things about your program before it ever runs, or it can leave those checks to you. 
 
 Enforcement mechanisms is where where TypeScript differs most from BSL. TypeScript makes **types** an explicit, checked part of the program, and it analyses and transforms your source code with a **compiler** before the program executes. The compiler catches many common programming mistakes and makes it easier to build large systems. 
@@ -173,6 +175,8 @@ An IDE runs the language's type checker continuously in the background as you ty
 
 ## Control flow statements (<code>if</code> and <code>return</code>)
 
+(TODO: to discuss: should we flip the tooltips with the tooltips giving the details of how if works and the examples in text being the running example? but no, statements are big enough we should describe them not in a tooltip...)
+
 There are two main kinds of syntax in all programming languages: expressions and statements. BSL is built almost entirely from **expressions**. Every chunk of BSL code is evaluated to produce a value, and that value is passed into the expression that contains it. 
 
 TypeScript has expressions too, but it adds a second kind of construct: the **statement**. A statement does not produce a value; it performs an action (TODO: discuss definition), such as making a decision or returning from a function. A TypeScript program is written as a sequence of statements that run in order.
@@ -267,20 +271,28 @@ An equivalent BSL function would look like:
 ```
 
 The TypeScript version says the same thing with statements: each `cond` clause becomes an `if` whose body returns that clause's value, and `else` becomes the final `return`. The logic is identical; what changed is that you spell out the control flow step by step rather than as a single expression.
+
+
+(TODO: something like. right now the typescript is significantly more wordy than cond in 110! but return will help us flexibly express different patterns of control flow further down the line? eh, you could express those things in BSL as well) 
 </details>
+
+
+(TODO: could give an exercise on re-writing the typescript without "else if"?)
 
 
 ## Static and dynamic views of a program
 
-There are two natural perspectives through which you can view any program. The **static** view is what you see when you look at your source code. It is fixed text sitting in a file, and it can be read and analysed without being executed. The types, the structure of your functions, and the way the pieces fit together are all static properties, because they are true of the text itself. The compiler works entirely in this static world, which is exactly why it can check your types before the program runs.
+There are two natural perspectives through which you can view any program. The **static** view is what you see when you look at your source code. It is fixed text sitting in a file, and it can be read and analysed *without being executed* (no execution is the key). The types, the structure of your functions, and the way the pieces fit together are all static properties, because they are true of the text itself. The compiler works entirely in this static world, which is exactly why it can check your types before the program runs.
 
-But we do not just write programs for them to sit as text on a filesystem. We write programs to do things, which gives rise to the **dynamic** view of the program. When the code executes it takes on actual values, follows particular paths, and produces behaviour that unfolds over time. Which branch an `if` takes, what a variable holds at a given moment, and how many times a piece of code runs are dynamic facts, decided as the program runs and often different from one run to the next.
+But we do not just write programs for them to sit as text on a filesystem. We write programs to do things, which gives rise to the **dynamic** view of the program. When the code *executes*, it takes on actual values, follows particular paths(TODO: do they know what paths are), and produces behaviour that unfolds over time. Which branch (TODO: we should define what a control branch is. the only mentions of branches in the [110 glossary](https://cs110.students.cs.ubc.ca/reference/glossary.html) are with regard to trees? conditionals are discussed as: "A cond expression first evaluates the first question,")an `if` takes, what a variable holds at a given moment, and how many times a piece of code runs are dynamic facts, decided as the program runs and often different from one run to the next.
 
 Keeping these two views apart is useful because different problems live in each. The compiler can rule out a whole class of mistakes statically, just by reading the text, but it cannot know what will actually happen once the program runs. That is why static checking, however good, never removes the need to run and test a program, a theme we will return to throughout the course.
 
 ## Validating the dynamic view with testing
 
-While the TypeScript compiler checks the static view of the program, we need to check dynamic view ourselves. We do this through a process called testing. Similar to CPSC 110, we will use a `checkExpect` mechanism to validate that our program does not contain known errors when it executes dynamically. TODO: describe checkExpect as an assertion mechanism. For example, to ensure that `letterGrade(88)` evaluates to `"A"`, we can write the following check:
+While the TypeScript compiler checks the static view of the program, we need to check dynamic view ourselves. We do this through a process called *testing*. 
+
+Similar to CPSC 110, in Part 1 of this course, we will use a `checkExpect` (TODO: describe checkExpect as an assertion mechanism.)mechanism to validate that our program does not contain known errors when it executes dynamically. For example, to ensure that `letterGrade(88)` evaluates to `"A"`, we can write the following check:
 
 ```typescript
 checkExpect(letterGrade(88), "A");
@@ -294,7 +306,10 @@ Suppose we had a more fine-grained expectation of how letter grades should be co
 checkExpect(letterGrade(95), "A+");
 ```
 
-In this case the program would crash, because `letterGrade(95)` evaluates to `"A"` in our current implementation. The type system cannot detect this failure statically; we rely on tests written and executed dynamically to detect this fault. In reality, this isn't quite a complete example; a full test case looks like this:
+In this case the program would crash, because `letterGrade(95)` evaluates to `"A"` in our current implementation. The type system cannot detect this failure statically; we rely on tests written and executed dynamically to detect this fault. 
+
+
+In reality, this isn't quite a complete example; a full test case looks like this:
 
 ```typescript
 test("Return an A for a score of 88", () => {
@@ -304,6 +319,14 @@ test("Return an A for a score of 88", () => {
 
 The first parameter to `test` is a string that describes the test case. The second parameter `() =>` is new syntax: what it is doing is creating an **anonymous function**, and that function is being passed as a parameter to `test` so the testing framework can control the execution of the test.
 
+(TODO: details TS to explain syntax)
+(TODO: details ISL to remind them of lambdas)
+
+
 ## Moving forward with new languages
 
-Learning TypeScript is not starting over. The way you design data, break a problem into functions, and reason about behaviour is the same as in CPSC 110. What is new is mostly enforcement and form. Types are written into the program and checked rather than left in a comment. Control flow is written with statements like `if` and `return` rather than as a single expression. Mapping constructs in a new language back to the ideas you already know from prior languages is what makes new languages quick to pick up. While this transition can be tricky this first time, each subsequent language you learn will be easier and easier.
+Learning TypeScript is not starting over. The way you design data, break a problem into functions, and reason about behaviour is the same as in CPSC 110. 
+
+What is new is mostly *enforcement* and *form*. In terms of *enforcement*, we write types into the program and `tsc` checks them, rather than leaving them in an unchecked comment. In terms of *form*, we write conditional control flow  with statements like `if` and `return`, rather than as a single `cond` expression. 
+
+Mapping constructs in a new language back to the ideas you already know from prior languages is what makes new programming languages quick to pick up. While this transition can be tricky this first time, with each subsequent language you learn, it will be easier and easier.
