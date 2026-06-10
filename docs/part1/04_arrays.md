@@ -7,7 +7,7 @@ CONTENT HERE
 
 NOTE: 
 
-* Need to show how to instantiate arrays (syntactic sugar string[] vs Array<string>)
+* Need to show how to instantiate arrays (syntactic sugar string[] vs `Array<string>`)
 * We will start with `map`, `filter`, `reduce`, and `find` (call out that find returns `undefined` when nothing is found, and this is chosen intentionally instead of null) 
 * Transition into `for of` loops to introduce iteration and contrast esp to filter and find
 
