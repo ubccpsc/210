@@ -296,6 +296,15 @@ checkExpect(letterGrade(95), "A+");
 
 In this case the program would crash, because `letterGrade(95)` evaluates to `"A"` in our current implementation. The type system cannot detect this failure statically; we rely on tests written and executed dynamically to detect this fault.
 
+TODO: need to talk about passing a function as a parameter for tests to work right... the code looks like this (`() =>` is just an anonymous function being passed as a param.)
+
+```
+test("test name", () => {
+    // test goes here
+});
+```
+
+
 ## Moving forward with new languages
 
 Learning TypeScript is not starting over. The way you design data, break a problem into functions, and reason about behaviour is the same as in CPSC 110. What is new is mostly enforcement and form. Types are written into the program and checked rather than left in a comment. Control flow is written with statements like `if` and `return` rather than as a single expression. Mapping constructs in a new language back to the ideas you already know from prior languages is what makes new languages quick to pick up. While this transition can be tricky this first time, each subsequent language you learn will be easier and easier.
