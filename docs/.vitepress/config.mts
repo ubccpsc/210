@@ -33,10 +33,32 @@ export default defineConfig({
 			}, {
 				text: "Part 1: Basics",
 				link: "/part1/",
-				items: [{
+				items: [
+				{
 					text: "Learning a New Language",
 					link: "/part1/01_new-language"
-				}, {
+				}, 
+				{
+					text: "Using Types to Model Problems",
+					link: "/part1/02_model-types"
+				},
+				{
+					text: "Testing",
+					link: "/part1/03_testing"
+				},
+				{
+					text: "Arrays and Iteration",
+					link: "/part1/04_arrays"
+				},
+				{
+					text: "Mutation and Side Effects",
+					link: "/part1/05_state-mutation"
+				},
+				{
+					text: "Asynchronous Effects and Time",
+					link: "/part1/06_async"
+				},
+				{
 					text: "Designing with Data",
 					collapsed: true,
 					items: [{
