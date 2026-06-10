@@ -9,12 +9,8 @@ NOTE:
 
 * Need to show how to instantiate arrays (syntactic sugar string[] vs `Array<string>`)
 * We will start with `map`, `filter`, `reduce`, and `find` (call out that find returns `undefined` when nothing is found, and this is chosen intentionally instead of null) 
-* Transition into `for of` loops to introduce iteration and contrast esp to filter and find
+* Transition into `for of` loops to introduce iteration and contrast esp to filter and find; need a story for why iteration even exists if you can do everything with map/filter etc.
 
-*** TBD: should these go after objects? there's no sugar for making a new Set or Map, so we need to talk about `new`...
-* Differentiate `Array` with `Set` (no duplicates) (unfortunately no sugar for instantiating a Map or Set, new is required)
-* Introduce JSON dictionaries (key strings, values contain any type)
-* Differentiate to built in `Map` type (explicit type safety!, keys of any type, iteration on insertion order, length property)
 
 # Lecture 4: Abstraction with Arrays
 
