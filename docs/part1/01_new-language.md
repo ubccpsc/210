@@ -280,7 +280,7 @@ Keeping these two views apart is useful because different problems live in each.
 
 ## Validating the dynamic view with testing
 
-While the TypeScript compiler checks the static view of the program, we need to check dynamic view ourselves. We do this through a process called testing. Similar to CPSC 110, we will use a `checkExpect` mechanism to validate that our program does not contain known errors when it executes dynamically. For example, to ensure that `letterGrade(88)` evaluates to `"A"`, we can write the following check:
+While the TypeScript compiler checks the static view of the program, we need to check dynamic view ourselves. We do this through a process called testing. Similar to CPSC 110, we will use a `checkExpect` mechanism to validate that our program does not contain known errors when it executes dynamically. TODO: describe checkExpect as an assertion mechanism. For example, to ensure that `letterGrade(88)` evaluates to `"A"`, we can write the following check:
 
 ```typescript
 checkExpect(letterGrade(88), "A");
@@ -294,16 +294,15 @@ Suppose we had a more fine-grained expectation of how letter grades should be co
 checkExpect(letterGrade(95), "A+");
 ```
 
-In this case the program would crash, because `letterGrade(95)` evaluates to `"A"` in our current implementation. The type system cannot detect this failure statically; we rely on tests written and executed dynamically to detect this fault.
+In this case the program would crash, because `letterGrade(95)` evaluates to `"A"` in our current implementation. The type system cannot detect this failure statically; we rely on tests written and executed dynamically to detect this fault. In reality, this isn't quite a complete example; a full test case looks like this:
 
-TODO: need to talk about passing a function as a parameter for tests to work right... the code looks like this (`() =>` is just an anonymous function being passed as a param.)
-
-```
-test("test name", () => {
-    // test goes here
+```typescript
+test("Return an A for a score of 88", () => {
+    checkExpect(letterGrade(88), "A");
 });
 ```
 
+The first parameter to `test` is a string that describes the test case. The second parameter `() =>` is new syntax: what it is doing is creating an **anonymous function**, and that function is being passed as a parameter to `test` so the testing framework can control the execution of the test.
 
 ## Moving forward with new languages
 
