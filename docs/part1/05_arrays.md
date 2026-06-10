@@ -217,41 +217,7 @@ function firstAbove(day: Reading[], threshold: number): Reading | undefined {
 
 The `return` inside the loop body exits the whole function the moment a match is found, so later elements are never visited. This is exactly what `find` does for you: `find` is a loop someone else already wrote. The same is true of `map`, `filter`, and `reduce`. The built-in operations are not magic; they are packaged loops, and knowing how to write the loop means you can build the patterns the language did not provide.
 
-Here is one the language does not provide. The forecasters want to know the longest unbroken stretch of below-freezing hours in the day. No single `map`, `filter`, or `find` computes this, because the answer depends on *runs* of consecutive elements: the computation has to remember how long the current cold streak is and reset that memory every time the temperature rises above freezing.
-
-```typescript
-function longestFreezingStreak(day: Reading[]): number {
-    let current = 0; // consecutive freezing readings ending here
-    let longest = 0; // best streak seen so far
-
-    for (const reading of day) {
-        if (reading.tempCelsius < 0) {
-            current = current + 1;
-            if (current > longest) {
-                longest = current;
-            }
-        } else {
-            current = 0; // the streak is broken
-        }
-    }
-    return longest;
-}
-```
-
-```typescript
-test("longest freezing streak spans the early morning", () => {
-    checkExpect(longestFreezingStreak(day), 2);
-});
-```
-
-The two streak counters are the loop's *state*: values that survive from one element to the next and change as the loop runs. That is what the named operations cannot express for us, and it is why iteration exists.
-
-<details class="tooltip ts-tips">
-<summary>The <code>let</code> Keyword</summary>
-
-`const` names cannot be reassigned, but a loop's state must change as the loop runs, so the counters above are declared with **`let`**: a name whose value *can* be reassigned. Use `const` by default and reach for `let` only when a value genuinely needs to change, as loop state does. Reassignment is our first encounter with mutation, and its broader consequences are the subject of the next reading.
-
-</details>
+TODO: need another example here using our Reading[] that does not depend on let, mutation, or state, as we want to deal with that in the next reading.
 
 So which should you reach for? Prefer the named operation whenever the task is exactly a transform, a selection, a summary, or a first-match search. The name tells every future reader the shape of the computation at a glance, and the traversal it performs has no room for the small mistakes a hand-written loop can harbour. Write a loop when the computation does not fit a named pattern: when it carries custom state, like the streak, or combines steps that would otherwise take several passes. The named operations say *what*; the loop is for when you must control *how*.
 
