@@ -1,10 +1,10 @@
 # Testing
 
-We previously introduced the distinction between the static and dynamic views of a program. The compiler checks the static view: it reads your source code, analyses your types, and flags inconsistencies before the program runs. But a program that passes the type checker can still produce the wrong results. Types tell you what *kind* of value a function returns; they do not tell you whether that value is *correct*. That gap is filled by automated testing. In this course we will mainly focus on what are known as unit tests, as they test individual units of a program, usually at the individual function level.
+We previously introduced the distinction between the static and dynamic views of a program. The compiler checks the static view: it reads your source code, analyses your types, and flags inconsistencies before the program runs. But a program that passes the type checker can still produce the wrong results. Types tell you what *kind* of value a function returns; they do not tell you whether that value is *correct*. That gap is filled by automated testing. In this course we will mainly focus on what are known as unit tests, as they test individual units of a program, usually at the function level.
 
 ## Anatomy of a Test Suite
 
-Tests are commonly held separate from the code they validate. In all of the code we look at in this course, in line with common best practice, product code is stored in the `src/` directory and all tests are stored in the `test/` directory. The `test/` directory can contain any number of test files, often in 1:1 correspondence with the files being tested in `src/`. Within each test file is a number of individual test cases. Each test case has a name and a body. The name describes what the test is checking; the body contains one or more assertions. The `checkExpect` call we have been using in this course is an example of an assertion. A concrete test case that ensures `letterGrade(88)` returns `"A"` looks like:
+Tests are commonly kept separate from the code they validate. In all of the code we look at in this course, in line with common best practice, production code is stored in the `src/` directory and all tests are stored in the `test/` directory. The `test/` directory can contain any number of test files, often in 1:1 correspondence with the files being tested in `src/`. Within each test file is a number of individual test cases. Each test case has a name and a body. The name describes what the test is checking; the body contains one or more assertions. The `checkExpect` call we have been using in this course is an example of an assertion. A concrete test case that ensures `letterGrade(88)` returns `"A"` looks like:
 
 ```typescript
 test("letterGrade returns A for a score of 88", () => {
@@ -12,7 +12,7 @@ test("letterGrade returns A for a score of 88", () => {
 });
 ```
 
-Assertions are the core of any test case: these validate that a dynamic behaviour emits the expected output for a given input. The `checkExpect` assertion takes two arguments: an expression to evaluate, and the expected result. If the two values are equal, the test passes silently. If they differ, the framework reports what was expected and what was actually produced, pointing you to the failing test by name.
+Assertions are the core of any test case: they validate that a dynamic behaviour emits the expected output for a given input. The `checkExpect` assertion takes two arguments: an expression to evaluate, and the expected result. If the two values are equal, the test passes silently. If they differ, the framework reports what was expected and what was actually produced, pointing you to the failing test by name.
 
 <details class="tooltip link-110">
 <summary>Tests in BSL</summary>
@@ -28,12 +28,12 @@ BSL used `check-expect` as a standalone expression at the top level of a file. T
 <details class="tooltip ts-tips">
 <summary>Running tests</summary>
 
-Tests in this course are run with `pnpm test` from the terminal, or using the IDE's test-running feature. The test framework executes every test case it can find in the `test/` directory. Test cases are aggregated by the files that contain them. Passing test cases are printed in green; failing test cases are printed in red, along with what was expected and what was actually returned.
+Both `test` and `checkExpect` are provided by the course toolkit; each test file imports them at the top with `import { test, checkExpect } from "@course/toolkit";`. Tests in this course are run with `pnpm test` from the terminal, or using the IDE's test-running feature. The test framework executes every test case it can find in the `test/` directory. Test cases are aggregated by the files that contain them. Passing test cases are printed in green; failing test cases are printed in red, along with what was expected and what was actually returned.
 </details>
 
 ## The Testing Process
 
-So far we have treated tests as something you write for code that already exists. In practice, the order is often reversed: we write the tests _first_. Writing tests first forces you to think about what expected behaviours are for some *code under test* (CUT), before you spend time implementing it. Having a precise set of input/output pairs is extremely helpful when you are implementing the code. Before writing the implementation you can execute your tests to ensure they fail; once the implementation has been correctly created, the test should pass. By ensuring the test fails first helps us to ensure that having that same test case pass is providing useful signal.
+So far we have treated tests as something you write for code that already exists. In practice, the order is often reversed: we write the tests _first_. Writing tests first forces you to think about the expected behaviours of the *code under test* before you spend time implementing it. Having a precise set of input/output pairs is extremely helpful when you are implementing the code. Before writing the implementation you can execute your tests to confirm they fail; once the implementation has been correctly created, the tests should pass. Confirming that a test fails first is what makes its eventual pass a meaningful signal.
 
 For the rest of this reading we will work with a single running example. Suppose the campus library asks us to implement its late-fee policy:
 
@@ -51,7 +51,7 @@ For the rest of this reading we will work with a single running example. Suppose
 function lateFee(daysLate: number): number
 ```
 
-The specification alone gives us everything we need to write tests before we write its implementation. Each clause from the function documentation becomes a test:
+The specification alone gives us everything we need to write tests before we write the implementation. Each clause from the function documentation becomes a test:
 
 ```typescript
 test("no fee during the grace period", () => {
@@ -82,7 +82,7 @@ We chose `-1` deliberately. A fee is never negative, so every test is guaranteed
 <details class="tooltip link-110">
 <summary>You have done this before</summary>
 
-This is the same ordering as the How to Design Functions recipe from CPSC 110: signature, purpose, and stub first, then *examples*—written as `check-expect`s—before you write the function body. What CPSC 110 called examples, we now call tests. The discipline of recording expected behavior before implementing it carries over unchanged.
+This is the same ordering as the How to Design Functions recipe from CPSC 110: signature, purpose, and stub first, then *examples*—written as `check-expect`s—before you write the function body. What CPSC 110 called examples, we now call tests. The discipline of recording expected behaviour before implementing it carries over unchanged.
 </details>
 
 Now we implement the function and run the tests again:
@@ -104,7 +104,7 @@ function lateFee(daysLate: number): number {
       Received: 14
 ```
 
-Two tests pass, but the third fails. The failure report tells us exactly where to look: `lateFee(30)` produced `14`. Re-reading the specification reveals the problem—our implementation handles the grace period and the per-day charge, but we forgot the maximum entirely. The fix adds the missing behavior:
+Two tests pass, but the third fails. The failure report tells us exactly where to look: `lateFee(30)` produced `14`. Re-reading the specification reveals the problem—our implementation handles the grace period and the per-day charge, but we forgot the maximum entirely. The fix adds the missing behaviour:
 
 ```typescript
 function lateFee(daysLate: number): number {
@@ -130,13 +130,13 @@ All three tests now pass. Notice what did *not* change: the tests. They were cor
 <details class="tooltip deep-dive">
 <summary>Tests as executable specifications</summary>
 
-A test suite written before the implementation acts as an *executable specification*—a precise, runnable description of the intended behavior. This is more valuable than a written description alone, because the computer can verify whether your implementation matches it, every time you run the suite.
+A test suite written before the implementation acts as an *executable specification*—a precise, runnable description of the intended behaviour. This is more valuable than a written description alone, because the computer can verify whether your implementation matches it, every time you run the suite.
 </details>
 
 <!--
 The full process, then:
 
-1. Read the specification and write tests that capture each promised behavior.
+1. Read the specification and write tests that capture each promised behaviour.
 2. Stub the function and run the tests, confirming that every test fails.
 3. Implement the function.
 4. Run the tests again. If any fail, use the failure reports to find and fix the fault.
@@ -147,7 +147,7 @@ The full process, then:
 
 We wrote the `lateFee` suite by instinct: read the specification, turn each clause into a test. That instinct served us well, but instinct alone does not tell you when a suite is *complete enough*. Two systematic techniques—equivalence class partitioning and boundary value analysis—turn that instinct into a method.
 
-## Equivalence Class Partitioning
+### Equivalence Class Partitioning
 
 The most direct way to choose test inputs is to divide the input space into **equivalence classes**: groups of inputs that the specification says should be handled the same way. You then choose at least one **representative** from each class.
 
@@ -169,7 +169,7 @@ Within a class, one representative is as informative as another. `lateFee(12)` a
 Two inputs belong to the same class when the *specification* says they should behave the same way—not when they happen to take the same path through the code you wrote. In our buggy implementation, `lateFee(12)` and `lateFee(30)` took the same path through the code; classes derived from that implementation would have merged them, and the fault would have survived. Classes derived from the specification kept them apart, which is exactly why the fault was caught.
 </details>
 
-## Boundary Value Analysis
+### Boundary Value Analysis
 
 Equivalence class partitioning identifies the regions to test. **Boundary value analysis** identifies *where* within those regions to look most carefully: at the edges, where one class meets the next.
 
@@ -184,9 +184,9 @@ test("fee changes exactly at the class boundaries", () => {
 });
 ```
 
-To see why these tests earn their place, consider a near-miss implementation in which the grace check was written `daysLate <= 3` instead of `daysLate <= 2`. Every test we have written so far passes against it—except `checkExpect(lateFee(3), 0.50)`, which fails because the faulty function returns `0`. In fact, `3` is the *only* input in the entire domain where this fault is visible. A representative from the middle of the class, like `lateFee(12)`, sails past it.
+To see why these tests earn their place, consider a near-miss implementation in which the grace check was written `daysLate <= 3` instead of `daysLate <= 2`. This fault is visible at exactly one input: `lateFee(3)` returns `0` instead of `0.50`. Every other value in the entire domain—including a mid-class representative like `lateFee(12)`—behaves correctly.
 
-That is the essence of boundary value analysis: off-by-one faults are often invisible everywhere except at a single input value, so that value must be in the suite.
+Our original suite does catch this fault, but only by luck: we happened to choose the boundary value `3` as a representative of the accruing class. Had we chosen `4` and `12` instead, every test we wrote would have passed. That is the essence of boundary value analysis: off-by-one faults are often invisible everywhere except at a single input value, so those values must be in the suite by design rather than by chance.
 
 ## White-Box Testing
 
@@ -223,4 +223,4 @@ This is why white-box testing supplements black-box testing but never replaces i
 
 ## Testing and Types Together
 
-The type checker and the test suite operate at different times: The type checker works statically on the source code, ruling out whole categories of invalid calls before the program runs. Tests work dynamically, verifying specific behaviors by actually executing the function. They are complementary approaches: a program that passes every type check can still return the wrong value for a given input. A program that passes all its tests may still fail on an input the test suite did not evaluate. The combination is what gives confidence: types narrow the space of programs that can even be written, and tests verify that the program you wrote does what you intended.
+The type checker and the test suite operate at different times: the type checker works statically on the source code, ruling out whole categories of invalid calls before the program runs. Tests work dynamically, verifying specific behaviours by actually executing the function. They are complementary approaches: a program that passes every type check can still return the wrong value for a given input. A program that passes all its tests may still fail on an input the test suite did not evaluate. The combination is what gives confidence: types narrow the space of programs that can even be written, and tests verify that the program you wrote does what you intended.
