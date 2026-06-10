@@ -74,10 +74,10 @@ The compiler does not know about the invariants that restrict the values in your
  * After the grace period, the fee is $0.50 for each additional
  * day. The total fee never exceeds $10.
  *
- * Precondition: daysLate is a whole number and daysLate >= 0
+ * Precondition: daysLate is a whole number and daysLate >= 0.
  *
- * @param daysLate the number of days past the due date
- * @returns the fee in dollars, between 0 and 10
+ * @param {number} daysLate the number of days past the due date
+ * @returns {number} the fee in dollars, between 0 and 10
  */
 function lateFee(daysLate: number): number
 ```
@@ -316,11 +316,14 @@ A `Loan` whose `renewalsRemaining` is `-1`, by contrast, is an *unexpected* erro
 /**
  * Renews a loan, consuming one renewal.
  *
- * Precondition: loan satisfies the Loan invariant
+ * Precondition: loan satisfies the Loan invariant.
  * Postcondition: if any renewals remain, returns ok: true with a new
  * Loan with one fewer renewal remaining; otherwise returns ok: false
- * with an explanatory error
- * TODO: add @param and @return
+ * with an explanatory error.
+ *
+ * @param {Loan} loan the loan to renew
+ * @returns {Result<Loan, string>} the renewed Loan on success, or an
+ * error explaining why the loan could not be renewed
  */
 function renew(loan: Loan): Result<Loan, string> {
     assert(loan.renewalsRemaining >= 0, "Loan invariant violated: negative renewals");
