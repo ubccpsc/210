@@ -1,9 +1,11 @@
+## RTH: I've added opinionated notes to most of the subsections below; we can incorporate the topics we want as we encounter the need.
+
 # TypeScript's Type Checker
 
 So far, we’ve focused on how to design types and functions.
 TypeScript’s type checker is what ensures these designs are used correctly. It reads your code, verifies that types are used consistently, and catches bugs before runtime.
 
-## 1. Type Inference
+## 1. Type Inference (RTH: we will skip type inference; types will _always_ be annotated in 210)
 
 One of TypeScript's superpowers is **type inference**—it can often figure out what type something has without you explicitly saying so.
 
@@ -75,7 +77,7 @@ While inference is convenient, it's sometimes good to be explicit about types:
    };
    ```
 
-## 2. Type Narrowing
+## 2. Type Narrowing (RTH: let's bring this up if it comes up)
 
 When you check or refine types in your code, TypeScript **narrows** the type—it figures out that in certain branches, a value must be a more specific type.
 
@@ -93,7 +95,7 @@ function processValue(value: string | number) {
 }
 ```
 
-### Narrowing with discriminated unions
+### Narrowing with discriminated unions (RTH: let's bring this up if we have to talk about error cases)
 
 ```ts
 type Result = Success | Failure;
@@ -111,7 +113,7 @@ function handleResult(result: Result) {
 }
 ```
 
-### Narrowing with truthiness
+### Narrowing with truthiness (RTH: let's avoid truthiness and stick with ===; this could have been str!null)
 
 ```ts
 function printLength(str: string | null) {
@@ -124,7 +126,7 @@ function printLength(str: string | null) {
 }
 ```
 
-### Type guards
+### Type guards (RTH: I think we should avoid this if we can and just use polymorphism instead later in the course)
 
 For custom types, you can write **type guard functions** that narrow types:
 
@@ -147,7 +149,7 @@ function makeSound(pet: Pet) {
 }
 ```
 
-## 3. Structural Typing
+## 3. Structural Typing (RTH: this is super sad, I think we should avoid this because it does not align with other languages anyways)
 
 TypeScript uses **structural typing**, meaning types are based on their shape, not their name.
 
@@ -190,7 +192,7 @@ const user: User = incomplete;  // ✗ Error: missing email
 
 Structural typing means you can pass objects around as long as they have the right shape. You don't need explicit inheritance or interface declarations (though you can use them for documentation).
 
-## 4. Union Types
+## 4. Union Types (RTH: we should talk about this for sure, when it comes up)
 
 A union type describes a value that could be one of several types.
 
@@ -213,7 +215,7 @@ const goodResponse: Response = { status: "success", data: [1, 2, 3] };
 const badResponse: Response = { status: "error", message: "Failed" };
 ```
 
-### Never type
+### Never type (RTH: I would prefer if we never talk about never :)
 
 In some cases, a branch is impossible. TypeScript represents this with `never`:
 
@@ -232,7 +234,7 @@ function exhaustiveCheck(value: string | number) {
 
 This pattern is useful for ensuring you've handled all cases in a union.
 
-## 5. Common Type Patterns
+## 5. Common Type Patterns (RTH: let's talk about this when it arises)
 
 ### Optional types
 
@@ -251,7 +253,7 @@ if (user1.email) {
 }
 ```
 
-### Record types (for objects with dynamic keys)
+### Record types (for objects with dynamic keys) (RTH: if this comes up, let's talk about it)
 
 ```ts
 type Scores = Record<string, number>;
@@ -266,7 +268,7 @@ const scores: Scores = {
 scores["diana"] = 89;  // ✓ OK
 ```
 
-### Array types
+### Array types (RTH: obv we should talk about this)
 
 ```ts
 type StringArray = string[];
@@ -276,7 +278,7 @@ const words: StringArray = ["hello", "world"];
 const mixed: NumberOrString = [1, "two", 3];
 ```
 
-### Readonly types
+### Readonly types (RTH: lets leave this out until encapsulation in part 2)
 
 ```ts
 type Config = {

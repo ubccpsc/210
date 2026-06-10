@@ -1,3 +1,5 @@
+# RTH: mostly migrated to part1/index.md
+
 # Contracts and Invariants
 
 In the previous section, we used types to model data precisely and guide program design.
