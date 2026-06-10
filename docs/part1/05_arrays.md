@@ -107,6 +107,25 @@ const fahrenheit: number[] = day.map(reading => reading.tempCelsius * 9 / 5 + 32
 
 The result of a `map` always has the same length as the input; only the elements are transformed. Notice the types: mapping a `Reading[]` through a function that returns a `number` produces a `number[]`.
 
+<details class="tooltip deep-dive">
+<summary>The Recursion <code>map</code> Replaces</summary>
+
+For the recursive `LinkedList<T>` from the modelling reading, the same transformation has to be written by hand. (The parameter `f` is typed with the same arrow used to write one: `(t: T) => U` is the type of a function from `T` to `U`.)
+
+```typescript
+function mapList<T, U>(list: LinkedList<T>, f: (t: T) => U): LinkedList<U> {
+    if (list.kind === "empty") {
+        return { kind: "empty" };
+    } else {
+        return { kind: "node", head: f(list.head), tail: mapList(list.tail, f) };
+    }
+}
+```
+
+If you compare this carefully with `day.map(f)`, you will see that `map` performs exactly the same steps; it just hides the traversal. You supply only the per-element transformation, and the structure-following work that this function spells out is done for you.
+
+</details>
+
 ### Keeping Some Elements with `filter`
 
 `filter` returns a new array containing only the elements for which the given function returns `true`. The report needs to know which hours were below freezing:
@@ -183,7 +202,7 @@ Each named operation tells the reader the shape of the step: a `filter` produces
 
 ## Writing Your Own Loops
 
-`map`, `filter`, `reduce`, and `find` are commonly used, but are also extremely prescriptive. `map` always produces one output per input; `filter` always visits every element and keeps the matches; `find` always stops at the first match. Many computations fit one of those shapes, but not all of them do. When a computation needs to carry its own state from element to element, or stop under its own conditions, we need the general mechanism that the built-in operations are themselves made of: a **loop**.
+`map`, `filter`, `reduce`, and `find` are commonly used, but are also extremely prescriptive. `map` always produces one output per input; `filter` always visits every element and keeps the matches; `find` always stops at the first match. Many computations fit one of those shapes, but not all of them do. When a computation does not match a named pattern, for example because it relates elements to one another rather than examining each one on its own, we need the general mechanism that the built-in operations are themselves made of: a **loop**.
 
 The loop we use is the `for of` statement. It runs its body once for each element of an array, in order, binding the element to a name:
 
@@ -198,7 +217,7 @@ Like the `if` statement from the first reading, `for of` is a statement: it prod
 <details class="tooltip link-110">
 <summary>Loops Replace the Recursive Traversal</summary>
 
-In CPSC 110 you traversed a list by calling the function again on `(rest lst)` until you reached `empty`. A `for of` loop performs the same traversal as a statement: visit each element in order, then stop. What the recursive call carried as arguments, the loop carries in variables declared before it starts.
+In CPSC 110 you traversed a list by calling the function again on `(rest lst)` until you reached `empty`. A `for of` loop performs the same traversal as a statement: visit each element in order, then stop. The traversal you used to spell out with a recursive call is performed by the statement itself.
 
 </details>
 
@@ -217,13 +236,76 @@ function firstAbove(day: Reading[], threshold: number): Reading | undefined {
 
 The `return` inside the loop body exits the whole function the moment a match is found, so later elements are never visited. This is exactly what `find` does for you: `find` is a loop someone else already wrote. The same is true of `map`, `filter`, and `reduce`. The built-in operations are not magic; they are packaged loops, and knowing how to write the loop means you can build the patterns the language did not provide.
 
-TODO: need another example here using our Reading[] that does not depend on let, mutation, or state, as we want to deal with that in the next reading.
+Here is a question none of the named operations answers. Every operation above examines elements one at a time: the function you hand to `map`, `filter`, or `find` receives a single element and nothing else. Some questions are instead about how elements relate to *each other*. Suppose quality control asks: did the station ever report the same temperature at two different hours?
 
-So which should you reach for? Prefer the named operation whenever the task is exactly a transform, a selection, a summary, or a first-match search. The name tells every future reader the shape of the computation at a glance, and the traversal it performs has no room for the small mistakes a hand-written loop can harbour. Write a loop when the computation does not fit a named pattern: when it carries custom state, like the streak, or combines steps that would otherwise take several passes. The named operations say *what*; the loop is for when you must control *how*.
+<details class="tooltip ts-tips">
+<summary>Evaluating equality with <code>===</code></summary>
+There are several ways to evaluate equality with differing amounts of rigour in TypeScript. We will _always_ use `===` (often called _triple equals_)in CPSC 210. Using this operator ensures that two values are ***strictly equal***. Here are some examples.
+
+```typescript
+checkExpect(1 === 1, true);
+checkExpect(true === true, true);
+checkExpect("cpsc210" === "cpsc210", true);
+checkExpect(1 === "1", false);              // number 1 compared to string "1"
+checkExpect(true === "true", false);        // boolean true compared to string "true"
+```
+
+We do this because it is almost always the case that when we want a 2, we want the number 2, not the string "2", or we would have used "2". Some examples of why this can be confusing with non-strict equality (`==`) can be seen below. These unexpected values are never visible statically, they only surface when you run the program, which often leads to unexpected surprises. Because of this we will encourage you to always use `===` in this course.
+
+```typescript
+checkExpect(1 == 1, true);                  // as expected
+checkExpect(1 == "1", true);                // number 1 is considered the same as string "1"
+checkExpect(true == true, true);            // as expected
+checkExpect(true == 1, true);               // true is considered the same as the number 1
+```
+</details>
+
+```typescript
+/**
+ * Determines whether any two readings taken at different hours
+ * report the same temperature.
+ *
+ * @param {Reading[]} day the readings to examine
+ * @returns {boolean} true if any temperature repeats, false otherwise
+ */
+function hasRepeatedTemperature(day: Reading[]): boolean {
+    for (const first of day) {
+        for (const second of day) {
+            if (first.hour !== second.hour) {
+                if (first.tempCelsius === second.tempCelsius) {
+                    return true; // a repeat; stop the whole search
+                }
+            }
+        }
+    }
+    return false; // every pair was checked; no repeats found
+}
+```
+
+Loops nest: for each `first` reading, the inner loop walks the whole array looking for a *different* hour reporting the *same* temperature. The comparison involves two elements at once, which is exactly what the named operations cannot express, because the functions they take see one element at a time. (It is technically possible to contort `find` into answering this, with one search nested inside another, but the result is much harder to read than the loop that says what it means.)
+
+```typescript
+test("no temperature repeats in our day", () => {
+    checkExpect(hasRepeatedTemperature(day), false);
+});
+
+test("a repeated temperature is detected", () => {
+    const repeats: Reading[] = [
+        { hour: 3, tempCelsius: 5 },
+        { hour: 6, tempCelsius: 9 },
+        { hour: 9, tempCelsius: 5 }
+    ];
+    checkExpect(hasRepeatedTemperature(repeats), true);
+});
+```
+
+Loops have a second strength we are not ready to use yet: values that change as the loop runs, allowing a running tally to be carried from one element to the next. Doing that requires changing existing values, which is the subject of the next reading.
+
+So which should you reach for? Prefer the named operation whenever the task is exactly a transform, a selection, a summary, or a first-match search. The name tells every future reader the shape of the computation at a glance, and the traversal it performs has no room for the small mistakes a hand-written loop can harbour. Write a loop when the computation does not fit a named pattern: when it relates elements to one another, like the repeated-temperature check, or when one pass must answer a question no single named operation can. The named operations say *what*; the loop is for when you must control *how*.
 
 ## Moving Forward
 
-Arrays give sequences a built-in home in the language, and their operations package the traversals we used to write by hand: `map` to transform, `filter` to select, `reduce` to summarise, `find` to search, with `for of` underneath them all for the computations that fit no named pattern. Notice one property everything in this reading shared: none of these operations changed `day`. Every `map` and `filter` produced a new array, every `reduce` produced a new value, and the original readings were never touched. The only exception was the small state inside our loops, declared with `let`. What happens when programs *do* change existing values, and why that calls for so much care, is the subject of the next reading.
+Arrays give sequences a built-in home in the language, and their operations package the traversals we used to write by hand: `map` to transform, `filter` to select, `reduce` to summarise, `find` to search, with `for of` underneath them all for the computations that fit no named pattern. Notice one property everything in this reading shared: none of these operations changed `day`. Every `map` and `filter` produced a new array, every `reduce` produced a new value, and even our hand-written loops only read the elements they visited; the original readings were never touched. This reflects a general principle of program design that runs through this course: once a pattern is understood and reliable, it is packaged up so it never needs to be re-derived, and we get to focus on *what* to compute instead of *how* to traverse. What happens when programs *do* change existing values, and why that calls for so much care, is the subject of the next reading.
 
 <!--
 ### WORKING NOTES:
