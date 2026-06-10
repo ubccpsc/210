@@ -181,6 +181,8 @@ Today we will introduce two kinds of statements. The `if` statement chooses whet
 
 The most basic if block is shown below; if the `<condition>` is `true`, the code in `(A)` will execute, followed by the code in `(B)`. If `<condition>` is false, `(A)` is _not_ executed, the program jumps straight to `(B)`. The `if` only guards code within the if statement, so `(B)` will always execute, regardless of the outcome of the `if` statement, because it appears below it.
 
+A contiguous sequence of expressions and statements that will always execute in order in a programming language is known as a **basic block**. In TypeScript, these represent statements following `{` until the next branch statement (e.g, `if`) is encountered, or a closing `}` is encountered. This means that several statement could be included at `(A)`, and all would be executed in order if `<condition>` were `true`.
+
 ```typescript
 if (<condition>) {
     // (A)
