@@ -122,28 +122,28 @@ export default defineConfig({
 			link: "/part2/",
 			items: [{
 				text: "Abstraction",
-				link: "/part2/01-abstraction"
+				link: "/part2/01_abstraction"
 			}, {
 				text: "Decomposition",
-				link: "/part2/02-decomposition"
+				link: "/part2/02_decomposition"
 			}, {
 				text: "Verification",
-				link: "/part2/03-verification"
+				link: "/part2/03_verification"
 			}, {
 				text: "Error Handling",
-				link: "/part2/04-errors"
+				link: "/part2/04_errors"
 			}, {
 				text: "Encapsulation",
-				link: "/part2/05-encapsulation"
+				link: "/part2/05_encapsulation"
 			}, {
 				text: "Boundaries",
-				link: "/part2/06-boundaries"
+				link: "/part2/06_boundaries"
 			}, {
 				text: "Extension",
-				link: "/part2/07-extension"
+				link: "/part2/07_extension"
 			}, {
 				text: "Open/Closed",
-				link: "/part2/08-ocp"
+				link: "/part2/08_ocp"
 			}],
 		}, // end part 2
 		{
