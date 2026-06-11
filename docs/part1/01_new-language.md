@@ -62,7 +62,7 @@ letterGrade();
 
 We will expand on function declarations later in this reading.
 
-## Types as a language mechanism
+## Types as a Language Mechanism
 
 In BSL you documented type information as comments. A function's signature, like `; Number -> String`, told the reader what the function expected (a value representing a `Number`) and produced (a value representing a `String`). However, the language *did not check* that those types were honoured. If you passed a string where a number was expected, the language did not object; the mistake surfaced later, when you ran the program and it did not do what you expected.
 
@@ -173,7 +173,7 @@ Because the compiler is now part of how you write code, you should write TypeScr
 An IDE runs the language's type checker continuously in the background as you type and shows each error in place, on the line that caused it, the moment it appears. You no longer have to run `tsc` by hand and read through a list of errors; you see the same static checks reported right where you are working, which tightens the feedback loop as you write your code and make it work correctly. Live type checking is the feature that matters most to us today, but as the course continues we will engage with other features within the IDE as well.
 </details>
 
-## Control flow statements (<code>if</code> and <code>return</code>)
+## Control Flow Statements (<code>if</code> and <code>return</code>)
 
 (TODO: to discuss: should we flip the tooltips with the tooltips giving the details of how if works and the examples in text being the running example? but no, statements are big enough we should describe them not in a tooltip...)
 
@@ -282,7 +282,7 @@ The TypeScript version says the same thing with statements: each `cond` clause b
 (TODO: could give an exercise on re-writing the typescript without "else if"?)
 
 
-## Static and dynamic views of a program
+## Static and Dynamic Views of a Program
 
 There are two natural perspectives through which you can view any program. The **static** view is what you see when you look at your source code. It is fixed text sitting in a file, and it can be read and analysed *without being executed* (no execution is the key). The types, the structure of your functions, and the way the pieces fit together are all static properties, because they are true of the text itself. The compiler works entirely in this static world, which is exactly why it can check your types before the program runs.
 
@@ -290,7 +290,7 @@ But we do not just write programs for them to sit as text on a filesystem. We wr
 
 Keeping these two views apart is useful because different kinds of problems appear in each. The compiler can rule out a whole class of mistakes statically, just by reading the text, but it cannot know what will actually happen once the program runs. That is why static checking, however good, never removes the need to run and test a program, a theme we will return to throughout the course.
 
-## Validating the dynamic view with testing
+## Validating the Dynamic View With Testing
 
 
 While the TypeScript compiler checks the static view of the program, we need to check dynamic view ourselves. We do this through a process called *testing*. 

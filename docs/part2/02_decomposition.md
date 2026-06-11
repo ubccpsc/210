@@ -5,7 +5,7 @@
 Decomposing a system into classes only pays off if each class makes sense on its own; a class that enforces several invariants stops being a useful abstraction, since its users must understand all of them at once. We anchor what belongs inside a class to the invariant it enforces, applying the Single Responsibility Principle at both the class and method level to decompose the system into cohesive classes. A cohesive class is understandable from its invariant alone and can be modified without impacting the rest of the system.
 
 
-## The problem
+## The Problem
 
 [Abstraction](./01_abstraction) established the class as the unit of abstraction: classes bundle state with the operations that maintain an invariant, bound reasoning to one kind of thing at a time, and give the rest of the program a named type it can depend on. That tells us how to build an abstraction. This does not guide us towards building *good* abstractions. We still have to decide what each class should be, and what functionality and state belongs in each class, so that every class actually delivers those properties.
 
@@ -86,7 +86,7 @@ class CourseSection {
 The split runs right through the class. The fields `registered` and `cap` serve the capacity invariant, while `waitlisted` serves the waitlist invariant. The methods divide the same way, except that `register` and `withdraw` now have to manage both: each has to maintain capacity and reach into the waitlist. 
 </details>
 
-## God classes
+## God Classes
 
 Left unchecked, a class that keeps absorbing responsibilities becomes a god class: one type that knows about and does everything. Each addition seemed reasonable on its own, but the result is a class with many fields and methods that answer to no single invariant. This often happens because it is easier to just add one more method to a class than make a new class and ensure all of its functionality is cohesive.
 
@@ -132,7 +132,7 @@ Consider where you would look in a class like this to change how waitlisted stud
 
 </details>
 
-## Cohesion as the design criterion
+## Cohesion as the Design Criterion
 
 A class is cohesive when everything it contains works toward a single purpose. We make "single purpose" precise by anchoring it to one invariant: a cohesive class enforces exactly one invariant, and every field and method exists to establish, preserve, or observe it. A cohesive class can be understood from its invariant alone and changed without reaching into the rest of the system. These are the properties of an abstraction: it bounds reasoning to one kind of thing and offers a named type the rest of the program can depend on. Evaluating cohesion is how we judge whether a decomposition keeps those properties true. 
 
@@ -140,7 +140,7 @@ Sometimes classes are not built around explicit invariants: a pure value object 
 
 Cohesion also shapes how a system behaves under change. When each invariant lives in exactly one class, a bug fix or a new feature for that invariant stays inside the class that owns it, instead of being spread across the system. The change stays localized, which makes it easier to make and far less likely to cause the cascading errors that follow when one edit forces matching edits in many other places.
 
-## One class, one invariant
+## One Class, One Invariant
 
 This is the **Single Responsibility Principle** at the class level: one class, one invariant. A class should have exactly one reason to change, and that reason is the invariant it protects. Deciding where one class ends and another begins is the core activity of decomposition, and cohesion is how we differentiate a good split from a bad one.
 
@@ -164,11 +164,11 @@ There is rarely a single correct decomposition. The same system can usually be s
 The Single Responsibility Principle reads as one invariant per class, but in reality, a practical statement is one *cluster of coherent invariants* per class. Counting alone is unreliable because invariants compose: when several invariants constrain the *same* state and must hold together, for example an `Order` whose total must equal the sum of its line items and which may not ship before payment, they form a single consistency boundary and belong in one class. That is still cohesion: the unit is the smallest set of state that must stay mutually consistent. The `Waitlist` separates cleanly from `CourseSection` because capacity and waiting order have no such shared state.
 </details>
 
-## Field cohesion
+## Field Cohesion
 
 Every field should participate in the invariant the class protects. Once the class invariant is known, each field can be checked against it: a field the invariant refers to belongs in the class, and a field the invariant never mentions is the clearest signal that a second responsibility has crept in. The usual exception is the field that holds the object's identity, such as a name or id; it names the thing the invariant is about rather than taking part in the invariant. This check assumes a class built around an invariant; for a value object or a stateless helper, the same test reads against the single concept the class represents, and a field that has nothing to do with that concept exhibits the same smell.
 
-## Method cohesion
+## Method Cohesion
 
 The Single Responsibility Principle applies at the method level too: one method, one operation on the invariant. Every method should act in maintenance of the class invariant, and nothing else. A method that maintains a different invariant is the method-level version of the same smell, and it points to the same fix: the invariant it serves, and the method with it, belongs in another class.
 
@@ -279,10 +279,10 @@ w1.isRegistered("s3");       // true
 ```
 </details>
 
-## Naming and cohesive intent
+## Naming and Cohesive Intent
 
 Naming is a core design concern, not a cosmetic one. A cohesive class is easy to name because it does one thing. The name is the most compact signal of a class's intent, and it is what lets an engineer find the class they need. This is the direct answer to the god class: cohesive classes can be named for their single responsibility, and those names are exactly what an engineer reads when deciding where a feature should live. A class that is hard to name is usually a class that does too much, and a vague name helps no one find their way around it.
 
-## A cohesive decomposition
+## A Cohesive Decomposition
 
 A cohesive decomposition gives every invariant exactly one home. Each class can be understood from its own invariant, tested against that invariant, and changed in isolation, so a fix or a feature stays local instead of rippling outward; and because each is named for its single responsibility, an engineer can find the one they need. This is what lets a system of classes scale as it grows from one class into many: not only is state bundled with the behaviour that maintains it, but each bundle stays small enough to reason about and clear enough to locate. Cohesion is what keeps our abstractions effective and durable over time.

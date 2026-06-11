@@ -261,7 +261,7 @@ A playlist would then be a `LinkedList<Song>` and a leaderboard a `LinkedList<nu
 
 </details>
 
-## Functions Follow the Shape of the Data
+## Functions Follow Data Shapes
 
 With the data defined, writing functions over it is far less open-ended than it first appears, because the structure of the code mirrors the structure of the data. The data definition provides a template: if the data has distinct cases, the function branches on the case; if the data is recursive, the function is recursive. This is why the modelling work pays off, as a precise data definition has already done much of the design of the functions that consume it.
 
@@ -370,7 +370,7 @@ function sum(tree: BinaryTree): number {
 
 </details>
 
-## What the Types Catch for Us
+## What the Types Can Catch
 
 Modelling the data this way is not just tidy; it changes what can go wrong. Because the types describe the exact shape of the information, the compiler rejects code that does not respect that shape, and it does so before the program ever runs.
 
