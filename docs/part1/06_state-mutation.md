@@ -1,22 +1,24 @@
 # Mutation and Side Effects
 
-The arrays reading ended with an observation: nothing in it ever changed. Every `map` and `filter` produced a new array, every `reduce` produced a new value, and `day` itself came through every example untouched. That is also true of every program in this course so far, and of every program you wrote in CPSC 110: values were created, used, and combined into new values, but an existing value was never altered.
+The arrays reading ended with an observation: the arrays in it ever changed. Every `map` and `filter` produced a new array, every `reduce` produced a new value, and `day` itself came through every example unchanged. That is also true of every program in this course so far, and of every program you wrote in CPSC 110: values were created, used, and combined into new values, but an existing value was never modified.
 
-This reading introduces the ability to change existing values, called **mutation**. The syntax is tiny (most of it is a single `=` sign) but the consequences are large. Mutation introduces *time* into our programs: the answer to "what does this variable hold?" stops being a fact about the program text and becomes a fact about a particular moment of its execution. Working out what that means, and exactly which changes are visible from where, is the work of this reading.
+This reading introduces the ability to change existing values, called **mutation**. The syntax is tiny (most of it is a single `=` sign) but the consequences are important. Mutation introduces *time* into our programs: the answer to "what does this variable hold?" stops being a fact about the program text and becomes a fact about a particular moment in time during its execution. This requires a shift in how we view our programs as we need to read the static text and simulate in our heads how the code will behave at runtime. We'll step through this thought process over the course of this reading.
 
 ## Reassignment
 
-So far, every name we have introduced was declared with `const`, and a `const` name holds the same value forever. TypeScript provides a second way to declare a variable: **`let`**, which permits the variable to be **reassigned** later.
+So far, every variable we have declared has been using the `const` keyword. `const` guarantees that the value associated with the name will remain unchanged for the duration of a program. TypeScript provides a second way to declare a variable: `let`, which allows variables to be **reassigned** zero or more times as the program runs.
 
 ```typescript
-let temperature = -4;           // temperature holds -4
-temperature = 1;                // temperature now holds 1
-temperature = temperature + 2;  // temperature now holds 3
+const absZero = -273;
+absZero = -273.15;              // error: absZero is defined const and cannot be reassigned
+let temperature = -4;           // temperature holds -4 after this line executes
+temperature = 1;                // temperature now holds 1 after this line executes
+temperature = temperature + 2;  // temperature now holds 3 after this line executes
 ```
 
-The `=` itself is not new: every declaration you have written uses it to store a first value into a brand-new name, an operation called **assignment**. What is new is lines two and three, where `=` stores a value into a name that *already exists*, replacing what was there. This is **reassignment**, and it is only permitted for variables declared with `let`.
+Every declaration you have written in this course uses `=` to store a first value into a brand-new name, an operation called **assignment**. The last two lines, where `=` stores a value into a name that *already exists*, is different as the old value `temperature` used to hold is replaced. This is **reassignment**, and it is only permitted for variables declared with `let`.
 
-A reassignment is performed in two steps: first the right-hand side is evaluated, using the values the variables hold *right now*; then the result is stored into the name on the left, replacing whatever it held. Notice how different this makes `=` from the equals sign of mathematics. The third line above makes no sense as an equation (no number equals itself plus two), but as an instruction it is perfectly clear: take the value `temperature` currently holds (`1`), add `2`, and store the result (`3`) back into `temperature`.
+A reassignment is performed in two steps: first the right-hand side is evaluated, using the values the variables hold *right now*; then the result is stored into the name on the left, replacing whatever it held. This makes the `=` operator different than the equals sign of mathematics. The last line above makes no sense as a math equation (no number equals itself plus two), but as an instruction it is perfectly clear: take the value `temperature` currently holds (`1`), add `2`, and store the result (`3`) back into `temperature` 
 
 Reassignment is a statement, like `if` and `return` from the first reading: it produces no value, it performs an action. And because each reassignment replaces a value, the *order* of statements now matters in a way it never did before:
 
@@ -27,17 +29,17 @@ x = x + 3;
 // x holds 5; if the two reassignments were swapped, x would hold 8
 ```
 
-This gives us the second key word of the reading. The **state** of a program is the value every variable holds at a particular moment of execution. Before mutation, a program had no state worth speaking of: a name meant one value, forever, and you could read a program in any order you liked. With mutation, understanding a program means tracing its state through time: running the program in your head, statement by statement, the way we traced `temperature` above. When a program with mutation surprises you, the cause is almost always a difference between the state you *thought* it was in and the state it was *actually* in.
+The **state** of a program is the value every variable holds at a particular instant during execution. Before mutation, a program had no state worth describing: a name meant one value, forever. With mutation, understanding a program means tracing its state over time: running the program in your head, statement by statement, the way we traced `temperature` above. When a program with mutation surprises you, the cause is almost always a difference between the state you *thought* the program was in and the state it was *actually* in.
 
 <details class="tooltip link-110">
 <summary>There Was No Mutation in BSL</summary>
 
-This is the first construct in the course with no counterpart in CPSC 110. In the teaching languages, `define` bound a name to a value once; nothing could change it afterwards. That absence was what made the stepper possible: because a name meant one value forever, any name could be replaced by its value, anywhere, without changing what the program meant. Mutation gives that property up. A name can no longer be replaced by "its value", because *which* value depends on where the program is in its execution. This is the deepest difference between the two languages so far, deeper than any syntax, and it is why this reading moves slowly.
+This is the first construct in the course with no counterpart in CPSC 110. In the teaching languages, `define` bound a name to a value once; nothing could change it afterwards. That absence was what made the stepper possible: because a name meant one value forever, any name could be replaced by its value, anywhere, without changing what the program meant. Mutation gives that property up. A name can no longer be replaced by "its value", because *which* value depends on where the program is in its execution. This is the most significant difference between the two languages so far, deeper than any syntax, and it is why this reading moves slowly.
 
 </details>
 
 <details class="tooltip ts-tips">
-<summary>The <code>let</code> Keyword</summary>
+<summary>The <code>let</code> keyword</summary>
 
 `let` declares a variable exactly as `const` does, with one difference: the value may be reassigned. Note that the declaration keyword is written once; reassignment is just the name and `=`, with no `let` in front. Writing `let` again would be an error, because it would attempt to declare a second variable with the same name.
 
@@ -105,7 +107,7 @@ reading.tempCelsius = -3;                  // allowed: the object's contents cha
 reading = { hour: 6, tempCelsius: -3 };    // compile error: reading is a const
 ```
 
-This surprises almost everyone. `const` froze the *variable* (the name `reading` will refer to this object forever) but it says nothing about the object itself, whose properties remain assignable. The distinction between a name and the thing it refers to is the subject of the next section; for now, notice that the two lines above really do different things, and the compiler treats them differently.
+That this is allowed can feel surprising. `const` froze the *variable* (the name `reading` will refer to this object forever) but it says nothing about the object itself, whose properties remain assignable. The distinction between a name and the thing it refers to is the subject of the next section; for now, notice that the two lines above really do different things, and the compiler treats them differently.
 
 Arrays are objects, and they mutate the same ways. Elements can be replaced through their index, and the classic array mutations are the pair that grow and shrink the array itself: **`push`** adds an element to the end, and **`pop`** removes the last element and returns it.
 
@@ -116,7 +118,7 @@ day[0] = { hour: 5, tempCelsius: -6 };     // replaces the first element entirel
 day[1].tempCelsius = -2;                   // reaches into the second element and changes it
 ```
 
-Why would we want this? Because much of what programs model genuinely changes. Our weather station does not receive its day of readings all at once: a new reading arrives every hour, and `push` is exactly how the day grows. Rebuilding the entire array to add one element would say something false about the problem, and at scale it is also wasteful: updating one reading in a year of data by copying the other thousands of readings does real, measurable work that updating in place does not.
+Why is the complexity mutation brings worth enduring? Because in the real world, things change and to model them effectively, programs need to be able to change too. Our weather station does not receive its day of readings all at once: a new reading arrives every hour, and `push` is exactly how the day grows. Rebuilding the entire array to add one element would say something false about the problem, and at scale it is also wasteful: updating one reading in a year of data by copying the other thousands of readings does real, measurable work that updating in place does not.
 
 <details class="tooltip ts-tips">
 <summary>Mutating and Non-Mutating Array Operations</summary>
@@ -306,21 +308,6 @@ Until then, the working guidance is restraint:
 
 ## Moving Forward
 
-Mutation earns its place: real programs model a changing world, loops need memory, and updating in place is sometimes the only affordable option. The price is state. Programs must now be understood by tracing values through time, and every reader needs to be able to answer a new set of questions precisely: is this a copy or a reference? Does this change escape this block, this function, this module? Who else holds an arrow to this object? The box-and-arrow model and the scope rules in this reading are the tools for answering them.
+Mutation is worth its extra mental burden: real programs model a changing world. The price is state. Programs must now be understood by tracing values through time, and every reader needs to be able to answer a new set of questions precisely: is this a copy or a reference? Does this change escape this block, this function, this module? Who else holds an arrow to this object? The box-and-arrow model and the scope rules in this reading are the tools for answering them.
 
-Side effects also opened a door we have not walked through yet: effects that reach *outside* the program, to files, networks, and users. The outside world has a property that nothing in our programs has had so far: it does not answer immediately. What programs do while they wait is the subject of the next reading.
-
-<!--
-### ORIGINAL WORKING NOTES (incorporated above):
-
-Goal: Students understand mutation as interaction with a persistent world and why invariants matter more under mutation.
-
-Key ideas & examples
-* I/O as observable behavior without return values  -- touched on in Side Effects; full I/O story deferred to the async reading
-* Persistent object state
-* Mutation as necessity (big data, streaming)
-* Reinterpreting loops with side effects (for loop with counter)
-* Pass-by-reference vs pass-by-value semantics: whether an argument passed to a function will be changed by the function, or whether the function has a copy that is changed invisibly from the caller
-
-The longestFreezingStreak example (moved from the arrays reading) now lives in "State Gives Loops a Memory".
--->
+Side effects also add new complexity we have not encountered yet: effects that reach *outside* the program, to files, networks, and users. The outside world has a property that nothing in our programs has had so far: it does not answer immediately. What programs do while they wait is the subject of the next reading.
