@@ -139,7 +139,7 @@ A `filter` never changes the elements themselves; it only selects which ones app
 
 ### Combining Elements with `reduce`
 
-`map` and `filter` produce arrays; `reduce` boils an array down to a single value. It carries an **accumulator** through the array: for each element, a combining function takes the accumulator so far and the current element, and produces the next accumulator. `reduce` takes two arguments: the combining function, and the accumulator's starting value.
+`map` and `filter` produce arrays; `reduce` collapses an array into a single value. It carries an **accumulator** through the array: for each element, a combining function takes the accumulator so far and the current element, and produces the next accumulator. `reduce` takes two arguments: the combining function, and the accumulator's starting value.
 
 ```typescript
 const totalCelsius: number = day.reduce((sum, reading) => sum + reading.tempCelsius, 0);
@@ -180,7 +180,7 @@ const thaw = day.find(reading => reading.tempCelsius > 0);
 // { hour: 12, tempCelsius: 3 }
 ```
 
-What if no element matches? `find` returns `undefined`, and its return type says so: searching a `Reading[]` produces a `Reading | undefined`. This is a deliberate language design choice. Recall the two absence values from the modelling reading: `null` is a deliberate "no value here" that we choose when designing our own types, while `undefined` is the language's own value for "nothing was provided". TypeScript's built-in operations consistently use `undefined` for their "not found" results, and `find` follows that convention. Either way the protection is the same: the union type forces every caller to consider the case where nothing matched.
+If no element matches, `find` returns `undefined`, and its return type says so: searching a `Reading[]` produces a `Reading | undefined`. This is a deliberate language design choice. Recall the two absence values from the modelling reading: `null` is a deliberate "no value here" that we choose when designing our own types, while `undefined` is the language's own value for "nothing was provided". TypeScript's built-in operations consistently use `undefined` for their "not found" results, and `find` follows that convention. Either way the protection is the same: the union type forces every caller to consider the case where nothing matched.
 
 ```typescript
 test("find returns undefined when nothing matches", () => {
@@ -236,11 +236,11 @@ function firstAbove(day: Reading[], threshold: number): Reading | undefined {
 
 The `return` inside the loop body exits the whole function the moment a match is found, so later elements are never visited. This is exactly what `find` does for you: `find` is a loop someone else already wrote. The same is true of `map`, `filter`, and `reduce`. The built-in operations are not magic; they are packaged loops, and knowing how to write the loop means you can build the patterns the language did not provide.
 
-Here is a question none of the named operations answers. Every operation above examines elements one at a time: the function you hand to `map`, `filter`, or `find` receives a single element and nothing else. Some questions are instead about how elements relate to *each other*. Suppose quality control asks: did the station ever report the same temperature at two different hours?
+Some questions cannot be answered by any of the named operations. Every operation above examines elements one at a time: the function you hand to `map`, `filter`, or `find` receives a single element and nothing else. Some questions are instead about how elements relate to *each other*. Suppose quality control asks: did the station ever report the same temperature at two different hours?
 
 <details class="tooltip ts-tips">
 <summary>Evaluating equality with <code>===</code></summary>
-There are several ways to evaluate equality with differing amounts of rigour in TypeScript. We will _always_ use `===` (often called _triple equals_)in CPSC 210. Using this operator ensures that two values are ***strictly equal***. Here are some examples.
+There are several ways to evaluate equality with differing amounts of rigour in TypeScript. We will _always_ use `===` (often called _triple equals_) in CPSC 210. Using this operator ensures that two values are ***strictly equal***. Here are some examples.
 
 ```typescript
 checkExpect(1 === 1, true);
@@ -250,7 +250,7 @@ checkExpect(1 === "1", false);              // number 1 compared to string "1"
 checkExpect(true === "true", false);        // boolean true compared to string "true"
 ```
 
-We do this because it is almost always the case that when we want a 2, we want the number 2, not the string "2", or we would have used "2". Some examples of why this can be confusing with non-strict equality (`==`) can be seen below. These unexpected values are never visible statically, they only surface when you run the program, which often leads to unexpected surprises. Because of this we will encourage you to always use `===` in this course.
+We do this because it is almost always the case that when we want a 2, we want the number 2, not the string "2", or we would have used "2". Some examples of why this can be confusing with non-strict equality (`==`) can be seen below. These unexpected values are never visible statically; they only surface when you run the program, which often leads to surprises. Because of this we will encourage you to always use `===` in this course.
 
 ```typescript
 checkExpect(1 == 1, true);                  // as expected
@@ -301,11 +301,11 @@ test("a repeated temperature is detected", () => {
 
 Loops have a second strength we are not ready to use yet: values that change as the loop runs, allowing a running tally to be carried from one element to the next. Doing that requires changing existing values, which is the subject of the next reading.
 
-So which should you reach for? Prefer the named operation whenever the task is exactly a transform, a selection, a summary, or a first-match search. The name tells every future reader the shape of the computation at a glance, and the traversal it performs has no room for the small mistakes a hand-written loop can harbour. Write a loop when the computation does not fit a named pattern: when it relates elements to one another, like the repeated-temperature check, or when one pass must answer a question no single named operation can. The named operations say *what*; the loop is for when you must control *how*.
+Prefer the named operation whenever the task is exactly a transform, a selection, a summary, or a first-match search. The name tells every future reader the shape of the computation at a glance, and the traversal it performs has no room for the small mistakes a hand-written loop can contain. Write a loop when the computation does not fit a named pattern: when it relates elements to one another, like the repeated-temperature check, or when one pass must answer a question no single named operation can. The named operations say *what*; the loop is for when you must control *how*.
 
 ## Moving Forward
 
-Arrays give sequences a built-in home in the language, and their operations package the traversals we used to write by hand: `map` to transform, `filter` to select, `reduce` to summarise, `find` to search, with `for of` underneath them all for the computations that fit no named pattern. Notice one property everything in this reading shared: none of these operations changed `day`. Every `map` and `filter` produced a new array, every `reduce` produced a new value, and even our hand-written loops only read the elements they visited; the original readings were never touched. This reflects a general principle of program design that runs through this course: once a pattern is understood and reliable, it is packaged up so it never needs to be re-derived, and we get to focus on *what* to compute instead of *how* to traverse. What happens when programs *do* change existing values, and why that calls for so much care, is the subject of the next reading.
+Arrays give sequences built-in support in the language, and their operations package the traversals we used to write by hand: `map` to transform, `filter` to select, `reduce` to summarise, `find` to search, with `for of` underneath them all for the computations that fit no named pattern. Notice one property everything in this reading shared: none of these operations changed `day`. Every `map` and `filter` produced a new array, every `reduce` produced a new value, and even our hand-written loops only read the elements they visited; the original readings were never touched. This reflects a general principle of program design that runs through this course: once a pattern is understood and reliable, it is packaged up so it never needs to be re-derived, and we get to focus on *what* to compute instead of *how* to traverse. What happens when programs *do* change existing values, and why that calls for so much care, is the subject of the next reading.
 
 <!--
 ### WORKING NOTES:
