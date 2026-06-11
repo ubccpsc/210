@@ -416,7 +416,7 @@ These run the functions and confirm they produce the expected values. The compil
 
 </details>
 
-## Moving Forward in This Course
+## The Centrality of Abstraction
 
 A precise data definition is the foundation everything else rests on. It catches mistakes early, it mirrors the structure of the problem, and it drives the structure of the code that consumes it: once the data is modelled, the functions largely follow its shape. In this reading we followed one process across a sequence of examples, from a simple enumeration through a song to a recursive playlist, and then wrote functions whose shape follows the data's shape.
 

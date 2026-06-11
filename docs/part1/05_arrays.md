@@ -303,7 +303,7 @@ Loops have a second strength we are not ready to use yet: values that change as 
 
 Prefer the named operation whenever the task is exactly a transform, a selection, a summary, or a first-match search. The name tells every future reader the shape of the computation at a glance, and the traversal it performs has no room for the small mistakes a hand-written loop can contain. Write a loop when the computation does not fit a named pattern: when it relates elements to one another, like the repeated-temperature check, or when one pass must answer a question no single named operation can. The named operations say *what*; the loop is for when you must control *how*.
 
-## Moving Forward
+## On Iteration
 
 Arrays give sequences built-in support in the language, and their operations package the traversals we used to write by hand: `map` to transform, `filter` to select, `reduce` to summarise, `find` to search, with `for of` underneath them all for the computations that fit no named pattern. Notice one property everything in this reading shared: none of these operations changed `day`. Every `map` and `filter` produced a new array, every `reduce` produced a new value, and even our hand-written loops only read the elements they visited; the original readings were never touched. This reflects a general principle of program design that runs through this course: once a pattern is understood and reliable, it is packaged up so it never needs to be re-derived, and we get to focus on *what* to compute instead of *how* to traverse. What happens when programs *do* change existing values, and why that calls for so much care, is the subject of the next reading.
 

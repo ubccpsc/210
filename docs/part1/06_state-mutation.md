@@ -4,6 +4,7 @@ You might have noticed in the previous reading that the arrays never actually ch
 
 This reading introduces the ability to change existing values, called **mutation**. The syntax that enables mutation is short (most of it is a single `=` sign) but this single character can have important consequences for how you think about software construction. Mutation introduces the dimension of *time* into our programs: the answer to "what does this variable hold?" stops being something we can read directly from the source code and becomes a feature of a particular instant in time during the program's execution. This requires a shift in how we view our programs as we need to read the static text and simulate in our heads how the code will behave at runtime. We'll step through this thought process over the course of this reading.
 
+
 ## Reassignment
 
 So far, every variable we have declared has been using the `const` keyword. `const` guarantees that the value associated with the name will remain unchanged for the duration of a program. TypeScript provides a second way to declare a variable: `let`, which allows variables to be **reassigned** zero or more times as the program runs.
@@ -288,6 +289,8 @@ Scope does not determine an object's lifetime; *reachability* does. An object li
 
 </details>
 
+TODO: Add a deep dive on mutability and immutability and their impact on program complexity
+
 ## Side Effects
 
 We now have a name for what `calibrate` and `calibrateDay` do. A **side effect** is any observable change a function makes besides returning a value: mutating an object its caller can see, reassigning a variable outside its own scope, or interacting with the world outside the program entirely (writing a file, printing output, sending a network request). A function with no side effects, one that only computes a value from its inputs, is called **pure**. Every function in this course before today was pure.
@@ -319,7 +322,7 @@ Until then, the working guidance falls back on a discipline-based approach:
 - Keep mutable state in the smallest scope that works: a counter local to one function is easy to reason about; a mutable value visible to the whole program can be changed by the whole program.
 - Clearly document mutation when it happens: in a function's name, its documentation, and its tests.
 
-## Moving Forward
+## Mutating the World
 
 Mutation is worth the extra mental burden it induces: real programs model a changing world. Programs must now be understood by tracing values through time, and every reader needs to be able to answer a new set of questions precisely: is this a copy or a reference? Does this change escape this block, this function, this module? Who else holds an arrow to this object? The box-and-arrow model and the scope rules in this reading are the tools for answering them. Side effects also add new complexity we have not encountered yet: effects that reach *outside* of specific functions, to other parts of the program, to files, databases, networks, and users. But since the point of programs is to do useful work for people, side effects are important and are a fundamental part of real software systems that require careful thought and design to use effectively without making a program too hard to understand or brittle to evolve.
 

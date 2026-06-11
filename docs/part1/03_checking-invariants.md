@@ -379,7 +379,7 @@ test("renew halts on a loan that violates the non-negative invariant", () => {
 Expected errors should be tested analogously to how a user would interact with a function, which means we should use `checkExpect`: a refused renewal is not a malfunction but a specified result, and the contract tells you exactly what value to expect. Unexpected errors though are almost always the result of programming errors, which means validating them with `checkError` is more appropriate, since you're ensuring the program is refusing to process erroneous requests. As a rule of thumb, if the specification describes the outcome, check the outcome; if the outcome should be impossible, check that the program halts.
 
 
-## Triangulating Quality with Types and Testing
+## Triangulating Quality
 
 The type checker and the test suite operate at different times: the type checker works statically on the source code, ruling out whole categories of invalid calls before the program runs. Tests work dynamically, verifying specific behaviours by actually executing the function. They are complementary approaches: a program that passes every type check can still return the wrong value for a given input. A program that passes all its tests may still fail on an input the test suite did not evaluate. The combination is what gives confidence: types narrow the space of programs that can even be written, and tests verify that the program you wrote does what you intended.
 
