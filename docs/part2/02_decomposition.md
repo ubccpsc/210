@@ -1,4 +1,4 @@
-# Cohesive decomposition
+# Cohesive Decomposition
 
 ## Motivation
 
