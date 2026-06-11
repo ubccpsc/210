@@ -289,7 +289,16 @@ Scope does not determine an object's lifetime; *reachability* does. An object li
 
 </details>
 
-TODO: Add a deep dive on mutability and immutability and their impact on program complexity
+<details class="tooltip deep-dive">
+<summary>Mutability, Immutability, and Program Complexity</summary>
+
+A value that can never change after creation is called **immutable**, and much of this reading's difficulty disappears when data is immutable. Aliasing only matters because somebody can write: two arrows pointing at an object that nobody can change behave exactly like two private copies, so the copy-versus-reference distinction stops affecting what a program computes. A reader can treat every immutable value as a fact rather than a state: learn it once and rely on it anywhere, in any order. BSL had this property everywhere. With no mutation in the language, every value was a fact, which is part of why the substitution model worked and why no reading before this one needed a trace table.
+
+Mutability provides efficient updates and direct modelling of change, at the cost of exactly this reasoning. Every alias to a mutable object is a potential writer, so the effort of understanding a value grows with the number of places that can reach it, and the order of operations starts to matter. The complexity is real enough that much of professional practice is organised around limiting it: declaring everything `const`, preferring operations like `map` and `filter` that return new values, and designing types whose instances are never modified after construction. Some languages go further; in Rust, values are immutable unless explicitly marked otherwise, and the compiler restricts shared mutable data.
+
+The working compromise in most systems, and in this course, is immutability by default with mutation where the problem demands it. A program in which the few mutable values are clearly marked, narrowly scoped, and changed in only a few places keeps most of the simplicity of immutable data while paying mutation's costs only where they are needed.
+
+</details>
 
 ## Side Effects
 
