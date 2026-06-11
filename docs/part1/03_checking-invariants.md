@@ -260,7 +260,7 @@ Look back at the suite we wrote: it contains a representative from each class: `
 Within a class, one representative is as informative as another. `lateFee(12)` and `lateFee(15)` both exercise the accruing class; testing both adds almost no confidence beyond testing one. Counting tests is therefore a poor measure of a suite: a suite of `lateFee(5)`, `lateFee(8)`, and `lateFee(15)` has three assertions but covers only one class, and would have passed our buggy, cap-free implementation without complaint. What matters is covering the *classes*, not accumulating assertions.
 
 <details class="tooltip deep-dive">
-<summary>Classes come from the specification, not the implementation</summary>
+<summary>Equivalence classes are only derived from the specification</summary>
 
 Two inputs belong to the same class when the *specification* says they should behave the same way, not when they happen to take the same path through the code you wrote. In our buggy implementation, `lateFee(12)` and `lateFee(30)` took the same path through the code; classes derived from that implementation would have merged them, and the fault would have survived. Classes derived from the specification kept them apart, which is exactly why the fault was caught.
 </details>
@@ -280,7 +280,7 @@ test("fee changes exactly at the class boundaries", () => {
 });
 ```
 
-To see why these tests earn their place, consider a near-miss implementation in which the grace check was written `daysLate <= 3` instead of `daysLate <= 2`. This fault is visible at exactly one input: `lateFee(3)` returns `0` instead of `0.50`. Every other value in the entire domain, including a mid-class representative like `lateFee(12)`, behaves correctly.
+Consider a near-miss implementation in which the grace check was written `daysLate <= 3` instead of `daysLate <= 2`. This fault is visible at exactly one input: `lateFee(3)` returns `0` instead of `0.50`. Every other value in the entire domain, including a mid-class representative like `lateFee(12)`, behaves correctly.
 
 Our original suite does catch this fault, but only by luck: we happened to choose the boundary value `3` as a representative of the accruing class. Had we chosen `4` and `12` instead, every test we wrote would have passed. That is the essence of boundary value analysis: off-by-one faults are often invisible everywhere except at a single input value, so those values must be in the suite by design rather than by chance.
 
