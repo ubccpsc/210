@@ -38,7 +38,7 @@ While the characters are different (syntax), both have exactly the same meaning.
 
 A more important way languages differ though is in the **mechanisms the language enforces for you**. A language can check things about your program before it ever runs, or it can leave those checks to you. 
 
-Enforcement mechanisms is where where TypeScript differs most from BSL. TypeScript makes **types** an explicit, checked part of the program, and it analyses and transforms your source code with a **compiler** before the program executes. The compiler catches many common programming mistakes and makes it easier to build large systems. 
+Enforcement mechanisms are where TypeScript differs most from BSL. TypeScript makes **types** an explicit, checked part of the program, and it analyses and transforms your source code with a **compiler** before the program executes. The compiler catches many common programming mistakes and makes it easier to build large systems. 
 
 Another big difference is that TypeScript primarily expresses control flow using **statements**, which differ from the expressions you used in BSL.
 
@@ -151,7 +151,7 @@ letterGrade("eighty");  // compilation error (A)
 letterGrade(false);     // compilation error (B)
 ```
 
-One nice thing about the compiler is that it will tell you both where the error is, and what is wrong with your code. For the two errors above, the compiler will point to the file and line number and give the following two messages:
+The compiler will tell you both where the error is and what is wrong with your code. For the two errors above, the compiler will point to the file and line number and give the following two messages:
 
 ```
 (A) Argument of type 'string' is not assignable to parameter of type 'number'.
@@ -163,14 +163,14 @@ The computer will not be able to execute the program until the invalid calls to 
 
 This changes when errors in your program are surfaced to you. In BSL and other dynamically-typed languages (e.g. Python), a type mistake surfaces while the program was running, and only if you happened to execute code that hits that type mistake.
 
-In TypeScript, the compiler checks your types *first*, before xecution. Any type errors in your *entire program* are flagged to you to fix before your code can execute. This is what is meant when we say that types help catch bugs "before runtime" (also termed *statically*): the compiler is the thing doing the catching, before you execute (i.e., run) your program. 
+In TypeScript, the compiler checks your types *first*, before execution. Any type errors in your *entire program* are flagged to you to fix before your code can execute. This is what is meant when we say that types help catch bugs "before runtime" (also termed *statically*): the compiler is the thing doing the catching, before you execute (i.e., run) your program. 
 
 <details class="tooltip deep-dive">
   <summary>Tools for writing source code</summary>
 
 Because the compiler is now part of how you write code, you should write TypeScript in an Integrated Development Environment (**IDE**) rather than a plain text editor. Visual Studio Code is a free IDE you can download, and will be used for both the midterms and final exam, so getting used to that one would be a good idea. But you can also use other IDEs like WebStorm (which is free for students as well).
 
-An IDE runs the language's type checker continuously in the background as you type and shows each error in place, on the line that caused it, the moment it appears. You no longer have to run `tsc` by hand and read through a list of errors; you see the same static checks reported right where you are working, which tightens the feedback loop as you write your code and make it work correctly. Live type checking is the feature that matters most to us today, but as the course continues we will engage in other features within the IDE as well.
+An IDE runs the language's type checker continuously in the background as you type and shows each error in place, on the line that caused it, the moment it appears. You no longer have to run `tsc` by hand and read through a list of errors; you see the same static checks reported right where you are working, which tightens the feedback loop as you write your code and make it work correctly. Live type checking is the feature that matters most to us today, but as the course continues we will engage with other features within the IDE as well.
 </details>
 
 ## Control flow statements (<code>if</code> and <code>return</code>)
@@ -184,6 +184,8 @@ TypeScript has expressions too, but it adds a second kind of construct: the **st
 Today we will introduce two kinds of statements. The `if` statement chooses whether to run a block of code based on a condition. Unlike BSL's `cond`, it does not evaluate to a value, it only directs which code runs. The `if` statement is the most basic **control flow** statement in most languages. By directing how the program executes, the `if` controls the flow of execution.
 
 The most basic if block is shown below; if the `<condition>` is `true`, the code in `(A)` will execute, followed by the code in `(B)`. If `<condition>` is false, `(A)` is _not_ executed, the program jumps straight to `(B)`. The `if` only guards code within the if statement, so `(B)` will always execute, regardless of the outcome of the `if` statement, because it appears below it.
+
+A contiguous sequence of expressions and statements that will always execute in order in a programming language is known as a **basic block**. In TypeScript, these represent statements following `{` until the next branch statement (e.g, `if`) is encountered, or a closing `}` is encountered. This means that several statements could be included at `(A)`, and all would be executed in order if `<condition>` were `true`.
 
 ```typescript
 if (<condition>) {
@@ -286,13 +288,15 @@ There are two natural perspectives through which you can view any program. The *
 
 But we do not just write programs for them to sit as text on a filesystem. We write programs to do things, which gives rise to the **dynamic** view of the program. When the code *executes*, it takes on actual values, follows particular paths(TODO: do they know what paths are), and produces behaviour that unfolds over time. Which branch (TODO: we should define what a control branch is. the only mentions of branches in the [110 glossary](https://cs110.students.cs.ubc.ca/reference/glossary.html) are with regard to trees? conditionals are discussed as: "A cond expression first evaluates the first question,")an `if` takes, what a variable holds at a given moment, and how many times a piece of code runs are dynamic facts, decided as the program runs and often different from one run to the next.
 
-Keeping these two views apart is useful because different problems live in each. The compiler can rule out a whole class of mistakes statically, just by reading the text, but it cannot know what will actually happen once the program runs. That is why static checking, however good, never removes the need to run and test a program, a theme we will return to throughout the course.
+Keeping these two views apart is useful because different kinds of problems appear in each. The compiler can rule out a whole class of mistakes statically, just by reading the text, but it cannot know what will actually happen once the program runs. That is why static checking, however good, never removes the need to run and test a program, a theme we will return to throughout the course.
 
 ## Validating the dynamic view with testing
+
 
 While the TypeScript compiler checks the static view of the program, we need to check dynamic view ourselves. We do this through a process called *testing*. 
 
 Similar to CPSC 110, in Part 1 of this course, we will use a `checkExpect` (TODO: describe checkExpect as an assertion mechanism.)mechanism to validate that our program does not contain known errors when it executes dynamically. For example, to ensure that `letterGrade(88)` evaluates to `"A"`, we can write the following check:
+
 
 ```typescript
 checkExpect(letterGrade(88), "A");
@@ -319,11 +323,24 @@ test("Return an A for a score of 88", () => {
 
 The first parameter to `test` is a string that describes the test case. The second parameter `() =>` is new syntax: what it is doing is creating an **anonymous function**, and that function is being passed as a parameter to `test` so the testing framework can control the execution of the test.
 
+
 (TODO: details TS to explain syntax)
-(TODO: details ISL to remind them of lambdas)
 
 
-## Moving forward with new languages
+
+<details class="tooltip link-110">
+<summary>Anonymous Functions are Lambdas</summary>
+
+You have seen anonymous functions before: in CPSC 110 they were called **lambda expressions**. When you wrote a `lambda` to pass to an abstract function like `filter`, you were creating a function without naming it, right at the place it was needed:
+
+```racket
+(filter (lambda (n) (> n 5)) (list 3 6 9))
+```
+
+TypeScript's arrow syntax does the same job: `(n) => n > 5` means the same thing as `(lambda (n) (> n 5))`. The `() =>` in the test above is simply a lambda that takes no parameters, like `(lambda () ...)`. The body of the test is wrapped in an anonymous function so that it can be handed to `test` and executed later, just as `filter` decided when to call your lambda.
+</details>
+
+## Learning New Languages
 
 Learning TypeScript is not starting over. The way you design data, break a problem into functions, and reason about behaviour is the same as in CPSC 110. 
 

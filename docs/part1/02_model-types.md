@@ -257,13 +257,13 @@ type LinkedList<T> =
   | { kind: "node"; head: T; tail: LinkedList<T> };
 ```
 
-A playlist would then be a `LinkedList<Song>` and a leaderboard a `LinkedList<number>`. We keep the concrete `Playlist` from above so its `kind` labels stay readable, but it describes exactly the same values. Reach for generics only when you see real duplication; until then they add abstraction without paying for it.
+A playlist would then be a `LinkedList<Song>` and a leaderboard a `LinkedList<number>`. We keep the concrete `Playlist` from above so its `kind` labels stay readable, but it describes exactly the same values. Reach for generics only when you see real duplication; until then they add abstraction without benefit.
 
 </details>
 
 ## Functions Follow the Shape of the Data
 
-With the data defined, writing functions over it is far less open-ended than it first appears, because the structure of the code mirrors the structure of the data. The data definition hands you a template: if the data has distinct cases, the function branches on the case; if the data is recursive, the function is recursive. This is why the modelling work pays off, as a precise data definition has already done much of the design of the functions that consume it.
+With the data defined, writing functions over it is far less open-ended than it first appears, because the structure of the code mirrors the structure of the data. The data definition provides a template: if the data has distinct cases, the function branches on the case; if the data is recursive, the function is recursive. This is why the modelling work pays off, as a precise data definition has already done much of the design of the functions that consume it.
 
 <details class="tooltip deep-dive">
   <summary>Coming from BSL</summary>
@@ -416,7 +416,7 @@ These run the functions and confirm they produce the expected values. The compil
 
 </details>
 
-## Moving Forward in This Course
+## The Centrality of Abstraction
 
 A precise data definition is the foundation everything else rests on. It catches mistakes early, it mirrors the structure of the problem, and it drives the structure of the code that consumes it: once the data is modelled, the functions largely follow its shape. In this reading we followed one process across a sequence of examples, from a simple enumeration through a song to a recursive playlist, and then wrote functions whose shape follows the data's shape.
 

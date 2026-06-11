@@ -9,20 +9,20 @@ To move invariant enforcement from programmer discipline to language enforcement
 - reduces complexity at the system level, and 
 - provides named types that can be depended upon.
 
-## The Problem: How Do We Manage State?
+## The Problem: Managing State
 
 In Part 1, we moved from purely functional programs to ones involving *state*. We saw how state can be a handy abstraction, allowing us to (TODO: what?). 
 
 However, managing state becomes tricky as we grow programs. It might be appealing to keep all state in a single shared location, but this doesn't scale. If all state is centralized, then any part of the program can read and write to the shared state, and there's no enforcement of which parts of the program *should* read and write that state. 
 
-Even worse, if different parts of the program aren't clear to each other about who *should* modify state, they might modify it in inconsistent ways, and we may end up in a state that no programmer expected. This usually leads to bugs. Even if we were to spread state into different files, if that state is captured in global variables, we have the same problem: any part of the program can modify those global variables. To ensure that state is correctly modified, we need to rely on *programmer discipline*—which is not reliable to large systems. 
+Even worse, if different parts of the program aren't clear to each other about who *should* modify state, they might modify it in inconsistent ways, and we may end up in a state that no programmer expected. This usually leads to bugs. Even if we were to spread state into different files, if that state is captured in global variables, we have the same problem: any part of the program can modify those global variables. To ensure that state is correctly modified, we need to rely on *programmer discipline*, which is not reliable in large systems. 
 
 **Object-oriented programming** provides a language mechanism for systematically managing program state. The central solution is the **class**: a named unit that packages *state* together with the *operations that are meant to act on it*, and that can *enforce rules* about how that state is modified. All major programming languages that support object-orientation, including C++, Java, Rust, and TypeScript, do so primarily through classes.
 
 <details class="tooltip ts-tips">
 <summary>The "Object" in Object-Oriented Programming</summary>
 
-What's new about *object*-oriented programming? We already saw objects in TypeScript:
+*Object*-oriented programming does not introduce objects themselves; we have already seen them in TypeScript:
 ```typescript
 const song: Song = {
   title: "Two Hundred the Ages",
@@ -74,13 +74,13 @@ For instance, here is a class called `CourseSection`:
 // CourseSection V0: a blank class
 class CourseSection {
 	
-	constructor(courseId: str) {
+	constructor(courseId: string) {
 		// TODO: class initialisation
 	}
 }
 ```
 
-So far, it contains only a *constructor*. The *constructor* will be called when an *instance* of the class will be created (or, constructed). It provides a single point where the class will be configured: e.g., setting properties to certain values, calling set-up code to set-up the invariants. Unlike other callables, constructors are never annotated with a return type: they always return the type defined by the class itself. 
+So far, it contains only a *constructor*. The *constructor* is called when an *instance* of the class is created (or, constructed). It provides a single point where the class will be configured: e.g., setting properties to certain values, calling set-up code to set up the invariants. Unlike other callables, constructors are never annotated with a return type: they always return the type defined by the class itself. 
 
 <details class="tooltip ts-tips">
 <summary>Constructors</summary>
@@ -109,7 +109,7 @@ class T {
 
 A class on its own is essentially a fancier type definition. Just like we needed to create *values* of certain types to use a type, we need to **instantiate** a value of the class type to use a class. 
 
-In particular, we call an instantiated class value an **object**.  When a class is instantiated, an object is created in memory with its own independent storage for each field. For instance, the following creates an variable, named `cpsc210`, whose value is an object of type 
+In particular, we call an instantiated class value an **object**.  When a class is instantiated, an object is created in memory with its own independent storage for each field. For instance, the following creates a variable, named `cpsc210`, whose value is an object of type 
 `CourseSection`, as returned by the constructor of `CourseSection`:
 
 ```typescript
@@ -179,7 +179,7 @@ class T {
 }
 ```
 
-The `this` keyword allows us to access the *current instance* of the class. It only makes sense So, within the constructor, `this.field_1` retrieves the value of `field_1` in the current *object being constructed*.
+The `this` keyword allows us to access the *current instance* of the class; it only makes sense within a class body. So, within the constructor, `this.field_1` retrieves the value of `field_1` in the current *object being constructed*.
 
 If it makes things clearer, you could understand `this` as an extra argument to any callable within a class:
 
@@ -193,7 +193,7 @@ where TypeScript will automatically pass the current object to the `this` parame
 </details>
 
 <details class="tooltip ts-tips">
-  <summary>Default Initializating Fields</summary>
+  <summary>Default Initializing Fields</summary>
 
 It is often the case that there is a default initial value for a field that we want set but know we will not change in the constructor. If this is the case, rather than writing:
 ```typescript
@@ -217,7 +217,7 @@ class T {
 
 This sets the default value for `field_n` to whatever value is in `some_x`. `some_x` can be any expression (including a function call), not just a variable. 
 
-Setting the field's default value is the same as if it were set in the constructor itself. This is convenient for fields that do not need per-instance customisation. For instance, if we wanted a CourseSection to have a list of students field, and initialize this to the empty list.
+Setting the field's default value is the same as if it were set in the constructor itself. This is convenient for fields that do not need per-instance customisation. For instance, if we wanted a `CourseSection` to have a list-of-students field, we could initialize it to the empty list this way.
 
 </details>
 
@@ -245,7 +245,7 @@ One challenging problem though is determining _what_ should be state at all, in 
 #### Functionality
 
 Let's now flesh out how classes can define *functionality*. 
-Within classes, functionality is provided by **methods**. Most classes contain many methods that enable programs to perform actions on the class's stored state. These actions can *explicitly enforce* any expected expected invariants on the fields.
+Within classes, functionality is provided by **methods**. Most classes contain many methods that enable programs to perform actions on the class's stored state. These actions can *explicitly enforce* any expected invariants on the fields.
 
 <details class="tooltip ts-tips">
 <summary> Methods (and <code>this</code> again)
@@ -256,7 +256,7 @@ The following defines a method `method_1` for class `T`
 class T {
     
     method_1(x: X, y: Y): Z {
-       // do something with arg_1 and arg_2 to return a value of type Z 
+       // do something with x and y to return a value of type Z 
     }
     
 }
@@ -272,10 +272,10 @@ class T {
        if (this.method_2()) {
          // ...
        }
-       // do something with arg_1 and arg_2 to return a value of type Z 
+       // do something with x and y to return a value of type Z 
     }
     
-    method_2(): bool {
+    method_2(): boolean {
        // do something
     }
     
@@ -351,12 +351,12 @@ Methods have access to all of the class's fields and can call other methods with
 Notice that `register` enforces the enrolment cap: no caller can exceed it, regardless of how they try. The invariant is maintained *by the class itself*, not by *programmer discipline* in the calling code.
 
 In all languages, methods have a name, take zero or more parameters, and return either a value or `void`. 
-When a method does not reutrn a value, it is good practice to declare that the method return type is `void`. This signals to whoever is reading the code that the absence of a return value is intentional.
+When a method does not return a value, it is good practice to declare that the method return type is `void`. This signals to whoever is reading the code that the absence of a return value is intentional.
 
 <details class="tooltip deep-dive">
 <summary>When should I make a method?</summary>
 
-Declaring a method involves a few steps: 1) figuring out what the point of the method is and coming up with a name that succinctly and clearly captures that intent; 2) determining what parameters the method should take and what their names and types should be; 3) determining what the method should return and what it's type should be.
+Declaring a method involves a few steps: 1) figuring out what the point of the method is and coming up with a name that succinctly and clearly captures that intent; 2) determining what parameters the method should take and what their names and types should be; 3) determining what the method should return and what its type should be.
 
 It can be helpful to think of this process from a testing perspective. If you know what you'd like to test about a method's functionality, the parameters should encode the data you'd pass it, and the return value the result you'd look at to evaluate if the test is correct. Unlike a function, however, *fields* may encode part of the data in your test, and part of the result. 
 </details>  
