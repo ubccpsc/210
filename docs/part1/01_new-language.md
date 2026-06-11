@@ -318,6 +318,6 @@ You have seen anonymous functions before: in CPSC 110 they were called **lambda 
 TypeScript's arrow syntax does the same job: `(n) => n > 5` means the same thing as `(lambda (n) (> n 5))`. The `() =>` in the test above is simply a lambda that takes no parameters, like `(lambda () ...)`. The body of the test is wrapped in an anonymous function so that it can be handed to `test` and executed later, just as `filter` decided when to call your lambda.
 </details>
 
-## Moving forward with new languages
+## Learning New Languages
 
 Learning TypeScript is not starting over. The way you design data, break a problem into functions, and reason about behaviour is the same as in CPSC 110. What is new is mostly enforcement and form. Types are written into the program and checked rather than left in a comment. Control flow is written with statements like `if` and `return` rather than as a single expression. Mapping constructs in a new language back to the ideas you already know from prior languages is what makes new languages quick to pick up. While this transition can be tricky this first time, each subsequent language you learn will be easier and easier.

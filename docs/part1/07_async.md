@@ -244,11 +244,11 @@ Everything in this reading can fail in ways pure computation cannot: a file may 
 
 Handling these failures well is a real subject, and it is deferred to the errors reading in Part 2 rather than compressed into a paragraph here. For this reading and its exercises, the policy is simple: we will work with files that exist and services that answer, and if your program crashes, read the message it crashed with and fix the bug it points at (the most common one by far is a path or URL that is not quite right). Crashing immediately with a clear message is acceptable behaviour for a program at this stage; handling failures more gracefully comes later.
 
-## Moving Forward
+## From Mechanics to Abstraction
 
 Mutation introduced state and time *inside* the program; asynchrony extends time to the world *outside* it, where data lives on disks and on other machines, and arrives only after a wait the program must not spend standing still. The model TypeScript gives us is single-threaded and deferred: slow operations hand back promises, `await` collects their values while the lone thread stays busy, and `async` marks every function that participates. With files and web services available, our programs can act on data that comes from outside their own source code.
 
-This also closes Part 1. You can now model a problem with types, write contracts and tests that pin down behaviour, maintain invariants, process sequences, manage state, and reach the outside world. Every program so far has been small enough for one person to hold in their head, and that has let personal discipline carry a lot of weight. Part 2 asks what happens when it cannot: when programs, teams, and lifetimes outgrow any single person, and the discipline has to move into the language itself.
+This also closes Part 1. You have now mastered the mechanics of modelling a problem with types, writing contracts and tests that validate behaviour, maintaining invariants, managing state, and changing data in the the outside world. Every program so far has been small enough for one person to hold in their head, and that has let personal discipline carry a lot of weight. Part 2 asks what happens when it cannot: when programs, teams, and lifetimes outgrow any single person, and the discipline has to move into the language itself. This requires a new level of abstraction, and new support from the programming language.
 
 <!--
 ### ORIGINAL WORKING NOTES (incorporated above):
