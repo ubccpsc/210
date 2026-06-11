@@ -1,8 +1,8 @@
 # Mutation and Side Effects
 
-The arrays reading ended with an observation: the arrays in it ever changed. Every `map` and `filter` produced a new array, every `reduce` produced a new value, and `day` itself came through every example unchanged. That is also true of every program in this course so far, and of every program you wrote in CPSC 110: values were created, used, and combined into new values, but an existing value was never modified.
+You might have noticed in the previous reading that the arrays never actually changed. Every `map` and `filter` produced a new array, every `reduce` produced a new value, and `day` itself came through every example unchanged. That is also true of every program in this course so far, and of every program you wrote in CPSC 110: values were created, used, and combined into new values, but an existing value was never modified.
 
-This reading introduces the ability to change existing values, called **mutation**. The syntax is tiny (most of it is a single `=` sign) but the consequences are important. Mutation introduces *time* into our programs: the answer to "what does this variable hold?" stops being a fact about the program text and becomes a fact about a particular moment in time during its execution. This requires a shift in how we view our programs as we need to read the static text and simulate in our heads how the code will behave at runtime. We'll step through this thought process over the course of this reading.
+This reading introduces the ability to change existing values, called **mutation**. The syntax that enables mutation is short (most of it is a single `=` sign) but this single character can have important consequences for how you think about software construction. Mutation introduces the dimension of *time* into our programs: the answer to "what does this variable hold?" stops being something we can read directly from the source code and becomes a feature of a particular instant in time during the program's execution. This requires a shift in how we view our programs as we need to read the static text and simulate in our heads how the code will behave at runtime. We'll step through this thought process over the course of this reading.
 
 ## Reassignment
 
@@ -49,7 +49,7 @@ The habit to build: declare *everything* with `const`. When a value turns out to
 
 ## State Gives Loops a Memory
 
-The arrays reading promised that loops have a second strength we were not ready for: values that change as the loop runs. Here is the example it was saving. The forecasters want to know the longest unbroken stretch of below-freezing hours in the day. No single `map`, `filter`, or `find` computes this, because the answer depends on *runs* of consecutive elements: the computation has to remember how long the current cold streak is, and reset that memory every time the temperature rises above freezing.
+The arrays reading promised that loops have a second strength we were not ready for: values that change as the loop runs. Here is such an example. The forecasters want to know the longest unbroken stretch of below-freezing hours in the day. No single `map`, `filter`, or `find` computes this, because the answer depends on *runs* of consecutive elements: the computation has to remember how long the current cold streak is, and reset that memory every time the temperature rises above freezing.
 
 ```typescript
 /**
@@ -94,7 +94,7 @@ The two counters are the loop's state: values that survive from one element to t
 | hour 18, 2° | no | 0 | 2 |
 | hour 21, -2° | yes | 1 | 2 |
 
-The morning streak of two readings is recorded in `longest`, survives the warm afternoon, and is not beaten by the single freezing reading in the evening. A trace table like this one is the standard tool for understanding stateful code, and writing one out by hand is never a waste of time: it is the program's state made visible.
+The morning streak of two readings is recorded in `longest`, survives the warm afternoon, and is not beaten by the single freezing reading in the evening. A trace table like this one is the standard tool for understanding stateful code, and writing one out by hand is a reliable way to debug: it makes the program's state visible.
 
 ## Changing Objects and Arrays
 
@@ -118,7 +118,7 @@ day[0] = { hour: 5, tempCelsius: -6 };     // replaces the first element entirel
 day[1].tempCelsius = -2;                   // reaches into the second element and changes it
 ```
 
-Why is the complexity mutation brings worth enduring? Because in the real world, things change and to model them effectively, programs need to be able to change too. Our weather station does not receive its day of readings all at once: a new reading arrives every hour, and `push` is exactly how the day grows. Rebuilding the entire array to add one element would say something false about the problem, and at scale it is also wasteful: updating one reading in a year of data by copying the other thousands of readings does real, measurable work that updating in place does not.
+The complexity mutation brings is justified by what it models: in the real world things change, and to model them effectively, programs need to be able to change too. Our weather station does not receive its day of readings all at once: a new reading arrives every hour, and `push` is exactly how the day grows. Rebuilding the entire array to add one element would say something false about the problem, and at scale it is also wasteful: updating one reading in a year of data by copying the other thousands of readings does real, measurable work that updating in place does not.
 
 <details class="tooltip ts-tips">
 <summary>Mutating and Non-Mutating Array Operations</summary>
@@ -129,9 +129,9 @@ Arrays carry both kinds of operation, and it pays to know which is which. `map` 
 
 ## Copies and References
 
-To predict which changes are visible where, we need a precise picture of what a variable actually holds. The picture has two cases.
+To understand what a variable holds, we unfortunately need to deal with the fact that programming languages sometimes make design decisions for the sake of performance. While we do not like to think about performance too much while we are making our first initial systems, performance is the reason this section, and the confusion it imparts, exists.
 
-A variable holding a **primitive** value (a `number`, `string`, or `boolean`) holds the value itself. Assigning it to another variable **copies the value**, and from then on the two variables are entirely independent:
+To predict which changes are visible where, we need a precise picture of what a variable actually holds. The picture has two cases. A variable holding a **primitive** value (a `number`, `string`, or `boolean`) holds the value itself. Assigning it to another variable **copies the value**, and from then on the two variables are entirely independent:
 
 ```typescript
 let a = 5;
@@ -140,7 +140,9 @@ b = 6;
 checkExpect(a, 5);  // a is unaffected
 ```
 
-A variable holding an object or array does *not* hold the object itself. It holds a **reference**: a value that says where the object is. Assigning it to another variable copies *the reference*, not the object, so both variables now refer to the **same object**:
+A variable holding an object or array does *not* hold the object itself. It holds a **reference**: a value that says where the object is.
+
+This is the performance decision this section opened with. In a simpler world, assigning an object would copy it exactly the way assigning a number does, and every variable would be independent of every other. The language declines to do this because of what copying costs. A primitive has a small, fixed size, so copying one is essentially free. An object has no size limit: a single `Reading` is small, but an array holding a year of readings, or an object whose properties are themselves objects, can occupy enormous amounts of memory, and the language cannot know at a given `=` sign whether the copy would be cheap or extremely expensive. So objects are never copied on assignment. What is copied instead is the reference, which stays the same small size no matter how large the object it leads to. This efficiency has a consequence: assigning an object to another variable copies *the reference*, not the object, so both variables now refer to the **same object**:
 
 ```typescript
 const r = { hour: 6, tempCelsius: -4 };
@@ -149,13 +151,24 @@ s.tempCelsius = 0;
 checkExpect(r.tempCelsius, 0);   // r sees the change!
 ```
 
-A useful mental model: a variable is a labelled box. For a primitive, the box contains the value. For an object, the box contains an arrow pointing to the object, which lives elsewhere. `const s = r` copies the *arrow*. There is still exactly one `Reading`; it simply has two arrows pointing at it, and a change made through either arrow is visible through both. Two variables referring to the same object are called **aliases**, and *aliasing* is the single most common source of mutation surprises: code changes an object through one name, and the change appears, apparently from nowhere, under another name somewhere else entirely.
+<!-- RTH: consider adding a diagram here to show this behaviour -->
 
-This picture also explains the `const` surprise from the previous section: `const` locks the box, not the object the arrow points to. The arrow cannot be redirected, but the object at the end of it remains as mutable as ever.
+One way to think about this is in terms of boxes. A variable is a labelled box. For a primitive, the box contains the value. For an object, the box contains an arrow pointing to the object, which lives elsewhere. `const s = r` copies the *arrow*. There is still exactly one `Reading`; it simply has two arrows pointing at it, and a change made through either arrow is visible through both. Two variables referring to the same object are called **aliases**, and *aliasing* is the single most common source of mutation surprises: code changes an object through one name, and the change appears under another name somewhere else entirely.
+
+<details class="tooltip deep-dive">
+<summary>References Are Pointers (a Preview of CPSC 213)</summary>
+
+Concretely, the box holds a **memory address**. Every object lives somewhere in the computer's memory, and a reference is the number of the location where that object begins; the "arrow" in our box picture is the runtime following the address to the object. C, the language at the centre of CPSC 213, makes all of this explicit. Its references are called **pointers**, a pointer's numeric value can be printed, compared, and even used in arithmetic, and the language has dedicated operators for taking an address (`&x`) and for following one (`*p`). TypeScript runs on the same machinery but hides it completely: you cannot observe an address, manufacture one, or do arithmetic on one. Everything this reading says about sharing and aliasing is the visible behaviour of that hidden machinery.
+
+The other thing C makes explicit is memory management. In this course we never think about where objects live or when their memory comes back; in C, the programmer asks for memory when creating an object (`malloc`) and must announce when the program is finished with it (`free`), because nothing else will. Both directions of mistake are serious: freeing too early leaves *dangling pointers*, aliases to memory that may already be reused for something unrelated, and forgetting to free *leaks* memory that can never be recovered while the program runs. Many of the most damaging security vulnerabilities in widely used software are exactly these mistakes. TypeScript spares you all of it by reclaiming unreachable objects automatically (the garbage collection deep-dive later in this reading), trading away some performance and control to do so. When you reach CPSC 213 you will manage memory yourself, and you will see precisely what the runtime has been quietly doing for you here.
+
+</details>
+
+This also explains the `const` surprise from the previous section: `const` locks the box, not the object the arrow points to. The arrow cannot be redirected, but the object at the end of it remains as mutable as ever.
 
 ## What a Function Can and Cannot Change
 
-Why does the copy-versus-reference distinction matter so much? Because calling a function performs exactly the assignment we just studied: each argument is assigned to its parameter, copying boxes. Everything about what a function can change in its caller follows from that one fact. There are three cases, and they are worth walking through slowly, because this is where mutation most often defies expectations.
+The copy-versus-reference distinction matters because calling a function performs exactly the assignment we just studied: each argument is assigned to its parameter, copying boxes. Everything about what a function can change in its caller follows from that one fact. There are three cases, and they are worth walking through slowly, because this is where mutation most often defies expectations.
 
 **Passing a primitive: the function gets a copy.** The parameter is a new box holding a copy of the value, so nothing the function does to it can affect the caller:
 
@@ -190,7 +203,7 @@ checkExpect(morning.tempCelsius, -3);   // the caller's object changed
 
 This behaviour is commonly called **pass-by-reference**: the function is operating on the caller's object, not a private copy. The change `calibrate` makes is externally visible, and it outlives the call.
 
-**Reassigning an object parameter: still invisible.** Here is the case that catches nearly everyone. The parameter holds a *copy* of the arrow, so redirecting that copy points the function's own box somewhere new and leaves the caller's box exactly as it was:
+**Reassigning an object parameter: still invisible.**  One tricky aspect of pass-by-reference comes up when we reassign a method's parameters. The only parameter holds a *copy* of the arrow, so re-assigning that copy points the function's own box somewhere new. This leaves the original reference unchanged. This sounds straightforward, but it is worth ensuring you fully understand this example, as many languages have these kinds of tricky semantics:
 
 ```typescript
 function reset(reading: Reading): void {
@@ -204,6 +217,13 @@ checkExpect(evening.tempCelsius, -2);   // unchanged
 
 Compare `calibrate` and `reset` carefully: one writes `reading.tempCelsius = ...`, the other writes `reading = ...`. Mutating *through* a reference (`reading.tempCelsius`) changes the shared object and is visible to the caller. Reassigning *the reference itself* (`reading`) merely rebinds the function's local name and is invisible. The dot is the difference.
 
+<details class="tooltip deep-dive">
+<summary>What "Pass-by-Reference" Precisely Means</summary>
+
+The terms used above are the ones you will hear in practice, but the precise story is sharper: TypeScript passes *every* argument by value; it is just that for objects, the value being copied *is a reference*. Some languages have true pass-by-reference (C++'s `int&`), where the parameter is the caller's variable under another name, and a reassignment like the one in `reset` *would* change the caller's variable. TypeScript has no such mechanism, which is why `reset` cannot work. The behaviour TypeScript has (copy the reference, share the object) is sometimes given its own name, *call-by-sharing*. You do not need the vocabulary often, but when you learn your next language, "are object arguments shared or copied, and can a callee rebind my variable?" is exactly the right question to ask.
+
+</details>
+
 The three cases, summarised:
 
 | Argument passed | The parameter receives | Reassigning the parameter | Mutating the object it refers to |
@@ -214,14 +234,7 @@ The three cases, summarised:
 <details class="tooltip ts-tips">
 <summary>The <code>void</code> Return Type</summary>
 
-The functions above are our first whose signatures declare a return type of **`void`**: they return nothing, so there is no value to name. A `void` function is called purely for what it *does* rather than what it *produces*. Before this reading, that would have made such a function useless. `bump` genuinely is useless; `calibrate` is not, and the difference between them is the whole subject of this reading.
-
-</details>
-
-<details class="tooltip deep-dive">
-<summary>What "Pass-by-Reference" Precisely Means</summary>
-
-The terms used above are the ones you will hear in practice, but the precise story is sharper: TypeScript passes *every* argument by value; it is just that for objects, the value being copied *is a reference*. Some languages have true pass-by-reference (C++'s `int&`), where the parameter is the caller's variable under another name, and a reassignment like the one in `reset` *would* change the caller's variable. TypeScript has no such mechanism, which is why `reset` cannot work. The behaviour TypeScript has (copy the reference, share the object) is sometimes given its own name, *call-by-sharing*. You do not need the vocabulary often, but when you learn your next language, "are object arguments shared or copied, and can a callee rebind my variable?" is exactly the right question to ask.
+The functions above are our first whose signatures declare a return type of **`void`**: they return nothing, so there is no value to name. A `void` function is called purely for what it *does* rather than what it *produces*. Before this reading, that would have made such a function useless. `bump` genuinely is useless; `calibrate` is not, and the difference between them is the subject of this reading.
 
 </details>
 
@@ -250,13 +263,13 @@ for (const reading of day) {
 }                                // ...and current is gone again
 ```
 
-Each pass through a loop body is a fresh copy of the block: this `current` is born holding `0`, lives for one iteration, and dies at the closing brace, taking its value with it. A variable declared inside a block cannot remember anything across runs of that block. Choosing where to declare a variable is therefore not a formality: it is choosing how long the state lives, and the rule of thumb is to declare each variable in the *smallest* block that still spans every use of it.
+Each pass through a loop body is a fresh copy of the block: this `current` is created holding `0`, exists for one iteration, and is discarded at the closing brace, along with its value. A variable declared inside a block cannot remember anything across runs of that block. Choosing where to declare a variable is therefore not a formality: it is choosing how long the state lives, and the rule of thumb is to declare each variable in the *smallest* block that still spans every use of it.
 
 So values do not escape their blocks. There are three exceptions, and we have already met all three:
 
 1. **The value is returned.** `longest` the *name* dies when `longestFreezingStreak` ends, but its final *value* escapes through `return` into the caller's hands.
 2. **The value is assigned to a variable declared outside.** The loop body's assignments to `current` and `longest` outlive each iteration precisely because those variables live in the enclosing block.
-3. **The block mutates an object that is visible outside.** This is the quiet one. Consider calibrating an entire day:
+3. **The block mutates an object that is visible outside.** This one is the easiest to miss. Consider calibrating an entire day:
 
 ```typescript
 function calibrateDay(day: Reading[], offset: number): void {
@@ -266,12 +279,12 @@ function calibrateDay(day: Reading[], offset: number): void {
 }
 ```
 
-Every name in sight here is short-lived: `reading` is reborn each iteration, and `day` the parameter vanishes when the function returns. Yet every change survives, because the *objects* those names pointed at belong to the caller's array, which is alive and well outside the function. Scope governs **names**; it does not govern **objects**. An object lives as long as anything, anywhere, still refers to it, and mutations made to it through a short-lived name are permanent all the same. When you want to know "does this variable still exist?", look at the blocks. When you want to know "does this *change* still exist?", look at the arrows.
+Every name in sight here is short-lived: `reading` is re-created each iteration, and `day` the parameter vanishes when the function returns. Yet every change survives, because the *objects* those names pointed at belong to the caller's array, which is still in scope outside the function. Scope governs **names**; it does not govern **objects**. An object lives as long as anything, anywhere, still refers to it, and mutations made to it through a short-lived name are permanent all the same. Block structure determines whether a variable still exists; the arrows determine whether a change persists.
 
 <details class="tooltip deep-dive">
 <summary>Object Lifetimes and Garbage Collection</summary>
 
-If scope does not end an object's life, what does? An object lives as long as it is *reachable*: as long as some chain of references, starting from a live variable, leads to it. When the last reference is gone, the object can never be observed again, and the runtime reclaims its memory automatically, a mechanism called **garbage collection**. This is why TypeScript programs never explicitly destroy objects. Languages without garbage collection (C, C++) make the programmer manage object lifetimes by hand, and entire categories of serious bugs live in that gap.
+Scope does not determine an object's lifetime; *reachability* does. An object lives as long as some chain of references, starting from a live variable, leads to it. When the last reference is gone, the object can never be observed again, and the runtime reclaims its memory automatically, a mechanism called **garbage collection**. This is why TypeScript programs never explicitly destroy objects. Languages without garbage collection (C, C++) make the programmer manage object lifetimes by hand, and entire categories of serious bugs live in that gap.
 
 </details>
 
@@ -297,17 +310,19 @@ test("calibrateDay shifts every reading by the offset", () => {
 });
 ```
 
-There is one more consequence, and it is the one this part of the course has been building toward. The invariants readings established a comfortable discipline: validate a value when it is constructed, and rely on the invariant afterwards. Mutation breaks the "afterwards". `reading.hour = 99` is a perfectly legal statement that violates the `Reading` invariant long after construction, and aliasing means *any* part of the program holding a reference can do it, at any time, from anywhere. Under mutation, an invariant is no longer established once; it must be *preserved by every operation that touches the data, forever*. Keeping that promise when references can travel anywhere requires controlling who is allowed to mutate at all, and that problem (restricting mutation to a trusted set of operations) is precisely where the next part of the course goes.
+There is one more consequence, and it is the one this part of the course has been building toward. The invariants readings established a comfortable discipline: validate a value when it is constructed, and rely on the invariant afterwards. Mutation breaks the "afterwards". `reading.hour = 99` is a perfectly legal statement that violates the `Reading` invariant long after construction, and aliasing means *any* part of the program holding a reference can do it, at any time, from anywhere. Under mutation, an invariant is no longer established once; it must be *preserved by every operation that touches the data, forever*. Keeping that promise when references can travel anywhere in the program requires controlling who is allowed to mutate at all, and that problem (restricting mutation to a trusted set of operations) is precisely the focus of part 2 of the course.
 
-Until then, the working guidance is restraint:
+Until then, the working guidance falls back on a discipline-based approach:
 
 - Declare every variable with `const`. When a value turns out to genuinely need changing, change that one declaration to `let`, deliberately. Every `let` is a value your reader must trace through time.
 - Prefer the non-mutating operations (`map`, `filter`) when they fit; reach for mutation when the problem is genuinely about change, as the arriving readings and the streak counters were.
 - Keep mutable state in the smallest scope that works: a counter local to one function is easy to reason about; a mutable value visible to the whole program can be changed by the whole program.
-- Say so when a function mutates: in its name, in its documentation, and in its tests.
+- Clearly document mutation when it happens: in a function's name, its documentation, and its tests.
 
 ## Moving Forward
 
-Mutation is worth its extra mental burden: real programs model a changing world. The price is state. Programs must now be understood by tracing values through time, and every reader needs to be able to answer a new set of questions precisely: is this a copy or a reference? Does this change escape this block, this function, this module? Who else holds an arrow to this object? The box-and-arrow model and the scope rules in this reading are the tools for answering them.
+Mutation is worth the extra mental burden it induces: real programs model a changing world. Programs must now be understood by tracing values through time, and every reader needs to be able to answer a new set of questions precisely: is this a copy or a reference? Does this change escape this block, this function, this module? Who else holds an arrow to this object? The box-and-arrow model and the scope rules in this reading are the tools for answering them. Side effects also add new complexity we have not encountered yet: effects that reach *outside* of specific functions, to other parts of the program, to files, databases, networks, and users. But since the point of programs is to do useful work for people, side effects are important and are a fundamental part of real software systems that require careful thought and design to use effectively without making a program too hard to understand or brittle to evolve.
 
-Side effects also add new complexity we have not encountered yet: effects that reach *outside* the program, to files, networks, and users. The outside world has a property that nothing in our programs has had so far: it does not answer immediately. What programs do while they wait is the subject of the next reading.
+<!-- RTH: let's leave off this bridge for now; not sure if we want to keep these so clearly anyways. 
+
+The outside world has a property that nothing in our programs has had so far: it does not answer immediately. What programs do while they wait is the subject of the next reading. -->
