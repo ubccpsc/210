@@ -149,7 +149,7 @@ test("fee never exceeds the maximum", () => {
 });
 ```
 
-The precondition also guides us towards situations that may not result in a valid output. Since the precondition says `daysLate >= 0`, what happens if we pass `-5` is undefined: the caller has broken their half of the bargain, and the function promises nothing in return. What should happen when a precondition is violated anyway, and how to test for such erroneous behaviours, is a real question; we return to it at the end of this reading.
+The precondition also guides us towards situations that may not result in a valid output. Since the precondition says `daysLate >= 0`, what happens if we pass `-5` is undefined: the caller has broken their half of the bargain, and the function promises nothing in return. We return to what should happen when a precondition is violated anyway, and how to test for such erroneous behaviours, at the end of this reading.
 
 To run these tests, `lateFee` must at least exist; otherwise the compiler will refuse to execute the program at all. So we begin with a **stub**: a function with the right signature that returns a clearly wrong value.
 
@@ -159,7 +159,7 @@ function lateFee(daysLate: number): number {
 }
 ```
 
-We chose `-1` deliberately. A fee is never negative, so every test is guaranteed to fail against the stub. (Had the stub returned `0`, the grace-period test would have passed before we wrote any real code.) Running the suite now shows three failing tests. This step matters more than it looks: a test that cannot fail checks nothing, and we have just confirmed that all of ours can fail when they are expected to. Running these tests results in:
+We chose `-1` deliberately. A fee is never negative, so every test is guaranteed to fail against the stub. (Had the stub returned `0`, the grace-period test would have passed before we wrote any real code.) Running the suite now shows three failing tests. This step is important: a test that cannot fail checks nothing, and we have just confirmed that all of ours can fail when they are expected to. Running these tests results in:
 
 ```
 ✗ no fee during the grace period
@@ -213,7 +213,7 @@ function lateFee(daysLate: number): number {
 }
 ```
 
-All three tests now pass. Notice what did *not* change: the tests. They were correct all along, because they were written from the specification, and so the requirement our implementation forgot had nowhere to hide. If we had written our tests *after* the implementation, by reading our own code and checking that it does what it appears to do, would we have thought to test the maximum? Probably not: the code contains no hint that a maximum should exist. Tests written first keep the specification in charge; tests written after tend to mirror the code, mistakes included.
+All three tests now pass. Notice what did *not* change: the tests. They were correct all along, because they were written from the specification, and so the requirement our implementation forgot had nowhere to hide. If we had written our tests *after* the implementation, by reading our own code and checking that it does what it appears to do, we would probably not have thought to test the maximum: the code contains no hint that a maximum should exist. Tests written first keep the specification in charge; tests written after tend to mirror the code, mistakes included.
 
 <details class="tooltip ts-tips">
 <summary>The <code>const</code> keyword</summary>
@@ -255,7 +255,7 @@ The `lateFee` specification divides its input into three classes:
 
 Note where the table begins: at 0, with no negative inputs anywhere. That left edge was drawn by the documented precondition. The invariant we wrote in the doc comment defines the input space the suite must cover; without it, we would not know whether `lateFee(-5)` was a missing class or a meaningless input.
 
-Look back at the suite we wrote: it contains a representative from each class: `lateFee(0)` and `lateFee(2)` for the grace period, `lateFee(3)` and `lateFee(12)` for accrual, `lateFee(30)` for the cap. It is no accident that this suite caught our missing-maximum fault: the suite had a representative from the capped class, and that is precisely the class the implementation forgot.
+Look back at the suite we wrote: it contains a representative from each class: `lateFee(0)` and `lateFee(2)` for the grace period, `lateFee(3)` and `lateFee(12)` for accrual, `lateFee(30)` for the cap. This suite caught our missing-maximum fault because it had a representative from the capped class, and that is precisely the class the implementation forgot.
 
 Within a class, one representative is as informative as another. `lateFee(12)` and `lateFee(15)` both exercise the accruing class; testing both adds almost no confidence beyond testing one. Counting tests is therefore a poor measure of a suite: a suite of `lateFee(5)`, `lateFee(8)`, and `lateFee(15)` has three assertions but covers only one class, and would have passed our buggy, cap-free implementation without complaint. What matters is covering the *classes*, not accumulating assertions.
 
@@ -269,7 +269,7 @@ Two inputs belong to the same class when the *specification* says they should be
 
 Equivalence class partitioning identifies the regions to test. **Boundary value analysis** identifies *where* within those regions to look most carefully: at the edges, where one class meets the next.
 
-Bugs cluster at boundaries, because boundaries are where comparisons live, and comparisons are easy to get wrong by one. `lateFee` has two boundaries: between days 2 and 3 (grace ends, accrual begins) and between days 21 and 22 (accrual reaches the maximum). A boundary-focused test checks the last input on each side:
+Bugs cluster at boundaries, because boundaries are implemented with comparisons, and comparisons are easy to get wrong by one. `lateFee` has two boundaries: between days 2 and 3 (grace ends, accrual begins) and between days 21 and 22 (accrual reaches the maximum). A boundary-focused test checks the last input on each side:
 
 ```typescript
 test("fee changes exactly at the class boundaries", () => {
@@ -345,7 +345,7 @@ function renew(loan: Loan): Result<Loan, string> {
 
 Note where the `assert` calls live: unlike `checkExpect`, which sits in `test/` and probes chosen inputs from the outside, `assert` sits in the source code in `src/` and is evaluated on *every* execution of the function, whoever the caller is. Halting may seem drastic, but it is the right response to an impossible state.
 
-We saw at the start of this reading that operations built on a value whose invariant has failed quietly produce nonsense; an assertion stops the program at the first sign of corruption, before the nonsense can spread or be written somewhere permanent. This is also the answer to the question we deferred earlier: when a caller violates a precondition, an assertion is how the function refuses to continue. One relaxation to this approach is for functions that take user-specified input: rather than crashing, user-specified input is often explicitly validated and rejected as expected errors (because in practice it is useful to expect users to do unreasonable things).
+We saw at the start of this reading that operations built on a value whose invariant has failed quietly produce nonsense; an assertion stops the program at the first sign of corruption, before the nonsense can spread or be written somewhere permanent. This is also the behaviour we deferred earlier in the reading: when a caller violates a precondition, an assertion is how the function refuses to continue. One relaxation to this approach is for functions that take user-specified input: rather than crashing, user-specified input is often explicitly validated and rejected as expected errors (because in practice it is useful to expect users to do unreasonable things).
 
 Now the tests, and a distinction worth being careful about. The expected error is a *documented outcome*: the postcondition names the exact value the caller receives (an `ok: false` result carrying the reason), so we test it with `checkExpect`, the same way we test every other clause of the contract:
 

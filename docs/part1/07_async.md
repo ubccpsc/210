@@ -1,8 +1,8 @@
 # Asynchronous Effects and Time
 
-The previous reading ended at a door: side effects that reach outside the program, to files, networks, and users. Programs become much more useful when they can walk through that door. A weather station that can only summarise readings typed into its source code is a calculator; a weather station that can load a year of readings from a file, fetch the current conditions from a web service, and write its report somewhere permanent is a system.
+The previous reading ended with side effects: changes that reach beyond a function, and sometimes beyond the program entirely, to files, networks, and users. Programs become much more useful when they interact with the outside world. A weather station that can only summarise readings typed into its source code is a calculator; a weather station that can load a year of readings from a file, fetch the current conditions from a web service, and write its report somewhere permanent is a system.
 
-The outside world has a property that nothing inside our programs has had so far: it is *slow*, and it does not answer immediately. This reading is about what programs do while they wait. The mechanics take some getting used to, but the destination is concrete: by the end you will be able to read and write files and call web-based services, and those two capabilities are the foundation for almost everything programs do in practice.
+The outside world has a property that nothing inside our programs has had so far: it is *slow*, and it does not answer immediately. This reading is about what programs do while they wait. The mechanics take some getting used to, but the goal is concrete: by the end you will be able to read and write files and call web-based services, and those two capabilities are the foundation for almost everything programs do in practice.
 
 ## How Long Computers Wait
 
@@ -16,9 +16,9 @@ Inside the processor, work is astonishingly fast: a simple operation takes aroun
 | reading from a spinning disk | 10 ms | ~4 months |
 | cross-country network round trip | 150 ms | ~5 years |
 
-The pattern to take away: touching a disk or a network is not a little slower than computing, it is *millions of times* slower. From the processor's point of view, asking a web service across the ocean for the temperature and then waiting for the answer is like mailing a letter and standing motionless at the mailbox for five years.
+The pattern to take away: touching a disk or a network is not a little slower than computing, it is *millions of times* slower. From the processor's point of view, asking a distant web service for the temperature and then waiting for the answer is like mailing a letter and standing motionless at the mailbox for five years.
 
-A call that stands at the mailbox is called **blocking**: the function does not return until the slow work finishes, and the program makes no progress of any kind in the meantime. For a program that has nothing else to do, blocking is merely wasteful. For most real programs, it is unacceptable: a program frozen for the duration of a network request cannot respond to its user, accept another request, or do any of the computation that is already ready to go.
+A call that waits like this is called **blocking**: the function does not return until the slow work finishes, and the program makes no progress of any kind in the meantime. For a program that has nothing else to do, blocking is merely wasteful. For most real programs, it is unacceptable: a program frozen for the duration of a network request cannot respond to its user, accept another request, or do any of the computation that is already ready to go.
 
 ## One Thread at a Time
 
@@ -69,9 +69,9 @@ kettle has boiled        <- printed ten seconds later
 
 Read that order carefully, because it breaks an assumption every previous reading allowed: that statements take effect in the order they appear in the file. `setTimeout` does not wait ten seconds; it *registers* the callback and returns immediately, and the program continues to the next statement. Ten seconds later, when the timer expires and the thread is free, the callback runs. The program got a mug ready while the kettle boiled instead of standing in front of it.
 
-This is the mental shift of the reading. The source code still lists statements top to bottom, but *when* each one runs is no longer the same as *where it is written*. The static and dynamic views of the program, which the first reading introduced, have come apart in a new way: to know what this program does, you must now track time as well as state.
+This is the central mental shift of asynchronous programming: the source code still lists statements top to bottom, but *when* each one runs is no longer the same as *where it is written*. The static and dynamic views of the program, which the first reading introduced, have come apart in a new way: to know what this program does, you must now track time as well as state.
 
-Timers at least announce their schedules. The deeper reason callbacks exist is that much of what a program responds to has *no* schedule at all, and nowhere is that clearer than in a user interface. Suppose the weather station's display has a refresh button. The program cannot know when the button will be clicked, whether it will be clicked at all, or how many times. And the single thread must not sit in a loop asking "clicked yet? clicked yet?", because a thread that is spinning is just as occupied as a thread that is blocked: the display would freeze, unable to respond to anything else, while it watched one button. Instead, the program registers a callback and gets out of the way:
+A timer at least has a schedule. The deeper reason callbacks exist is that much of what a program responds to has *no* schedule at all, and nowhere is that clearer than in a user interface. Suppose the weather station's display has a refresh button. The program cannot know when the button will be clicked, whether it will be clicked at all, or how many times. And the single thread must not sit in a loop asking "clicked yet? clicked yet?", because a thread that is spinning is just as occupied as a thread that is blocked: the display would freeze, unable to respond to anything else, while it watched one button. Instead, the program registers a callback and gets out of the way:
 
 ```typescript
 // refreshButton is an object representing the on-screen button;
@@ -86,7 +86,7 @@ When the user clicks, the runtime raises an **event** and places it on a queue; 
 <details class="tooltip deep-dive">
 <summary>The Event Loop</summary>
 
-The machinery scheduling all of this has a name. The runtime keeps a **queue** of callbacks that are ready to run: a timer expired, a button was clicked, data arrived from a disk or a network. The single thread runs a permanent cycle called the **event loop**: take the callback at the front of the queue, run it *to completion*, then return for the next one; if the queue is empty, sleep until something joins it.
+The runtime keeps a **queue** of callbacks that are ready to run: a timer expired, a button was clicked, data arrived from a disk or a network. The single thread runs a permanent cycle called the **event loop**: take the callback at the front of the queue, run it *to completion*, then return for the next one; if the queue is empty, sleep until something joins it.
 
 Two consequences are worth knowing. First, run-to-completion means a callback is never interrupted partway through: no other code runs until it returns. This is what makes single-threaded programs simple to reason about, and it is also a responsibility, because a callback that computes for a long time freezes everything else; the loop cannot move on until it returns. Second, a duration like the timer's `10000` means "queue this callback no earlier than ten seconds from now", not "run it at exactly that moment": if the thread is busy when the timer expires, the callback waits in the queue for its turn. The event loop guarantees order and progress, not precise timing.
 
@@ -109,7 +109,7 @@ A promise's type says what it will eventually deliver: a `Promise<string>` will 
 
 Every promise is in one of three states. It begins **pending**: the work is still underway. It ends in one of two ways: **fulfilled**, holding the delivered value, or **rejected**, holding an error that explains why the value could not be produced. The language maintains two invariants on every promise, and you can rely on them the way you rely on your own data invariants: a promise settles *at most once*, and once settled, its state and value *never change again*. A fulfilled promise is permanently fulfilled; nothing can reach in later and alter the value it delivered.
 
-You will rarely create a promise yourself. Promises are what slow operations *give you*: the file-reading and web-fetching functions later in this reading all return them. Where you *will* meet promises constantly is in **return types**. When a function's signature says it returns a `Promise<string>`, the signature is telling you two things at once: the call itself will return immediately, and what it returns will not yet contain the value you actually want. The promise comes back right away; the result settles later. Watch what happens if we treat the receipt as if it were the drink:
+You will rarely create a promise yourself. Promises are what slow operations *give you*: the file-reading and web-fetching functions later in this reading all return them. Where you *will* meet promises constantly is in **return types**. When a function's signature says it returns a `Promise<string>`, the signature is telling you two things at once: the call itself will return immediately, and what it returns will not yet contain the value you actually want. The promise comes back right away; the result settles later. Here is what happens when the promise itself is treated as the value:
 
 ```typescript
 import { readFile } from "fs/promises";
@@ -118,7 +118,7 @@ const contents = readFile("report.txt", "utf8");  // returns immediately
 console.log(contents);  // prints "Promise { <pending> }", not the file's text
 ```
 
-`readFile` returns a `Promise<string>`, so `contents` holds a pending promise: at the moment the `console.log` runs, the disk has barely been asked. Helpfully, the type checker knows this too. `contents` has the type `Promise<string>`, not `string`, so a slip like `contents.length` is a compile error: the type system will not let you use the receipt as if it were the value it stands for. What the type system cannot do is hand you the value early. Collecting the value is the next section's subject.
+`readFile` returns a `Promise<string>`, so `contents` holds a pending promise: at the moment the `console.log` runs, the disk has barely been asked. The type checker knows this too. `contents` has the type `Promise<string>`, not `string`, so a slip like `contents.length` is a compile error: the type system will not let you use the receipt as if it were the value it stands for. What the type system cannot do is hand you the value early. Collecting the value is the next section's subject.
 
 <details class="tooltip deep-dive">
 <summary>Collecting a Value with <code>.then</code></summary>
@@ -131,7 +131,7 @@ readFile("report.txt", "utf8").then((contents) => {
 });
 ```
 
-This is the bridge between the two halves of this reading: a promise is, underneath, an object that runs callbacks for you when its value arrives, and the `await` syntax in the next section is built on exactly this mechanism. We show `then` so you will recognise it in documentation and in other people's code, but we will not use it in this course: `await` expresses the same thing and lets the code read top to bottom.
+This connects callbacks and promises: a promise is, underneath, an object that runs callbacks for you when its value arrives, and the `await` syntax in the next section is built on exactly this mechanism. We show `then` so you will recognise it in documentation and in other people's code, but we will not use it in this course: `await` expresses the same thing and lets the code read top to bottom.
 
 </details>
 
@@ -150,20 +150,20 @@ async function loadReport(): Promise<string> {
 
 Two new keywords. **`await`** takes a promise and produces the value it delivers: `readFile(...)` is a `Promise<string>`, so `await readFile(...)` is a `string`. When execution reaches the `await`, the function pauses until the promise settles, and then continues with the value, on the very next line, as if the file's contents had simply been returned.
 
-The sentence that matters most in this reading: **`await` pauses the function, not the program.** While `loadReport` is suspended at the `await`, the thread is free, and everything else the program has to do (timers, other deferred work, other paused functions whose promises have settled) keeps happening. An `await` is the program saying "wake me here when the value arrives", not "stand still until it does".
+The most important property of `await` is that **it pauses the function, not the program.** While `loadReport` is suspended at the `await`, the thread is free, and everything else the program has to do (timers, other deferred work, other paused functions whose promises have settled) keeps happening. An `await` is the program saying "wake me here when the value arrives", not "stand still until it does".
 
-**`async`** marks a function as one that may contain `await`, and it changes the function's return type: an `async` function always returns a *promise* of its result. `loadReport` is declared to return `Promise<string>`, not `string`, even though its body simply returns a string. This is forced by everything above: `loadReport` cannot hand its caller a `string` immediately, because the file read inside it takes an SSD's eternity to finish, and the caller must not be blocked either. So the caller gets a receipt, and collects it the same way, with `await`. Asynchrony is contagious: a function that awaits must be `async`, so its callers await it and must themselves be `async`, all the way up the program.
+**`async`** marks a function as one that may contain `await`, and it changes the function's return type: an `async` function always returns a *promise* of its result. `loadReport` is declared to return `Promise<string>`, not `string`, even though its body simply returns a string. This is forced by everything above: `loadReport` cannot hand its caller a `string` immediately, because the file read inside it is millions of times slower than the statements around it, and the caller must not be blocked either. So the caller gets a receipt, and collects it the same way, with `await`. Asynchrony is contagious: a function that awaits must be `async`, so its callers await it and must themselves be `async`, all the way up the program.
 
 It is worth being clear about what `async` and `await` are *not*. They do not make anything run faster, and they do not create threads; there is still exactly one statement executing at any moment. They are readable syntax for deferred computation, the same deferral the `setTimeout` example performed with a callback, written so that the code reads top to bottom again. The semantics did not change; the spelling did.
 
 While promises and `async`/`await` do not create threads, they take advantage of a deeper fact: the slow part of the work never needed our thread in the first place. When `readFile` starts, the request is handed down to the language runtime and the operating system, which carry it forward in the background whether our thread attends to it or not. Blocking was never _necessary_; it was our thread standing guard over work it could not help with. `await` is the program declining to stand guard: the thread spends the interval running whatever else is ready (or, in a user interface, simply staying responsive), and the paused function continues the moment its value arrives.
 
 <details class="tooltip deep-dive">
-<summary>Pulling Back the Covers: Your Program, the Runtime, and the Operating System</summary>
+<summary>Your Program, the Runtime, and the Operating System</summary>
 
 A TypeScript program is the top layer of a stack, and each layer below it does part of the waiting. Beneath your program sits the **runtime**, Node: it executes your compiled code, operates the event loop described earlier in this reading, and provides the functions the language itself does not have, including `setTimeout`, `readFile`, and `fetch`. Beneath the runtime sits the **operating system**, which manages the machine's hardware on behalf of every running program at once. Nothing your program does touches a disk or a network card directly; requests are passed down this stack, and results climb back up it.
 
-Follow one `readFile` all the way down. Your function calls `readFile`, the runtime asks the operating system for the file, and the operating system instructs the disk hardware to fetch the bytes, then turns to its other work. No one at any layer sits and watches: the request exists only as bookkeeping, an entry in a table recording who should be told when the bytes show up. When the disk finishes, it signals the operating system (a mechanism called an interrupt), the operating system passes the data up to the runtime, and the runtime fulfills the promise and places your paused function on the event loop's queue. The next time the loop reaches it, your function resumes at the `await`, value in hand.
+Follow one `readFile` all the way down. Your function calls `readFile`, the runtime asks the operating system for the file, and the operating system instructs the disk hardware to fetch the bytes, then turns to its other work. No one at any layer sits and watches: the request exists only as bookkeeping, an entry in a table recording who should be told when the bytes show up. When the disk finishes, it signals the operating system (a mechanism called an interrupt), the operating system passes the data up to the runtime, and the runtime fulfills the promise and places your paused function on the event loop's queue. The next time the loop reaches it, your function resumes at the `await` with the value.
 
 Notice what this means about `await`: your paused function returns to execution through the very same queue that clicks and timer callbacks travel through. There is one loop, one thread, and one line to wait in, which is also why a long-running computation delays everything: file results, button clicks, and resumed functions all stand in the same queue behind it.
 
@@ -171,7 +171,7 @@ This layered design is why a single thread is enough. The expensive waiting is d
 
 </details>
 
-Because the receipt is so easy to mistake for the value, one mistake dominates all others in asynchronous code: calling a promise-returning function and forgetting the `await`. Sometimes the type checker catches it, as the pending `console.log` example in the previous section showed. But when the result is not used at all, nothing in the types objects: a bare `loadReport();` on its own line compiles cleanly, *starts* the work, and continues past it without waiting, which is almost never what the surrounding code intends. The lint rules used in this course flag every call to a promise-returning function that is not awaited; when you see that warning, treat it as a bug report rather than a formality.
+Because the receipt is so easy to mistake for the value, one mistake dominates all others in asynchronous code: calling a promise-returning function and forgetting the `await`. Sometimes the type checker catches it, as the pending `console.log` example in the previous section showed. But when the result is not used at all, the types raise no objection: a bare `loadReport();` on its own line compiles cleanly, *starts* the work, and continues past it without waiting, which is almost never what the surrounding code intends. The lint rules used in this course flag every call to a promise-returning function that is not awaited; when you see that warning, treat it as a bug report rather than a formality.
 
 <details class="tooltip ts-tips">
 <summary>Testing <code>async</code> Functions</summary>
@@ -191,7 +191,7 @@ The test framework awaits the test body itself, so the test does not finish unti
 
 ## Reading and Writing Files
 
-With `async` and `await` in hand, files are within reach. Node, the runtime that executes our TypeScript programs, provides a standard library, and its file-system module exports the two functions that matter most: `readFile`, which delivers a file's contents, and `writeFile`, which replaces them. Both are slow in exactly the disk-latency way this reading opened with, and both therefore return promises.
+With `async` and `await` in hand, files are within reach. Node, the runtime that executes our TypeScript programs, provides a standard library, and its file-system module exports the two functions that matter most: `readFile`, which delivers a file's contents, and `writeFile`, which replaces them. Both operations involve the disk latencies from the table at the start of this reading, and both therefore return promises.
 
 ```typescript
 import { readFile, writeFile } from "fs/promises";
@@ -217,7 +217,7 @@ Files on disk are stored as raw bytes. The second argument to `readFile` names t
 
 ## Calling Web Services
 
-The other door is the network. A **web service** is a program, running on another machine, that answers requests over the internet: ask it a question shaped like a URL, and it answers with data. The built-in function `fetch` makes the request and, being a network operation of ocean-crossing slowness, returns a promise.
+The network is the second of the two capabilities this reading promised. A **web service** is a program, running on another machine, that answers requests over the internet: ask it a question shaped like a URL, and it answers with data. The built-in function `fetch` makes the request and, being a slow network operation, returns a promise.
 
 Suppose the regional weather network runs a service that reports current conditions for any station. Asking it for our station's temperature looks like this:
 
@@ -236,17 +236,17 @@ async function currentTemperature(stationId: string): Promise<number> {
 
 There are two `await`s because the answer arrives in stages: the first delivers the response once the service has begun answering, and `response.json()` delivers the response's *body*, parsed from text into an object, which can itself take time for a large reply. After the second `await`, `report` is an ordinary object, and the function reads a property from it like any other.
 
-One caution deserves its own paragraph. The type annotation on `report` is a statement of *our expectation*, not something the compiler can verify: the data was manufactured by another machine at runtime, and no type checker can see across a network. If the service changes its reply format, the program will compile cleanly and then misbehave when it runs. The compiler's guarantees stop at the program's edge. At the edges, the discipline from the invariants readings takes over: data arriving from outside should be *checked* before the rest of the program relies on it. We will not build that checking today, but you should notice the boundary it belongs on.
+The type annotation on `report` is a statement of *our expectation*, not something the compiler can verify: the data was manufactured by another machine at runtime, and no type checker can see across a network. If the service changes its reply format, the program will compile cleanly and then misbehave when it runs. The compiler's guarantees stop at the program's edge. At the edges, the discipline from the invariants readings takes over: data arriving from outside should be *checked* before the rest of the program relies on it. We will not build that checking today, but you should notice the boundary it belongs on.
 
 ## When Slow Things Fail
 
 Everything in this reading can fail in ways pure computation cannot: a file may not exist, a network may be down, a service may answer nonsense. This is what the rejected state of a promise is for, and when an `await`ed promise rejects, the error surfaces in your program at the `await`.
 
-Handling these failures well is a real subject, and it is deferred to the errors reading in Part 2 rather than compressed into a paragraph here. For this reading and its exercises, the policy is simple: we will work with files that exist and services that answer, and if your program crashes, read the message it crashed with and fix the bug it points at (the most common one by far is a path or URL that is not quite right). Crashing immediately with an honest message is respectable behaviour for a program; what comes later is doing something more graceful instead.
+Handling these failures well is a real subject, and it is deferred to the errors reading in Part 2 rather than compressed into a paragraph here. For this reading and its exercises, the policy is simple: we will work with files that exist and services that answer, and if your program crashes, read the message it crashed with and fix the bug it points at (the most common one by far is a path or URL that is not quite right). Crashing immediately with a clear message is acceptable behaviour for a program at this stage; handling failures more gracefully comes later.
 
 ## Moving Forward
 
-This reading completes a journey that began with values that never changed. Mutation introduced state and time *inside* the program; asynchrony extends time to the world *outside* it, where data lives on disks and on other machines, and arrives only after a wait the program must not spend standing still. The model TypeScript gives us is single-threaded and deferred: slow operations hand back promises, `await` collects their values while the lone thread stays busy, and `async` marks every function that participates. With files and web services available, our programs can finally act on data they were not born holding.
+Mutation introduced state and time *inside* the program; asynchrony extends time to the world *outside* it, where data lives on disks and on other machines, and arrives only after a wait the program must not spend standing still. The model TypeScript gives us is single-threaded and deferred: slow operations hand back promises, `await` collects their values while the lone thread stays busy, and `async` marks every function that participates. With files and web services available, our programs can act on data that comes from outside their own source code.
 
 This also closes Part 1. You can now model a problem with types, write contracts and tests that pin down behaviour, maintain invariants, process sequences, manage state, and reach the outside world. Every program so far has been small enough for one person to hold in their head, and that has let personal discipline carry a lot of weight. Part 2 asks what happens when it cannot: when programs, teams, and lifetimes outgrow any single person, and the discipline has to move into the language itself.
 
