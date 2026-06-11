@@ -272,24 +272,3 @@ Looking at our designs in this reading, we see that the invariants of our progra
 
 Building objects out of closures works, but the support the language gives us for this task is minimal. Object-oriented programming, provides this pattern as direct language syntax: constructors, methods, and fields that the language itself controls access to. The syntax will be new, but the idea will directly flow from this reading.
 
-<!--
-### CONTENT NOTES (incorporated above)
-
-* build on `BankAccount` from the preceding lecture's activity
-* show that you can `const account: BankAccount = {balance: -100};` which violates the `balance >=0` invariant
-* try using a `makeAccount(initialBalance: number): BankAccount { assert(initialBalance >= 0) }` function to control creation ; note that nothing is *forcing* it be used (likewise for deposit/withdraw)
-  * need to "bind" operations to the data
-* work up to solving this problem by adding functions to `BankAccount`, although without a `balance` field (using a closure instead).
-
-Nick's Notes:
-* Main point: designing our code to protect invariants.
-* Achieved using two steps:
-  1. Constructor function: only way for a client to create an account. Gatekeeper to ensure the invariant holds initially.
-  2. Encapsulation of state: the closure over the count `n` means it can only be modified by the functions defined in the constructor function.
-* Language features: functions can be properties on objects (BSL define-struct example, used in link-110 tooltip); closures (BSL local example, used in link-110 tooltip)
-* Could hint that OOP is coming and it will make it easier to express these ideas (but it's the idea that is important)
-
-Omitted for now (per notes), aside from a brief ts-tip on `export`:
-* Modules: talking about `export` formally (and how that forms boundaries limiting what clients can do).
-  * testability trade-offs of not exporting functions (this also came up in 110 when using local since check-expect must be at top-level)
--->
