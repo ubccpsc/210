@@ -181,7 +181,7 @@ An IDE runs the language's type checker continuously in the background as you ty
 
 There are two main kinds of syntax in all programming languages: expressions and statements. BSL is built almost entirely from **expressions**. Every chunk of BSL code is evaluated to produce a value, and that value is passed into the expression that contains it. 
 
-TypeScript has expressions too, but it adds a second kind of construct: the **statement**. A statement's purpose is not to evaluate to a single value; it performs an action, such as making a decision or returning from a function. Often this action can change program **state**: where state includes the names that are defined (e.g., variable or function names), and the values those names take on. A TypeScript program is written as a sequence of statements that run in order.
+TypeScript has expressions too, but it adds a second kind of construct: the **statement**. A statement's purpose is not to evaluate to a single value; it performs an action, such as making a decision or returning from a function. Often this action can change program **state**: *state* includes the names that are defined (e.g., variable or function names), and the values those names take on. A TypeScript program is written as a sequence of statements that run in order.
 
 We saw one type of statement already: the function definition. Today we will introduce two more kinds of statements. 
 
@@ -200,7 +200,9 @@ if (<condition>) {
 
 <!--- note: code in between { } forms a block, not always a basic block. There could be another if statement in the block, and it would be a block but not a basic block. I don't think we need to introduce basic blocks yet.  --->
 
-A contiguous sequence of expressions and statements that will always execute in order in a programming language is known as a **block**. In TypeScript, these represent statements following `{` until the next branch statement (e.g, `if`) is encountered, or a closing `}` is encountered. This means that several statements could be included at `(A)`, and all would be executed in order if `<condition>` were `true`.
+<!--- A contiguous sequence of expressions and statements that will always execute in order in a programming language is known as a **block**. In TypeScript, these represent statements between a `{` until the next branch statement (e.g, `if`) is encountered, or a closing `}` is encountered. This means that several statements could be included at `(A)`, and all would be executed in order if `<condition>` were `true`. ---->
+
+`(A)` need not be only a single statement. Notice the `if` is followed by curly braces: `{` and `}`. These curly braces designate a **block**, which can contain a sequence of statements. This means that several statements could be included at `(A)`, and they would be executed in order if `<condition>` were `true`.
 
 
 `if` statements (in TypeScript, and most languages) are extremely flexible and expressive. The most explicit extension to the example above involves the `else` statement. This means that if `<condition>` is true, `(A)` executes, followed by `(C)`, but if `<condition>` is false, `(B)` executes, followed by `(C)`.
@@ -318,14 +320,14 @@ function letterGrade(score: number): string {
 }
 ```
 
-In the code aboveonce a true branch of one of the `if` statements is taken, no other code is executed. We've written what we intend in each branch---but how do we capture  "funtion should evaluate to" in TypeScript?
+In the code above once a true branch of one of the `if` statements is taken, no other code is executed. We've written what we intend in each branch---but how do we capture  "funtion should evaluate to" in TypeScript?
 
 #### <code>return</code> statements
 
 The `return` keyword is necessary to make functions in TypeScript return values.  The `return` statement hands a value back to whoever called the function and stops the function there. 
 
 <details class="tooltip ts-tips">
-<summary> `return` statements </summary>
+<summary> <code>return</code> statements </summary>
 
 `return e;` evaluates the expression `e` to a value `v` (i.e., `2 + 3` to `5`), stops executing the function there, and returns this `v` to the caller of the function.
 
@@ -367,7 +369,7 @@ Each `return` exits the function immediately, so the order of the checks matters
 
 
 <details class="tooltip link-110">
-<summary>`cond`</summary>
+<summary><code>if</code> vs <code>cond</code></summary>
 
 `if` operates very similarly to `cond`. 
 
@@ -387,7 +389,7 @@ An equivalent BSL function to `letterGrade` looks like:
 
 the TypeScript version says the same thing with statements: each `cond` clause becomes an `if` whose body returns that clause's value, and `else` becomes the final `return`. The behaviour is identical; what changed is that you spell out the control flow step-by-step rather than as a single expression.
 
-If you want more details: the difference between `if` and `cond` is that `cond` is an expression: `cond` evaluates to one value. The bodies of the functions you defined in BSL contained a single expression `e` (above, the `cond`) expression, and `(letter-grade 87)` simply evaluates `e` with `87` in the place of `score`. 
+*Technical Details*. the difference between `if` and `cond` is that `cond` is an expression: `cond` evaluates to one value. The bodies of the functions you defined in BSL contained a single expression `e` (above,`e` is the `cond` expression) and `(letter-grade 87)` simply evaluates `e` with `87` in the place of `score`. 
 
 In TypeScript, a function body is not a single expression: it is a list of statements which will be run in order. TypeScript functions will not return a value unless they are told to by a `return` statement. Later, we'll see that we might want to write functions that have no `return` statements at all. 
 
@@ -395,25 +397,25 @@ In TypeScript, a function body is not a single expression: it is a list of state
 
 ## Static and Dynamic Views of a Program
 
-There are two natural perspectives through which you can view any program. The **static** view is what you see when you look at your source code. It is fixed text sitting in a file, and it can be read and analysed *without being executed* (no execution is the key). The types, the structure of your functions, and the way the pieces fit together are all static properties, because they are true of the text itself. The compiler works entirely in this static world, which is exactly why it can check your types before the program runs.
+There are two natural perspectives through which you can view any program. The **static** view is what you see when you look at your source code. It is fixed text sitting in a file, and it can be read and analysed *without being executed*. Types you write down in a function signature are static, as is the overall structure of your code. The compiler works entirely in this static world, and it can check your types before the program runs.
 
-But we do not just write programs for them to sit as text on a filesystem. We write programs to do things, which gives rise to the **dynamic** view of the program. When the code *executes*, it takes on actual values, follows particular paths(TODO: do they know what paths are), and produces behaviour that unfolds over time. Which branch (TODO: we should define what a control branch is. the only mentions of branches in the [110 glossary](https://cs110.students.cs.ubc.ca/reference/glossary.html) are with regard to trees? conditionals are discussed as: "A cond expression first evaluates the first question,")an `if` takes, what a variable holds at a given moment, and how many times a piece of code runs are dynamic facts, decided as the program runs and often different from one run to the next.
+But we do not just write programs for them to sit as text on a filesystem. We write programs to do things, which gives rise to the **dynamic** view of the program. When the code *executes*, it is run on some actual *inputs*, which cause variables in the code to take on different values, and control flow statements to follow different branches. Which branch an `if` takes, what a variable holds at a given moment, and how many times a piece of code runs are dynamic facts, decided as the program runs and often different from one run to the next.
 
-Keeping these two views apart is useful because different kinds of problems appear in each. The compiler can rule out a whole class of mistakes statically, just by reading the text, but it cannot know what will actually happen once the program runs. That is why static checking, however good, never removes the need to run and test a program, a theme we will return to throughout the course.
+Keeping these two views apart is useful because different kinds of problems appear in each. The compiler can rule out a whole class of mistakes statically, just by reading the text, but it cannot know what will happen once the program runs on a given input. That is why static checking, however good, never removes the need to run and test a program, a theme we will return to throughout the course.
 
 ## Validating the Dynamic View With Testing
 
 
 While the TypeScript compiler checks the static view of the program, we need to check the dynamic view ourselves. We do this through a process called *testing*. 
 
-Similar to CPSC 110, in Part 1 of this course, we will use a `checkExpect` (TODO: describe checkExpect as an assertion mechanism.)mechanism to validate that our program does not contain known errors when it executes dynamically. For example, to ensure that `letterGrade(88)` evaluates to `"A"`, we can write the following check:
+In Part 1 of this course, we will use a `checkExpect` (TODO: describe checkExpect as an assertion mechanism.)mechanism to validate that our program does not contain known errors when it executes dynamically. For example, to ensure that `letterGrade(88)` evaluates to `"A"`, we can write the following check:
 
 
 ```typescript
 checkExpect(letterGrade(88), "A");
 ```
 
-This cannot be checked statically; we must execute the `checkExpect` statement to verify the program behaviour. If `letterGrade` satisfies this behaviour, the program will execute successfully; if it does not, the program will crash with an error that describes the expected behaviour that was violated.
+This cannot be checked statically; we must execute the `checkExpect` statement to verify the program behaviour. If the the two arguments to `checkExpect` evaluate to the same value the program will execute successfully; if it does not, the program will crash with an error that describes the expected behaviour that was violated.
 
 Suppose we had a more fine-grained expectation of how letter grades should be computed and wrote the following check:
 
@@ -423,8 +425,7 @@ checkExpect(letterGrade(95), "A+");
 
 In this case the program would crash, because `letterGrade(95)` evaluates to `"A"` in our current implementation. The type system cannot detect this failure statically; we rely on tests written and executed dynamically to detect this fault. 
 
-
-In reality, this isn't quite a complete example; a full test case looks like this:
+TypeScript does not natively have a checkExpect. It is a utility we've built for Part 1. To use it, we must put it in a full test case, like this:
 
 ```typescript
 test("Return an A for a score of 88", () => {
@@ -435,12 +436,13 @@ test("Return an A for a score of 88", () => {
 The first parameter to `test` is a string that describes the test case. The second parameter `() =>` is new syntax: what it is doing is creating an **anonymous function**, and that function is being passed as a parameter to `test` so the testing framework can control the execution of the test.
 
 
-(TODO: details TS to explain syntax)
-
+<details class="tooltip ts-tips">
+<summary>Anonymous</summary>
+</details>
 
 
 <details class="tooltip link-110">
-<summary>Anonymous Functions are Lambdas</summary>
+<summary>Lambdas</summary>
 
 You have seen anonymous functions before: in CPSC 110 they were called **lambda expressions**. When you wrote a `lambda` to pass to an abstract function like `filter`, you were creating a function without naming it, right at the place it was needed:
 
