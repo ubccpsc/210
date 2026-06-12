@@ -68,24 +68,13 @@ Part 1 covers three broad themes across seven chapters.
 
 ## Learning Objectives
 
-Conceptual:
+By the end of Part 1, you should be able to:
 
-1. Distinguish the static and dynamic views of a program, and explain which kinds of error each can surface.
-2. Distinguish structural correctness from semantic correctness, and explain what contracts and invariants add beyond types.
-3. Compare the guarantees provided by types, tests, assertions, and controlled creation, and explain where each is strong and where it is blind.
-4. Decide, for a given property, whether it can be enforced statically, must be checked dynamically, or must rest on programmer discipline.
-5. Trace how a change propagates through references and aliases, and determine which parts of a program can observe it.
-6. Assess the trade-offs between mutable and immutable designs, and justify when changing state in place is warranted.
-
-Applied:
-
-1. Design type definitions from a problem description, and implement functions whose structure follows the data using case analysis and recursion.
-2. Formulate contracts and data invariants that are precise enough to test.
-3. Construct a test suite using equivalence-class partitioning and boundary-value analysis, and guard invariants with assertions.
-4. Evaluate a test suite and an exported interface, judging whether the tests cover the meaningful cases and whether client code can break the invariant.
-5. Design a value that establishes its invariant at creation and preserves it under every operation, using a constructor function and a closure.
-6. Diagnose a fault by tracing program state, references, and scope.
-7. Build programs that process sequences with array operations and loops, and that read files and call web services using `async` and `await`.
+1. **Model information as precise types**, designing data definitions whose structure drives the code that operates on them.
+2. **Specify behaviour with contracts and invariants, and construct tests** that target the cases most likely to reveal faults, then judge whether a suite genuinely covers them.
+3. **Decide how each property should be guaranteed**, whether by the type system, by tests and assertions, or by controlling how values are created, and design code that enforces the invariants the language cannot.
+4. **Reason about state and time**, tracing how references, scope, and mutation determine what a change affects, and weighing the trade-offs of mutation, side effects, and asynchronous computation.
+5. **Build working programs** that combine these ideas to process collections and interact with files and web services.
 
 ## Toward Part 2: Designing & Enforcing Abstractions
 
