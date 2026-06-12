@@ -1,6 +1,6 @@
 # Maintaining Invariants
 
-The previous reading placed invariants in documentation, tests, and assertions. All three of those mechanisms *detect* problems: tests probe chosen inputs, and assertions terminate the program when an impossible states are observed. A shortcoming of these mechanisms though is that they cannot  *prevent* invalid values from being created in the first place. This reading is about closing that gap: designing code so that the invariant is maintained by the structure of the program itself, rather than checked after the fact.
+The previous reading placed invariants in documentation, tests, and assertions. These mechanisms *detect* problems: tests probe chosen inputs, and assertions terminate the program when an impossible state is observed. A shortcoming of these mechanisms though is that they cannot *prevent* invalid values from being created in the first place. This reading is about closing that gap: designing code so that the invariant is maintained by the structure of the program itself, rather than checked after the fact.
 
 We will build on the `BankAccount` design from the previous lecture activity. The design has a data type carrying an invariant, and functions that operate on it:
 
@@ -39,7 +39,7 @@ The design has a weakness that the type checker cannot see:
 const account: BankAccount = { balance: -100 }; // passes the type checker
 ```
 
-This is the same shortcoming we encountered with `Song` whose duration was `-30`: the object has the right *shape*, so the static check passes, but its *meaning* is wrong. Nothing about the `BankAccount` type connects it to `deposit` and `withdraw`. A client can build any object literal with a `balance` property and the language will call it a `BankAccount`, whether or not the invariant holds. The careful contracts on `deposit` and `withdraw` protect only the clients who choose to call them.
+This is the same shortcoming we encountered with the `Song` whose duration was `-30`: the object has the right *shape*, so the static check passes, but its *meaning* is wrong. Nothing about the `BankAccount` type connects it to `deposit` and `withdraw`. A client can build any object literal with a `balance` property and the language will call it a `BankAccount`, whether or not the invariant holds. The careful contracts on `deposit` and `withdraw` protect only the clients who choose to call them.
 
 An invariant holds for the life of a program when two things are true. It must be *established* when the value is created, and it must be *preserved* by every operation that produces a new value from an old one. If both are true, then every value that ever exists is valid: the first one was checked, and every later one came from an operation that kept the promise. The initial design preserves the invariant in its operations but has no control over establishing the invariant, because creation is open to everyone.
 
@@ -215,7 +215,9 @@ The inner functions close over `n` exactly the way `deposit` and `withdraw` clos
 
 ## The Pattern Applied: A Venue Counter
 
-The pattern is not specific to bank accounts. A second example, compact enough to read in one piece: a venue installs a click counter at the door, and the count must never exceed the venue's capacity.
+The pattern is not specific to bank accounts. Here is a second example, compact enough to read in one piece:
+
+> As a door attendant at a venue, I want a clicker counter that refuses to count past the venue's capacity, so that we never admit more people than fire regulations allow.
 
 ```typescript
 const MAX_CAPACITY: number = 1000;
@@ -257,7 +259,24 @@ export function makeCounter(count: number): Counter {
 
 Both halves of the pattern are here. `makeCounter` is the constructor function: the assertion at its top is the single place the invariant is established, and because `increment` produces its successor by calling `makeCounter` again, every state the counter ever occupies passes through that check. The closure over `count` is the second half: no `count` property exists for a client to read or rewrite, so the operations returned by the constructor are the only way to interact with the state.
 
-One design observation, connecting back to the previous reading: this counter treats a click at full capacity as an *unexpected* error and halts. If turning people away at the door were a normal outcome the program should handle, `increment` would instead return a `Result`, the way `withdraw` reports an overdraft. Which treatment is right is a contract decision, not a coding one.
+Tests show the counter in action, with each `increment` producing a new counter:
+
+```typescript
+test("each click is counted", () => {
+    const empty = makeCounter(0);
+    const one = empty.increment();
+    const two = one.increment();
+    checkExpect(two.getCount(), 2);
+    checkExpect(empty.getCount(), 0); // the original counter is unchanged
+});
+
+test("the counter refuses to count past capacity", () => {
+    const full = makeCounter(1000); // the venue is exactly at capacity
+    checkError(() => full.increment(), "Invariant violation: Venue is full!");
+});
+```
+
+The second test demonstrates a design decision, connecting back to the previous reading: this counter treats a click at full capacity as an *unexpected* error and halts. If turning people away at the door were a normal outcome the program should handle, `increment` would instead return a `Result`, the way `withdraw` reports an overdraft. Which treatment is right is a contract decision, not a coding one.
 
 <details class="tooltip ts-tips">
 <summary>The <code>export</code> Keyword</summary>
@@ -268,7 +287,7 @@ The `export` in front of `makeCounter` marks it as available to code in other fi
 
 ## Protecting Invariants Drives Design
 
-Looking at our designs in this reading, we see that the invariants of our programs strongly influenced the designs we chose: creation could only be accomplished using one constructor function so the invariant could be established in a single place; the operations were bound to the data so that preserving the invariant is their job rather than every caller's; and the state was hidden in a closure so that no code outside the constructor could modify it. The organisation of the code is itself the enforcement mechanism. This is the first time we have seen an invariant shape the design of a program rather than just its documentation and tests, and it will not be the last: protecting invariants frequently drives how code is organised, as this makes the code safer, easier to understand, and easier to evolve.
+Looking at our designs in this reading, we see that the invariants of our programs strongly influenced the choices we made: creation could only be accomplished using one constructor function so the invariant could be established in a single place; the operations were bound to the data so that preserving the invariant is their job rather than every caller's; and the state was hidden in a closure so that no code outside the constructor could modify it. The organisation of the code is itself the enforcement mechanism. This is the first time we have seen an invariant shape the design of a program rather than just its documentation and tests, and it will not be the last: protecting invariants frequently drives how code is organised, as this makes the code safer, easier to understand, and easier to evolve.
 
-Building objects out of closures works, but the support the language gives us for this task is minimal. Object-oriented programming, provides this pattern as direct language syntax: constructors, methods, and fields that the language itself controls access to. The syntax will be new, but the idea will directly flow from this reading.
+Building objects out of closures works, but the support the language gives us for this task is minimal. Object-oriented programming provides this pattern as direct language syntax: constructors, methods, and fields that the language itself controls access to. The syntax will be new, but the idea will directly flow from this reading.
 
