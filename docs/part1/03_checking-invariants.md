@@ -298,7 +298,7 @@ type Loan = {
 };
 ```
 
-Trying to renew a loan that has no renewals remaining is an *expected* error: it will happen at the front desk every day, and the contract should say exactly what the caller gets. While we could encode the result as a `null` value, it is not descriptive, as `null` is often an overloaded concept in many languages.
+Trying to renew a loan that has no renewals remaining is an *expected* error: it will happen at the front desk every day, and the contract should say exactly what the caller gets. While we could encode the result as a `null` value, it is not descriptive, as `null` is often an overloaded concept in many languages. We could have also modelled this expected error by returning `-1` (since that would never be a valid `lateFee` value anyways), but this would open clients to simple unexpected math errors summing `lateFee` calls, if they were not careful and did not fully read the specification for the method.
 
 Instead, we introduce a result type so we can be clear about the failure:
 
