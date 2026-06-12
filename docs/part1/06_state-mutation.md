@@ -52,6 +52,8 @@ The habit to build: declare *everything* with `const`. When a value turns out to
 
 The arrays reading promised that loops have a second strength we were not ready for: values that change as the loop runs. Here is such an example. The forecasters want to know the longest unbroken stretch of below-freezing hours in the day. No single `map`, `filter`, or `find` computes this, because the answer depends on *runs* of consecutive elements: the computation has to remember how long the current cold streak is, and reset that memory every time the temperature rises above freezing.
 
+TODO: add a role goal benefit statement here and update the paragraph above to incorporate and not duplicate it
+
 ```typescript
 /**
  * Computes the length of the longest run of consecutive
@@ -95,7 +97,9 @@ The two counters are the loop's state: values that survive from one element to t
 | hour 18, 2° | no | 0 | 2 |
 | hour 21, -2° | yes | 1 | 2 |
 
-The morning streak of two readings is recorded in `longest`, survives the warm afternoon, and is not beaten by the single freezing reading in the evening. A trace table like this one is the standard tool for understanding stateful code, and writing one out by hand is a reliable way to debug: it makes the program's state visible.
+The morning streak of two readings is recorded in `longest`, survives the warm afternoon, and is not beaten by the single freezing reading in the evening. A trace table like this one is a standard tool for understanding stateful code, when programs are small enough. Writing one out by hand is a reliable way to debug: it makes the program's state visible.
+
+TODO: add a deep dive here describing the existence of the debugger, and the value of pausing computation to inspect (and modify!) variables in the debugger views. Encourage this approach over trace tables for any program that is more than one screen long.
 
 ## Changing Objects and Arrays
 
