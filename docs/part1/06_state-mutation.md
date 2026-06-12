@@ -1,8 +1,8 @@
 # Mutation and Side Effects
 
-You might have noticed in the previous reading that the arrays never actually changed. Every `map` and `filter` produced a new array, every `reduce` produced a new value, and `day` itself came through every example unchanged. That is also true of every program in this course so far, and of every program you wrote in CPSC 110: values were created, used, and combined into new values, but an existing value was never modified.
+You might have noticed in the previous chapter that the arrays never actually changed. Every `map` and `filter` produced a new array, every `reduce` produced a new value, and `day` itself came through every example unchanged. That is also true of every program in this course so far, and of every program you wrote in CPSC 110: values were created, used, and combined into new values, but an existing value was never modified.
 
-This reading introduces the ability to change existing values, called **mutation**. The syntax that enables mutation is short (most of it is a single `=` sign) but this single character can have important consequences for how you think about software construction. Mutation introduces the dimension of *time* into our programs: the answer to "what does this variable hold?" stops being something we can read directly from the source code and becomes a feature of a particular instant in time during the program's execution. This requires a shift in how we view our programs as we need to read the static text and simulate in our heads how the code will behave at runtime. We'll step through this thought process over the course of this reading.
+This chapter introduces the ability to change existing values, called **mutation**. The syntax that enables mutation is short (most of it is a single `=` sign) but this single character can have important consequences for how you think about software construction. Mutation introduces the dimension of *time* into our programs: the answer to "what does this variable hold?" stops being something we can read directly from the source code and becomes a feature of a particular instant in time during the program's execution. This requires a shift in how we view our programs as we need to read the static text and simulate in our heads how the code will behave at runtime. We'll step through this thought process over the course of this chapter.
 
 
 ## Reassignment
@@ -21,7 +21,7 @@ Every declaration you have written in this course uses `=` to store a first valu
 
 A reassignment is performed in two steps: first the right-hand side is evaluated, using the values the variables hold *right now*; then the result is stored into the name on the left, replacing whatever it held. This makes the `=` operator different than the equals sign of mathematics. The last line above makes no sense as a math equation (no number equals itself plus two), but as an instruction it is perfectly clear: take the value `temperature` currently holds (`1`), add `2`, and store the result (`3`) back into `temperature` 
 
-Reassignment is a statement, like `if` and `return` from the first reading: it produces no value, it performs an action. And because each reassignment replaces a value, the *order* of statements now matters in a way it never did before:
+Reassignment is a statement, like `if` and `return` from the first chapter: it produces no value, it performs an action. And because each reassignment replaces a value, the *order* of statements now matters in a way it never did before:
 
 ```typescript
 let x = 1;
@@ -35,7 +35,7 @@ The **state** of a program is the value every variable holds at a particular ins
 <details class="tooltip link-110">
 <summary>There Was No Mutation in BSL</summary>
 
-This is the first construct in the course with no counterpart in CPSC 110. In the teaching languages, `define` bound a name to a value once; nothing could change it afterwards. That absence was what made the stepper possible: because a name meant one value forever, any name could be replaced by its value, anywhere, without changing what the program meant. Mutation gives that property up. A name can no longer be replaced by "its value", because *which* value depends on where the program is in its execution. This is the most significant difference between the two languages so far, deeper than any syntax, and it is why this reading moves slowly.
+This is the first construct in the course with no counterpart in CPSC 110. In the teaching languages, `define` bound a name to a value once; nothing could change it afterwards. That absence was what made the stepper possible: because a name meant one value forever, any name could be replaced by its value, anywhere, without changing what the program meant. Mutation gives that property up. A name can no longer be replaced by "its value", because *which* value depends on where the program is in its execution. This is the most significant difference between the two languages so far, deeper than any syntax, and it is why this chapter moves slowly.
 
 </details>
 
@@ -50,7 +50,7 @@ The habit to build: declare *everything* with `const`. When a value turns out to
 
 ## State Gives Loops a Memory
 
-The arrays reading promised that loops have a second strength we were not ready for: values that change as the loop runs. Here is such an example. The forecasters want to know the longest unbroken stretch of below-freezing hours in the day. No single `map`, `filter`, or `find` computes this, because the answer depends on *runs* of consecutive elements: the computation has to remember how long the current cold streak is, and reset that memory every time the temperature rises above freezing.
+The arrays chapter promised that loops have a second strength we were not ready for: values that change as the loop runs. Here is such an example. The forecasters want to know the longest unbroken stretch of below-freezing hours in the day. No single `map`, `filter`, or `find` computes this, because the answer depends on *runs* of consecutive elements: the computation has to remember how long the current cold streak is, and reset that memory every time the temperature rises above freezing.
 
 TODO: add a role goal benefit statement here and update the paragraph above to incorporate and not duplicate it
 
@@ -128,7 +128,7 @@ The complexity mutation brings is justified by what it models: in the real world
 <details class="tooltip ts-tips">
 <summary>Mutating and Non-Mutating Array Operations</summary>
 
-Arrays carry both kinds of operation, and it pays to know which is which. `map` and `filter` return a **new array** and leave the original untouched; that is why the previous reading could use them freely before mutation existed. `push`, `pop`, and `sort` **mutate the array in place**. The names do not announce the difference, so when using an array operation for the first time, check its documentation to see whether it modifies the array or returns a new one. A surprising number of real-world bugs are a `sort` that quietly reordered an array somebody else was still using.
+Arrays carry both kinds of operation, and it pays to know which is which. `map` and `filter` return a **new array** and leave the original untouched; that is why the previous chapter could use them freely before mutation existed. `push`, `pop`, and `sort` **mutate the array in place**. The names do not announce the difference, so when using an array operation for the first time, check its documentation to see whether it modifies the array or returns a new one. A surprising number of real-world bugs are a `sort` that quietly reordered an array somebody else was still using.
 
 </details>
 
@@ -163,9 +163,9 @@ One way to think about this is in terms of boxes. A variable is a labelled box. 
 <details class="tooltip deep-dive">
 <summary>References Are Pointers (a Preview of CPSC 213)</summary>
 
-Concretely, the box holds a **memory address**. Every object lives somewhere in the computer's memory, and a reference is the number of the location where that object begins; the "arrow" in our box picture is the runtime following the address to the object. C, the language at the centre of CPSC 213, makes all of this explicit. Its references are called **pointers**, a pointer's numeric value can be printed, compared, and even used in arithmetic, and the language has dedicated operators for taking an address (`&x`) and for following one (`*p`). TypeScript runs on the same machinery but hides it completely: you cannot observe an address, manufacture one, or do arithmetic on one. Everything this reading says about sharing and aliasing is the visible behaviour of that hidden machinery.
+Concretely, the box holds a **memory address**. Every object lives somewhere in the computer's memory, and a reference is the number of the location where that object begins; the "arrow" in our box picture is the runtime following the address to the object. C, the language at the centre of CPSC 213, makes all of this explicit. Its references are called **pointers**, a pointer's numeric value can be printed, compared, and even used in arithmetic, and the language has dedicated operators for taking an address (`&x`) and for following one (`*p`). TypeScript runs on the same machinery but hides it completely: you cannot observe an address, manufacture one, or do arithmetic on one. Everything this chapter says about sharing and aliasing is the visible behaviour of that hidden machinery.
 
-The other thing C makes explicit is memory management. In this course we never think about where objects live or when their memory comes back; in C, the programmer asks for memory when creating an object (`malloc`) and must announce when the program is finished with it (`free`), because nothing else will. Both directions of mistake are serious: freeing too early leaves *dangling pointers*, aliases to memory that may already be reused for something unrelated, and forgetting to free *leaks* memory that can never be recovered while the program runs. Many of the most damaging security vulnerabilities in widely used software are exactly these mistakes. TypeScript spares you all of it by reclaiming unreachable objects automatically (the garbage collection deep-dive later in this reading), trading away some performance and control to do so. When you reach CPSC 213 you will manage memory yourself, and you will see precisely what the runtime has been quietly doing for you here.
+The other thing C makes explicit is memory management. In this course we never think about where objects live or when their memory comes back; in C, the programmer asks for memory when creating an object (`malloc`) and must announce when the program is finished with it (`free`), because nothing else will. Both directions of mistake are serious: freeing too early leaves *dangling pointers*, aliases to memory that may already be reused for something unrelated, and forgetting to free *leaks* memory that can never be recovered while the program runs. Many of the most damaging security vulnerabilities in widely used software are exactly these mistakes. TypeScript spares you all of it by reclaiming unreachable objects automatically (the garbage collection deep-dive later in this chapter), trading away some performance and control to do so. When you reach CPSC 213 you will manage memory yourself, and you will see precisely what the runtime has been quietly doing for you here.
 
 </details>
 
@@ -239,7 +239,7 @@ The three cases, summarised:
 <details class="tooltip ts-tips">
 <summary>The <code>void</code> Return Type</summary>
 
-The functions above are our first whose signatures declare a return type of **`void`**: they return nothing, so there is no value to name. A `void` function is called purely for what it *does* rather than what it *produces*. Before this reading, that would have made such a function useless. `bump` genuinely is useless; `calibrate` is not, and the difference between them is the subject of this reading.
+The functions above are our first whose signatures declare a return type of **`void`**: they return nothing, so there is no value to name. A `void` function is called purely for what it *does* rather than what it *produces*. Before this chapter, that would have made such a function useless. `bump` genuinely is useless; `calibrate` is not, and the difference between them is the subject of this chapter.
 
 </details>
 
@@ -296,7 +296,7 @@ Scope does not determine an object's lifetime; *reachability* does. An object li
 <details class="tooltip deep-dive">
 <summary>Mutability, Immutability, and Program Complexity</summary>
 
-A value that can never change after creation is called **immutable**, and much of this reading's difficulty disappears when data is immutable. Aliasing only matters because somebody can write: two arrows pointing at an object that nobody can change behave exactly like two private copies, so the copy-versus-reference distinction stops affecting what a program computes. A reader can treat every immutable value as a fact rather than a state: learn it once and rely on it anywhere, in any order. BSL had this property everywhere. With no mutation in the language, every value was a fact, which is part of why the substitution model worked and why no reading before this one needed a trace table.
+A value that can never change after creation is called **immutable**, and much of this chapter's difficulty disappears when data is immutable. Aliasing only matters because somebody can write: two arrows pointing at an object that nobody can change behave exactly like two private copies, so the copy-versus-reference distinction stops affecting what a program computes. A reader can treat every immutable value as a fact rather than a state: learn it once and rely on it anywhere, in any order. BSL had this property everywhere. With no mutation in the language, every value was a fact, which is part of why the substitution model worked and why no chapter before this one needed a trace table.
 
 Mutability provides efficient updates and direct modelling of change, at the cost of exactly this reasoning. Every alias to a mutable object is a potential writer, so the effort of understanding a value grows with the number of places that can reach it, and the order of operations starts to matter. The complexity is real enough that much of professional practice is organised around limiting it: declaring everything `const`, preferring operations like `map` and `filter` that return new values, and designing types whose instances are never modified after construction. Some languages go further; in Rust, values are immutable unless explicitly marked otherwise, and the compiler restricts shared mutable data.
 
@@ -326,7 +326,7 @@ test("calibrateDay shifts every reading by the offset", () => {
 });
 ```
 
-There is one more consequence, and it is the one this part of the course has been building toward. The invariants readings established a comfortable discipline: validate a value when it is constructed, and rely on the invariant afterwards. Mutation breaks the "afterwards". `reading.hour = 99` is a perfectly legal statement that violates the `Reading` invariant long after construction, and aliasing means *any* part of the program holding a reference can do it, at any time, from anywhere. Under mutation, an invariant is no longer established once; it must be *preserved by every operation that touches the data, forever*. Keeping that promise when references can travel anywhere in the program requires controlling who is allowed to mutate at all, and that problem (restricting mutation to a trusted set of operations) is precisely the focus of part 2 of the course.
+There is one more consequence, and it is the one this part of the course has been building toward. The invariants chapters established a comfortable discipline: validate a value when it is constructed, and rely on the invariant afterwards. Mutation breaks the "afterwards". `reading.hour = 99` is a perfectly legal statement that violates the `Reading` invariant long after construction, and aliasing means *any* part of the program holding a reference can do it, at any time, from anywhere. Under mutation, an invariant is no longer established once; it must be *preserved by every operation that touches the data, forever*. Keeping that promise when references can travel anywhere in the program requires controlling who is allowed to mutate at all, and that problem (restricting mutation to a trusted set of operations) is precisely the focus of part 2 of the course.
 
 Until then, the working guidance falls back on a discipline-based approach:
 
@@ -337,8 +337,8 @@ Until then, the working guidance falls back on a discipline-based approach:
 
 ## Mutating the World
 
-Mutation is worth the extra mental burden it induces: real programs model a changing world. Programs must now be understood by tracing values through time, and every reader needs to be able to answer a new set of questions precisely: is this a copy or a reference? Does this change escape this block, this function, this module? Who else holds an arrow to this object? The box-and-arrow model and the scope rules in this reading are the tools for answering them. Side effects also add new complexity we have not encountered yet: effects that reach *outside* of specific functions, to other parts of the program, to files, databases, networks, and users. But since the point of programs is to do useful work for people, side effects are important and are a fundamental part of real software systems that require careful thought and design to use effectively without making a program too hard to understand or brittle to evolve.
+Mutation is worth the extra mental burden it induces: real programs model a changing world. Programs must now be understood by tracing values through time, and every reader needs to be able to answer a new set of questions precisely: is this a copy or a reference? Does this change escape this block, this function, this module? Who else holds an arrow to this object? The box-and-arrow model and the scope rules in this chapter are the tools for answering them. Side effects also add new complexity we have not encountered yet: effects that reach *outside* of specific functions, to other parts of the program, to files, databases, networks, and users. But since the point of programs is to do useful work for people, side effects are important and are a fundamental part of real software systems that require careful thought and design to use effectively without making a program too hard to understand or brittle to evolve.
 
 <!-- RTH: let's leave off this bridge for now; not sure if we want to keep these so clearly anyways. 
 
-The outside world has a property that nothing in our programs has had so far: it does not answer immediately. What programs do while they wait is the subject of the next reading. -->
+The outside world has a property that nothing in our programs has had so far: it does not answer immediately. What programs do while they wait is the subject of the next chapter. -->

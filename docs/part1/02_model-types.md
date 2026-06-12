@@ -1,12 +1,12 @@
 # Using Types to Model Problems
 
-In the last reading we used types to annotate individual values: a parameter was a `number`, a function returned a `string`, and the compiler checked that we used them consistently. That is enough when a program passes around single, unrelated values, but real information rarely arrives one value at a time.
+In the last chapter we used types to annotate individual values: a parameter was a `number`, a function returned a `string`, and the compiler checked that we used them consistently. That is enough when a program passes around single, unrelated values, but real information rarely arrives one value at a time.
 
 Consider a song. A song is not one value; it is a title, an artist, and a duration that only mean something together. With only primitive types we would carry these as three separate values and have to remember, everywhere, that they belong to the same song. Nothing would stop us from pairing one song's title with another's duration, or forgetting the duration entirely, or passing an artist where a title was expected (both are strings, so the compiler would stay silent). The information has a shape, and primitive annotations cannot capture it.
 
 Other information cannot be expressed with primitives at all. A playlist is *either empty or a song followed by another playlist*: it has distinct cases, and it can be any length. No single `number` or `string` means "either nothing, or a song and then more songs."
 
-This reading introduces the tools to describe information like this: **compound types** that group related values into one, model alternatives as distinct cases, and capture self-referential structure. Writing such a description down as a **data definition** does two things at once: it gives the program a shape to follow, and it lets the compiler hold us to that shape, catching whole classes of mistakes before the program runs. This is the data-definition design you practised in CPSC 110, now written directly in the language and checked by the compiler.
+This chapter introduces the tools to describe information like this: **compound types** that group related values into one, model alternatives as distinct cases, and capture self-referential structure. Writing such a description down as a **data definition** does two things at once: it gives the program a shape to follow, and it lets the compiler hold us to that shape, catching whole classes of mistakes before the program runs. This is the data-definition design you practised in CPSC 110, now written directly in the language and checked by the compiler.
 
 ## Assigning Values to Names
 
@@ -17,7 +17,7 @@ const courseName: string = "CPSC 210";
 const credits: number = 4;
 ```
 
-A name introduced with `const` cannot be reassigned to a different value later: `courseName` will always refer to that one string. Every value in this reading is named with `const`; names whose values are meant to change come later, when we look at mutation.
+A name introduced with `const` cannot be reassigned to a different value later: `courseName` will always refer to that one string. Every value in this chapter is named with `const`; names whose values are meant to change come later, when we look at mutation.
 
 Two values are worth knowing from the start because they stand for the *absence* of a value: `null` and `undefined`. `null` represents a deliberate "no value here", such as the result of a lookup that finds nothing. `undefined` is the value a name has when nothing has been assigned to it yet. Each is its own type, and both become useful in combination with other types, as we will see when a function may or may not find a result.
 
@@ -44,7 +44,7 @@ A **data definition** is a precise description of which values are allowed. Desi
 5. Write examples to check your model
 6. Look for generalisation
 
-The rest of this reading works through the examples below, from the simplest to the most involved. As we go we will meet the building blocks TypeScript provides: primitive values for atomic facts, restricted values for fixed choices, types that group related values together, unions for distinct cases, and self-reference for recursive structure.
+The rest of this chapter works through the examples below, from the simplest to the most involved. As we go we will meet the building blocks TypeScript provides: primitive values for atomic facts, restricted values for fixed choices, types that group related values together, unions for distinct cases, and self-reference for recursive structure.
 
 <details class="tooltip deep-dive">
   <summary>Coming from BSL</summary>
@@ -213,7 +213,7 @@ type NonEmptyPlaylist = {
 
 </details>
 
-Reading a `kind` back to recover which case you are looking at can feel indirect, since the case is something the value already is. A more direct mechanism becomes available once these definitions become classes, where we can ask an object what it is and let each kind carry its own behaviour. We return to this when we reach polymorphism in a later reading.
+Reading a `kind` back to recover which case you are looking at can feel indirect, since the case is something the value already is. A more direct mechanism becomes available once these definitions become classes, where we can ask an object what it is and let each kind carry its own behaviour. We return to this when we reach polymorphism in a later chapter.
 
 ### 5. Examples
 
@@ -418,6 +418,6 @@ These run the functions and confirm they produce the expected values. The compil
 
 ## The Centrality of Abstraction
 
-A precise data definition is the foundation everything else rests on. It catches mistakes early, it mirrors the structure of the problem, and it drives the structure of the code that consumes it: once the data is modelled, the functions largely follow its shape. In this reading we followed one process across a sequence of examples, from a simple enumeration through a song to a recursive playlist, and then wrote functions whose shape follows the data's shape.
+A precise data definition is the foundation everything else rests on. It catches mistakes early, it mirrors the structure of the problem, and it drives the structure of the code that consumes it: once the data is modelled, the functions largely follow its shape. In this chapter we followed one process across a sequence of examples, from a simple enumeration through a song to a recursive playlist, and then wrote functions whose shape follows the data's shape.
 
 From here, Part 1 builds directly on this work: writing functions that are themselves generic, deriving tests from the structure of data, and leaning further on the type checker. Later, when we move to object-oriented programming, the tagged unions you wrote here become class hierarchies; the underlying ideas carry over even as the syntax changes.

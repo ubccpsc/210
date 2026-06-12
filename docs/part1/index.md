@@ -1,4 +1,4 @@
-# RTH NOTE: this is a rough draft that we shouldn't bother editing until the part1 readings are all done so they can forward reference towards all of them in a coherent story.
+# RTH NOTE: this is a rough draft that we shouldn't bother editing until the part1 chapters are all done so they can forward reference towards all of them in a coherent story.
 
 # Part 1: Contracts and Safety
 
@@ -58,7 +58,7 @@ That raises an immediate question: if the language cannot check an invariant, wh
 We call this part *Contracts and Safety* because the mechanisms in it share one goal: establishing guarantees that hold for **every** execution of the program, not just the executions we happened to observe. A passing test is evidence about particular runs; a type check, a contract, or a maintained invariant is a claim about all of them. Knowing which kind of assurance you hold—and which you merely hope for—is much of what separates engineering from optimism.
 </details>
 
-## Layered Correctness (This is really synthesis for this part; could be its own reading if needed)
+## Layered Correctness (This is really synthesis for this part; could be its own chapter if needed)
 
 The mechanisms above are not competing answers to the same question; they are layers of a single strategy, and each layer guards against a failure the others cannot see:
 

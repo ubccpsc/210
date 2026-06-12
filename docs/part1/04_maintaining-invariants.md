@@ -1,6 +1,6 @@
 # Maintaining Invariants
 
-The previous reading placed invariants in documentation, tests, and assertions. These mechanisms *detect* problems: tests probe chosen inputs, and assertions terminate the program when an impossible state is observed. A shortcoming of these mechanisms though is that they cannot *prevent* invalid values from being created in the first place. This reading is about closing that gap: designing code so that the invariant is maintained by the structure of the program itself, rather than checked after the fact.
+The previous chapter placed invariants in documentation, tests, and assertions. These mechanisms *detect* problems: tests probe chosen inputs, and assertions terminate the program when an impossible state is observed. A shortcoming of these mechanisms though is that they cannot *prevent* invalid values from being created in the first place. This chapter is about closing that gap: designing code so that the invariant is maintained by the structure of the program itself, rather than checked after the fact.
 
 We will build on the `BankAccount` design from the previous lecture activity. The design has a data type carrying an invariant, and functions that operate on it:
 
@@ -29,7 +29,7 @@ function deposit(account: BankAccount, amount: number): BankAccount {
 }
 ```
 
-A matching `withdraw` follows the same shape. The contracts are documented, tests can be derived from them, and assertions can guard the implementations. By the standards of the previous reading, this design is complete.
+A matching `withdraw` follows the same shape. The contracts are documented, tests can be derived from them, and assertions can guard the implementations. By the standards of the previous chapter, this design is complete.
 
 ## Valid Types, Invalid Values
 
@@ -276,7 +276,7 @@ test("the counter refuses to count past capacity", () => {
 });
 ```
 
-The second test demonstrates a design decision, connecting back to the previous reading: this counter treats a click at full capacity as an *unexpected* error and halts. If turning people away at the door were a normal outcome the program should handle, `increment` would instead return a `Result`, the way `withdraw` reports an overdraft. Which treatment is right is a contract decision, not a coding one.
+The second test demonstrates a design decision, connecting back to the previous chapter: this counter treats a click at full capacity as an *unexpected* error and halts. If turning people away at the door were a normal outcome the program should handle, `increment` would instead return a `Result`, the way `withdraw` reports an overdraft. Which treatment is right is a contract decision, not a coding one.
 
 <details class="tooltip ts-tips">
 <summary>The <code>export</code> Keyword</summary>
@@ -287,7 +287,7 @@ The `export` in front of `makeCounter` marks it as available to code in other fi
 
 ## Protecting Invariants Drives Design
 
-Looking at our designs in this reading, we see that the invariants of our programs strongly influenced the choices we made: creation could only be accomplished using one constructor function so the invariant could be established in a single place; the operations were bound to the data so that preserving the invariant is their job rather than every caller's; and the state was hidden in a closure so that no code outside the constructor could modify it. The organisation of the code is itself the enforcement mechanism. This is the first time we have seen an invariant shape the design of a program rather than just its documentation and tests, and it will not be the last: protecting invariants frequently drives how code is organised, as this makes the code safer, easier to understand, and easier to evolve.
+Looking at our designs in this chapter, we see that the invariants of our programs strongly influenced the choices we made: creation could only be accomplished using one constructor function so the invariant could be established in a single place; the operations were bound to the data so that preserving the invariant is their job rather than every caller's; and the state was hidden in a closure so that no code outside the constructor could modify it. The organisation of the code is itself the enforcement mechanism. This is the first time we have seen an invariant shape the design of a program rather than just its documentation and tests, and it will not be the last: protecting invariants frequently drives how code is organised, as this makes the code safer, easier to understand, and easier to evolve.
 
-Building objects out of closures works, but the support the language gives us for this task is minimal. Object-oriented programming provides this pattern as direct language syntax: constructors, methods, and fields that the language itself controls access to. The syntax will be new, but the idea will directly flow from this reading.
+Building objects out of closures works, but the support the language gives us for this task is minimal. Object-oriented programming provides this pattern as direct language syntax: constructors, methods, and fields that the language itself controls access to. The syntax will be new, but the idea will directly flow from this chapter.
 
