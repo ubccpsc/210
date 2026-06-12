@@ -41,7 +41,7 @@ A **data definition** is a precise description of which values are allowed. Desi
 2. Identify any distinct cases
 3. Determine what information each case needs
 4. Translate into a TypeScript type
-5. Write examples to check your model
+5. Write concrete examples to check your model
 6. Look for generalisation
 
 The rest of this chapter works through the examples below, from the simplest to the most involved. As we go we will meet the building blocks TypeScript provides: primitive values for atomic facts, restricted values for fixed choices, types that group related values together, unions for distinct cases, and self-reference for recursive structure.
@@ -53,7 +53,7 @@ This is the data-definition step of the design recipe from CPSC 110. There you d
 
 </details>
 
-## Traffic Lights
+## Example: Traffic Lights
 
 > As a driver, I want the intersection's signal to be exactly one of red, yellow, or green, so that I always know whether to stop, slow down, or go.
 
@@ -61,7 +61,7 @@ This is the data-definition step of the design recipe from CPSC 110. There you d
 2. **Cases:** it shows one of three colours: red, yellow, or green.
 3. **Information per case:** none; a colour is a bare label that carries nothing beyond itself.
 4. **Translate:** a value that is one of a fixed set of labels is exactly a union of string literals.
-5. **Examples:** one valid colour, plus an invalid one to confirm the type is enforced.
+5. **Concrete examples:** one valid colour, plus an invalid one to confirm the type is enforced.
 6. **Generalisation:** none; a small enumeration stands on its own.
 
 <details class="tooltip ts-tips">
@@ -84,7 +84,7 @@ type HttpStatus = 200 | 301 | 404 | 500;
 
 </details>
 
-## Shuffle Modes
+## Example: Shuffle Modes
 
 > As a listener, I want to set playback to one of off, on, or repeat-one, so that I can control how my music is ordered.
 
@@ -101,7 +101,7 @@ const mode: ShuffleMode = "on"; // ok
 
 </details>
 
-## Songs
+## Example: Songs
 
 > As a listener, I want each song to carry its title, artist, and length, so that I can see what is playing and how long it will last.
 
@@ -143,7 +143,7 @@ A `Song` type plays the role of a structure definition. Where CPSC 110 had `(def
 
 </details>
 
-### 5. Examples
+### 5. Concrete Examples
 
 An object is an instance of its type, and each object is its own independent value. Below, `song1` and `song2` are two separate songs that share the `Song` type.
 
@@ -187,7 +187,7 @@ JSON is data only: it carries no types and no code. A few rules separate it from
 
 </details>
 
-## Playlists
+## Example: Playlists
 
 > As a listener, I want to build an ordered list of songs of any length, so that I can queue up exactly the music I want to hear.
 
@@ -232,7 +232,7 @@ type NonEmptyPlaylist = {
 
 Reading a `kind` back to recover which case you are looking at can feel indirect, since the case is something the value already is. A more direct mechanism becomes available once these definitions become classes, where we can ask an object what it is and let each kind carry its own behaviour. We return to this when we reach polymorphism in a later chapter.
 
-### 5. Examples
+### 5. Concrete Examples
 
 With the type written, we build concrete examples from the songs we already have. If they are easy to construct, the design fits; if they are awkward, the model is probably too complicated. These examples also become the data our tests run against later.
 
