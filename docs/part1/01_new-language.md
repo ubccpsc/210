@@ -2,13 +2,9 @@
 
 (TODO: BSL/ISL Teaching Languages? Won't change for now. We could say at the top we'll use "BSL" to refer to all the teaching languages)
 
-You already know how to program. In CPSC 110 (or equivalent course) you learned to design data, write functions, and reason about how a program is written using a teaching language (BSL). 
+This chapter introduces TypeScript, the language we use for the rest of the course. Much of CPSC 110 carries over; what is new is mostly a matter of how things are written down and how much the language checks for you.
 
-The core skills you learned previously are not tied to the language you learned them with. Ideas like *values*, *variables*, *functions*, *conditionals*, and *data* carry across every language. What changes is how each language *writes them down* and how much *it checks* your work for you. 
-
-In this course we will use TypeScript, and we will introduce it by scaffolding from BSL. Where a concept is familiar we will point at the BSL idea it corresponds to, and where a concept differs from BSL we will call it out explicitly. You may not be provided such explicit scaffolding for the next language you learn; that will be ok! Having seen this scaffolding once, you'll have an idea of which comparisons to your prior knowledge are necessary to learn a new language. 
-
-Since all languages are related, if your first programming language was something other than BSL, that's ok too. In particular, if your first language was Python, the notion of **types** will be new to you as well.
+To make the transition concrete, we scaffold from BSL: each new concept is related back to the idea it corresponds to in the teaching languages, and the differences are called out as they arise. The next language you learn may offer no such scaffolding, and that is fine. Having built these comparisons once, you will know which questions to ask of any new language. If you came from a language other than BSL this still applies, and if that language was Python, the notion of **types** will be new to you as well.
 
 ## Software Systems and Programming Languages
 
@@ -293,7 +289,7 @@ Keeping these two views apart is useful because different kinds of problems appe
 ## Validating the Dynamic View With Testing
 
 
-While the TypeScript compiler checks the static view of the program, we need to check dynamic view ourselves. We do this through a process called *testing*. 
+While the TypeScript compiler checks the static view of the program, we need to check the dynamic view ourselves. We do this through a process called *testing*. 
 
 Similar to CPSC 110, in Part 1 of this course, we will use a `checkExpect` (TODO: describe checkExpect as an assertion mechanism.)mechanism to validate that our program does not contain known errors when it executes dynamically. For example, to ensure that `letterGrade(88)` evaluates to `"A"`, we can write the following check:
 
