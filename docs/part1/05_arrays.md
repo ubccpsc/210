@@ -64,6 +64,23 @@ The array literal plays the role of `list` from CPSC 110: `[ -4, -1, 3 ]` is the
 
 </details>
 
+<details class="tooltip ts-tips">
+<summary>Arrays are JSON values too</summary>
+
+The modelling chapter introduced **JSON** and listed its values: an object, a string, a number, a boolean, or `null`. The array is the one kind we had not yet met. An array literal is a JSON value whenever its elements are, so JSON can represent a whole sequence of records. Our `day` of readings is valid JSON:
+
+```json
+[
+  { "hour": 6, "tempCelsius": -4 },
+  { "hour": 9, "tempCelsius": -1 },
+  { "hour": 12, "tempCelsius": 3 }
+]
+```
+
+Objects and arrays nest freely, so a JSON value can describe data of almost any shape: an array of objects, an object whose properties are themselves arrays, and so on.
+
+</details>
+
 ## The Built-In Array Operations
 
 Arrays come with operations that cover the most common things a program does with a sequence. Each operation takes a function as its input: you describe what should happen to *one element*, and the operation applies that description across the whole array for you. The four we use most are `map`, `filter`, `reduce`, and `find`. These four operations capture some of the most common tasks we perform on arrays. `map` is used to uniformly transform every element of an array into a new array. `filter` returns a subset of an array. `find` locates one element in an array. `reduce` summarizes an array. 

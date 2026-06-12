@@ -50,9 +50,11 @@ The habit to build: declare *everything* with `const`. When a value turns out to
 
 ## State Gives Loops a Memory
 
-The arrays chapter promised that loops have a second strength we were not ready for: values that change as the loop runs. Here is such an example. The forecasters want to know the longest unbroken stretch of below-freezing hours in the day. No single `map`, `filter`, or `find` computes this, because the answer depends on *runs* of consecutive elements: the computation has to remember how long the current cold streak is, and reset that memory every time the temperature rises above freezing.
+The arrays chapter promised that loops have a second strength we were not ready for: values that change as the loop runs. Here is a problem that needs it.
 
-TODO: add a role goal benefit statement here and update the paragraph above to incorporate and not duplicate it
+> As a weather forecaster, I want to find the longest unbroken stretch of below-freezing hours in a day, so that I can report the severity of overnight cold snaps.
+
+No single `map`, `filter`, or `find` computes this, because the answer depends on *runs* of consecutive elements: the computation has to remember how long the current cold streak is, and reset that memory every time the temperature rises above freezing.
 
 ```typescript
 /**
@@ -99,7 +101,16 @@ The two counters are the loop's state: values that survive from one element to t
 
 The morning streak of two readings is recorded in `longest`, survives the warm afternoon, and is not beaten by the single freezing reading in the evening. A trace table like this one is a standard tool for understanding stateful code, when programs are small enough. Writing one out by hand is a reliable way to debug: it makes the program's state visible.
 
-TODO: add a deep dive here describing the existence of the debugger, and the value of pausing computation to inspect (and modify!) variables in the debugger views. Encourage this approach over trace tables for any program that is more than one screen long.
+<details class="tooltip deep-dive">
+<summary>Use the Debugger for Larger Programs</summary>
+
+A trace table is something you fill in by hand, which is practical only for short programs. Your IDE includes a **debugger** that does the same work automatically and at any scale. You set a **breakpoint** on a line, run the program, and execution pauses when it reaches that line. While it is paused, a panel shows the current value of every variable in scope, so you can read the program's state directly instead of reconstructing it on paper.
+
+From a breakpoint you can **step** through the code one statement at a time and watch the values change. This is the trace table built for you as the program runs. You can also modify a variable while execution is paused and then continue, which lets you test what would happen for a different value without editing the code and running it again.
+
+The debugger should be the main tool you think of whenever a program runs to more than a screen of code and you need to understand how it is operating at runtime.
+
+</details>
 
 ## Changing Objects and Arrays
 

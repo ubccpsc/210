@@ -2,6 +2,8 @@
 
 The previous chapter ended with side effects: changes that reach beyond a function, and sometimes beyond the program entirely, to files, networks, and users. Programs become much more useful when they interact with the outside world. A weather station that can only summarise readings typed into its source code is a calculator; a weather station that can load a year of readings from a file, fetch the current conditions from a web service, and write its report somewhere permanent is a system.
 
+> As a weather-station operator, I want to load past readings from a file and fetch current conditions from the regional service, so that my station can publish complete reports without my entering the data by hand.
+
 The outside world has a property that nothing inside our programs has had so far: it is *slow*, and it does not answer immediately. This chapter is about what programs do while they wait. The mechanics take some getting used to, but the goal is concrete: by the end you will be able to read and write files and call web-based services, and those two capabilities are the foundation for almost everything programs do in practice.
 
 ## How Long Computers Wait
