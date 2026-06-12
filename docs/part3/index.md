@@ -1,15 +1,15 @@
-# Part 3: Composing Abstractions (OO Design)
+# Part 3: Enabling Evolution
 
 > Build systems that you are able to evolve
 
-Topics that we could cover in this part include:
+Part 3 will span 7 lectures and could cover some (or all) of the following topics:
 
+* Coupling
+* Quality attributes (readability, complexity)
+* Refactoring
 * Using some sort(s) of non-rest API (API consumering)
 * REST API consumering
 * API Design
-* Coupling
-* Refactoring
 * Given a bug, fix it (what if there is and isn't a reproducer)
-* Fault localization?
+* Fault localization
 * Adding features
-* Quality attributes (readability, complexity)
