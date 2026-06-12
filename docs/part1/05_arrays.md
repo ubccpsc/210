@@ -2,11 +2,11 @@
 
 Much of the data programs work with arrives as a *sequence*: the messages in an inbox, the transactions on an account, the students in a course, the readings from a sensor. Because sequences are so common, every programming language provides a built-in data structure for them: the **array**, an ordered collection of elements that can be accessed by position and that knows its own size. C, Java, Rust, Python, and TypeScript all provide arrays (Python calls them lists), and an engineer moving between languages can rely on them being there.
 
-We have already built a sequence by hand. In [Using Types to Model Problems](./02_model-types) we defined a recursive `Playlist` and wrote a recursive function every time we wanted to count, total, or search it. That worked, but we had to re-invent the same traversal pattern in every function. Patterns this common are exactly what languages provide explicit support for to make work easier. Arrays come with the traversal operations already written for transforming, selecting, and searching sequences. This reading introduces arrays, those built-in operations, and then the general mechanism underneath them all: iteration.
+We have already built a sequence by hand. In [Using Types to Model Problems](./02_model-types) we defined a recursive `Playlist` and wrote a recursive function every time we wanted to count, total, or search it. That worked, but we had to re-invent the same traversal pattern in every function. Patterns this common are exactly what languages provide explicit support for to make work easier. Arrays come with the traversal operations already written for transforming, selecting, and searching sequences. This chapter introduces arrays, those built-in operations, and then the general mechanism underneath them all: iteration.
 
 ## A Day of Temperature Readings
 
-We will work with a single running example throughout this reading:
+We will work with a single running example throughout this chapter:
 
 > As a weather-station operator, I want to summarise a day of hourly temperature readings, so that I can publish accurate daily reports without computing them by hand.
 
@@ -53,14 +53,14 @@ const count = day.length;    // 6
 <details class="tooltip link-110">
 <summary>Lists in BSL</summary>
 
-The array literal plays the role of `list` from CPSC 110: `[ -4, -1, 3 ]` is the counterpart of `(list -4 -1 3)`. Underneath, BSL lists were built from `cons` cells, which is exactly the recursive structure we rebuilt as `LinkedList` in an earlier reading. Arrays package the same idea as a single built-in type, with direct access to any position by index.
+The array literal plays the role of `list` from CPSC 110: `[ -4, -1, 3 ]` is the counterpart of `(list -4 -1 3)`. Underneath, BSL lists were built from `cons` cells, which is exactly the recursive structure we rebuilt as `LinkedList` in an earlier chapter. Arrays package the same idea as a single built-in type, with direct access to any position by index.
 
 </details>
 
 <details class="tooltip ts-tips">
 <summary>Array Type Notation</summary>
 
-`Reading[]` can also be written `Array<Reading>`; the two notations mean exactly the same type, and the second uses the generics syntax from the modelling reading. In this course we use the `Reading[]` form, which is shorter and is the form you will see most often in practice.
+`Reading[]` can also be written `Array<Reading>`; the two notations mean exactly the same type, and the second uses the generics syntax from the modelling chapter. In this course we use the `Reading[]` form, which is shorter and is the form you will see most often in practice.
 
 </details>
 
@@ -110,7 +110,7 @@ The result of a `map` always has the same length as the input; only the elements
 <details class="tooltip deep-dive">
 <summary>The Recursion <code>map</code> Replaces</summary>
 
-For the recursive `LinkedList<T>` from the modelling reading, the same transformation has to be written by hand. (The parameter `f` is typed with the same arrow used to write one: `(t: T) => U` is the type of a function from `T` to `U`.)
+For the recursive `LinkedList<T>` from the modelling chapter, the same transformation has to be written by hand. (The parameter `f` is typed with the same arrow used to write one: `(t: T) => U` is the type of a function from `T` to `U`.)
 
 ```typescript
 function mapList<T, U>(list: LinkedList<T>, f: (t: T) => U): LinkedList<U> {
@@ -146,7 +146,7 @@ const totalCelsius: number = day.reduce((sum, reading) => sum + reading.tempCels
 // 6
 ```
 
-With `reduce` and `length` we can write, document, and test a summary function in the style of the previous readings:
+With `reduce` and `length` we can write, document, and test a summary function in the style of the previous chapters:
 
 ```typescript
 /**
@@ -169,7 +169,7 @@ test("mean temperature over the day", () => {
 });
 ```
 
-The precondition matters here in exactly the way the previous reading described: `meanTemp` of an empty array would divide by zero, so the contract excludes that input.
+The precondition matters here in exactly the way the previous chapter described: `meanTemp` of an empty array would divide by zero, so the contract excludes that input.
 
 ### Searching with `find`
 
@@ -180,7 +180,7 @@ const thaw = day.find(reading => reading.tempCelsius > 0);
 // { hour: 12, tempCelsius: 3 }
 ```
 
-If no element matches, `find` returns `undefined`, and its return type says so: searching a `Reading[]` produces a `Reading | undefined`. This is a deliberate language design choice. Recall the two absence values from the modelling reading: `null` is a deliberate "no value here" that we choose when designing our own types, while `undefined` is the language's own value for "nothing was provided". TypeScript's built-in operations consistently use `undefined` for their "not found" results, and `find` follows that convention. Either way the protection is the same: the union type forces every caller to consider the case where nothing matched.
+If no element matches, `find` returns `undefined`, and its return type says so: searching a `Reading[]` produces a `Reading | undefined`. This is a deliberate language design choice. Recall the two absence values from the modelling chapter: `null` is a deliberate "no value here" that we choose when designing our own types, while `undefined` is the language's own value for "nothing was provided". TypeScript's built-in operations consistently use `undefined` for their "not found" results, and `find` follows that convention. Either way the protection is the same: the union type forces every caller to consider the case where nothing matched.
 
 ```typescript
 test("find returns undefined when nothing matches", () => {
@@ -212,7 +212,7 @@ for (const reading of day) {
 }
 ```
 
-Like the `if` statement from the first reading, `for of` is a statement: it produces no value, it directs the flow of execution. This is a new construct relative to CPSC 110, where every repetition was expressed with recursion.
+Like the `if` statement from the first chapter, `for of` is a statement: it produces no value, it directs the flow of execution. This is a new construct relative to CPSC 110, where every repetition was expressed with recursion.
 
 <details class="tooltip link-110">
 <summary>Loops Replace the Recursive Traversal</summary>
@@ -299,11 +299,11 @@ test("a repeated temperature is detected", () => {
 });
 ```
 
-Loops have a second strength we are not ready to use yet: values that change as the loop runs, allowing a running tally to be carried from one element to the next. Doing that requires changing existing values, which is the subject of the next reading.
+Loops have a second strength we are not ready to use yet: values that change as the loop runs, allowing a running tally to be carried from one element to the next. Doing that requires changing existing values, which is the subject of the next chapter.
 
 Prefer the named operation whenever the task is exactly a transform, a selection, a summary, or a first-match search. The name tells every future reader the shape of the computation at a glance, and the traversal it performs has no room for the small mistakes a hand-written loop can contain. Write a loop when the computation does not fit a named pattern: when it relates elements to one another, like the repeated-temperature check, or when one pass must answer a question no single named operation can. The named operations say *what*; the loop is for when you must control *how*.
 
 ## On Iteration
 
-Arrays give sequences built-in support in the language, and their operations package the traversals we used to write by hand: `map` to transform, `filter` to select, `reduce` to summarise, `find` to search, with `for of` underneath them all for the computations that fit no named pattern. Notice one property everything in this reading shared: none of these operations changed `day`. Every `map` and `filter` produced a new array, every `reduce` produced a new value, and even our hand-written loops only read the elements they visited; the original readings were never touched. This reflects a general principle of program design that runs through this course: once a pattern is understood and reliable, it is packaged up so it never needs to be re-derived, and we get to focus on *what* to compute instead of *how* to traverse. What happens when programs *do* change existing values, and why that calls for so much care, is the subject of the next reading.
+Arrays give sequences built-in support in the language, and their operations package the traversals we used to write by hand: `map` to transform, `filter` to select, `reduce` to summarise, `find` to search, with `for of` underneath them all for the computations that fit no named pattern. Notice one property everything in this chapter shared: none of these operations changed `day`. Every `map` and `filter` produced a new array, every `reduce` produced a new value, and even our hand-written loops only read the elements they visited; the original readings were never touched. This reflects a general principle of program design that runs through this course: once a pattern is understood and reliable, it is packaged up so it never needs to be re-derived, and we get to focus on *what* to compute instead of *how* to traverse. What happens when programs *do* change existing values, and why that calls for so much care, is the subject of the next chapter.
 

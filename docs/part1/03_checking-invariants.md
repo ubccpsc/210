@@ -2,11 +2,11 @@
 
 We previously introduced the distinction between the static and dynamic views of a program. The compiler checks the static view: it reads your source code, analyses your types, and flags inconsistencies before the program runs. But a program that passes the type checker can still produce the wrong results. Types tell you what *kind* of value a function returns; they do not tell you whether that value is *correct*.
 
-The properties a correct program must maintain beyond its types are called **invariants**. This reading is about working with them: what an invariant is, how to identify the invariants in a problem, how to record them in a function's documentation so they can be detected later, and how to check them with automated tests. In this course we will mainly focus on what are known as unit tests, as they test individual units of a program, usually at the function level.
+The properties a correct program must maintain beyond its types are called **invariants**. This chapter is about working with them: what an invariant is, how to identify the invariants in a problem, how to record them in a function's documentation so they can be detected later, and how to check them with automated tests. In this course we will mainly focus on what are known as unit tests, as they test individual units of a program, usually at the function level.
 
 ## What Is an Invariant?
 
-An **invariant** is a property that must hold for a value or a computation to be meaningful, but that the type system cannot express or enforce. We have already met one. In the previous reading, the `Song` type carried this comment:
+An **invariant** is a property that must hold for a value or a computation to be meaningful, but that the type system cannot express or enforce. We have already met one. In the previous chapter, the `Song` type carried this comment:
 
 ```typescript
 type Song = {
@@ -33,7 +33,7 @@ Invariants are everywhere once you look for them: durations are positive, percen
 
 ## Identifying Invariants
 
-At the function level, invariants attach in two places: to a function's inputs and to its output. For the rest of this reading we will work with a single running example:
+At the function level, invariants attach in two places: to a function's inputs and to its output. For the rest of this chapter we will work with a single running example:
 
 > As the campus library, I want late fees computed from how many days late a book is returned, with a short grace period and a capped maximum, so that patrons are charged fairly and predictably.
 
@@ -124,7 +124,7 @@ BSL used `check-expect` as a standalone expression at the top level of a file. T
 <details class="tooltip ts-tips">
 <summary>Running tests</summary>
 
-`test`, `checkExpect`, and `checkError` are provided by the course toolkit; each test file imports them at the top with `import { test, checkExpect, checkError } from "@course/toolkit";`. (The toolkit's `assert`, which we meet at the end of this reading, is imported the same way by files in `src/`.) Tests in this course are run with `pnpm test` from the terminal, or using the IDE's test-running feature. The test framework executes every test case it can find in the `test/` directory. Test cases are aggregated by the files that contain them. Passing test cases are printed in green; failing test cases are printed in red, along with what was expected and what was actually returned.
+`test`, `checkExpect`, and `checkError` are provided by the course toolkit; each test file imports them at the top with `import { test, checkExpect, checkError } from "@course/toolkit";`. (The toolkit's `assert`, which we meet at the end of this chapter, is imported the same way by files in `src/`.) Tests in this course are run with `pnpm test` from the terminal, or using the IDE's test-running feature. The test framework executes every test case it can find in the `test/` directory. Test cases are aggregated by the files that contain them. Passing test cases are printed in green; failing test cases are printed in red, along with what was expected and what was actually returned.
 </details>
 
 ## The Testing Process
@@ -149,7 +149,7 @@ test("fee never exceeds the maximum", () => {
 });
 ```
 
-The precondition also guides us towards situations that may not result in a valid output. Since the precondition says `daysLate >= 0`, what happens if we pass `-5` is undefined: the caller has broken their half of the bargain, and the function promises nothing in return. We return to what should happen when a precondition is violated anyway, and how to test for such erroneous behaviours, at the end of this reading.
+The precondition also guides us towards situations that may not result in a valid output. Since the precondition says `daysLate >= 0`, what happens if we pass `-5` is undefined: the caller has broken their half of the bargain, and the function promises nothing in return. We return to what should happen when a precondition is violated anyway, and how to test for such erroneous behaviours, at the end of this chapter.
 
 To run these tests, `lateFee` must at least exist; otherwise the compiler will refuse to execute the program at all. So we begin with a **stub**: a function with the right signature that returns a clearly wrong value.
 
@@ -308,7 +308,7 @@ type Result<T, E> =
   | { ok: false, error: E };
 ```
 
-`Result` is generic over two type parameters: `T` is the type of a successful value, and `E` is the type of the error. This is the same tagged-union idea from the previous reading, with `ok` as the discriminator: a caller checks `ok` to learn whether it received a `value` or an `error`.
+`Result` is generic over two type parameters: `T` is the type of a successful value, and `E` is the type of the error. This is the same tagged-union idea from the previous chapter, with `ok` as the discriminator: a caller checks `ok` to learn whether it received a `value` or an `error`.
 
 A `Loan` whose `renewalsRemaining` is `-1`, by contrast, is an *unexpected* error: no sequence of correct operations can produce it, so if it appears, something else has already gone wrong. We can detect unexpected errors and signal them to our program using the `assert` function. These calls look like `assert(<condition>, <description>)`. When an assertion fails, the program is immediately terminated with the provided description. The presence of assertions in the implementation like this can make the code much easier to write, because your implementation can trust that the invariants are valid for the remainder of the function, which can reduce defensive checks you might otherwise need to make in your code.
 
@@ -345,7 +345,7 @@ function renew(loan: Loan): Result<Loan, string> {
 
 Note where the `assert` calls live: unlike `checkExpect`, which sits in `test/` and probes chosen inputs from the outside, `assert` sits in the source code in `src/` and is evaluated on *every* execution of the function, whoever the caller is. Halting may seem drastic, but it is the right response to an impossible state.
 
-We saw at the start of this reading that operations built on a value whose invariant has failed quietly produce nonsense; an assertion stops the program at the first sign of corruption, before the nonsense can spread or be written somewhere permanent. This is also the behaviour we deferred earlier in the reading: when a caller violates a precondition, an assertion is how the function refuses to continue. One relaxation to this approach is for functions that take user-specified input: rather than crashing, user-specified input is often explicitly validated and rejected as expected errors (because in practice it is useful to expect users to do unreasonable things).
+We saw at the start of this chapter that operations built on a value whose invariant has failed quietly produce nonsense; an assertion stops the program at the first sign of corruption, before the nonsense can spread or be written somewhere permanent. This is also the behaviour we deferred earlier in the chapter: when a caller violates a precondition, an assertion is how the function refuses to continue. One relaxation to this approach is for functions that take user-specified input: rather than crashing, user-specified input is often explicitly validated and rejected as expected errors (because in practice it is useful to expect users to do unreasonable things).
 
 Now the tests, and a distinction worth being careful about. The expected error is a *documented outcome*: the postcondition names the exact value the caller receives (an `ok: false` result carrying the reason), so we test it with `checkExpect`, the same way we test every other clause of the contract:
 

@@ -60,7 +60,7 @@ The part of the declaration after the word `function` and before the first `{` i
 letterGrade();
 ```
 
-We will expand on function declarations later in this reading.
+We will expand on function declarations later in this chapter.
 
 ## Types as a Language Mechanism
 
