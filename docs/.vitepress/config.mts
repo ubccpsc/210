@@ -127,11 +127,11 @@ export default defineConfig({
                 text: "Decomposition",
                 link: "/part2/02_decomposition"
             }, {
+                text: "Error Handling",
+                link: "/part2/03_errors"
+            }, {
                 text: "Verification",
                 link: "/part2/03_verification"
-            }, {
-                text: "Error Handling",
-                link: "/part2/04_errors"
             }, {
                 text: "Encapsulation",
                 link: "/part2/05_encapsulation"
