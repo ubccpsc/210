@@ -122,7 +122,7 @@ BSL used `check-expect` as a standalone expression at the top level of a file. T
 </details>
 
 <details class="tooltip ts-tips">
-<summary>Running tests</summary>
+<summary>Running Tests</summary>
 
 `test`, `checkExpect`, and `checkError` are provided by the course toolkit; each test file imports them at the top with `import { test, checkExpect, checkError } from "@course/toolkit";`. (The toolkit's `assert`, which we meet at the end of this chapter, is imported the same way by files in `src/`.) Tests in this course are run with `pnpm test` from the terminal, or using the IDE's test-running feature. The test framework executes every test case it can find in the `test/` directory. Test cases are aggregated by the files that contain them. Passing test cases are printed in green; failing test cases are printed in red, along with what was expected and what was actually returned.
 </details>
@@ -174,7 +174,7 @@ We chose `-1` deliberately. A fee is never negative, so every test is guaranteed
 ```
 
 <details class="tooltip link-110">
-<summary>You have done this before</summary>
+<summary>You Have Done This Before</summary>
 
 This is the same ordering as the How to Design Functions recipe from CPSC 110: signature, purpose, and stub first, then *examples*, written as `check-expect`s, before you write the function body. What CPSC 110 called examples, we now call tests. The discipline of recording expected behaviour before implementing it carries over unchanged.
 </details>
@@ -216,13 +216,13 @@ function lateFee(daysLate: number): number {
 All three tests now pass. Notice what did *not* change: the tests. They were correct all along, because they were written from the specification, and so the requirement our implementation forgot had nowhere to hide. If we had written our tests *after* the implementation, by reading our own code and checking that it does what it appears to do, we would probably not have thought to test the maximum: the code contains no hint that a maximum should exist. Tests written first keep the specification in charge; tests written after tend to mirror the code, mistakes included.
 
 <details class="tooltip ts-tips">
-<summary>The <code>const</code> keyword</summary>
+<summary>The <code>const</code> Keyword</summary>
 
 `const` introduces a named value. Here `fee` names the result of the per-day calculation so it can be compared against the maximum and then returned. A `const` cannot be reassigned after it is defined.
 </details>
 
 <details class="tooltip deep-dive">
-<summary>Tests as executable specifications</summary>
+<summary>Tests as Executable Specifications</summary>
 
 A test suite written before the implementation acts as an *executable specification*: a precise, runnable description of the intended behaviour. This is more valuable than a written description alone, because the computer can verify whether your implementation matches it, every time you run the suite.
 </details>
@@ -260,7 +260,7 @@ Look back at the suite we wrote: it contains a representative from each class: `
 Within a class, one representative is as informative as another. `lateFee(12)` and `lateFee(15)` both exercise the accruing class; testing both adds almost no confidence beyond testing one. Counting tests is therefore a poor measure of a suite: a suite of `lateFee(5)`, `lateFee(8)`, and `lateFee(15)` has three assertions but covers only one class, and would have passed our buggy, cap-free implementation without complaint. What matters is covering the *classes*, not accumulating assertions.
 
 <details class="tooltip deep-dive">
-<summary>Equivalence classes are only derived from the specification</summary>
+<summary>Equivalence Classes are Only Derived From the Specification</summary>
 
 Two inputs belong to the same class when the *specification* says they should behave the same way, not when they happen to take the same path through the code you wrote. In our buggy implementation, `lateFee(12)` and `lateFee(30)` took the same path through the code; classes derived from that implementation would have merged them, and the fault would have survived. Classes derived from the specification kept them apart, which is exactly why the fault was caught.
 </details>
