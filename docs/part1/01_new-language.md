@@ -66,7 +66,7 @@ We will expand on function declarations later in this chapter.
 In BSL you documented type information as comments. A function's signature, like `; Number -> String`, told the reader what the function expected (a value representing a `Number`) and produced (a value representing a `String`). However, the language *did not check* that those types were honoured. If you passed a string where a number was expected, the language did not object; the mistake surfaced later, when you ran the program and it did not do what you expected.
 
 <details class="tooltip deep-dive">
-  <summary>Basic types: <code>number</code>, <code>string</code>, and <code>boolean</code></summary>
+  <summary>Basic Types: <code>number</code>, <code>string</code>, and <code>boolean</code></summary>
 
 TypeScript provides several basic types to describe individual values. Three of the most common are `number`, `string`, and `boolean`. `number` is the standard numeric type that can be used for both integer (e.g., `3`) and floating point (e.g., `3.14`) values. `string` is used to describe textual data; these values are enclosed in either single quotes `'CPSC'` or double quotes `"CPSC"`, although it is best practice to be consistent about the kind of quote used in a program. `boolean` values provide means for capturing whether a value is `true` or `false`.
 
@@ -221,7 +221,7 @@ When, in a certain run, `<condition>` evaluates to true and we execute `(A)`, we
 
 
 <details class="tooltip ts-tips"> 
-<summary><code>if</code> statements and block statements</summary>
+<summary><code>if</code> Statements and Block Statements</summary>
 
 A block statement is started by `{` and `}`. It groups together a list of statements:
 
@@ -327,7 +327,7 @@ In the code above once a true branch of one of the `if` statements is taken, no 
 The `return` keyword is necessary to make functions in TypeScript return values.  The `return` statement hands a value back to whoever called the function and stops the function there. 
 
 <details class="tooltip ts-tips">
-<summary> <code>return</code> statements </summary>
+<summary><code>return</code> Statements</summary>
 
 `return e;` evaluates the expression `e` to a value `v` (i.e., `2 + 3` to `5`), stops executing the function there, and returns this `v` to the caller of the function.
 
