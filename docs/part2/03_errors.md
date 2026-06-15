@@ -67,7 +67,7 @@ function checkPrerequisite(student: Student, section: Section): Result<Section, 
 }
 ```
 
-The great strength of this approach is that the failure is written into the type. A caller of `findSection` receives a `Result<Section, string>`, not a `Section`, so the compiler will not let them reach for `.value` without first checking `.ok`. The possibility of failure is impossible to overlook, because the type checker keeps raising it until the caller deals with it.
+The strength of this approach is that the failure is written into the type. A caller of `findSection` receives a `Result<Section, string>`, not a `Section`, so the compiler will not let them reach for `.value` without first checking `.ok`. The possibility of failure is impossible to overlook, because the type checker keeps raising it until the caller deals with it.
 
 A returned failure is an ordinary value, which means it is tested like any other value, with `checkExpect`:
 
@@ -86,7 +86,7 @@ test("a missing prerequisite returns a failure value", () => {
 });
 ```
 
-That safety comes at a cost, and the cost lands at every call site. A caller cannot use the returned section directly; it must first check `.ok`, and only once it has confirmed success may it reach for `.value`. Even a single call is wrapped in a check, so the handling of the failure case sits right in the middle of the code doing the successful work.
+That safety has a cost at every call site. A caller cannot use the returned section directly; it must first check `.ok`, and only once it has confirmed success may it reach for `.value`. Even a single call is wrapped in a check, so the handling of the failure case is interleaved with the code that does the successful work.
 
 ## The Cost of Threading Results
 
@@ -110,9 +110,9 @@ function enrollAll(catalog: Section[], student: Student, ids: string[]): Result<
 }
 ```
 
-Look at what this function actually contains. Of its eight lines of body, four exist only to notice a failure and forward it. `enrollAll` cannot do anything useful about an unknown section or a missing prerequisite; the only code that can respond is whatever called `enrollAll`, perhaps to show the student a message. Yet `enrollAll` is forced to participate, unpacking each `Result` and re-returning it, purely to carry the failure one step closer to a caller that can act on it. Its own caller will then unpack the `Result` one more time.
+Of the eight lines in this function's body, four exist only to notice a failure and forward it. `enrollAll` cannot do anything useful about an unknown section or a missing prerequisite; the only code that can respond is whatever called `enrollAll`, perhaps to show the student a message. Yet `enrollAll` is forced to participate, unpacking each `Result` and re-returning it, purely to carry the failure one step closer to a caller that can act on it. Its own caller will then unpack the `Result` one more time.
 
-There is a readability cost hiding in here that matters as much as the line count. The everyday success path, the case that runs almost every time, is the simple sequence "find the section, check the prerequisite, add it to the list". In the code above that sequence is broken into fragments, with a failure check wedged between each step. The case that almost never happens is interleaved with, and visually dominates, the case that almost always does. This is the cost of returning failure as a value: every layer between the function that *detects* a problem and the function that *handles* it must thread the failure through by hand, and the threading crowds out the logic that the reader actually came to understand. When detection and handling are right next to each other, this is a fair price. When they are many layers apart, the next mechanism is designed for exactly that situation.
+There is a readability cost here that matters as much as the line count. The everyday success path, the case that runs almost every time, is the simple sequence "find the section, check the prerequisite, add it to the list". In the code above that sequence is broken into fragments, with a failure check wedged between each step. The case that almost never happens is interleaved with, and visually dominates, the case that almost always does. This is the cost of returning failure as a value: every layer between the function that *detects* a problem and the function that *handles* it must thread the failure through by hand, and the threading crowds out the logic the reader is there to understand. When detection and handling are right next to each other, this is a fair price. When they are many layers apart, the next mechanism is designed for exactly that situation.
 
 ## Raising an Exception
 
@@ -128,7 +128,7 @@ function attempt(): void {
 }
 ```
 
-If `(A)` runs and the `throw` is then reached, the statements in `(B)` never run. A `throw` leaves the function on the spot, much as `return` does, but with two differences: it carries an error rather than an ordinary value, and the caller does not receive that error as a result. Instead the error begins travelling up the chain of callers, as described above.
+If `(A)` runs and the `throw` is then reached, the statements in `(B)` never run. A `throw` leaves the function immediately, much as `return` does, but with two differences: it carries an error rather than an ordinary value, and the caller does not receive that error as a result. Instead the error begins travelling up the chain of callers, as described above.
 
 This throw-and-catch model is not unique to TypeScript. The same mechanism, with slightly different spelling, appears in Java, C++, C#, and Python (where the keywords are `try` and `except`), among many others. The idea you learn here transfers directly when you move between languages.
 
@@ -166,7 +166,7 @@ function enrollAll(catalog: Section[], student: Student, ids: string[]): Section
 }
 ```
 
-Compare this with the `Result` version. The four lines of failure-forwarding are gone, and so is the interleaving: what remains reads as the plain success path, "find the section, check the prerequisite, add it to the list", with no error handling wedged between the steps. If `requireSection` throws on the third id, the `throw` abandons `requireSection`, abandons the loop in `enrollAll`, and abandons `enrollAll` itself, all without any of them writing a line of code to make that happen. The exception travels straight to whoever is prepared to catch it.
+Compare this with the `Result` version. The four lines of failure-forwarding are gone, and so is the interleaving: what remains reads as the plain success path, "find the section, check the prerequisite, add it to the list", with no error handling wedged between the steps. If `requireSection` throws on the third id, the `throw` abandons `requireSection`, abandons the loop in `enrollAll`, and abandons `enrollAll` itself, without any of them containing code to make that happen. The exception travels directly to the nearest enclosing handler.
 
 <details class="tooltip deep-dive">
 <summary><code>assert</code> Is an Exception</summary>
@@ -249,7 +249,7 @@ test("a valid request enrols in every section", () => {
 });
 ```
 
-The contrast with the earlier `Result` tests is worth pausing on. A returned error is a value, so we asserted on it with `checkExpect`; a thrown error escapes the call, so we need `checkError`, which is built to run the call and observe that it threw.
+Note the contrast with the earlier `Result` tests. A returned error is a value, so we asserted on it with `checkExpect`; a thrown error escapes the call, so we need `checkError`, which runs the call and observes that it threw.
 
 <details class="tooltip ts-tips">
 <summary>The <code>finally</code> Block</summary>
@@ -293,7 +293,7 @@ function checkError(thunk: () => void, expected: string): void {
 
 This is why `checkError` takes a function, the `() =>` thunk, rather than a value. It must run your code *inside its own* `try`/`catch` so it can observe whether an exception is thrown. Handing it `enrollAll(...)` directly would run that call first, and the exception would escape before `checkError` ever got control.
 
-The word **thunk** is old programming jargon for a small, parameterless function that wraps up a computation to be run later. The name dates to the Algol-60 community of the 1960s and is jokingly explained as the past tense of "think": a thunk is an expression the program has already thought about and set aside to evaluate when it is needed.
+The word **thunk** is old programming jargon for a small, parameterless function that wraps up a computation to be run later. The name dates to the Algol-60 community of the 1960s and is sometimes glossed as the past tense of "think", since a thunk is an expression already thought about and set aside to evaluate when it is needed.
 
 </details>
 
@@ -311,7 +311,7 @@ function sectionOrBackup(catalog: Section[], preferredId: string, backupId: stri
 }
 ```
 
-Here the `catch` block does real work, and the program carries on with a valid section. If the backup is missing too, that second `requireSection` throws, and since nothing catches it here, the failure propagates onward, which is the right outcome.
+Here the `catch` block performs a real recovery, and the program continues with a valid section. If the backup is missing too, that second `requireSection` throws, and since nothing catches it here, the failure propagates onward, which is the right outcome.
 
 <details class="tooltip ts-tips">
 <summary>Optional <code>catch</code> Binding</summary>
@@ -320,17 +320,17 @@ When a handler does not need the caught value, the `catch` parameter can be left
 
 </details>
 
-In practice, a great deal of error handling does not recover at all. Very often the most a handler can honestly do is *detect* the failure, record it, tell someone, and stop the operation that cannot proceed. Our `enrolStudent` is typical: it cannot conjure a missing prerequisite into existence, so it catches the error, reports it, and abandons the enrolment. That is still valuable, because the alternative, letting the exception halt the whole program, would be far worse for everyone else using the system. Catching an error to report it cleanly and stop one operation is a legitimate and common use of `try`/`catch`, even when no recovery is possible.
+In practice, a great deal of error handling does not recover at all. Very often the most a handler can do is *detect* the failure, record it, report it, and stop the operation that cannot proceed. Our `enrolStudent` is typical: it cannot supply a missing prerequisite, so it catches the error, reports it, and abandons the enrolment. That is still valuable, because the alternative, letting the exception halt the whole program, would be far worse for everyone else using the system. Catching an error to report it cleanly and stop one operation is a legitimate and common use of `try`/`catch`, even when no recovery is possible.
 
-What a handler must not do is catch an error and silently discard it. An empty `catch` block that does nothing turns a loud, traceable failure into a quiet wrong answer that surfaces much later, somewhere far from the cause. If you cannot recover and cannot usefully report, it is almost always better to let the exception keep rising than to swallow it.
+What a handler must not do is catch an error and silently discard it. An empty `catch` block that does nothing turns a visible, traceable failure into a silent wrong answer that surfaces much later, far from its cause. If you cannot recover and cannot usefully report, it is almost always better to let the exception keep rising than to swallow it.
 
 ## Exceptions Travel Up the Call Stack
 
-The power of exceptions, and the thing that makes them worth a separate mechanism, is that the function which detects a problem and the function which handles it need not know about each other at all. Everything between them is left untouched.
+The power of exceptions, and what makes them worth a separate mechanism, is that the function which detects a problem and the function which handles it need not know about each other at all. Everything between them is left untouched.
 
 Trace the unknown-section failure through our program. `enrolStudent` calls `enrollAll`, which calls `requireSection`, which discovers the bad id and throws. The exception now rises back through that exact chain: it leaves `requireSection`, passes through `enrollAll` without `enrollAll` doing anything, and arrives at the `try` in `enrolStudent`, where it is finally caught. `enrollAll` is on the path but is not a participant; it neither checks for the error nor forwards it, because propagation is automatic. This is the plumbing the `Result` version had to write by hand, now handled by the language.
 
-This is the deeper reason the success path stayed clean. The intermediate layers carry no error-handling code not because we were careful to leave it out, but because they genuinely need none: an exception they do not catch passes straight through them. The further apart detection and handling are, the more this saves.
+This is the deeper reason the success path stayed clean. The intermediate layers carry no error-handling code not because we were careful to leave it out, but because they need none: an exception they do not catch passes straight through them. The further apart detection and handling are, the more this saves.
 
 <details class="tooltip deep-dive">
 <summary>What Is a Call Stack?</summary>
@@ -390,13 +390,13 @@ function shallow(): void {
 }
 ```
 
-Calling `shallow` prints only `caught in shallow`. The `throw` in `deep` jumps straight past the rest of `deep`, all of `middle`, and the rest of the `try` in `shallow`, landing in the `catch`. Two whole functions were abandoned mid-execution. Although a `throw` *can* be used to leap out of deep code like this, it must only ever be used for genuine error states, never as a tidy shortcut for breaking out of nested calls, for the reasons described just below.
+Calling `shallow` prints only `caught in shallow`. The `throw` in `deep` jumps straight past the rest of `deep`, all of `middle`, and the rest of the `try` in `shallow`, landing in the `catch`. Two whole functions were abandoned mid-execution. Although a `throw` *can* be used to leap out of deep code like this, it must only ever be used for genuine error states, never as a shortcut for breaking out of nested calls, for the reasons given below.
 
 </details>
 
-That same reach is also a hazard, and it is worth being blunt about it. Because a `throw` can leap past every function between the error and its handler, exceptions are easy to *misuse* as a convenient jump out of deep code, a stand-in for ordinary control flow. They must not be used that way, and the reason is not merely taste: overusing exceptions makes a program genuinely hard to understand, for a cause rooted in the static and dynamic views from Part 1.
+That same reach is also a hazard. Because a `throw` can leap past every function between the error and its handler, exceptions are easy to *misuse* as a jump out of deep code, a substitute for ordinary control flow. They must not be used that way, and the reason is not merely stylistic: overusing exceptions makes a program hard to understand, for a cause rooted in the static and dynamic views from Part 1.
 
-A `throw` and a `try`/`catch` are both plainly visible in the source code, the static view of the program. But *whether* an exception is raised on a given run, and *which* one, almost always depends on the inputs and the program's state, which belong to the dynamic view. Reading a function tells you it *might* throw, never whether it will on a particular call. And because the exception travels up the call stack to a handler that may be many frames away, you cannot work out a function's failure behaviour from the function and its immediate callers and callees alone: the error it raises might be handled far above, by code it has never heard of, and an error it must be ready to receive might originate far below, passed up through functions that merely forwarded it. The very non-locality that kept the success path clean is what makes failure behaviour hard to trace. This is the strongest reason to keep exceptions rare, reserve them for genuine errors, and handle them at a deliberately chosen layer rather than catching them wherever they happen to surface.
+A `throw` and a `try`/`catch` are both plainly visible in the source code, the static view of the program. But *whether* an exception is raised on a given run, and *which* one, almost always depends on the inputs and the program's state, which belong to the dynamic view. Reading a function tells you it *might* throw, never whether it will on a particular call. And because the exception travels up the call stack to a handler that may be many frames away, you cannot determine a function's failure behaviour from the function and its immediate callers and callees alone: the error it raises might be handled far above, by code it does not know about, and an error it must be ready to receive might originate far below, passed up through functions that only forwarded it. The very non-locality that kept the success path clean is what makes failure behaviour hard to trace. This is the strongest reason to keep exceptions rare, reserve them for genuine errors, and handle them at a deliberately chosen layer rather than catching them wherever they happen to surface.
 
 ## Choosing Between Results and Exceptions
 
@@ -422,7 +422,7 @@ Notice that a `Result` return type recovers the *checked* property inside an unc
 <details class="tooltip deep-dive">
 <summary>Other Ways to Signal Failure</summary>
 
-`Result` and exceptions are this chapter's focus, but they are not the only options. A function that can simply find nothing often returns the value or `undefined`, the way `Array.find` does; this is the **optional** pattern, really a `Result` with no error detail. Older code, and lower-level languages, often use **sentinel values**: a special in-band return such as `-1` for "not found". Sentinels are error-prone precisely because they are ordinary values that can be used by mistake or collide with real data, which is why a stub that returned `-1` was a reliable way to force a test to fail in Part 1.
+`Result` and exceptions are this chapter's focus, but they are not the only options. A function that can simply find nothing often returns the value or `undefined`, the way `Array.find` does; this is the **optional** pattern, in effect a `Result` with no error detail. Older code, and lower-level languages, often use **sentinel values**: a special in-band return such as `-1` for "not found". Sentinels are error-prone precisely because they are ordinary values that can be used by mistake or collide with real data, which is why a stub that returned `-1` was a reliable way to force a test to fail in Part 1.
 
 Whatever the mechanism, a few practices hold across all of them: never silently discard an error; do not use exceptions for ordinary control flow, only for genuine failures; and check data the moment it crosses into your program from a file, a network, or a user, converting outside uncertainty into either a trusted value or a clear error right at the boundary. That last practice is the subject of a later chapter.
 
@@ -432,4 +432,4 @@ Whatever the mechanism, a few practices hold across all of them: never silently 
 
 A well-designed abstraction handles failure as deliberately as it handles success. Expected failures belong in the contract, and a function communicates them in one of two ways: by returning a value that the type checker forces callers to confront, or by throwing an exception that propagates on its own to a handler far above. Unexpected failures, the impossible states that signal bugs, are thrown by `assert` and left uncaught so the program halts at the first sign of corruption. The choice between returning and throwing is a genuine design decision, weighing visibility in the types against the readability of the success path, and it is one you now have the vocabulary to make.
 
-Two threads run on from here. We have been testing errors with `checkExpect` and `checkError`; the next chapter on verifying behaviour introduces more expressive tools for asserting exactly how and why a piece of code fails. And the practice of checking data as it enters a program returns when we study the boundaries between a system and the world outside it, where most real failures begin.
+Two threads continue from here. We have been testing errors with `checkExpect` and `checkError`; the next chapter on verifying behaviour introduces more expressive tools for asserting exactly how and why a piece of code fails. And the practice of checking data as it enters a program returns when we study the boundaries between a system and the world outside it, where most real failures begin.
