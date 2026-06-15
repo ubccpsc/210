@@ -398,7 +398,7 @@ There does exist an expression in TypeScript that behaves like a 1-condition `co
 <condition> ? <then-expression> : <else-expression>
 ```
 
-Unlike an `if` statement, the `<then-expression>` and `<else-expression>` in the ternary operator must be single expressions.
+Unlike an `if` statement, the `<then-expression>` and `<else-expression>` in the ternary operator must be single expressions. The single-expression limitation, and confusions that sometimes arise from the ternary operator's compact notation, are two reasons why it can often be preferable to just use `if` statements explicitly instead of `?`.
 
 </details>
 
