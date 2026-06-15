@@ -346,7 +346,7 @@ function getString(): string {
 }
 ```
 
-To finish `letterGrade` and specify what `letterGrade` should evalute to, we'll need to add `return` statements to the body.
+To finish `letterGrade` and specify what `letterGrade` should evaluate to, we'll need to add `return` statements to the body.
 
 
 ```typescript
@@ -395,6 +395,7 @@ In TypeScript, a function body is not a single expression: it is a list of state
 
 </details>
 
+
 ## Static and Dynamic Views of a Program
 
 There are two natural perspectives through which you can view any program. The **static** view is what you see when you look at your source code. It is fixed text sitting in a file, and it can be read and analysed *without being executed*. Types you write down in a function signature are static, as is the overall structure of your code. The compiler works entirely in this static world, and it can check your types before the program runs.
@@ -437,7 +438,7 @@ The first parameter to `test` is a string that describes the test case. The seco
 
 
 <details class="tooltip ts-tips">
-<summary>Anonymous</summary>
+<summary>Anonymous Functions</summary>
 </details>
 
 
