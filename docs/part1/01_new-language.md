@@ -427,7 +427,7 @@ checkExpect(letterGrade(88), "A");
 
 This cannot be checked statically; we must execute the `checkExpect` statement to verify the program behaviour. If the the two arguments to `checkExpect` evaluate to the same value the program will execute successfully; if it does not, the program will crash with an error that describes the expected behaviour that was violated.
 
-TODO: add a TS details block on the mechanics of a test case (test name, checkExpect, <condition>, "message")
+TODO: add a TS details block on the mechanics of a test case (test name, checkExpect, test expression, "message")
 
 Suppose we had a more fine-grained expectation of how letter grades should be computed and wrote the following check:
 
