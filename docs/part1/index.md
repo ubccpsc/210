@@ -8,6 +8,16 @@ Part 1 builds on that groundwork and lays the foundations of software constructi
 
 Our programs in Part 1 stay small enough that one person can hold the whole design in their head. That assumption is what allows personal discipline to uphold the promises the language cannot. Part 2 moves beyond this size restriction and asks what happens when programs, teams, and lifetimes outgrow any one person.
 
+## Intended Learning Objectives
+
+By the end of Part 1, you will be able to:
+
+1. **Model information as precise types**, designing data definitions whose structure drives the code that operates on them.
+2. **Specify behaviour with contracts and invariants, and construct tests** that target the cases most likely to reveal faults, then judge whether a suite genuinely covers them.
+3. **Decide how each property should be corroborated**, whether by the type system, by tests and assertions, or by controlling how values are created, and design code that enforces the invariants the language cannot.
+4. **Reason about state and time**, tracing how references, scope, and mutation determine what a change affects, and weighing the trade-offs of mutation, side effects, and asynchronous computation.
+5. **Build working programs** that combine these ideas to process collections and interact with files and web services.
+
 ## Building on CPSC 110
 
 TypeScript is introduced by scaffolding from the BSL you already know. Where a concept is familiar we point at its BSL counterpart; where it differs we call the difference out explicitly. Many of the ideas are not new. Designing data, breaking a problem into functions, and writing examples before code all carry over. What changes is how much the language records and checks for you. The central change is the **type**: in BSL a signature like `; Number -> String` was a comment the language ignored, while in TypeScript it is a checked part of the program, and a whole category of mistakes becomes an error reported before the program runs rather than a bug discovered afterward.
@@ -34,7 +44,7 @@ No layer is sufficient on its own. A program can be perfectly typed and still co
 One concern remains. An invariant the language cannot check must still be kept true, and this requires control over creation. If any code can build a value, every such place is an opportunity to break the invariant. Chapter 4 restricts creation to a single constructor function and hides the data inside a closure, so the only way to produce or change a value is through operations that preserve the invariant. This is encapsulation built by hand. Part 2 provides it as a language feature, but the idea is the one you meet here: protecting an invariant shapes how the code is organised.
 
 <details class="tooltip deep-dive">
-<summary>How guarantees fail</summary>
+<summary>How Guarantees Fail</summary>
 
 Four failure modes account for most broken guarantees, and each corresponds to a missing layer:
 
@@ -46,36 +56,26 @@ Four failure modes account for most broken guarantees, and each corresponds to a
 When you find a bug that "should have been impossible," it is usually worth asking which of these four is responsible.
 </details>
 
-## The Chapters
+## Chapter Overview
 
 Part 1 covers three broad themes across seven chapters.
 
-**The language and its data.**
+**The language and its data:**
 
 1. [Learning a New Programming Language](./01_new-language) introduces TypeScript from BSL: types as a checked mechanism, the compiler, statements like `if` and `return`, and the static and dynamic views the rest of the part builds on.
 2. [Using Types to Model Problems](./02_model-types) designs precise data: compound types, unions for distinct cases, and recursive structure, with functions whose shape follows the shape of the data.
 
-**Correctness.**
+**Correctness:**
 
 3. [Checking Invariants](./03_checking-invariants) records contracts and invariants, derives tests from them using equivalence classes and boundary values, and uses assertions to catch impossible states.
 4. [Maintaining Invariants](./04_maintaining-invariants) keeps an invariant true for the life of a program by controlling creation with a constructor function and hiding state inside a closure.
 
-**The capabilities of real programs.**
+**The capabilities of real programs:**
 
 5. [Arrays and Iteration](./05_arrays) introduces collections and the operations over them: `map`, `filter`, `reduce`, and `find`, with the `for of` loop beneath them.
 6. [Mutation and Side Effects](./06_state-mutation) adds state that changes over time, along with the references, aliasing, scope, and side effects that come with it.
 7. [Asynchronous Effects and Time](./07_async) reaches outside the program to files and web services, where a result arrives only after a wait, using promises and `async`/`await`.
 
-## Learning Objectives
-
-By the end of Part 1, you should be able to:
-
-1. **Model information as precise types**, designing data definitions whose structure drives the code that operates on them.
-2. **Specify behaviour with contracts and invariants, and construct tests** that target the cases most likely to reveal faults, then judge whether a suite genuinely covers them.
-3. **Decide how each property should be guaranteed**, whether by the type system, by tests and assertions, or by controlling how values are created, and design code that enforces the invariants the language cannot.
-4. **Reason about state and time**, tracing how references, scope, and mutation determine what a change affects, and weighing the trade-offs of mutation, side effects, and asynchronous computation.
-5. **Build working programs** that combine these ideas to process collections and interact with files and web services.
-
 ## Toward Part 2: Designing & Enforcing Abstractions
 
-Throughout Part 1 our programs stay small, small enough that one person can hold the whole design in their head, and small enough that personal discipline can plausibly maintain every promise the types cannot check. In Part 2 we relax that assumption and ask what happens when programs, teams, and lifetimes grow beyond what any individual can manage. When that happens, the ideas of Part 1 are not replaced; they are re-expressed. Data with distinct cases, handled here through case analysis, returns as class hierarchies; the constructor-and-closure encapsulation of Chapter 4 returns as classes that keep their own state private; contracts return as the expectations and guarantees of methods. The vocabulary changes; the design logic does not.
+Throughout Part 1 our programs stay small, small enough that one person can hold the whole design in their head, and small enough that personal discipline can plausibly maintain every promise the types cannot check. In Part 2 we relax that assumption and ask what happens when programs, teams, and lifetimes grow beyond what any individual can manage. 
