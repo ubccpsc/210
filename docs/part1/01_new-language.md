@@ -66,7 +66,7 @@ We will expand on function declarations later in this chapter.
 In BSL you documented type information as comments. A function's signature, like `; Number -> String`, told the reader what the function expected (a value representing a `Number`) and produced (a value representing a `String`). However, the language *did not check* that those types were honoured. If you passed a string where a number was expected, the language did not object; the mistake surfaced later, when you ran the program and it did not do what you expected.
 
 <details class="tooltip deep-dive">
-  <summary>Basic types: <code>number</code>, <code>string</code>, and <code>boolean</code></summary>
+  <summary>Basic Types: <code>number</code>, <code>string</code>, and <code>boolean</code></summary>
 
 TypeScript provides several basic types to describe individual values. Three of the most common are `number`, `string`, and `boolean`. `number` is the standard numeric type that can be used for both integer (e.g., `3`) and floating point (e.g., `3.14`) values. `string` is used to describe textual data; these values are enclosed in either single quotes `'CPSC'` or double quotes `"CPSC"`, although it is best practice to be consistent about the kind of quote used in a program. `boolean` values provide means for capturing whether a value is `true` or `false`.
 
@@ -221,7 +221,7 @@ When, in a certain run, `<condition>` evaluates to true and we execute `(A)`, we
 
 
 <details class="tooltip ts-tips"> 
-<summary><code>if</code> statements and block statements</summary>
+<summary><code>if</code> Statements and Block Statements</summary>
 
 A block statement is started by `{` and `}`. It groups together a list of statements:
 
@@ -327,7 +327,7 @@ In the code above once a true branch of one of the `if` statements is taken, no 
 The `return` keyword is necessary to make functions in TypeScript return values.  The `return` statement hands a value back to whoever called the function and stops the function there. 
 
 <details class="tooltip ts-tips">
-<summary> <code>return</code> statements </summary>
+<summary><code>return</code> Statements</summary>
 
 `return e;` evaluates the expression `e` to a value `v` (i.e., `2 + 3` to `5`), stops executing the function there, and returns this `v` to the caller of the function.
 
@@ -346,7 +346,7 @@ function getString(): string {
 }
 ```
 
-To finish `letterGrade` and specify what `letterGrade` should evalute to, we'll need to add `return` statements to the body.
+To finish `letterGrade` and specify what `letterGrade` should evaluate to, we'll need to add `return` statements to the body.
 
 
 ```typescript
@@ -369,7 +369,7 @@ Each `return` exits the function immediately, so the order of the checks matters
 
 
 <details class="tooltip link-110">
-<summary><code>if</code> vs <code>cond</code></summary>
+<summary><code>if</code> vs <code>cond</code> (vs the ternary operator)</summary>
 
 `if` operates very similarly to `cond`. 
 
@@ -389,11 +389,19 @@ An equivalent BSL function to `letterGrade` looks like:
 
 the TypeScript version says the same thing with statements: each `cond` clause becomes an `if` whose body returns that clause's value, and `else` becomes the final `return`. The behaviour is identical; what changed is that you spell out the control flow step-by-step rather than as a single expression.
 
-*Technical Details*. the difference between `if` and `cond` is that `cond` is an expression: `cond` evaluates to one value. The bodies of the functions you defined in BSL contained a single expression `e` (above,`e` is the `cond` expression) and `(letter-grade 87)` simply evaluates `e` with `87` in the place of `score`. 
+The core difference between `if` and `cond` is that `cond` is an expression: `cond` evaluates to one value. The bodies of the functions you defined in BSL contained a single expression `e` (above,`e` is the `cond` expression) and `(letter-grade 87)` simply evaluates `e` with `87` in the place of `score`. 
 
 In TypeScript, a function body is not a single expression: it is a list of statements which will be run in order. TypeScript functions will not return a value unless they are told to by a `return` statement. Later, we'll see that we might want to write functions that have no `return` statements at all. 
 
+There does exist an expression in TypeScript that behaves like a 1-condition `cond`. It is called the **ternary operator**, and takes 3 operands (thus the "ternary"):
+```typescript
+<condition> ? <then-expression> : <else-expression>
+```
+
+Unlike an `if` statement, the `<then-expression>` and `<else-expression>` in the ternary operator must be single expressions. The single-expression limitation, and confusions that sometimes arise from the ternary operator's compact notation, are two reasons why it can often be preferable to just use `if` statements explicitly instead of `?`.
+
 </details>
+
 
 ## Static and Dynamic Views of a Program
 
@@ -433,11 +441,31 @@ test("Return an A for a score of 88", () => {
 });
 ```
 
-The first parameter to `test` is a string that describes the test case. The second parameter `() =>` is new syntax: what it is doing is creating an **anonymous function**, and that function is being passed as a parameter to `test` so the testing framework can control the execution of the test.
+The first parameter to `test` is a string that describes the test case. The second parameter `() =>` is new syntax: what it is doing is creating an *anonymous* **arrow function**, and that function is being passed as a parameter to `test` so the testing framework can control the execution of the test.
 
 
 <details class="tooltip ts-tips">
-<summary>Anonymous</summary>
+<summary>Arrow Functions</summary>
+Arrow functions have two forms. The first has a single expression in its body:
+
+```typescript
+(x: X, y: Y, b: Z) => <return-exp>
+```
+this defines an anonymous function with  3 parameters (`x`, `y`, `b` of types `X`, `Y`, `Z`), which, when called, evaluates the expression `<return-exp>` with the given argument values, and return the resulting value.
+
+The second form has a block expression in its body:
+
+```typescript
+(x: X, y: Y, b: Z) => {
+    s_1;
+    s_2;
+    s_3;
+}
+```
+
+which can contain any number of statements. To return a value in this case, the `return` statement must be used.  
+
+
 </details>
 
 
@@ -460,3 +488,21 @@ Learning TypeScript is not starting over. The way you design data, break a probl
 What is new is mostly *enforcement* and *form*. In terms of *enforcement*, we write types into the program and `tsc` checks them, rather than leaving them in an unchecked comment. In terms of *form*, we write conditional control flow  with statements like `if` and `return`, rather than as a single `cond` expression. 
 
 Mapping constructs in a new language back to the ideas you already know from prior languages is what makes new programming languages quick to pick up. While this transition can be tricky this first time, with each subsequent language you learn, it will be easier and easier.
+
+
+(TODO if time permits, a "reading code" exercise that would go nicely either at the end if the `if` secion or in the testing section is debugging the following code:
+```typescript
+function toPassFail(s: number): string {
+    if (s > 0) 
+        if (s > 50) 
+          return "PASS";
+        if (s <= 50) 
+          return "FAIL";
+    else 
+          return "NEGATIVE";
+
+}
+```
+gives a n idea as why we want to put curly braces everywhere)
+
+(TODO: maybe an exercise asking them to write down any vocabulary that was new to them and prepare questions for class/OH?)
