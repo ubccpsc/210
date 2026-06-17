@@ -2,7 +2,7 @@
 
 A function's contract states what it should do; a test demonstrates that it does, for a chosen input. Part 1 began this practice with `checkExpect`: write down an input and the result the contract promises, and let the framework compare the two. That was enough to get started, but it kept two things simple that real test suites do not. Our assertions checked little beyond equality, and we chose our tests one clause of the contract at a time. This chapter develops both: a richer vocabulary for stating what a result must satisfy, and more systematic ways to judge whether a suite checks enough.
 
-It also changes our tools. The `checkExpect` and `checkError` functions were a deliberately simple stand-in for the assertions used in real test frameworks, and from here on we use the real ones. We write tests with `expect`, the assertion vocabulary provided by the chai library that the vitest test runner is built on. The change is more than spelling. Where `checkExpect` did exactly one thing, compare for equality, `expect` offers a family of assertion operators, each stating a different kind of expectation and, when it fails, reporting a different kind of message. Learning to choose among them is the first half of this chapter.
+It also changes our tools. The `checkExpect` and `checkError` functions were a deliberately simple stand-in for the assertions used in real test frameworks, and from here on we use those assertions. We write tests with `expect`, the assertion vocabulary provided by the chai library that the vitest test runner is built on. The change is more than spelling. Where `checkExpect` did exactly one thing, compare for equality, `expect` offers a family of assertion operators, each stating a different kind of expectation and, when it fails, reporting a different kind of message. Learning to choose among them is the first half of this chapter.
 
 ## From `checkExpect` to `expect`
 
@@ -43,7 +43,7 @@ checkError(() => requireSection(catalog, "NOPE"), "no section with id NOPE");
 expect(() => requireSection(catalog, "NOPE")).to.throw("no section with id NOPE");
 ```
 
-As with `checkError`, the call under test is wrapped in `() =>` so that `expect` can run it and observe the throw, rather than being handed an error that has already escaped. The string is matched against the thrown error's message; the assertion passes when the message contains it.
+As with `checkError`, the call under test is wrapped in `() =>` so that `expect` can run it and observe the throw, rather than receiving an error that has already escaped. The string is matched against the thrown error's message; the assertion passes when the message contains it.
 
 <!--
 <details class="tooltip ts-tips">
@@ -70,7 +70,7 @@ expect({ id: "CPSC210" }).to.equal({ id: "CPSC210" });      // fails: different 
 expect({ id: "CPSC210" }).to.deep.equal({ id: "CPSC210" }); // passes: same contents
 ```
 
-`to.deep.equal` compares structure: it checks that the two values have the same shape and the same values throughout. `checkExpect` always compared using deep equality, so when you translate a `checkExpect` whose expected value is an object or an array, you probably want to use `deep.equal`, not `equal`.
+`to.deep.equal` compares structure: it checks that the two values have the same shape and the same values throughout. `checkExpect` always compared using deep equality, so when you translate a `checkExpect` whose expected value is an object or an array, you should use `deep.equal`, not `equal`.
 
 </details>
 
@@ -98,7 +98,7 @@ Beyond equality, chai groups its assertions by the kind of property they check. 
 | Numeric | `expect(fee).to.be.at.most(10)` | A numeric comparison holds |
 | Throws | `expect(() => f()).to.throw("...")` | The call raises an error |
 
-None of these is strictly necessary. Each could be rewritten as an equality or boolean check: `expect(ids.includes("CPSC210")).to.equal(true)` does the same work as `expect(ids).to.include("CPSC210")`. The specific operator is better for two reasons. It states intent at a glance, so a reader of the test sees *what* is being checked rather than a hand-rolled expression that happens to reduce to a boolean. And when it fails, it reports the actual problem. The generic form can only say:
+None of these is strictly necessary. Each could be rewritten as an equality or boolean check: `expect(ids.includes("CPSC210")).to.equal(true)` does the same work as `expect(ids).to.include("CPSC210")`. The specific operator is better for two reasons. It states intent at a glance, so a reader of the test sees *what* is being checked rather than a hand-written expression that happens to reduce to a boolean. And when it fails, it reports the actual problem. The generic form can only say:
 
 ```text
 AssertionError: expected false to equal true
@@ -110,7 +110,7 @@ while the specific form names the value and the missing element:
 AssertionError: expected [ 'CPSC213' ] to include 'CPSC210'
 ```
 
-The first tells you that a boolean came out wrong; the second tells you which array was missing which element. A test that fails should point at its cause, and a specific operator is what makes that possible.
+The first tells you only that a boolean was not as expected; the second tells you which array was missing which element. A test that fails should point at its cause, and a specific operator is what makes that possible.
 
 <!--
 <details class="tooltip deep-dive">
@@ -142,6 +142,16 @@ const catalog: Section[] = [
     { id: "CPSC213", prerequisite: ["CPSC210"] }
 ];
 
+/**
+ * Determines whether a student has completed every prerequisite of a section.
+ *
+ * A section with no prerequisites is satisfied by every student.
+ *
+ * @param {Student} student the student whose completed courses are checked
+ * @param {Section} section the section whose prerequisites must be met
+ * @returns {boolean} true when the student has completed every id in
+ * section.prerequisite, and false otherwise
+ */
 function hasAllPrerequisites(student: Student, section: Section): boolean {
     for (const required of section.prerequisite) {
         if (student.completed.includes(required) === false) {
@@ -151,6 +161,18 @@ function hasAllPrerequisites(student: Student, section: Section): boolean {
     return true;
 }
 
+/**
+ * Lists the sections a student can currently enrol in.
+ *
+ * A section is eligible when the student has not already completed it and
+ * has completed all of its prerequisites. Eligible sections are returned
+ * in catalog order.
+ *
+ * @param {Section[]} catalog the sections on offer
+ * @param {Student} student the student enrolling
+ * @returns {Section[]} the eligible sections, or an empty array when none
+ * are available
+ */
 function eligibleSections(catalog: Section[], student: Student): Section[] {
     const result: Section[] = [];
     for (const section of catalog) {
@@ -207,7 +229,11 @@ This is not a licence to attach five assertions to every test. Most tests need o
 
 Choosing what to assert is one half of test design; choosing the inputs is the other. Part 1 divided a function's input space into equivalence classes, groups the specification treats alike, and tested one representative of each, looking hardest at the boundaries between classes. Those techniques carry over unchanged. Two things grow once a function's inputs and outputs are richer than a single number: the input classes are defined over combinations of fields rather than ranges, and the output deserves partitioning of its own.
 
-For the rest of the chapter we move to a video streaming service, which gives us a function whose input and output are both worth partitioning. A viewer can play a title when the title is published, it is licensed in the viewer's region, and, if it is a premium title, the viewer is on a premium plan.
+For the rest of the chapter we move to a video streaming service, which gives us a function whose input and output are both worth partitioning.
+
+> As a streaming service, I want to show each viewer only the titles they can play right now, so that no one is offered something they cannot watch.
+
+A viewer can play a title when the title is published, it is licensed in the viewer's region, and, if it is a premium title, the viewer is on a premium plan.
 
 ```typescript
 type Tier = "free" | "premium";
@@ -225,6 +251,17 @@ type Viewer = {
     region: string; // where the viewer is watching from
 };
 
+/**
+ * Determines whether a viewer can play a title.
+ *
+ * A title is playable when it is published, it is licensed in the viewer's
+ * region, and, if it is a premium title, the viewer is on the premium plan.
+ *
+ * @param {Viewer} viewer the viewer attempting to watch
+ * @param {Title} title the title being checked
+ * @returns {boolean} true when the viewer may play the title, and false
+ * otherwise
+ */
 function canPlay(viewer: Viewer, title: Title): boolean {
     if (title.published === false) {
         return false; // not live yet
@@ -241,6 +278,17 @@ function canPlay(viewer: Viewer, title: Title): boolean {
     return true;
 }
 
+/**
+ * Lists the titles a viewer can currently play.
+ *
+ * A title is included exactly when canPlay accepts it. Titles are returned
+ * in catalog order.
+ *
+ * @param {Title[]} catalog the titles on offer
+ * @param {Viewer} viewer the viewer watching
+ * @returns {Title[]} the playable titles, or an empty array when none are
+ * available
+ */
 function playableTitles(catalog: Title[], viewer: Viewer): Title[] {
     const result: Title[] = [];
     for (const title of catalog) {
@@ -278,24 +326,32 @@ The catalog adds further dimensions that the specification treats distinctly: a 
 
 With a single-number result like `lateFee` from Part 1, partitioning the input was sufficient, because each input class produced its own kind of output. A structured result has classes of its own that do not line up one-to-one with the input. `playableTitles` can return an empty list, when nothing is playable; a single title; or several at once. A suite with a representative of every input class can still miss an output class.
 
-The mismatch is easy to see. The viewer's plan is the most visible input dimension, but it does not decide whether the result is empty: the *largest* result here comes from the most permissive input, a premium viewer, while the empty result comes from a viewer in a region where nothing is licensed, whatever their plan. Reaching each output class takes a deliberately chosen input:
+The mismatch is easy to see. The viewer's plan is the most visible input dimension, but it does not decide whether the result is empty: the *largest* result here comes from the most permissive input, a premium viewer, while the empty result comes from a viewer in a region where nothing is licensed, whatever their plan. Reaching each output class takes a deliberately chosen input, and each test layers its assertions from general to specific, as before, so that a failure names which aspect of the result is wrong:
 
 ```typescript
 test("a free viewer sees only published, licensed, non-premium titles", () => {
     const viewer: Viewer = { id: "v1", plan: "free", region: "CA" };
     const result = playableTitles(catalog, viewer);
-    expect(result.map(t => t.id)).to.have.members(["t1"]); // the single-result class
+
+    expect(result).to.be.an("array"); // the right kind of value
+    expect(result).to.have.length(1); // the single-result class
+    expect(result.map(t => t.id)).to.have.members(["t1"]); // the title we expect
 });
 
 test("a premium viewer also sees premium titles", () => {
     const viewer: Viewer = { id: "v2", plan: "premium", region: "CA" };
     const result = playableTitles(catalog, viewer);
-    expect(result.map(t => t.id)).to.have.members(["t1", "t3"]); // the several-results class
+
+    expect(result).to.be.an("array"); // the right kind of value
+    expect(result).to.have.length(2); // the several-results class
+    expect(result.map(t => t.id)).to.have.members(["t1", "t3"]); // the titles we expect
 });
 
 test("a viewer outside every licensed region sees nothing", () => {
     const viewer: Viewer = { id: "v3", plan: "free", region: "EU" };
     const result = playableTitles(catalog, viewer);
+
+    expect(result).to.be.an("array"); // the right kind of value
     expect(result).to.be.empty; // the empty-result class
 });
 ```
@@ -306,7 +362,7 @@ Partitioning the input tells you which situations to feed a function; partitioni
 
 The techniques so far are all forms of **black-box testing**: every test was derived from the specification, with the implementation treated as a box we cannot see into. Black-box tests check that a function does what it promises. Once an implementation exists, we can also open the box.
 
-**White-box testing** takes this complementary view. We read the code and ask a different question: do our tests actually *exercise* what was written? Reading reveals the code's branches, and each branch is a place a fault can hide untested. The decisions in `playableTitles` all live in its helper, `canPlay`, so that is where we look:
+**White-box testing** takes this complementary view. We read the code and ask a different question: do our tests *exercise* what was written? Reading reveals the code's branches, and each branch is a place a fault can hide untested. The decisions in `playableTitles` all live in its helper, `canPlay`, so that is where we look:
 
 ```typescript
 function canPlay(viewer: Viewer, title: Title): boolean {
@@ -343,7 +399,7 @@ With those five cases every branch runs at least once, so no part of `canPlay` e
 
 ### Coverage
 
-**Coverage** makes the white-box question measurable: how much of the code does the suite actually execute? The most practical form is **branch coverage**, the fraction of branches run by at least one test. The five cases above execute all five branches of `canPlay`, for 100% branch coverage. Drop the two premium-title cases and coverage falls to three of five branches, with a report pointing at the exact lines no test reaches. That is what coverage is for: it finds the parts of your code the suite silently ignores.
+**Coverage** makes the white-box question measurable: how much of the code does the suite execute? The most practical form is **branch coverage**, the fraction of branches run by at least one test. The five cases above execute all five branches of `canPlay`, for 100% branch coverage. Drop the two premium-title cases and coverage falls to three of five branches, with a report pointing at the exact lines no test reaches. That is what coverage is for: it finds the parts of your code the suite silently ignores.
 
 But coverage has a sharp limit. Suppose an earlier version of `canPlay` had never checked regional licensing at all:
 
@@ -391,5 +447,5 @@ This is the second job of a test suite, and over the life of a program it is the
 
 ## Verifying with Confidence
 
-Effective verification strategies are layered such that each approach provides additional unique insight into the correctness of a program. The type checker rules out malformed programs before they run. Tests show that the program behaves as its contract promises when it does run. Specific, layered assertions make a failing test explain not just that something is wrong but what kind of thing. Partitioning the inputs and the outputs makes a passing suite meaningful rather than merely green. Coverage reveals the code the suite still ignores, and re-running the suite on every change keeps a correct program correct. No single one of these is enough on its own. Together they are how we move from claiming that an abstraction honours its contract to having earned the confidence that it does.
+Effective verification strategies are layered such that each approach provides additional unique insight into the correctness of a program. The type checker rules out malformed programs before they run. Tests show that the program behaves as its contract promises when it does run. Specific, layered assertions make a failing test explain not merely that something is wrong but what kind of fault occurred. Partitioning the inputs and the outputs makes a passing suite meaningful rather than merely green. Coverage reveals the code the suite still ignores, and re-running the suite on every change keeps a correct program correct. No single one of these is enough on its own. Together they are how we move from claiming that an abstraction honours its contract to having earned the confidence that it does.
 
