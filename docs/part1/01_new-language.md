@@ -189,6 +189,8 @@ We saw one type of statement already: the function definition. Today we will int
 
 The `if` statement chooses whether to run a block of code based on a condition. Unlike BSL's `cond`, it does not evaluate to a value, it only directs which code runs. The `if` statement is the most basic **control flow** statement in most languages. By directing how the program executes, the `if` controls the flow of execution.
 
+TODO: this abstract form is already in the 'if and block statement' details block; this might as well transition to build up the `letterGrade` function (return A/F, return A/B/F, etc.)
+
 The most basic if block is shown below; if the `<condition>` is `true`, the code in `(A)` will execute, followed by the code in `(B)`. If `<condition>` is false, `(A)` is _not_ executed, the program jumps straight to `(B)`. The `if` only guards code within the if statement, so `(B)` will always execute, regardless of the outcome of the `if` statement, because it appears below it.
 
 ```typescript
@@ -369,7 +371,7 @@ Each `return` exits the function immediately, so the order of the checks matters
 
 
 <details class="tooltip link-110">
-<summary><code>if</code> vs <code>cond</code> (vs the ternary operator)</summary>
+<summary><code>if</code> vs <code>cond</code> vs the Ternary (<code>?</code>) Operator</summary>
 
 `if` operates very similarly to `cond`. 
 
@@ -425,6 +427,8 @@ checkExpect(letterGrade(88), "A");
 
 This cannot be checked statically; we must execute the `checkExpect` statement to verify the program behaviour. If the the two arguments to `checkExpect` evaluate to the same value the program will execute successfully; if it does not, the program will crash with an error that describes the expected behaviour that was violated.
 
+TODO: add a TS details block on the mechanics of a test case (test name, checkExpect, test expression, "message")
+
 Suppose we had a more fine-grained expectation of how letter grades should be computed and wrote the following check:
 
 ```typescript
@@ -440,6 +444,7 @@ test("Return an A for a score of 88", () => {
     checkExpect(letterGrade(88), "A");
 });
 ```
+
 
 The first parameter to `test` is a string that describes the test case. The second parameter `() =>` is new syntax: what it is doing is creating an *anonymous* **arrow function**, and that function is being passed as a parameter to `test` so the testing framework can control the execution of the test.
 

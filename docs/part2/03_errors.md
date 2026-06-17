@@ -1,18 +1,18 @@
 # Error Handling
 
-Every function has a contract, and a contract is about more than success. A function that looks up a course section must also say what happens when no such section exists; a function that enrols a student must say what happens when a prerequisite is missing. Designing an abstraction means designing its failures as deliberately as its results: deciding what can go wrong, and how each function tells its caller about it.
+Every function has a contract, and contracts describe what happens when things work, and when the don't. A function that looks up a course section must also say what happens when no such section exists; a function that enrols a student must say what happens when a prerequisite is missing. Failures are designed as deliberately as its results so a design affords a consistent and understandable failure model that interferes as little as possible when the system is working, but makes it hard to do the wrong thing when they are not.
 
-In Part 1 we drew a line between two kinds of failure. An **unexpected error** is one that should be impossible: an invariant has been violated, which means the program has a bug. We detect these with `assert`, which stops the program the moment an impossible state appears, because no sensible computation can continue from corrupt data. An **expected error** is a foreseeable, unsuccessful outcome that is not a bug at all: a section is full, a prerequisite is missing, a file is absent. Expected errors belong in the contract, and the caller is expected to deal with them.
+In Part 1 we differentiated two kinds of failure: An **unexpected error** is one that should be impossible: an invariant has been violated, which means the program has a bug. We detect these with `assert`, which stops the program the moment an impossible state appears, because no sensible computation can continue from corrupt data. An **expected error** is a foreseeable, unsuccessful outcome that is not a bug at all: a section is full, a prerequisite is missing, a file is absent. Expected errors belong in the contract, and the caller is expected to deal with them.
 
-This chapter is about expected errors: how a function communicates one to its caller, and how the caller responds. There are two mechanisms in wide use. A function can **return** its failure as an ordinary value, or it can **throw** an exception that travels up the call stack until something handles it. Neither is universally correct, and choosing between them is a design decision we will spend the second half of the chapter making well.
+This chapter focuses on expected errors: how a function communicates errors to its caller, and how the caller responds. There are two mechanisms in wide use. A function can **return** its failure as an ordinary value, or it can **throw** an exception that travels up the call stack until something handles it. Each have their strengths and weaknesses. 
 
 ## A Student Enrolling in Sections
 
-We will work with one running example throughout this chapter:
+We will work through a running example in this chapter:
 
 > As a registration system, I want to enrol a student in a chosen set of sections and report the first problem I encounter, so that the student knows exactly what needs fixing.
 
-We model a small slice of this domain: a catalog of sections, each listing the courses required before it, and a student with a record of the courses they have already passed. A section with no prerequisites simply lists an empty array.
+We model a small slice of this problem: a catalog of sections, each listing the courses required before it, and a student with a record of the courses they have already passed. A section with no prerequisites simply lists an empty array.
 
 ```typescript
 type Section = {
@@ -34,11 +34,11 @@ const catalog: Section[] = [
 const student: Student = { id: "s1", completed: ["CPSC110"] };
 ```
 
-Enrolling in a section can fail in two foreseeable ways: the section id might not exist in the catalog, or the student might not have completed a prerequisite. Our `student` can take `CPSC210` (its prerequisite `CPSC110` is done) but not `CPSC213` (its prerequisite `CPSC210` is not), and a request for `"NOPE"` names no section at all.
+Enrolling in a section can fail in two predictable ways: the section id might not exist in the catalog, or the student might not have completed a prerequisite. Our `student` can take `CPSC210` (its prerequisite `CPSC110` is done) but not `CPSC213` (its prerequisite `CPSC210` is not), and a request for `"NOPE"` names no section at all.
 
 ## Returning Failure as a Value
 
-The first mechanism is the one we met in Part 1: model failure as part of the return type, so that a function hands back either a success or a failure, and the caller must look to see which. The `Result` type captured this as a tagged union.
+The first error-reporting mechanism is the one we met in Part 1: model failure as part of the return type, so that a function returns either a success or a failure, and the caller must look to see which. The `Result` type captured this as a tagged union.
 
 ```typescript
 type Result<T, E> =
@@ -46,7 +46,7 @@ type Result<T, E> =
   | { ok: false, error: E };
 ```
 
-Each leaf check returns a `Result`. The success case carries the section; the failure case carries a message explaining what went wrong.
+Each function returns a `Result`. The success case carries the section; the failure case carries a message explaining what went wrong.
 
 ```typescript
 function findSection(catalog: Section[], id: string): Result<Section, string> {
@@ -67,9 +67,9 @@ function checkPrerequisite(student: Student, section: Section): Result<Section, 
 }
 ```
 
-The strength of this approach is that the failure is written into the type. A caller of `findSection` receives a `Result<Section, string>`, not a `Section`, so the compiler will not let them reach for `.value` without first checking `.ok`. The possibility of failure is impossible to overlook, because the type checker keeps raising it until the caller deals with it.
+The strength of this approach is that the failure is written into the type. A caller of `findSection` receives a `Result<Section, string>`, not a `Section`, so the compiler will not let them reach for `.value` without first checking `.ok`. The possibility of failure is impossible to overlook, because the type checker forces the caller to deal with the error case.
 
-A returned failure is an ordinary value, which means it is tested like any other value, with `checkExpect`:
+Since the returned failure is an ordinary value, it is tested like any other value: 
 
 ```typescript
 test("a known section is found", () => {
@@ -86,11 +86,9 @@ test("a missing prerequisite returns a failure value", () => {
 });
 ```
 
-That safety has a cost at every call site. A caller cannot use the returned section directly; it must first check `.ok`, and only once it has confirmed success may it reach for `.value`. Even a single call is wrapped in a check, so the handling of the failure case is interleaved with the code that does the successful work.
-
 ### The Cost of Threading Results
 
-The example asks us to enrol a student in *several* sections, checking each one. Built from the leaf checks above, that function spends most of its body moving failures along:
+This error mechanism has a cost for every caller. A caller cannot use the returned section directly; it must first check `.ok`, and only once it has confirmed success may it access `.value`. Even a single call is wrapped in a check, so the handling of the failure case is interleaved with the code that does the successful work. Here we provide a function to enrol a student in *several* sections, checking each one. Built from the functions above, `enrollAll` spends most of its implementation managing failures:
 
 ```typescript
 function enrollAll(catalog: Section[], student: Student, ids: string[]): Result<Section[], string> {
@@ -110,9 +108,15 @@ function enrollAll(catalog: Section[], student: Student, ids: string[]): Result<
 }
 ```
 
-Of the eight lines in this function's body, four exist only to notice a failure and forward it. `enrollAll` cannot do anything useful about an unknown section or a missing prerequisite; the only code that can respond is whatever called `enrollAll`, perhaps to show the student a message. Yet `enrollAll` is forced to participate, unpacking each `Result` and re-returning it, purely to carry the failure one step closer to a caller that can act on it. Its own caller will then unpack the `Result` one more time.
+Of the eight lines in this function's body, four exist only to detect a failure and return it. `enrollAll` cannot do anything useful about an unknown section or a missing prerequisite; the only code that can respond is whatever called `enrollAll`, perhaps to show the student a message. But `enrollAll` is forced to participate, unpacking each `Result` and re-returning it, purely to forward the failure back to the caller to act on it.
 
-There is a readability cost here that matters as much as the line count. The everyday success path, the case that runs almost every time, is the simple sequence "find the section, check the prerequisite, add it to the list". In the code above that sequence is broken into fragments, with a failure check wedged between each step. The case that almost never happens is interleaved with, and visually dominates, the case that almost always does. This is the cost of returning failure as a value: every layer between the function that *detects* a problem and the function that *handles* it must thread the failure through by hand, and the threading crowds out the logic the reader is there to understand. When detection and handling are right next to each other, this is a fair price. When they are many layers apart, the next mechanism is designed for exactly that situation.
+There is a readability cost here that matters as much as the line count: the success path (often called the _happy path_), the case that runs almost every time, is the simple sequence "find the section, check the prerequisite, add it to the list". In the code above that sequence is broken into fragments, with a failure check wedged between each step. Infrequent cases are interleaved with, and visually clutter, the case that almost always happens. This is the cost of returning failure as a value: every layer between the function that *detects* a problem and the function that *handles* it must thread the failure through by hand, and the threading crowds out the logic the reader is there to understand. When detection and handling are right next to each other, this is a fair price. When they are many layers apart, the next mechanism is designed for exactly that situation.
+
+<details class="tooltip deep-dive">
+<summary>Other Ways to Return Failures as Values</summary>
+
+`Result` is not the only way to return an error as a value. A function can return `undefined` if they fail to complete a task, the way `Array.find` does. This is the **optional** pattern, in effect a `Result` with no error detail. Older code, and lower-level languages, often use **sentinel values**: a special in-band return such as `-1`, or `null` for "not found". Sentinels are error-prone precisely because they are ordinary values that can be used by mistake or collide with real data, which is why a stub that returned `-1` was a reliable way to force a test to fail in Part 1.
+</details>
 
 ## Raising an Exception
 
@@ -450,14 +454,7 @@ A **thrown** failure *propagates itself*, which keeps every layer between detect
 
 Two further rules cut through most cases. Unexpected errors, the bugs guarded by `assert`, are always thrown and never caught; there is no decision to make there. And within a single codebase, consistency matters as much as the individual choice: a module where similar operations report failure in similar ways is far easier to use correctly than one where every function makes its own call.
 
-<details class="tooltip deep-dive">
-<summary>Other Ways to Signal Failure</summary>
-
-`Result` and exceptions are this chapter's focus, but they are not the only options. A function that can simply find nothing often returns the value or `undefined`, the way `Array.find` does; this is the **optional** pattern, in effect a `Result` with no error detail. Older code, and lower-level languages, often use **sentinel values**: a special in-band return such as `-1` for "not found". Sentinels are error-prone precisely because they are ordinary values that can be used by mistake or collide with real data, which is why a stub that returned `-1` was a reliable way to force a test to fail in Part 1.
-
-Whatever the mechanism, a few practices hold across all of them: never silently discard an error; do not use exceptions for ordinary control flow, only for genuine failures; and check data the moment it crosses into your program from a file, a network, or a user, converting outside uncertainty into either a trusted value or a clear error right at the boundary. That last practice is the subject of a later chapter.
-
-</details>
+Whatever the error mechanism, a few practices hold across all of them: never silently discard an error; do not use exceptions for ordinary control flow, only for genuine failures; and check data the moment it crosses into your program from a file, a network, or a user, converting outside uncertainty into either a trusted value or a clear error right at the boundary. That last practice is the subject of a later chapter.
 
 ## Designing for Failure
 
