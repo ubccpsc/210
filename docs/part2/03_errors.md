@@ -49,6 +49,14 @@ type Result<T, E> =
 Each function returns a `Result`. The success case carries the section; the failure case carries a message explaining what went wrong.
 
 ```typescript
+/**
+ * Finds the section in the catalog with the given id.
+ *
+ * @param {Section[]} catalog the sections to search
+ * @param {string} id the section id to look for
+ * @returns {Result<Section, string>} ok: true with the matching section,
+ * or ok: false with the error "no section with id <id>" when none matches
+ */
 function findSection(catalog: Section[], id: string): Result<Section, string> {
     const section = catalog.find(s => s.id === id);
     if (section === undefined) {
@@ -57,6 +65,15 @@ function findSection(catalog: Section[], id: string): Result<Section, string> {
     return { ok: true, value: section };
 }
 
+/**
+ * Checks that a student has completed every prerequisite of a section.
+ *
+ * @param {Student} student the student to check
+ * @param {Section} section the section whose prerequisites are required
+ * @returns {Result<Section, string>} ok: true with the section when every
+ * prerequisite is complete, or ok: false with "<section.id> requires <id>"
+ * for the first prerequisite the student is missing
+ */
 function checkPrerequisite(student: Student, section: Section): Result<Section, string> {
     for (const required of section.prerequisite) {
         if (student.completed.includes(required) === false) {
@@ -91,6 +108,15 @@ test("a missing prerequisite returns a failure value", () => {
 This error mechanism has a cost for every caller. A caller cannot use the returned section directly; it must first check `.ok`, and only once it has confirmed success may it access `.value`. Even a single call is wrapped in a check, so the handling of the failure case is interleaved with the code that does the successful work. Here we provide a function to enrol a student in *several* sections, checking each one. Built from the functions above, `enrollAll` spends most of its implementation managing failures:
 
 ```typescript
+/**
+ * Enrols a student in the given sections, stopping at the first problem.
+ *
+ * @param {Section[]} catalog the sections on offer
+ * @param {Student} student the student enrolling
+ * @param {string[]} ids the ids of the sections to enrol in
+ * @returns {Result<Section[], string>} ok: true with the sections in order,
+ * or ok: false carrying the first error from findSection or checkPrerequisite
+ */
 function enrollAll(catalog: Section[], student: Student, ids: string[]): Result<Section[], string> {
     const sections: Section[] = [];
     for (const id of ids) {
@@ -150,6 +176,14 @@ Notice that the `Result` type from earlier in this chapter recovers the *checked
 Where a returned failure asks every layer to carry it, a thrown one carries itself. The leaf checks no longer return a `Result`; they return on success and `throw` on failure, with an informative message.
 
 ```typescript
+/**
+ * Finds the section in the catalog with the given id.
+ *
+ * @param {Section[]} catalog the sections to search
+ * @param {string} id the section id to look for
+ * @returns {Section} the matching section
+ * @throws {Error} "no section with id <id>" when no section matches
+ */
 function requireSection(catalog: Section[], id: string): Section {
     const section = catalog.find(s => s.id === id);
     if (section === undefined) {
@@ -158,6 +192,15 @@ function requireSection(catalog: Section[], id: string): Section {
     return section;
 }
 
+/**
+ * Verifies that a student has completed every prerequisite of a section.
+ *
+ * @param {Student} student the student to check
+ * @param {Section} section the section whose prerequisites are required
+ * @returns {void} nothing when every prerequisite is complete
+ * @throws {Error} "<section.id> requires <id>" for the first prerequisite
+ * the student is missing
+ */
 function requirePrerequisite(student: Student, section: Section): void {
     for (const required of section.prerequisite) {
         if (student.completed.includes(required) === false) {
@@ -170,6 +213,16 @@ function requirePrerequisite(student: Student, section: Section): void {
 Now `enrollAll` is free of error-handling entirely:
 
 ```typescript
+/**
+ * Enrols a student in the given sections, stopping at the first problem.
+ *
+ * @param {Section[]} catalog the sections on offer
+ * @param {Student} student the student enrolling
+ * @param {string[]} ids the ids of the sections to enrol in
+ * @returns {Section[]} the sections, in order, when every enrolment succeeds
+ * @throws {Error} the first failure encountered, from requireSection or
+ * requirePrerequisite
+ */
 function enrollAll(catalog: Section[], student: Student, ids: string[]): Section[] {
     const sections: Section[] = [];
     for (const id of ids) {
