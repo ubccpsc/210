@@ -245,22 +245,6 @@ Note a syntax difference between object values and object types; property defini
 
 6. **Generalisation:** A song is a single fixed shape, so there is nothing to generalise.
 
-<details class="tooltip ts-tips">
-  <summary>JSON: objects as a data format</summary>
-
-The object-and-property structure has a standard text form called **JSON** (JavaScript Object Notation). It is one of the most common ways to store data in a file or send it between programs over a network. A `Song` written as JSON looks almost identical to the object literal above:
-
-```json
-{
-  "title": "Song A",
-  "artist": "Artist 1",
-  "durationSeconds": 200
-}
-```
-
-JSON is data only: it carries no types and no code. A few rules separate it from a TypeScript object literal. Every property name is written in double quotes, strings use double quotes rather than single, and there are no comments and no trailing commas. A JSON value is an object like this one, a string, a number, a boolean, or `null`. One further kind of JSON value, the array, appears in the arrays chapter.
-
-</details>
 
 <details class="tooltip link-110">
   <summary>Coming from BSL</summary>
