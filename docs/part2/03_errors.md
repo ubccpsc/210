@@ -2,9 +2,9 @@
 
 Every function's contract describes what happens when the function works, and when it doesn't. A function that looks up a course section must also handle what happens when no such section exists; a function that enrols a student must handle what happens when a prerequisite is missing. Failures are designed as deliberately as its results so a design affords a consistent and understandable failure model that interferes as little as possible when the system is working, but makes it hard to do the wrong thing when they are not.
 
-In Part 1 we differentiated two kinds of failure: An **unexpected error** is one that should be impossible: an invariant has been violated, which means the program has a bug. We proactively detect these with `assert`, which stops the program the moment an impossible state appears, because no sensible computation can continue from corrupt data. These are often only triggered during development, as an implementation will typically be strengthened to prevent preconditions from being triggered in deployed systems. 
+We previously differentiated two kinds of failure: An **unexpected error** is one that should be impossible: an invariant has been violated, which means the program has a bug. We proactively detect these with `assert`, which stops the program the moment an impossible state appears, because no sensible computation can continue from corrupt data. These are often only triggered during development, as an implementation will typically be strengthened to prevent preconditions from being triggered in deployed systems. 
 
-An **expected error** is a foreseeable, unsuccessful outcome that is not a bug at all: a section is full, a prerequisite is missing, a file is absent. Expected errors belong in the contract, and the caller is expected to deal with them. This chapter focuses on expected errors: how a function communicates errors to its caller, and how the caller responds. There are two mechanisms in wide use. A function can **return** its failure as an ordinary value, or it can **throw** an exception that travels up the call stack until something handles it. Each have their strengths and weaknesses. 
+An **expected error** is a foreseeable, unsuccessful outcome that is not a bug at all: a section is full, a prerequisite is missing, a file is absent. Expected errors belong in the contract, and the caller is expected to deal with them. This chapter focuses on expected errors: how a function communicates errors to its caller, and how the caller responds. There are two mechanisms in wide use. A function can *return* its failure as an ordinary value, or it can *throw* an exception that travels up the call stack until something handles it. Each mechanism has strengths and weaknesses. 
 
 ## A Student Enrolling in Sections
 
@@ -38,7 +38,7 @@ Enrolling in a section can fail in two predictable ways: the section id might no
 
 ## Returning Failure as a Value
 
-The first error-reporting mechanism was introduced in the maintaining invariants [chapter](../part1/04_maintaining-invariants): the failure is modeled as part of the return type, so that a function returns either a success or a failure, and the caller must check the returned value to determine the outcome. The `Result` type captured this as a tagged union.
+The first error-reporting mechanism was introduced in the [checking invariants chapter](../part1/03_checking-invariants.html#expected-and-unexpected-errors): the failure is modeled as part of the return type, so that a function returns either a success or a failure, and the caller must check the returned value to determine the outcome. The `Result` type captured this as a tagged union.
 
 ```typescript
 type Result<T, E> =
@@ -103,7 +103,7 @@ test("a missing prerequisite returns a failure value", () => {
 });
 ```
 
-### The Cost of Threading Results
+### The Cost of Interleaving Results
 
 This error mechanism has a cost for every caller. Callers cannot use the returned value directly; it must first check `.ok`, and only once it has confirmed success may it access `.value`. Even a single call is wrapped in a check, so the handling of the failure case is interleaved with the code that does the successful work. Here we provide a function to enrol a student in *several* sections, checking each one. Built from the functions above, `enrollAll` spends most of its implementation managing failures:
 
@@ -144,36 +144,11 @@ The readability impact of this is meaningful: the success path (often called the
 `Result` is not the only way to return an error as a value. A function can return `undefined` if they fail to complete a task, the way `Array.find` does. This is the **optional** pattern, in effect a `Result` with no error detail. Older code, and lower-level languages, often use **sentinel values**: a special in-band return such as `-1`, or `null` for "not found". Sentinels are error-prone precisely because they are ordinary values that can be used by mistake or collide with real data, which is why a stub that returned `-1` was a reliable way to force a test to fail in Part 1.
 </details>
 
-## Raising an Exception
+## Raising (Throwing) an Exception
 
-An **exception** is a signal that something has gone wrong, raised with the `throw` statement. Throwing an exception immediately abandons the rest of the current function and hands the exception to that function's caller; if the caller does not handle it, the exception is handed to *its* caller, and so on up the call stack until something catches it or the program runs out of stack and halts.
+When an error is encountered, we can **raise an exception**. That is, we can signal that an exceptional state has been reached. We do this with the `throw` statement. Throwing an exception immediately abandons the rest of the current function and hands the exception to that function's caller; if the caller does not handle it, the exception is handed to *its* caller, and so on up the call stack until something catches it or the program runs out of stack and halts.
 
-Concretely, `throw` takes an error value to raise, almost always a `new Error` carrying a message that describes the problem. The skeleton below shows its key effect:
-
-```typescript
-function attempt(): void {
-    // (A)
-    throw new Error("a description of what went wrong");
-    // (B)
-}
-```
-
-If `(A)` runs and the `throw` is then reached, the statements in `(B)` never run. A `throw` leaves the function immediately, much as `return` does, but with two differences: it carries an error rather than an ordinary value, and the caller does not receive that error as a result. Instead the error begins travelling up the chain of callers, as described above.
-
-This throw-and-catch model is not unique to TypeScript. The same mechanism, with slightly different spelling, appears in Java, C++, C#, and Python (where the keywords are `try` and `except`), among many others. The idea you learn here transfers directly when you move between languages.
-
-<details class="tooltip deep-dive">
-<summary>Checked and Unchecked Exceptions</summary>
-
-The languages above differ in how much they ask of a caller. TypeScript's exceptions are **unchecked**: a function's type says nothing about what it might throw, and the compiler never forces a caller to handle a possible exception. The `attempt` skeleton above can throw, yet its signature, `(): void`, is identical to that of a function that never throws.
-
-Some languages, notably Java, also offer **checked** exceptions, which must be declared in the signature and which the compiler forces every caller either to handle or to re-declare. Checked exceptions make a failure impossible to forget, at the cost of real ceremony in every layer the exception passes through.
-
-Notice that the `Result` type from earlier in this chapter recovers the *checked* property inside an unchecked language. By putting the failure in the return type, it makes the compiler insist that callers deal with it. That is the single sharpest difference between the two mechanisms in this chapter: returned failures are visible to the type checker, thrown ones are not.
-
-</details>
-
-Where a returned failure asks every layer to carry it, a thrown one carries itself. The leaf checks no longer return a `Result`; they return on success and `throw` on failure, with an informative message.
+For example, in `requireSection` we can see that when it encounters a situation where the section does not exist it can just `throw new Error(...)`. In this way `requireSection` can signal to its callers that a section that does not exist was requested. The method also no longer returns a `Result` but instead returns `Section`, which is the more common successful path. Finally, the `@throws` annotation is added to the method description so callers know what kinds of errors to expect.
 
 ```typescript
 /**
@@ -191,7 +166,40 @@ function requireSection(catalog: Section[], id: string): Section {
     }
     return section;
 }
+```
 
+<details class="tooltip ts-tips">
+<summary><code>throw</code> Syntax</summary>
+
+Concretely, `throw` takes an error value to raise, almost always a `new Error` carrying a message that describes the problem. The skeleton below shows its key effect:
+
+```typescript
+function attempt(): void {
+    // (A)
+    throw new Error("a description of what went wrong");
+    // (B)
+}
+```
+
+If `(A)` runs and the `throw` is then reached, the statements in `(B)` never run. A `throw` leaves the function immediately, much as `return` does, but with two differences: it carries an error rather than an ordinary value, and the caller does not receive that error as a result. Instead the error begins travelling up the chain of callers, as described above.
+</details>
+
+This throw-and-catch model is not unique to TypeScript. The same mechanism, with slightly different spelling, appears in Java, C++, C#, and Python (where the keywords are `try` and `except`), among many others. The idea you learn here transfers directly when you move between languages.
+
+<details class="tooltip deep-dive">
+<summary>Checked and Unchecked Exceptions</summary>
+
+The languages above differ in how much they ask of a caller. TypeScript's exceptions are **unchecked**: a function's type says nothing about what it might throw, and the compiler never forces a caller to handle a possible exception. The `attempt` skeleton above can throw, yet its signature, `(): void`, is identical to that of a function that never throws.
+
+Some languages, notably Java, also offer **checked** exceptions, which must be declared in the signature and which the compiler forces every caller either to handle or to re-declare. Checked exceptions make a failure impossible to forget, at the cost of real ceremony in every layer the exception passes through.
+
+Notice that the `Result` type from earlier in this chapter recovers the *checked* property inside an unchecked language. By putting the failure in the return type, it makes the compiler insist that callers deal with it. That is the single sharpest difference between the two mechanisms in this chapter: returned failures are visible to the type checker, thrown ones are not.
+
+</details>
+
+Looking at the rest of our example:
+
+```typescript
 /**
  * Verifies that a student has completed every prerequisite of a section.
  *
@@ -208,11 +216,7 @@ function requirePrerequisite(student: Student, section: Section): void {
         }
     }
 }
-```
 
-Now `enrollAll` is free of error-handling entirely:
-
-```typescript
 /**
  * Enrols a student in the given sections, stopping at the first problem.
  *
@@ -513,7 +517,7 @@ We now have two ways to manage the same expected failure and need to make real d
 
 A **returned** failure is *visible to the type checker*. It appears in the function's return type, and the compiler forces every caller to manage it. The cost is that every layer between detection and handling must examine the failure, and the checks interleave can obscure the success path. Returning failure is the better choice when the failure is an ordinary, expected part of the operation that the *immediate* caller should always deal with it.
 
-A **thrown** failure *propagates itself*, which clarifies the common success path. The price is that the failure is invisible in the type: a function that throws looks, from its signature, just like one that always succeeds, so it is easy for a caller to forget that handling is needed. Throwing is the better choice when a failure should abort the current line of work and be dealt with somewhere well above, or when threading a `Result` through many layers would bury the logic.
+A **thrown** failure *propagates itself*, which clarifies the common success path. The price is that the failure is invisible in the type: a function that throws looks, from its signature, just like one that always succeeds, so it is easy for a caller to forget that handling is needed. Throwing is the better choice when a failure should abort the current line of work and be dealt with somewhere well above, or when interleaving a `Result` through many layers would bury the logic.
 
 Within a single codebase, consistency matters as much as the individual choice: consistent error handling mechnsims are always easier to use correctly than one where every function makes its own call. Whatever the error mechanism, a few practices hold across all of them: never silently discard an error; do not use exceptions for ordinary control flow, only for real errors; and check data the moment it crosses into your program from a file, a network, or a user, converting outside uncertainty into either a trusted value or a clear error right at the boundary. That last practice is the subject of a later chapter.
 
