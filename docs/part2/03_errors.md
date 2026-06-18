@@ -271,20 +271,9 @@ You raised errors in CPSC 110 with `error`, which stopped the program with a mes
 
 ## Catching an Exception
 
-A thrown exception is handled with a `try`/`catch` statement. The code that might throw goes in the `try` block; if it throws, control jumps to the `catch` block, which receives the thrown error. In the abstract:
+A thrown exception is handled with a `try`/`catch` statement. Code that might encounter an error goes in the `try` block, while the code that should execute should an error be encountered goes in the `catch` block. 
 
-```typescript
-try {
-    // (A)
-} catch (error) {
-    // (B)
-}
-// (C)
-```
-
-If `(A)` runs to completion without throwing, the `catch` block `(B)` is skipped entirely and control continues at `(C)`. If anything in `(A)` throws, the rest of `(A)` is abandoned at once, control jumps to `(B)` with the thrown error bound to the name `error`, and then continues at `(C)`. Either way `(C)` runs; the only difference is whether `(B)` ran on the way there. Crucially, the throw caught in `(B)` need not have happened directly in `(A)`: it may have come from deep inside a function that `(A)` called, because a `try` catches throws from anywhere in the work it encloses.
-
-The function that enrols a student sits at the top, where there is finally something useful to do with a failure, and it is the only place that handles errors at all:
+For example, the `enrolStudent` function needs to handle the situation where `enrollAll` fails:
 
 ```typescript
 function enrolStudent(catalog: Section[], student: Student, ids: string[]): void {
@@ -298,7 +287,24 @@ function enrolStudent(catalog: Section[], student: Student, ids: string[]): void
 }
 ```
 
+<details class="tooltip ts-tips">
+<summary><code>try/catch</code> Syntax</summary>
+
+The code that might throw goes in the `try` block; if it throws, control jumps to the `catch` block, which receives the thrown error. In the abstract:
+
+```typescript
+try {
+    // (A)
+} catch (error) {
+    // (B)
+}
+// (C)
+```
+
+If `(A)` runs to completion without throwing, the `catch` block `(B)` is skipped entirely and control continues at `(C)`. If anything in `(A)` throws, the rest of `(A)` is abandoned at once, control jumps to `(B)` with the thrown error bound to the name `error`, and then continues at `(C)`. Either way `(C)` runs; the only difference is whether `(B)` ran on the way there. Crucially, the throw caught in `(B)` need not have happened directly in `(A)`: it may have come from deep inside a function that `(A)` called, because a `try` catches throws from anywhere in the work it encloses. 
+
 TypeScript gives the caught value the type `unknown`, because in principle any value can be thrown, so here we simply log the whole error rather than reach into it. That is enough to report what went wrong: an `Error` prints with the message it was given.
+</details>
 
 A thrown failure interrupts the call rather than coming back as a value, so we cannot inspect it with `checkExpect`. This is what `checkError` is for: it runs the code you give it and passes only if that code throws.
 
@@ -345,20 +351,7 @@ The word **thunk** is old programming jargon for a small, parameterless function
 
 ### The `finally` Block
 
-A `try` may be followed by a `finally` block. Where a `catch` runs only when the `try` throws, a `finally` runs on every path out of the `try`, whether it finished normally or threw. In the abstract:
-
-```typescript
-try {
-    // (A)
-} finally {
-    // (B)
-}
-// (C)
-```
-
-If `(A)` runs to completion, `(B)` runs and then control continues at `(C)`. If `(A)` throws, `(B)` still runs, and then the exception continues up the call stack: `(C)` is not reached, but the cleanup in `(B)` was not skipped. A `finally` may also follow a `catch`, written `try { ... } catch (error) { ... } finally { ... }`, in which case the `finally` runs after the `try` and after any `catch`, again on every path.
-
-To see why this matters, you need to know that a program does not work only with values in its own memory; it also borrows things from the operating system that must be given back. Opening a file, for instance, returns a **handle**, a token the operating system grants so the program can read and write that file. The operating system allows only a limited number of open handles at once, and a handle stays held until the program explicitly closes it. The same is true of a network connection, or of a lock that keeps two parts of a program from interfering: each is held until it is released. If a program keeps opening files and never closing them, it eventually runs out of handles and can open no more, a fault known as a **resource leak**.
+A `try` may be followed by a `finally` block. Where a `catch` runs only when the `try` throws, a `finally` runs on every path out of the `try`, whether it finished normally or threw. To see why this matters, you need to know that a program does not work only with values in its own memory; it also borrows things from the operating system that must be given back. Opening a file, for instance, returns a **handle**, a token the operating system grants so the program can read and write that file. The operating system allows only a limited number of open handles at once, and a handle stays held until the program explicitly closes it. The same is true of a network connection, or of a lock that keeps two parts of a program from interfering: each is held until it is released. If a program keeps opening files and never closing them, it eventually runs out of handles and can open no more, a fault known as a **resource leak**.
 
 Here is the danger an exception introduces. If a `throw` interrupts the work between opening a resource and closing it, the closing line is one of the statements that gets abandoned, and the resource is leaked. `finally` exists to prevent exactly this: because its block runs on the throwing path as well as the normal one, the cleanup cannot be skipped.
 
@@ -371,7 +364,24 @@ try {
 }
 ```
 
-We rarely need to write `finally` ourselves in this course, but you will see it wherever a cleanup step must happen no matter how a block is left.
+While `finally` blocks are often not needed, you will likely encounter them whenever your code requires a cleanup step no matter how a block exits.
+
+<details class="tooltip ts-tips">
+<summary>Optional <code>finally</code> Block</summary>
+
+In the abstract:
+
+```typescript
+try {
+    // (A)
+} finally {
+    // (B)
+}
+// (C)
+```
+
+If `(A)` runs to completion, `(B)` runs and then control continues at `(C)`. If `(A)` throws, `(B)` still runs, and then the exception continues up the call stack: `(C)` is not reached, but the cleanup in `(B)` was not skipped. A `finally` may also follow a `catch`, written `try { ... } catch (error) { ... } finally { ... }`, in which case the `finally` runs after the `try` and after any `catch`, again on every path.
+</details>
 
 ### Recovering, or Just Reporting
 
