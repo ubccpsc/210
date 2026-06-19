@@ -376,6 +376,7 @@ The data definition provides a template: if the data has distinct cases, the fun
 
 This section is analogous the template step of the design recipe. In CPSC 110 the shape of a data definition dictated the shape of the function that consumed it: an itemisation became a `cond` with one clause per case, and a self-referential definition became a natural recursion. The same correspondence holds in TypeScript.
 
+We won't strictly enforce a template step in CPSC 210. But, if you find yourself lost and unsure where to start, you can look at the structure of the type to guide your programming. 
 </details>
 
 ### Branching on the Case
@@ -537,4 +538,6 @@ These run the functions and confirm they produce the expected values. The compil
 
 A precise data definition is the foundation everything else rests on. It catches mistakes early, it mirrors the structure of the problem, and it drives the structure of the code that consumes it: once the data is modelled, the functions largely follow its shape. In this chapter we followed one process across a sequence of examples, from a simple enumeration through a song to a recursive playlist, and then wrote functions whose shape follows the data's shape.
 
-From here, Part 1 builds directly on this work: writing functions that are themselves generic, deriving tests from the structure of data, and leaning further on the type checker. In part 2, when we move to object-oriented programming, the tagged unions you wrote here become class hierarchies; the underlying ideas will carry over even as the syntax changes.
+From here, Part 1 builds directly on this work: writing functions that are themselves generic, deriving tests from the structure of data, and leaning further on the type checker. 
+
+In Part 2, when we move to **object-oriented programming**, the **tagged unions** you wrote here become class hierarchies. the underlying ideas will carry over even as the syntax changes.
