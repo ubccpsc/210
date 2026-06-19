@@ -189,37 +189,43 @@ We saw one type of statement already: the function definition. Today we will int
 
 The `if` statement chooses whether to run a block of code based on a condition. Unlike BSL's `cond`, it does not evaluate to a value, it only directs which code runs. The `if` statement is the most basic **control flow** statement in most languages. By directing how the program executes, the `if` controls the flow of execution.
 
-TODO: this abstract form is already in the 'if and block statement' details block; this might as well transition to build up the `letterGrade` function (return A/F, return A/B/F, etc.)
+A basic if block is shown below. If the condition `grade >= 50` is `true`, the code labelled `// (A)` will execute. If the conditiob `grade >= 50` is `false`, the code labelled `// (B)` will execute. 
 
-The most basic if block is shown below; if the `<condition>` is `true`, the code in `(A)` will execute, followed by the code in `(B)`. If `<condition>` is false, `(A)` is _not_ executed, the program jumps straight to `(B)`. The `if` only guards code within the if statement, so `(B)` will always execute, regardless of the outcome of the `if` statement, because it appears below it.
+<!--- not talking about executing stuff after the if statement, because it kind of conflicts with returns ---->
 
 ```typescript
-if (<condition>) {
-    // (A)
+if (grade >= 50) {
+    // (A) handle passing grade
+} else {
+    // (B) handle failing grade
 }
-// (B)
 ```
 
 <!--- note: code in between { } forms a block, not always a basic block. There could be another if statement in the block, and it would be a block but not a basic block. I don't think we need to introduce basic blocks yet.  --->
 
 <!--- A contiguous sequence of expressions and statements that will always execute in order in a programming language is known as a **block**. In TypeScript, these represent statements between a `{` until the next branch statement (e.g, `if`) is encountered, or a closing `}` is encountered. This means that several statements could be included at `(A)`, and all would be executed in order if `<condition>` were `true`. ---->
 
-`(A)` need not be only a single statement. Notice the `if` is followed by curly braces: `{` and `}`. These curly braces designate a **block**, which can contain a sequence of statements. This means that several statements could be included at `(A)`, and they would be executed in order if `<condition>` were `true`.
-
-
-`if` statements (in TypeScript, and most languages) are extremely flexible and expressive. The most explicit extension to the example above involves the `else` statement. This means that if `<condition>` is true, `(A)` executes, followed by `(C)`, but if `<condition>` is false, `(B)` executes, followed by `(C)`.
-
-```typescript
-if (<condition>) {
-    // (A)
-} else {
-    // (B)
-}
-// (C)
-```
+Right now `(A)` and `(B)` are comments rather than concrete code; the code can be any sequence of statements.  The curly braces `{}` designate a **block**, which can contain a sequence of statements. This means that several statements could be included at `// (A)`, or `// (B)`. We'll give a concrete example once we introduce another type of statement.
 
 The two sides of the if statement are referred to as **branches**.
-When, in a certain run, `<condition>` evaluates to true and we execute `(A)`, we call this taking the **then-branch**. On the other hand, when 
+When, in a certain run, the if condition (`grade >= 50` above) evaluates to true and we execute `// (A)`, we call this taking the **then-branch**. On the other hand, when the if condition (`grade >= 50` above) evaluates to false and we execute `// (B)`, we call this taking the **else-branch**.
+
+It is common enough that we only want to execute code if a condition is true that an alternative version of `if` has no `else` statement:
+
+```typescript
+if (grade >= 50) {
+    // code to run if grade is passing
+}
+```
+
+This is identical to having an empty `else` block:
+
+```typescript
+if (grade >= 50) {
+    // code to run if grade is passing
+} else {
+}
+```
 
 
 <details class="tooltip ts-tips"> 
@@ -229,12 +235,14 @@ A block statement is started by `{` and `}`. It groups together a list of statem
 
 ```typescript
 { 
-   s_1;
-   s_2;
-   s_3;
+   <statement-1>;
+   <statement-2>;
+   <statement-3>;
 }
 ```
-so that first `s_1` will run, then `s_2` will run, etc. It can group together any number of statements. In general typescript, if you separate your statements with `;`, you can write them on the same line, and the meaning is the same: `{ s_1; s_2; s_3 }`. However, in this course, we will always put statements on separate lines for clarity.
+so that first `<statement-1>` will run, then `<statement-3>` will run, etc. It can group together any number of statements. 
+
+In general typescript, if you separate your statements with `;`, you can write them on the same line, and the meaning is the same: `{ <statement-1>; <statement-2>; <statement-3> }`. However, in this course, we will always put statements on separate lines for clarity.
 
 If statements have two forms. First, the `if` (no else) statement:
 ```typescript
@@ -322,7 +330,7 @@ function letterGrade(score: number): string {
 }
 ```
 
-In the code above once a true branch of one of the `if` statements is taken, no other code is executed. We've written what we intend in each branch---but how do we capture  "funtion should evaluate to" in TypeScript?
+In the code above once a true branch of one of the `if` statements is taken, no other code is executed. We've written what we intend in each branch---but how do we capture  "function should evaluate to" in TypeScript?
 
 #### <code>return</code> statements
 
@@ -331,9 +339,9 @@ The `return` keyword is necessary to make functions in TypeScript return values.
 <details class="tooltip ts-tips">
 <summary><code>return</code> Statements</summary>
 
-`return e;` evaluates the expression `e` to a value `v` (i.e., `2 + 3` to `5`), stops executing the function there, and returns this `v` to the caller of the function.
+`return <expression>;` evaluates the expression ` <expression>` to a value `v` (i.e., `2 + 3` to `5`), stops executing the function there, and returns this `v` to the caller of the function.
 
-For instance, if `return e;` is in the function `foo`, wherever the call `foo()` appears, when we execute `return e;` within `foo`, `foo` evaluates `e` to `v`, and the call to `foo()` is then replaced with `v`.
+For instance, if `return <expression>;` is in the function `foo`, wherever the call `foo()` appears, when we execute `return  <expression>;` within `foo`, `foo` evaluates `<expression>` to `v`, and the call to `foo()` is then replaced with `v`.
 
 The `return` statement only makes sense if it appears in a function definition (or method defintion, which we'll see in Part 2).
 
@@ -402,6 +410,30 @@ There does exist an expression in TypeScript that behaves like a 1-condition `co
 
 Unlike an `if` statement, the `<then-expression>` and `<else-expression>` in the ternary operator must be single expressions. The single-expression limitation, and confusions that sometimes arise from the ternary operator's compact notation, are two reasons why it can often be preferable to just use `if` statements explicitly instead of `?`.
 
+</details>
+
+
+<details class="tooltip exercise"> 
+<summary>Exercise: <code>{}</code> for clarity</summary>
+
+In this class, we will use block statements as the statement after any `if` conditions. In the wild, you may see `if` statements that aren't followed by `{`. It's worth learning how to reason about those as well.
+
+Consider the following piece of code:
+```typescript
+function toPassFail(s: number): string {
+    if (s > 0) 
+        if (s > 50) 
+          return "PASS";
+        if (s <= 50) 
+          return "FAIL";
+    else 
+          return "NEGATIVE";
+
+}
+```
+1. Suggest three inputs you would pass to `toPassFail` to check its behaviour.
+2. Without executing the code, predict, for each input, what `toPassFail` would return.
+3. Execute `toPassFail(i)` for each input `i` you've decided on. Does its return value match your prediction? Why or why not?
 </details>
 
 
@@ -495,19 +527,7 @@ What is new is mostly *enforcement* and *form*. In terms of *enforcement*, we wr
 Mapping constructs in a new language back to the ideas you already know from prior languages is what makes new programming languages quick to pick up. While this transition can be tricky this first time, with each subsequent language you learn, it will be easier and easier.
 
 
-(TODO if time permits, a "reading code" exercise that would go nicely either at the end if the `if` secion or in the testing section is debugging the following code:
-```typescript
-function toPassFail(s: number): string {
-    if (s > 0) 
-        if (s > 50) 
-          return "PASS";
-        if (s <= 50) 
-          return "FAIL";
-    else 
-          return "NEGATIVE";
 
-}
-```
-gives a n idea as why we want to put curly braces everywhere)
+
 
 (TODO: maybe an exercise asking them to write down any vocabulary that was new to them and prepare questions for class/OH?)
