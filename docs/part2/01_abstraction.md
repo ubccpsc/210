@@ -68,13 +68,13 @@ is a *statement* that declares the name *X* as a type.
 
 
 
-For instance, here is a class called `CourseSection`:
+For instance, here is a class called `Workshop`:
 
 ```typescript
-// CourseSection V0: a blank class
-class CourseSection {
+// Workshop V0: a blank class
+class Workshop {
 	
-	constructor(courseId: string) {
+	constructor(id: string) {
 		// TODO: class initialisation
 	}
 }
@@ -98,7 +98,7 @@ defines how objects of type `T` are created. We don't call `constructor()` expli
 By default, TypeScript will provide a default constructor that takes in no arguments, like the one in the code example above. You could understand the code above as defining:
 ```typescript
 class T {
-   T(): T { // NOT correct TypeScript Syntax
+   T(): T { // illustrative: NOT correct TypeScript syntax
      // empty default constructor
    }
 }
@@ -109,11 +109,11 @@ class T {
 
 A class on its own is essentially a fancier type definition. Just like we needed to create *values* of certain types to use a type, we need to **instantiate** a value of the class type to use a class. 
 
-In particular, we call an instantiated class value an **object**.  When a class is instantiated, an object is created in memory with its own independent storage for each field. For instance, the following creates a variable, named `cpsc210`, whose value is an object of type 
-`CourseSection`, as returned by the constructor of `CourseSection`:
+In particular, we call an instantiated class value an **object**.  When a class is instantiated, an object is created in memory with its own independent storage for each field. For instance, the following creates a variable, named `pottery`, whose value is an object of type 
+`Workshop`, as returned by the constructor of `Workshop`:
 
 ```typescript
-const cpsc210 = new CourseSection("CPSC 210");
+const pottery = new Workshop("Intro to Pottery");
 ```
 
 <details class="tooltip ts-tips">
@@ -132,33 +132,33 @@ Importantly, we can make multiple independent objects from the same class:
 <!--- Intentional: break the pattern that the variable name is directly derivable from the first constructor argument, so students don't think that's necessary. --> 
 
 ```typescript
-const math_prereq = new CourseSection("MATH 100");
-const cpsc210 = new CourseSection("CPSC 210");
-const cpsc310 = new CourseSection("CPSC 310");
+const watercolour = new Workshop("Watercolour Basics");
+const pottery = new Workshop("Intro to Pottery");
+const sketching = new Workshop("Sketching 101");
 ```
 
-Objects from the same class share the same structure, but hold different *data*.  This is one way we will manage state: by splitting data up between different objects. Conceptually, the 3 `CourseSection` objects above could help us split up the state for different classes.
+Objects from the same class share the same structure, but hold different *data*.  This is one way we will manage state: by splitting data up between different objects. Conceptually, the 3 `Workshop` objects above could help us split up the state for different classes.
 
 
 ### Class Bodies: Storing State and Functionality
 
-We mentioned above that a class binds together *state* and *functionality*. But our `CourseSection` was blank except for a constructor.
+We mentioned above that a class binds together *state* and *functionality*. But our `Workshop` was blank except for a constructor.
 
 #### State
 
-Let's first flesh out the `CourseSection` above to contain relevant *state*. A course section, should, at the very least, contain information about its name and capacity. When we create a course section object, we should set that name and capacity. We do that as follows: 
+Let's first flesh out the `Workshop` above to contain relevant *state*. A course section, should, at the very least, contain information about its name and capacity. When we create a course section object, we should set that name and capacity. We do that as follows: 
 
 ```typescript
-// CourseSection V1: Add Some Data
-class CourseSection {
+// Workshop V1: Add Some Data
+class Workshop {
    // the first field: the course ID
 	id: string;
 	// the second field: the course capacity
-	cap: number;
+	capacity: number;
 	
-	constructor(courseId: string, cap: number) {
-		this.id = courseId;
-		this.cap = cap;
+	constructor(id: string, capacity: number) {
+		this.id = id;
+		this.capacity = capacity;
 	}
 }
 ```
@@ -217,20 +217,20 @@ class T {
 
 This sets the default value for `field_n` to whatever value is in `some_x`. `some_x` can be any expression (including a function call), not just a variable. 
 
-Setting the field's default value is the same as if it were set in the constructor itself. This is convenient for fields that do not need per-instance customisation. For instance, if we wanted a `CourseSection` to have a list-of-students field, we could initialize it to the empty list this way.
+Setting the field's default value is the same as if it were set in the constructor itself. This is convenient for fields that do not need per-instance customisation. For instance, if we wanted a `Workshop` to have a list-of-students field, we could initialize it to the empty list this way.
 
 </details>
 
 
-In this version of CourseSection, we have two fields, `id`, and `cap`.  Fields are non-callable (i.e., not functions) properties of classes. The constructor above initializes the values of fields while the objects of type `CourseSection` are being created. For instance, now we can create objects with names and enrolment capacities for each class: 
+In this version of Workshop, we have two fields, `id`, and `cap`.  Fields are non-callable (i.e., not functions) properties of classes. The constructor above initializes the values of fields while the objects of type `Workshop` are being created. For instance, now we can create objects with names and enrolment capacities for each class: 
 
 ```typescript
-const math_prereq = new CourseSection("MATH 100", 400);
-const cpsc210 = new CourseSection("CPSC 210", 180);
-const cpsc310 = new CourseSection("CPSC 310", 160);
+const watercolour = new Workshop("Watercolour Basics", 400);
+const pottery = new Workshop("Intro to Pottery", 180);
+const sketching = new Workshop("Sketching 101", 160);
 ```
 
-Note that the contents of the fields are unique to each instantiated object; changes to a field in one object have *no impact* on the same field in another object. In the above, `cpsc210.id` will hold the value `"CPSC 210"`, while `math_prereq.id` will hold the value `"MATH 100"`.
+Note that the contents of the fields are unique to each instantiated object; changes to a field in one object have *no impact* on the same field in another object. In the above, `pottery.id` will hold the value `"Intro to Pottery"`, while `watercolour.id` will hold the value `"Watercolour Basics"`.
 
 <details class="tooltip deep-dive">
 <summary>When should I make a field?</summary>
@@ -286,7 +286,7 @@ class T {
 
 
 
-Let's add functionality to our `CourseSection`. Most functionality for a course section involves the students enrolled. So we'll first add a field `registered` in which we can store enrolled students. Then, we'll add functionality to register and withdraw students:
+Let's add functionality to our `Workshop`. Most functionality for a course section involves the students enrolled. So we'll first add a field `registered` in which we can store enrolled students. Then, we'll add functionality to register and withdraw students:
 
 <!--
 duplicate students not caught on purpose, we will notice this in verification
@@ -295,29 +295,29 @@ duplicate students not caught on purpose, we will notice this in verification
 <CollapsibleCode>
 
 ```typescript
-// CourseSection V2: Now we've got state and functionality
-class CourseSection {
+// Workshop V2: Now we've got state and functionality
+class Workshop {
 
 	id: string;
 	
 	// course capacity
-	cap: number;
+	capacity: number;
 	
 	// registered students; should not be greater than cap
 	registered: string[] = [];
 	
-	constructor(courseId: string, cap: number) {
-		this.id = courseId;
-		this.cap = cap;
+	constructor(id: string, capacity: number) {
+		this.id = id;
+		this.capacity = capacity;
 	}
 	
 	/**
 	 * Registers a student id. If the course is full, do 
 	 * not register the student and return false.
 	 */
-	register(studentId: string): boolean {
+	register(participantId: string): boolean {
 		if (this.isFull() === false) {
-			this.registered.push(studentId);
+			this.registered.push(participantId);
 			return true;
 		}
 		return false;
@@ -327,19 +327,19 @@ class CourseSection {
 	 *  Withdraws a student. Does not return a value,
 	 *  regardless of whether the withdraw was successful.
 	 */
-	withdraw(studentId: string): void {
-		const index = this.registered.indexOf(studentId);
+	withdraw(participantId: string): void {
+		const index = this.registered.indexOf(participantId);
 		if (index !== -1) {
 			this.registered.splice(index, 1);
 		}
 	}
 	
-	isRegistered(studentId: string): boolean {
-		return this.registered.includes(studentId);
+	isRegistered(participantId: string): boolean {
+		return this.registered.includes(participantId);
 	}
 	
 	isFull(): boolean {
-		return this.registered.length >= this.cap;
+		return this.registered.length >= this.capacity;
 	}
 }
 ```
@@ -371,7 +371,7 @@ To perform work, we instantiate objects and interact with them by calling their 
 
 Because every object stores its own field values, a method call on one object can never affect another, even if both are instances of the same class.
 
-The following test shows a demonstration of using `CourseSection` objects. 
+The following test shows a demonstration of using `Workshop` objects. 
 
 <CollapsibleCode>
 
@@ -379,8 +379,8 @@ The following test shows a demonstration of using `CourseSection` objects.
 //TODO: test format
 
 // Two sections of the same course, with different caps
-const w1 = new CourseSection("CPSC 210w1", 2);
-const w2 = new CourseSection("CPSC 210w2", 200);
+const w1 = new Workshop("Pottery (morning)", 2);
+const w2 = new Workshop("Pottery (evening)", 200);
 
 // Register students into w1 until it is full
 let didReg = w1.register("s1");    // true
@@ -421,10 +421,10 @@ This is valuable because it confines each concern to a single place. The class i
 So far this is the class _offering_ an interface that a client has no need to look past. Guaranteeing that a client genuinely _cannot_ reach past it, so that an object's internal state is truly the class's alone, is the role of [encapsulation](./05_encapsulation).
 
 <details class="tooltip deep-dive">
-  <summary>The abstraction at work in `CourseSection`</summary>
+  <summary>The abstraction at work in `Workshop`</summary>
 
 Look back at how we used `w1` and `w2`. We called `register`, `isFull`, `isRegistered`, and `withdraw`, but we never read the `registered` array directly, never compared anything against `cap`, and never kept the list of students within its limit ourselves.
 
-That work still happened, it was just performed by `CourseSection`. When we called `w1.register("s3")` on a section that was already full, the cap invariant held because `register` checks `isFull()` before adding a student; the caller did not have to, and could not, get this wrong. As a client we only needed to know that a `CourseSection` can register students and can report when it is full. How it stores enrolment, and where it enforces the cap, were details we never had to see.
+That work still happened, it was just performed by `Workshop`. When we called `w1.register("s3")` on a section that was already full, the cap invariant held because `register` checks `isFull()` before adding a student; the caller did not have to, and could not, get this wrong. As a client we only needed to know that a `Workshop` can register students and can report when it is full. How it stores enrolment, and where it enforces the cap, were details we never had to see.
 
 </details>
