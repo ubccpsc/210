@@ -131,7 +131,7 @@ export default defineConfig({
                 link: "/part2/03_errors"
             }, {
                 text: "Verification",
-                link: "/part2/03_verification"
+                link: "/part2/04_verification"
             }, {
                 text: "Encapsulation",
                 link: "/part2/05_encapsulation"
