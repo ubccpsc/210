@@ -64,6 +64,8 @@ The array literal plays the role of `list` from CPSC 110: `[ -4, -1, 3 ]` is the
 
 </details>
 
+
+(TODO: need to fully introduce JSON)
 <details class="tooltip ts-tips">
 <summary>Arrays are JSON values too</summary>
 
