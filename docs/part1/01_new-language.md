@@ -189,7 +189,7 @@ We saw one type of statement already: the function definition. Today we will int
 
 The `if` statement chooses whether to run a block of code based on a condition. Unlike BSL's `cond`, it does not evaluate to a value, it only directs which code runs. The `if` statement is the most basic **control flow** statement in most languages. By directing how the program executes, the `if` controls the flow of execution.
 
-A basic if block is shown below. If the condition `grade >= 50` is `true`, the code labelled `// (A)` will execute. If the conditiob `grade >= 50` is `false`, the code labelled `// (B)` will execute. 
+A basic if block is shown below. If the condition `grade >= 50` is `true`, the code labelled `// (A)` will execute. If the condition `grade >= 50` is `false`, the code labelled `// (B)` will execute. 
 
 <!--- not talking about executing stuff after the if statement, because it kind of conflicts with returns ---->
 

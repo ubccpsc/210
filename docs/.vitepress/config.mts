@@ -54,68 +54,8 @@ export default defineConfig({
             }, {
                 text: "Asynchronousity",
                 link: "/part1/07_async"
-            }, {
-                text: "Prior Part 1 Readings",
-                collapsed: true,
-                items: [{
-                    text: "Designing with Data",
-                    collapsed: true,
-                    items: [{
-                        text: "Overview",
-                        link: "/part1/prior/01-data/00-overview"
-                    }, {
-                        text: "Modelling Information as Data",
-                        link: "/part1/prior/01-data/01-modelling_data",
-                    }, {
-                        text: "Designing Functions that Operate on Data",
-                        link: "/part1/prior/01-data/02-working_with_data",
-                    }, {
-                        text: "Designing Tests from Data and Functions",
-                        link: "/part1/prior/01-data/03-testing_over_data",
-                    }, {
-                        text: "Abstract Patterns over Data (Arrays)",
-                        link: "/part1/prior/01-data/04-abstract_data_patterns",
-                    }, {
-                        text: "TypeScript's Type Checker",
-                        link: "/part1/prior/01-data/05-language_mechanics",
-                    }, {
-                        text: "Synthesis: Information as Data",
-                        link: "/part1/prior/01-data/06-synthesis",
-                    },],
-                }, {
-                    text: "Contracts and Invariants",
-                    collapsed: true,
-                    items: [{
-                        text: "Overview",
-                        link: "/part1/prior/02-contracts/00-overview",
-                    }, {
-                        text: "Limits of Types and the Need for Contracts",
-                        link: "/part1/prior/02-contracts/01-type_limitations",
-                    }, {
-                        text: "Invariants",
-                        link: "/part1/prior/02-contracts/02-invariants",
-                    }, {
-                        text: "Owning Invariants with Modules",
-                        link: "/part1/prior/02-contracts/03-modules",
-                    }, {
-                        text: "Synthesis: Contracts and Invariant Ownership",
-                        link: "/part1/prior/02-contracts/04-synthesis",
-                    },],
-                },
-                {
-                    text: "Exceptions",
-                    link: "/part1/prior/03_exceptions",
-                },
-                {
-                    text: "Mutation",
-                    link: "/part1/prior/04_mutation",
-                },
-                {
-                    text: "Async",
-                    link: "/part1/prior/05_async",
-                }
-                ]
-            }]
+            } ]
+      
         }, // end part 1
         {
             text: "Part 2: Design",
