@@ -258,13 +258,13 @@ class CourseSection {
 }
 ```
 
-**Does the `waitlist` field break field cohesion?**
+_Does the `waitlist` field break field cohesion?_
 
 The capacity invariant does not range over `waitlist`, so at first glance it looks like the same smell we just removed. The difference is ownership: `Waitlist` is a collaborator that `CourseSection` holds so it can delegate a responsibility it no longer maintains itself; it is not state that the capacity invariant constrains. 
 
-**The decomposed classes working together**
+_The decomposed classes working together_
 
-***TODO: Not sure if this is worth having (and if it is whether it should be `checkExpect`)***
+TODO: Not sure if this is worth having (and if it is whether it should be `checkExpect`)
 
 ```typescript
 const w1 = new CourseSection("CPSC 210w1", 2);
