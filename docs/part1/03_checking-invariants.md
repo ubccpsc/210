@@ -506,7 +506,7 @@ If we were to pass `renew(corrupted)` directly as an argument, `renew(corrupted)
 As a rule of thumb, if the specification describes the outcome, check the outcome; if the outcome should be impossible, check that the program halts.
 
 
-## Triangulating Quality
+## Triangulating Quality: Type Checking, Testing, and Assertions
 
 The type checker and the test suite operate at different times. The type checker works *statically* on the source code, ruling out whole categories of invalid calls before the program runs. Tests work *dynamically*, verifying specific behaviours by actually executing the function. They are complementary approaches: a program that passes every type check can still return the wrong value for a given input. But, a program that passes all its tests may still fail on an input the test suite did not evaluate. The combination is what gives confidence: types narrow the space of programs that can even be written, and tests verify that the program you wrote does what you intended.
 
