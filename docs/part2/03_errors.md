@@ -189,12 +189,11 @@ This throw-and-catch model is not unique to TypeScript. The same mechanism, with
 <details class="tooltip deep-dive">
 <summary>Checked and Unchecked Exceptions</summary>
 
-The languages above differ in how much they ask of a caller. TypeScript's exceptions are **unchecked**: a function's type says nothing about what it might throw, and the compiler never forces a caller to handle a possible exception. The `attempt` skeleton above can throw, yet its signature, `(): void`, is identical to that of a function that never throws.
+The languages above differ in how much they ask of a caller. TypeScript's exceptions are **unchecked**: a function's type says nothing about what it might throw, and the compiler never forces a caller to handle a possible exception. The `attempt` skeleton above can throw, yet its signature, `attempt(): void`, is identical to that of a function that never throws.
 
-Some languages, notably Java, also offer **checked** exceptions, which must be declared in the signature and which the compiler forces every caller either to handle or to re-declare. Checked exceptions make a failure impossible to forget, at the cost of real ceremony in every layer the exception passes through.
+Some languages, like Java, also offer **checked** exceptions, which must be declared in the signature and which the compiler forces every caller either to handle or to re-declare. Checked exceptions make a failure impossible to forget, functions need to declare what they throw, and any function invoking another function that throws an exception needs to either explicitly catch the exception or their function signature needs to declare that they can throw that exception too.
 
-Notice that the `Result` type from earlier in this chapter recovers the *checked* property inside an unchecked language. By putting the failure in the return type, it makes the compiler insist that callers deal with it. That is the single sharpest difference between the two mechanisms in this chapter: returned failures are visible to the type checker, thrown ones are not.
-
+The `Result` type from earlier in this chapter recovers the *checked* property inside an unchecked language. By putting the failure in the return type, it makes the compiler insist that callers deal with errors. 
 </details>
 
 Looking at the rest of our example:
@@ -253,7 +252,7 @@ function assert(condition: boolean, message: string): void {
 }
 ```
 
-The reason a failed assertion halts the program is simply that nothing ever catches it. An assertion guards an *unexpected* error, an impossible state, and the right response to an impossible state is to stop, so we deliberately leave it uncaught and let it rise all the way out of the program. Everything in this chapter is the same mechanism, caught on purpose instead of left to halt.
+The reason a failed assertion halts the program is simply that nothing ever catches it. An assertion guards an *unexpected* error, an impossible state, and the right response to an impossible state is to stop, so we deliberately leave it uncaught and let it rise all the way out of the program. Everything in this chapter is the same mechanism, caught on purpose instead of left to halt the program.
 
 </details>
 
