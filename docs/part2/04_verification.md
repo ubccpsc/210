@@ -397,9 +397,9 @@ expect(canPlay(free, { id: "x", published: true, tier: "free", regions: ["CA"] }
 
 With those five cases every branch runs at least once, so no part of `canPlay` executes only when no test is watching.
 
-### Coverage
+### Code Coverage
 
-**Coverage** makes the white-box question measurable: how much of the code does the suite execute? The most practical form is **branch coverage**, the fraction of branches run by at least one test. The five cases above execute all five branches of `canPlay`, for 100% branch coverage. Drop the two premium-title cases and coverage falls to three of five branches, with a report pointing at the exact lines no test reaches. That is what coverage is for: it finds the parts of your code the suite silently ignores.
+**Code coverage** makes the white-box question measurable: how much of the code does the suite execute? The most practical form is **branch coverage**, the fraction of branches run by at least one test. The five cases above execute all five branches of `canPlay`, for 100% branch coverage. Drop the two premium-title cases and coverage falls to three of five branches, with a report pointing at the exact lines no test reaches. That is what coverage is for: it finds the parts of your code the suite silently ignores.
 
 But coverage has a sharp limit. Suppose an earlier version of `canPlay` had never checked regional licensing at all:
 

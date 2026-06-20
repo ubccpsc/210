@@ -109,7 +109,9 @@ class T {
 
 A class on its own is essentially a fancier type definition. Just like we needed to create *values* of certain types to use a type, we need to **instantiate** a value of the class type to use a class. 
 
-In particular, we call an instantiated class value an **object**.  When a class is instantiated, an object is created in memory with its own independent storage for each field. For instance, the following creates a variable, named `pottery`, whose value is an object of type 
+TODO: introduce fields more explicitly!
+
+In particular, we call an instantiated class value an **object**.  When a class is instantiated, an object is created in memory with its own independent storage for each **field**. For instance, the following creates a variable, named `pottery`, whose value is an object of type 
 `Workshop`, as returned by the constructor of `Workshop`:
 
 ```typescript
