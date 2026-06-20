@@ -182,6 +182,8 @@ The other thing C makes explicit is memory management. In this course we never t
 
 This also explains the `const` surprise from the previous section: `const` locks the box, not the object the arrow points to. The arrow cannot be redirected, but the object at the end of it remains as mutable as ever.
 
+RTH TODO: add reference equality ts-deep dive for objects here
+
 ## What a Function Can and Cannot Change
 
 The copy-versus-reference distinction matters because calling a function performs exactly the assignment we just studied: each argument is assigned to its parameter, copying boxes. Everything about what a function can change in its caller follows from that one fact. There are three cases, and they are worth walking through slowly, because this is where mutation most often defies expectations.

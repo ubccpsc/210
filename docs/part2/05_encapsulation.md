@@ -200,7 +200,7 @@ Now pushing onto `everyone` modifies a separate array and leaves the list untouc
 
 A variable holding an array or object does not hold the data; it holds a reference to data that lives elsewhere. Assigning or returning that variable copies the reference, not the data, so two names end up pointing at the same array, and a change through one is visible through the other. `slice()` (for arrays) builds a new array, which is why returning `this.invited.slice()` is safe.
 
-There is a depth limit worth knowing. `slice()` makes a **shallow** copy: a new array whose elements are the same references as the original's. For an array of strings that is completely safe, because strings cannot be mutated. For an array of objects it is not: the copy is a new array, but its elements are the same objects, so a caller could still reach through and mutate one of them. When the elements are themselves mutable, you need either a deeper copy or elements that cannot be changed, which is the subject of the next section.
+There is a depth limit worth knowing. `slice()` makes a **shallow copy**: a new array whose elements are the same references as the original's. For an array of strings that is completely safe, because strings cannot be mutated. For an array of objects it is not: the copy is a new array, but its elements are the same objects, so a caller could still reach through and mutate one of them. When the elements are themselves mutable, you need either a deeper copy or elements that cannot be changed, which is the subject of the next section.
 
 </details>
 
@@ -261,20 +261,20 @@ Every public method has the same name, the same parameters, and the same return 
 
 ## Mutability and Immutability
 
-`GuestList` is a **mutable** object: `add` and `remove` change it in place. It is worth separating two guarantees that are easily confused, because they guard against different risks:
+`GuestList` is a **mutable object**: `add` and `remove` change it in place. It is worth separating two guarantees that are easily confused, because they guard against different risks:
 
 - `const list = new GuestList(2)` stops the *binding* `list` from being pointed at a different object. It does nothing to stop `list.add("alice")` from changing the object `list` already refers to.
 - `private readonly capacity` stops the *field* from being reassigned after construction.
 
-An **immutable** object carries the second idea to its conclusion: none of its fields ever change, and methods that would modify it instead return a new object. An immutable guest list would establish its invariant once, at construction, and never have any later state to corrupt, so it would be valid for its whole life with no per-method effort. The cost is that every change allocates a new object. A mutable object is more economical and is often the natural choice for a guest list that is edited over time, but it accepts the obligation that *every* method preserve the invariant. Immutability buys safety by removing change; encapsulation buys safety by controlling it.
+An **immutable object** carries the second idea to its conclusion: none of its fields ever change, and methods that would modify it instead return a new object. An immutable guest list would establish its invariant once, at construction, and never have any later state to corrupt, so it would be valid for its whole life with no per-method effort. The cost is that every change allocates a new object. A mutable object is more economical and is often the natural choice for a guest list that is edited over time, but it accepts the obligation that *every* method preserve the invariant. Immutability buys safety by removing change; encapsulation buys safety by controlling it.
 
 ## Choosing What to Expose
 
 Information hiding is not only about marking fields `private`; it is about keeping the public side of a class small and behavioural. Every public member is a promise to callers, so the fewer and the more stable they are, the more freedom the class keeps for itself. Three habits help:
 
-- **Expose behaviour, not data.** `add`, `remove`, `isInvited`, and `size` say what a guest list *does*. We never exposed `invited`, so the data is reachable only in the controlled ways those methods allow.
-- **Hide what is most likely to change.** The choice between an array and a `Set` was precisely such a decision, and hiding it is what made the change painless. Anything you expose, you may later have to keep working.
-- **Keep the public side minimal.** Add a public method when a caller needs the behaviour, not in anticipation of one that might.
+- _Expose behaviour, not data._ `add`, `remove`, `isInvited`, and `size` say what a guest list *does*. We never exposed `invited`, so the data is reachable only in the controlled ways those methods allow.
+- _Hide what is most likely to change._ The choice between an array and a `Set` was precisely such a decision, and hiding it is what made the change painless. Anything you expose, you may later have to keep working.
+- _Keep the public side minimal._ Add a public method when a caller needs the behaviour, not in anticipation of one that might.
 
 <details class="tooltip ts-tips">
 <summary>Accessors with <code>get</code></summary>
@@ -322,12 +322,12 @@ This is black-box testing by construction: with the representation hidden, there
 
 The example followed a repeatable process, worth stating on its own so you can apply it to a new class:
 
-1. **State the invariant** the object must always satisfy.
-2. **Choose a representation** that can express it.
-3. **Make the representation `private`** (and `readonly` wherever it never changes).
-4. **Establish the invariant in the constructor**, rejecting any input it cannot satisfy.
-5. **Expose a minimal set of public methods**, each written to preserve the invariant.
-6. **Return copies or read-only views**, so the representation cannot escape.
+1. _State the invariant_ the object must always satisfy.
+2. _Choose a representation_ that can express it.
+3. _Make the representation `private`_ (and `readonly` wherever it never changes).
+4. _Establish the invariant in the constructor_, rejecting any input it cannot satisfy.
+5. _Expose a minimal set of public methods_, each written to preserve the invariant.
+6. _Return copies or read-only views_, so the representation cannot escape.
 
 Followed through, the result is an object that cannot be constructed invalid, cannot be driven invalid, and cannot leak the internals that would let someone else do either.
 
@@ -352,9 +352,9 @@ A plain-object dictionary and a `Map` overlap, but differ in ways that decide be
 
 A class with a hidden representation and a small public surface is an invariant you can rely on. The constructor establishes it, `private` stops anyone bypassing the methods, the methods preserve it, and copies keep it from escaping. What this discipline buys is worth making explicit:
 
-- **Local reasoning.** You can confirm the invariant by reading a single class, because nothing outside it can break the invariant. This is the same argument the Error Handling chapter made for keeping behaviour understandable from one place rather than scattered across the whole program.
-- **Freedom to change.** Because callers depend only on the public methods, the representation is yours to change, as the move from an array to a `Set` showed. Internal changes stay internal.
-- **A stable surface to build on.** A team can write code against a class's public methods while its internals are still being worked out, as long as the public methods keep their promises.
-- **Fewer places for bugs.** There is less code that can put the object in a bad state, so there are fewer places a bug can hide.
+- _Local reasoning._ You can confirm the invariant by reading a single class, because nothing outside it can break the invariant. This is the same argument the Error Handling chapter made for keeping behaviour understandable from one place rather than scattered across the whole program.
+- _Freedom to change._ Because callers depend only on the public methods, the representation is yours to change, as the move from an array to a `Set` showed. Internal changes stay internal.
+- _A stable surface to build on._ A team can write code against a class's public methods while its internals are still being worked out, as long as the public methods keep their promises.
+- _Fewer places for bugs._ There is less code that can put the object in a bad state, so there are fewer places a bug can hide.
 
 Encapsulation is the point where the invariants of Part 1 stop being promises and become guarantees. The next chapter builds on it.
