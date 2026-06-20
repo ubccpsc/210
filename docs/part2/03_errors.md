@@ -141,12 +141,12 @@ The readability impact of this is meaningful: the success path (often called the
 <details class="tooltip deep-dive">
 <summary>Other Ways to Return Failures as Values</summary>
 
-`Result` is not the only way to return an error as a value. A function can return `undefined` if they fail to complete a task, the way `Array.find` does. This is the **optional** pattern, in effect a `Result` with no error detail. Older code, and lower-level languages, often use **sentinel values**: a special in-band return such as `-1`, or `null` for "not found". Sentinels are error-prone precisely because they are ordinary values that can be used by mistake or collide with real data, which is why a stub that returned `-1` was a reliable way to force a test to fail in Part 1.
+`Result` is not the only way to return an error as a value. A function can return `undefined` if they fail to complete a task, the way `Array.find` does. This is the _optional_ pattern, in effect a `Result` with no error detail. Older code, and lower-level languages, often use **sentinel values**: a special in-band return such as `-1`, or `null` for "not found". Sentinels are error-prone precisely because they are ordinary values that can be used by mistake or collide with real data, which is why a stub that returned `-1` was a reliable way to force a test to fail in Part 1.
 </details>
 
 ## Raising (Throwing) an Exception
 
-When an error is encountered, we can **raise an exception**. That is, we can signal that an exceptional state has been reached. We do this with the `throw` statement. Throwing an exception immediately abandons the rest of the current function and hands the exception to that function's caller; if the caller does not handle it, the exception is handed to *its* caller, and so on up the call stack until something catches it or the program runs out of stack and halts.
+When an error is encountered, we can **raise** or **throw** an exception. That is, we can signal that an exceptional state has been reached. We do this with the `throw` statement. Throwing an exception immediately abandons the rest of the current function and hands the exception to that function's caller; if the caller does not handle it, the exception is handed to *its* caller, and so on up the call stack until something catches it or the program runs out of stack and halts.
 
 For example, in `requireSection` we can see that when it encounters a situation where the section does not exist it can just `throw new Error(...)`. In this way `requireSection` can signal to its callers that a section that does not exist was requested. The method also no longer returns a `Result` but instead returns `Section`, which is the more common successful path. Finally, the `@throws` annotation is added to the method description so callers know what kinds of errors to expect.
 
@@ -189,9 +189,9 @@ This throw-and-catch model is not unique to TypeScript. The same mechanism, with
 <details class="tooltip deep-dive">
 <summary>Checked and Unchecked Exceptions</summary>
 
-The languages above differ in how much they ask of a caller. TypeScript's exceptions are **unchecked**: a function's type says nothing about what it might throw, and the compiler never forces a caller to handle a possible exception. The `attempt` skeleton above can throw, yet its signature, `attempt(): void`, is identical to that of a function that never throws.
+The languages above differ in how much they ask of a caller. TypeScript's uses **unchecked exceptions**: a function's type says nothing about what it might throw, and the compiler never forces a caller to handle a possible exception. The `attempt` skeleton above can throw, yet its signature, `attempt(): void`, is identical to that of a function that never throws.
 
-Some languages, like Java, also offer **checked** exceptions, which must be declared in the signature and which the compiler forces every caller either to handle or to re-declare. Checked exceptions make a failure impossible to forget, functions need to declare what they throw, and any function invoking another function that throws an exception needs to either explicitly catch the exception or their function signature needs to declare that they can throw that exception too.
+Some languages, like Java, also offer **checked exceptions**, which must be declared in the signature and which the compiler forces every caller either to handle or to re-declare. Checked exceptions make a failure impossible to forget, functions need to declare what they throw, and any function invoking another function that throws an exception needs to either explicitly catch the exception or their function signature needs to declare that they can throw that exception too.
 
 The `Result` type from earlier in this chapter recovers the *checked* property inside an unchecked language. By putting the failure in the return type, it makes the compiler insist that callers deal with errors. 
 </details>
@@ -348,13 +348,13 @@ function checkError(thunk: () => void, expected: string): void {
 
 This is why `checkError` takes a function, the `() =>` thunk, rather than a value. It must run your code *inside its own* `try`/`catch` so it can observe whether an exception is thrown. Handing it `enrollAll(...)` directly would run that call first, and the exception would escape before `checkError` ever got control.
 
-The word **thunk** is old programming jargon for a small, parameterless function that wraps up a computation to be run later. The name dates to the Algol-60 community of the 1960s and is sometimes glossed as the past tense of "think", since a thunk is an expression already thought about and set aside to evaluate when it is needed.
+The word _thunk_ is old programming jargon for a small, parameterless function that wraps up a computation to be run later. The name dates to the Algol-60 community of the 1960s and is sometimes glossed as the past tense of "think", since a thunk is an expression already thought about and set aside to evaluate when it is needed.
 
 </details>
 
 ### The `finally` Block
 
-A `try` may be followed by a `finally` block. Where a `catch` runs only when the `try` throws, a `finally` runs on every path out of the `try`, whether it finished normally or threw. To see why this matters, you need to know that a program does not work only with values in its own memory; it also borrows things from the operating system that must be given back. Opening a file, for instance, returns a **handle**, a token the operating system grants so the program can read and write that file. The operating system allows only a limited number of open handles at once, and a handle stays held until the program explicitly closes it. The same is true of a network connection, or of a lock that keeps two parts of a program from interfering: each is held until it is released. If a program keeps opening files and never closing them, it eventually runs out of handles and can open no more, a fault known as a **resource leak**.
+A `try` may be followed by a `finally` block. Where a `catch` runs only when the `try` throws, a `finally` runs on every path out of the `try`, whether it finished normally or threw. To see why this matters, you need to know that a program does not work only with values in its own memory; it also borrows things from the operating system that must be given back. Opening a file, for instance, returns a _handle_, a token the operating system grants so the program can read and write that file. The operating system allows only a limited number of open handles at once, and a handle stays held until the program explicitly closes it. The same is true of a network connection, or of a lock that keeps two parts of a program from interfering: each is held until it is released. If a program keeps opening files and never closing them, it eventually runs out of handles and can open no more, a fault known as a _resource leak_.
 
 Here is the danger an exception introduces. If a `throw` interrupts the work between opening a resource and closing it, the closing line is one of the statements that gets abandoned, and the resource is leaked. `finally` exists to prevent exactly this: because its block runs on the throwing path as well as the normal one, the cleanup cannot be skipped.
 
@@ -518,7 +518,7 @@ A **returned** failure is *visible to the type checker*. It appears in the funct
 
 A **thrown** failure *propagates itself*, which clarifies the common success path. The price is that the failure is invisible in the type: a function that throws looks, from its signature, just like one that always succeeds, so it is easy for a caller to forget that handling is needed. Throwing is the better choice when a failure should abort the current line of work and be dealt with somewhere well above, or when interleaving a `Result` through many layers would bury the logic.
 
-Within a single codebase, consistency matters as much as the individual choice: consistent error handling mechnsims are always easier to use correctly than one where every function makes its own call. Whatever the error mechanism, a few practices hold across all of them: never silently discard an error; do not use exceptions for ordinary control flow, only for real errors; and check data the moment it crosses into your program from a file, a network, or a user, converting outside uncertainty into either a trusted value or a clear error right at the boundary. That last practice is the subject of a later chapter.
+Within a single codebase, consistency matters as much as the individual choice: consistent error handling mechanisms are always easier to use correctly than one where every function makes its own call. Whatever the error mechanism, a few practices hold across all of them: never silently discard an error; do not use exceptions for ordinary control flow, only for real errors; and check data the moment it crosses into your program from a file, a network, or a user, converting outside uncertainty into either a trusted value or a clear error right at the boundary. That last practice is the subject of a later chapter.
 
 ## Designing for Failure
 
