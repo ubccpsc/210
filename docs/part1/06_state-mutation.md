@@ -182,7 +182,41 @@ The other thing C makes explicit is memory management. In this course we never t
 
 This also explains the `const` surprise from the previous section: `const` locks the box, not the object the arrow points to. The arrow cannot be redirected, but the object at the end of it remains as mutable as ever.
 
-RTH TODO: add reference equality ts-deep dive for objects here
+<details class="tooltip ts-tips">
+<summary>Reference equality vs value equality</summary>
+
+`===` (strict equality, from the arrays chapter) means different things for primitives and objects, and the difference is exactly the visibility distinction from this section.
+
+For *primitives*, `===` compares values. Two numbers that happen to be equal are `===`, whether or not they were declared together:
+
+```typescript
+let x = 5;
+let y = 5;
+checkExpect(x === y, true);   // equal values
+```
+
+For *objects*, `===` compares identity: it asks whether two variables refer to the same object in memory, not whether their contents match.
+
+```typescript
+const r = { hour: 6, tempCelsius: -4 };
+const s = r;                              // s refers to r's object
+const t = { hour: 6, tempCelsius: -4 };   // a separate object with equal contents
+
+checkExpect(r === s, true);    // the same object
+checkExpect(r === t, false);   // different objects, even though their contents are identical
+```
+
+This is the visibility rule restated as a comparison. Because `r` and `s` are the same object, a mutation through one is seen through the other; because `t` is a different object, it is untouched:
+
+```typescript
+s.tempCelsius = 0; // mutate s
+checkExpect(r.tempCelsius === 0, true);    // r sees the change made through s
+checkExpect(t.tempCelsius === -4, true);   // t, a separate object, does not
+```
+
+So `r === t` being `false` is not a technicality. It is the runtime telling you that `r` and `t` are independent, and that changing one will never change the other.
+
+</details>
 
 ## What a Function Can and Cannot Change
 
