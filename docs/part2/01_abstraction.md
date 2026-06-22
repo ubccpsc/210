@@ -1,6 +1,6 @@
 # The Class as a Unit of Abstraction
 
-Part 1 ended invariants being maintained by hand: we wrote a constructor function that established an invariant when a value was created, and we hid the value's state inside a closure so that only a fixed set of operations could change it. This chapter introduces object-oriented programming, which provides this same pattern as direct language syntax. The mechanism is the **class**: a named unit that bundles _state_ with the _operations that maintain it_.
+Part 1 ended with invariants maintained by hand: we wrote a constructor function that established an invariant when a value was created, and we hid the value's state inside a closure so that only a fixed set of operations could change it. This chapter introduces object-oriented programming, which provides this same pattern as direct language syntax. The mechanism is the **class**: a named unit that bundles _state_ with the _operations that maintain it_.
 
 > As a listener, I want a playlist that always knows which song is current, so that pressing "next" moves through my music predictably as I add and remove songs.
 
@@ -8,15 +8,15 @@ Consider the running example for this chapter. A playlist holds a list of songs 
 
 ## The Problem: Keeping State Consistent
 
-An invariant like this is only useful if is always true. In a small program this can be maintained through discipline: every place that changes the song list also fixes the current index. That discipline does not scale. If the song list and the index are ordinary variables that any part of the program can read and write, then the entire program can leave the index pointing at a song that no longer exists. Spreading the state across more files does not help; a **global variable** is a reachable, and therefore writable, memory location that can be accessed from anywhere in a system. To maintain the invariant we would have to audit the whole program, which is exactly the kind of whole-program reasoning we are trying to avoid.
+An invariant like this is only useful if it is always true. In a small program this can be maintained through discipline: every place that changes the song list also fixes the current index. That discipline does not scale. If the song list and the index are ordinary variables that any part of the program can read and write, then the entire program can leave the index pointing at a song that no longer exists. Spreading the state across more files does not help; a **global variable** is a reachable, and therefore writable, memory location that can be accessed from anywhere in a system. To maintain the invariant we would have to audit the whole program, which is exactly the kind of whole-program reasoning we are trying to avoid.
 
 What we want is a way to bundle the state (the songs and the index) together with the operations that are allowed to change it (add, remove, advance), so that the invariant is the responsibility of one small, named unit rather than of every caller. That unit of organization is the class.
 
 ## Three Programming Paradigms
 
-Before we build the class, it helps to place it among the programming paradigms we have already used; each of which have their place in software development.
+Before we build the class, it helps to place it among the programming paradigms we have already used, each of which has its place in software development.
 
-**Functional programming** builds values and transforms them with functions, without mutation. We saw this in Part 1 when we modelled data as types and processing it with pure functions. Summing the durations of a list of songs functionally looks like this (note the lack of mutation):
+**Functional programming** builds values and transforms them with functions, without mutation. We saw this in Part 1 when we modelled data as types and processed it with pure functions. Summing the durations of a list of songs functionally looks like this (note the lack of mutation):
 
 ```typescript
 const total = songs.reduce((sum, song) => sum + song.durationSeconds, 0);
@@ -204,7 +204,7 @@ defines how objects of type `T` are created. We do not call `constructor()` expl
 
 </details>
 
-When we create a class, we say we are **instantiating** the class. That is, we are creating an **instance** of a class that can store its own state and provides its own operations. Every instance of a class is called an **object** and is independent of the others: its state is unique to that individual instance.
+When we create an object from a class, we say we are **instantiating** the class. That is, we are creating an **instance** of a class that can store its own state and provides its own operations. Every instance of a class is called an **object** and is independent of the others: its state is unique to that individual instance.
 
 ```typescript
 const favourites = new Playlist();
@@ -280,8 +280,10 @@ Declaring a field is relatively straightforward: identify what state you need to
 The contents of a field are unique to each object. After:
 
 ```typescript
-const chill = new Playlist([slowSong]);
-const party = new Playlist([fastSong]);
+const chill = new Playlist();
+chill.add(slowSong);
+const party = new Playlist();
+party.add(fastSong);
 ```
 
 `chill.current()` and `party.current()` return different songs, because each object holds its own `songs` and `currentIndex`.
@@ -347,7 +349,7 @@ Removing a song can invalidate the current index: if the removed song was before
 <details class="tooltip ts-tips">
 <summary>Methods (and <code>this</code> again)</summary>
 
-The following defines a method `method_1` for class `T`:
+The following defines a method `firstMethod` for class `T`:
 ```typescript
 class T {
     firstMethod(x: X, y: Y): Z {
@@ -388,7 +390,7 @@ Declaring a class declares a type, and that type behaves like any other type fro
 function longest(playlists: Playlist[]): Playlist | null {
     let longestSoFar: Playlist | null = null;
     for (const playlist of playlists) {
-        if (longestSoFar === null || playlist.totalDuration() > best.totalDuration()) {
+        if (longestSoFar === null || playlist.totalDuration() > longestSoFar.totalDuration()) {
             longestSoFar = playlist;
         }
     }
@@ -402,15 +404,15 @@ The compiler checks these annotations exactly as it did for the types in Part 1.
 
 A field of one object can hold another object, and a variable that "holds" an object actually holds a _reference_ to it, exactly as in the Part 1 mutation chapter. Two consequences follow.
 
-Two objects are distinct even when their contents match. Each `new` produces a separate object with its own identity:
+First, two objects are distinct even when their contents match. Each `new` produces a separate object with its own identity:
 
 ```typescript
-const a = new Playlist([slowSong]);
-const b = new Playlist([slowSong]);
-// a and b hold references to the same song, but a === b is false: they are different objects
+const a = new Playlist();
+const b = new Playlist();
+// a and b have identical (empty) contents, but a === b is false: they are different objects
 ```
 
-Second, when an object is passed to a function or stored in a field, it is the reference that is copied, not the object. The caller and the callee then share that single object, and a method call that changes one is visible to both. This is the aliasing from Part 1, now the normal way objects are used. NOTE: this is true only for objects for primitives, their value, not their reference, is copied so changes to a `number`, `string`, or `boolean` do not propagate to other copies of the same values.
+Second, when an object is passed to a function or stored in a field, it is the reference that is copied, not the object. The caller and the callee then share that single object, and a method call that changes one is visible to both. This is the aliasing from Part 1, now the normal way objects are used; primitives behave differently, as the deep dive below explains.
 
 ### Working with Objects
 
@@ -418,9 +420,11 @@ A class declaration only describes what its objects look like. To do work, we in
 
 The following walks a small program through two independent playlists:
 
+<CollapsibleCode>
+
 ```typescript
-const favourites = new Playlist([]);
-const workout = new Playlist([]);
+const favourites = new Playlist();
+const workout = new Playlist();
 
 const a: Song = { title: "Aubade", artist: "Dawn Quartet", durationSeconds: 180 };
 const b: Song = { title: "Bassline", artist: "Low End", durationSeconds: 240 };
@@ -440,6 +444,8 @@ checkExpect(favourites.current(), c);   // c shifted into b's old position
 checkExpect(workout.current(), null);   // workout is untouched and still empty
 ```
 
+</CollapsibleCode>
+
 <!--
 <details class="tooltip exercise">
 <summary>Exercise: Testing</summary>
@@ -449,15 +455,54 @@ The code above puts several checks in one block. The verification chapter argues
 </details>
 -->
 
+<details class="tooltip deep-dive">
+<summary>References vs values</summary>
+
+We saw what variables hold in [Copies and References](../part1/06_state-mutation#copies-and-references). But now that we are declaring and instantiating our own objects, we will start to encounter the differences between what variables hold for objects compared to primitive values. This can be especially confusing in terms of where changes are visible. 
+
+Specifically, calling a function with an argument that is an object means any changes to that object within the function will be visible in any other context that has access to that object. But making the exact same changes to a primitive argument will _not_ be visible to external code that has access to the same value.
+
+<CollapsibleCode>
+
+```typescript
+const someSong: Song = { title: "Drift", artist: "Marker", durationSeconds: 210 };
+
+// An object argument is shared: the function changes the caller's playlist.
+function addSong(list: Playlist, song: Song): void {
+    list.add(song);
+}
+
+const mix = new Playlist();
+addSong(mix, someSong);
+checkExpect(mix.current() === someSong, true); 
+
+checkExpect(someSong.durationSeconds === 210, true);
+checkExpect(mix.current().durationSeconds === 210, true);
+
+someSong.durationSeconds = 199; // mutate the value
+checkExpect(someSong.durationSeconds === 199, true);
+checkExpect(mix.current().durationSeconds === 199, true);
+
+
+// A primitive argument is copied: the function cannot change the caller's value.
+function bumpToZero(value: number): void {
+    value = 0;
+}
+
+const count = 5;
+bumpToZero(count);
+checkExpect(count === 5, true); // `count` is a value, not a `reference` and does not change
+```
+
+</CollapsibleCode>
+
+The two `checkExpect`s capture the whole difference: `mix` was shared with `addSong`, so the song it added is still there afterward, while `count` was copied into `bumpToZero`, so the caller's value never changed.
+
+</details>
+
 ## The Value of Class Abstractions
 
 Bundling state with the operations that maintain it is what makes the class a unit of _abstraction_. A client reasons about _what_ a `Playlist` does, through the behaviour its methods expose, without needing to know _how_ it keeps the current index valid. To use the class, a client finds the one that models the thing they care about and calls the methods that provide the behaviour they want. This is part of why naming matters so much in design: a good name is what lets an engineer find the abstraction they need. The work of storing the state and keeping it consistent stays inside the class.
-
-This confines each concern to a single place. The class is the one location responsible for its own state, which frees the rest of the program from that responsibility. Because the operations that maintain the invariant live alongside the state they protect, rather than in the calling code, a client cannot accidentally leave an object in an inconsistent configuration by following the intended path.
-
-<!--
-So far this is the class *offering* an interface that a client has no need to look past. It is not yet a guarantee. Nothing in this chapter stops a determined caller from reaching in and writing `favourites.currentIndex = 99` directly, breaking the invariant from outside. Guaranteeing that a client genuinely *cannot* reach past the interface, so that an object's state is truly the class's own, is the role of [encapsulation](./05_encapsulation).
--->
 
 <details class="tooltip deep-dive">
   <summary>The abstraction at work in <code>Playlist</code></summary>
@@ -465,3 +510,21 @@ So far this is the class *offering* an interface that a client has no need to lo
 Look back at how we used `favourites`. We called `add(..)`, `next()`, `current()`, and `remove(..)`, but we never touched the `songs` array directly, never adjusted `currentIndex`, and never worried about what removing the current song would do to the position. That work still happened; it was performed by `Playlist`. When we removed the current song, the index stayed valid because `remove` repairs it, and the caller could not get this wrong. As a client we only needed to know that a `Playlist` tracks a current song and moves through its list. How it stores the songs, and where it keeps the index valid, were details we never had to see.
 
 </details>
+
+This confines each concern to a single place. The class is the one location responsible for its own state, which frees the rest of the program from that responsibility. Because the operations that maintain the invariant live alongside the state they protect, rather than in the calling code, a client cannot accidentally leave an object in an inconsistent configuration by following the intended path.
+
+<!--
+So far this is the class *offering* an interface that a client has no need to look past. It is not yet a guarantee. Nothing in this chapter stops a determined caller from reaching in and writing `favourites.currentIndex = 99` directly, breaking the invariant from outside. Guaranteeing that a client genuinely *cannot* reach past the interface, so that an object's state is truly the class's own, is the role of [encapsulation](./05_encapsulation).
+-->
+
+<details class="tooltip exercise">
+<summary>Exercise: Designing a Class</summary>
+        
+Design a class for the scenario below, following the same path this chapter used for `Playlist`.
+
+> As a homeowner, I want a thermostat whose target temperature I can nudge up or down but never set outside a safe range, so that the house is never driven dangerously hot or cold.
+
+For this task, design a class, give it a name, and determine its invariants. Figure out what fields it should maintain, and design the methods that should update the stored state. 
+
+</details>
+
