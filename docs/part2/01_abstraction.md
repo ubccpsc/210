@@ -420,6 +420,8 @@ A class declaration only describes what its objects look like. To do work, we in
 
 The following walks a small program through two independent playlists:
 
+<CollapsibleCode>
+
 ```typescript
 const favourites = new Playlist();
 const workout = new Playlist();
@@ -442,6 +444,8 @@ checkExpect(favourites.current(), c);   // c shifted into b's old position
 checkExpect(workout.current(), null);   // workout is untouched and still empty
 ```
 
+</CollapsibleCode>
+
 <!--
 <details class="tooltip exercise">
 <summary>Exercise: Testing</summary>
@@ -457,6 +461,8 @@ The code above puts several checks in one block. The verification chapter argues
 We saw what variables hold in [Copies and References](../part1/06_state-mutation#copies-and-references). But now that we are declaring and instantiating our own objects, we will start to encounter the differences between what variables hold for objects compared to primitive values. This can be especially confusing in terms of where changes are visible. 
 
 Specifically, calling a function with an argument that is an object means any changes to that object within the function will be visible in any other context that has access to that object. But making the exact same changes to a primitive argument will _not_ be visible to external code that has access to the same value.
+
+<CollapsibleCode>
 
 ```typescript
 const someSong: Song = { title: "Drift", artist: "Marker", durationSeconds: 210 };
@@ -488,10 +494,28 @@ bumpToZero(count);
 checkExpect(count === 5, true); // `count` is a value, not a `reference` and does not change
 ```
 
+</CollapsibleCode>
+
 The two `checkExpect`s capture the whole difference: `mix` was shared with `addSong`, so the song it added is still there afterward, while `count` was copied into `bumpToZero`, so the caller's value never changed.
 
 </details>
 
+## The Value of Class Abstractions
+
+Bundling state with the operations that maintain it is what makes the class a unit of _abstraction_. A client reasons about _what_ a `Playlist` does, through the behaviour its methods expose, without needing to know _how_ it keeps the current index valid. To use the class, a client finds the one that models the thing they care about and calls the methods that provide the behaviour they want. This is part of why naming matters so much in design: a good name is what lets an engineer find the abstraction they need. The work of storing the state and keeping it consistent stays inside the class.
+
+<details class="tooltip deep-dive">
+  <summary>The abstraction at work in <code>Playlist</code></summary>
+
+Look back at how we used `favourites`. We called `add(..)`, `next()`, `current()`, and `remove(..)`, but we never touched the `songs` array directly, never adjusted `currentIndex`, and never worried about what removing the current song would do to the position. That work still happened; it was performed by `Playlist`. When we removed the current song, the index stayed valid because `remove` repairs it, and the caller could not get this wrong. As a client we only needed to know that a `Playlist` tracks a current song and moves through its list. How it stores the songs, and where it keeps the index valid, were details we never had to see.
+
+</details>
+
+This confines each concern to a single place. The class is the one location responsible for its own state, which frees the rest of the program from that responsibility. Because the operations that maintain the invariant live alongside the state they protect, rather than in the calling code, a client cannot accidentally leave an object in an inconsistent configuration by following the intended path.
+
+<!--
+So far this is the class *offering* an interface that a client has no need to look past. It is not yet a guarantee. Nothing in this chapter stops a determined caller from reaching in and writing `favourites.currentIndex = 99` directly, breaking the invariant from outside. Guaranteeing that a client genuinely *cannot* reach past the interface, so that an object's state is truly the class's own, is the role of [encapsulation](./05_encapsulation).
+-->
 
 <details class="tooltip exercise">
 <summary>Exercise: Designing a Class</summary>
@@ -504,19 +528,3 @@ For this task, design a class, give it a name, and determine its invariants. Fig
 
 </details>
 
-## The Value of Class Abstractions
-
-Bundling state with the operations that maintain it is what makes the class a unit of _abstraction_. A client reasons about _what_ a `Playlist` does, through the behaviour its methods expose, without needing to know _how_ it keeps the current index valid. To use the class, a client finds the one that models the thing they care about and calls the methods that provide the behaviour they want. This is part of why naming matters so much in design: a good name is what lets an engineer find the abstraction they need. The work of storing the state and keeping it consistent stays inside the class.
-
-This confines each concern to a single place. The class is the one location responsible for its own state, which frees the rest of the program from that responsibility. Because the operations that maintain the invariant live alongside the state they protect, rather than in the calling code, a client cannot accidentally leave an object in an inconsistent configuration by following the intended path.
-
-<!--
-So far this is the class *offering* an interface that a client has no need to look past. It is not yet a guarantee. Nothing in this chapter stops a determined caller from reaching in and writing `favourites.currentIndex = 99` directly, breaking the invariant from outside. Guaranteeing that a client genuinely *cannot* reach past the interface, so that an object's state is truly the class's own, is the role of [encapsulation](./05_encapsulation).
--->
-
-<details class="tooltip deep-dive">
-  <summary>The abstraction at work in <code>Playlist</code></summary>
-
-Look back at how we used `favourites`. We called `add(..)`, `next()`, `current()`, and `remove(..)`, but we never touched the `songs` array directly, never adjusted `currentIndex`, and never worried about what removing the current song would do to the position. That work still happened; it was performed by `Playlist`. When we removed the current song, the index stayed valid because `remove` repairs it, and the caller could not get this wrong. As a client we only needed to know that a `Playlist` tracks a current song and moves through its list. How it stores the songs, and where it keeps the index valid, were details we never had to see.
-
-</details>
