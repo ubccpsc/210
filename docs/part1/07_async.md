@@ -248,3 +248,18 @@ Handling these failures well is a real subject, and it is deferred to the errors
 Mutation introduced state and time *inside* the program; asynchrony extends time to the world *outside* it, where data lives on disks and on other machines, and arrives only after a wait the program must not spend standing still. The model TypeScript gives us is single-threaded and deferred: slow operations hand back promises, `await` collects their values while the lone thread stays busy, and `async` marks every function that participates. With files and web services available, our programs can act on data that comes from outside their own source code.
 
 This also closes Part 1. You are now adept at the mechanics of modelling a problem with types, writing contracts and tests that validate behaviour, maintaining invariants, managing state, and changing data in the the outside world. We have come a long way: TypeScript is a fully-featured, industrial-strength language. So far, every program we have seen has been small enough for one person to hold in their head, and that has let personal discipline carry a lot of weight in ensuring the program works as intended. Part 2 investigates what happens when it cannot: when programs, teams, and lifetimes outgrow any single person, and the discipline has to move into the language itself. This requires a new level of abstraction, and new support from the programming language.
+
+<details class="tooltip exercise">
+  <summary>Exercise: A Journal on Disk</summary>
+
+Practise using `async` and `await` for reading and writing files on a new kind of data.
+
+> As a journaling app, I want to count a writer's entries, keep a backup of their journal, and restore it on request, so that they can track their progress and recover their work if the file is lost.
+
+The journal is a plain text file, one entry per line.
+
+1. Write `async function lineCount(path: string): Promise<number>` that reads the file at `path` as text (pass `"utf8"` to `readFile`) and returns how many lines it has. (Hint: `text.split("\n")` gives an array of the lines.) Test it with an async test, of the form `test("...", async () => { checkExpect(await lineCount("entries.txt"), ...); })`. 
+2. Write `async function backUp(path: string): Promise<void>` that reads the journal and writes its contents to a new file at `path + ".bak"`. In the doc comment, record that the function modifies the file system, as the mutation chapter required. Note that the two `await`s must run in order: the backup cannot be written before the contents have been read.
+3. Write `async function restore(path: string): Promise<void>` that reads the backup at `path + ".bak"` and writes its contents back to `path`, replacing the journal with the backed-up copy. Document the file-system change in its doc comment too, and, as in `backUp`, make sure the read finishes before the write begins.
+
+</details>

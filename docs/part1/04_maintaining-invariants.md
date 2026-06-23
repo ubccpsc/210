@@ -291,3 +291,19 @@ Looking at our designs in this chapter, we see that the invariants of our progra
 
 Building objects out of closures works, but the support the language gives us for this task is minimal. Object-oriented programming provides this pattern as direct language syntax: constructors, methods, and fields that the language itself controls access to. The syntax will be new, but the idea will directly flow from this chapter.
 
+<details class="tooltip exercise">
+  <summary>Exercise: Character Health</summary>
+
+Practise this chapter's process on a new problem.
+
+> As a game developer, I want a character's health to stay between 0 and its maximum, so that nothing in the game can drive it out of range.
+
+A character's health has a current hit-point count and a maximum, and must always satisfy the invariant `0 <= hp <= maxHp`. A holder of a `Health` value should be able to apply damage, apply healing, read the current hit points, and ask whether the character is still alive, but should never be able to reach the underlying numbers directly.
+
+1. Define a `Health` type whose properties are _operations_, not data: `damage(amount: number): Health`, `heal(amount: number): Health`, `getHp(): number`, and `isAlive(): boolean`. There should be no `hp` or `maxHp` field on the type.
+2. Write a constructor function `makeHealth(maxHp: number, hp: number): Health` that _establishes_ the invariant with an `assert` (reject a `maxHp` below 1, or an `hp` outside `0` to `maxHp`) and hides `hp` and `maxHp` in a closure. Model it on `makeCounter`.
+3. Implement `damage` and `heal` so they _preserve_ the invariant: damage never drops hit points below 0, and heal never raises them above `maxHp`. Each should return a new `Health` produced by `makeHealth`, so the invariant is re-established on every change.
+4. Add a `newCharacter(maxHp: number): Health` helper that starts a character at full health.
+5. Write tests: `checkExpect` that damage and heal land on the right hit points, including that they stop at 0 and at `maxHp`; and `checkError` that `makeHealth` rejects an invalid starting value such as `makeHealth(10, -1)`.
+
+</details>

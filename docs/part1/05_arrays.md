@@ -326,3 +326,31 @@ Prefer the named operation whenever the task is exactly a transform, a selection
 
 Arrays give sequences built-in support in the language, and their operations package the traversals we used to write by hand: `map` to transform, `filter` to select, `reduce` to summarise, `find` to search, with `for of` underneath them all for the computations that fit no named pattern. Notice one property everything in this chapter shared: none of these operations changed `day`. Every `map` and `filter` produced a new array, every `reduce` produced a new value, and even our hand-written loops only read the elements they visited; the original readings were never touched. This reflects a general principle of program design that runs through this course: once a pattern is understood and reliable, it is packaged up so it never needs to be re-derived, and we get to focus on *what* to compute instead of *how* to traverse. What happens when programs *do* change existing values, and why that calls for so much care, is the subject of the next chapter.
 
+<details class="tooltip exercise">
+  <summary>Exercise: Summarising an Order</summary>
+
+Practise this chapter's tools using `map`, `filter`, `reduce`, `find`, and a `for of` on a new collection.
+
+> As an online shop, I want to summarise a customer's order, so that I can show line items, totals, and stock problems at a glance.
+
+Each item in an order records a name, a unit price, and a quantity:
+
+```typescript
+type Item = {
+    name: string;
+    price: number;    // unit price in dollars
+    quantity: number; // how many were ordered
+};
+```
+
+Write a small example `order` of three or four items to test against, then write these functions. Use the named operation whenever one fits, and a loop only when none does:
+
+1. `names(order: Item[]): string[]`; return the name of every item, using `map`.
+2. `affordable(order: Item[], max: number): Item[]`; return the items whose `price` is at most `max`, using `filter`.
+3. `orderTotal(order: Item[]): number`; return the total cost, summing `price * quantity` across the order, using `reduce`.
+4. `firstOutOfStock(order: Item[]): Item | undefined`; return the first item with a `quantity` of 0, using `find` (remember what `find` returns when nothing matches).
+5. `hasDuplicateName(order: Item[]): boolean`; return `true` if any two items share the same `name`. This one compares items to one another, which the named operations cannot express, so you will want to use a `for of` loop for this task.
+
+Write a `checkExpect` for each function against your example order, including a case for `firstOutOfStock` where nothing is out of stock.
+
+</details>
