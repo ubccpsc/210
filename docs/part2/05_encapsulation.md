@@ -320,10 +320,10 @@ This is black-box testing by construction: with the representation hidden, there
 
 ## An Encapsulation Process
 
-The example followed a repeatable process, worth stating on its own so you can apply it to a new class:
+With this chapther, we've now seen the main components of class construction and can think more abstractly about how classes are designed. This is not a process that you follow once, for most classes you will end up iterating on these steps until you have a final design that you are happy with.
 
 1. _State the invariant_ the object must always satisfy.
-2. _Choose a representation_ that can express it.
+2. _Choose a representation_ that can track the state required for the invariant in fields.
 3. _Make the representation `private`_ (and `readonly` wherever it never changes).
 4. _Establish the invariant in the constructor_, rejecting any input it cannot satisfy.
 5. _Expose a minimal set of public methods_, each written to preserve the invariant.
