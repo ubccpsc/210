@@ -389,3 +389,23 @@ Mutation is worth the extra mental burden it induces: real programs model a chan
 <!-- RTH: let's leave off this bridge for now; not sure if we want to keep these so clearly anyways. 
 
 The outside world has a property that nothing in our programs has had so far: it does not answer immediately. What programs do while they wait is the subject of the next chapter. -->
+
+<details class="tooltip exercise">
+  <summary>Exercise: Moving a Robot</summary>
+
+Here we practise in-place mutation, references and aliasing on a small moving object.
+
+> As a game engine, I want a robot's position updated as it moves, so that the rest of the game can read its current location.
+
+A robot is just a position:
+
+```typescript
+type Robot = { x: number; y: number };
+```
+
+1. Write `step(robot: Robot, dx: number, dy: number): void` that moves the robot by adding `dx` to its `x` and `dy` to its `y`, changing the robot in place. Create a robot at `{ x: 0, y: 0 }`, call `step(robot, 1, 2)`, and use `checkExpect` to confirm the caller's robot now has an `x` of 1 and a `y` of 2.
+2. Write `teleport(robot: Robot, x: number, y: number): void` that instead _reassigns the parameter_, with `robot = { x: x, y: y }`. Predict what the caller's robot looks like after `teleport(robot, 9, 9)`, then confirm it with `checkExpect`. Why does `step` change the caller's robot while `teleport` does not?
+3. Give a robot a second name with `const other = robot`. Call `step(other, 3, 0)`, and use `checkExpect` to show that `robot` sees the move, because `other` is an alias for the same object. Then build a separate robot `twin` with the same coordinates, and use `===` to confirm that `robot === other` is `true` but `robot === twin` is `false`.
+4. Write `walk(robot: Robot, steps: number[]): void` that uses a `for of` loop to apply each number in `steps` as an eastward move (one `step(robot, s, 0)` per element), so the position carries forward from one iteration to the next. Check the robot's final `x` against the sum of `steps`.
+
+</details>

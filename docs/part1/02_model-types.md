@@ -538,6 +538,23 @@ These run the functions and confirm they produce the expected values. The compil
 
 A precise data definition is the foundation everything else rests on. It catches mistakes early, it mirrors the structure of the problem, and it drives the structure of the code that consumes it: once the data is modelled, the functions largely follow its shape. In this chapter we followed one process across a sequence of examples, from a simple enumeration through a song to a recursive playlist, and then wrote functions whose shape follows the data's shape.
 
-From here, Part 1 builds directly on this work: writing functions that are themselves generic, deriving tests from the structure of data, and leaning further on the type checker. 
+From here, Part 1 builds directly on this work: writing functions that are themselves generic, deriving tests from the structure of data, and leaning further on the type checker. In Part 2, when we move to **object-oriented programming**, the **tagged unions** you wrote here become class hierarchies. the underlying ideas will carry over even as the syntax changes.
 
-In Part 2, when we move to **object-oriented programming**, the **tagged unions** you wrote here become class hierarchies. the underlying ideas will carry over even as the syntax changes.
+<details class="tooltip exercise">
+  <summary>Exercise: Modelling a Journey</summary>
+
+Let's apply the process from this chapter to a new problem, then write functions whose shape follows the data.
+
+> As a commuter, I want to describe a journey as a sequence of legs, each with a mode of travel and a duration, so that I can total the travel time and see how I am getting around.
+
+A journey is either _arrived_ (there are no more legs) or a _leg_: a single mode of travel, a duration in minutes, and the rest of the journey after it. The mode of travel is one of `"walk"`, `"bus"`, `"train"`, or `"bike"`.
+
+1. Model the data. Following the process, write a `Mode` type as a restricted value (a union of the four literals), and a `Journey` type as a tagged union with a `kind` discriminator, one case for _arrived_ and one for a _leg_. Notice that `Journey` has the same shape as `Playlist`: an empty case, and a "first thing plus the rest" case.
+2. Write two example journeys: one that is simply _arrived_, and one with at least two legs.
+3. Following the shape of the data, write `totalMinutes(journey: Journey): number`, using case analysis on `kind` and recursion on the rest.
+4. Write `usesTransit(journey: Journey): boolean`, which is `true` when any leg travels by `"bus"` or `"train"`.
+5. Write a `checkExpect` for each function against your example journeys. Predict each result before you run them.
+
+Bonus task: which step of the modelling process suggests turning `Journey` into a generic type, and what would it become?
+
+</details>

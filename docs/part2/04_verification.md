@@ -21,7 +21,7 @@ test("no fee at the grace boundary", () => {
 ```
 
 <details class="tooltip deep-dive">
-  <summary>Behaviour-Driven Design (BDD)</summary>
+  <summary>Behaviour-Driven Development (BDD)</summary>
 
 In the abstract, our assertions look like:
 
@@ -30,17 +30,17 @@ expect(<the value under test>).to.<assertion>;
 expect(<the value under test>).to.<assertion>(<expected value>);
 ```
 
-Most assertions take an expected value in parentheses; a few, such as existence checks, are written as a property with no parentheses at all. The chained words in between, `to`, `be`, and `have`, are there only to make the assertion read as English; they carry no meaning of their own. The chained shape of these assertions has been deliberately designed to mimic sentence structure. `expect` is a **behaviour-driven development** (BDD) assertion library, and BDD is a style of testing that describes what code should do in language close to ordinary prose, so that a test reads as a statement of behaviour rather than a low-level comparison. The assertion `expect(() => requireSection(catalog, "NOPE")).to.throw("no section with id NOPE")` is more verbose than a bare check would be, but it reads almost as the English sentence it stands for, and under a descriptive test name the whole case doubles as a human-readable description of the behaviour it verifies. That legibility is what lets a test suite serve as documentation of what the code is meant to do, and it is why chai favours a longer, readable form over a terse one.
+Most assertions take an expected value in parentheses; a few, such as existence checks, are written as a property with no parentheses at all. The chained words in between, `to`, `be`, and `have`, are there only to make the assertion read as English; they carry no meaning of their own. The chained shape of these assertions has been deliberately designed to mimic sentence structure. `expect` is a **behaviour-driven development** (BDD) assertion library, and BDD is a style of testing that describes what code should do in language close to ordinary prose, so that a test reads as a statement of behaviour rather than a low-level comparison. The assertion `expect(() => requireSection(catalogue, "NOPE")).to.throw("no section with id NOPE")` is more verbose than a bare check would be, but it reads almost as the English sentence it stands for, and under a descriptive test name the whole case doubles as a human-readable description of the behaviour it verifies. That legibility is what lets a test suite serve as documentation of what the code is meant to do, and it is why chai favours a longer, readable form over a terse one.
 </details>
 
 Errors translate just as directly. Recall `requireSection` from the previous chapter, which throws when no section matches the requested id. Where `checkError` ran a function and passed if it threw, `expect(...).to.throw` does the same:
 
 ```typescript
 // previously
-checkError(() => requireSection(catalog, "NOPE"), "no section with id NOPE");
+checkError(() => requireSection(catalogue, "NOPE"), "no section with id NOPE");
 
 // now
-expect(() => requireSection(catalog, "NOPE")).to.throw("no section with id NOPE");
+expect(() => requireSection(catalogue, "NOPE")).to.throw("no section with id NOPE");
 ```
 
 As with `checkError`, the call under test is wrapped in `() =>` so that `expect` can run it and observe the throw, rather than receiving an error that has already escaped. The string is matched against the thrown error's message; the assertion passes when the message contains it.
@@ -122,7 +122,9 @@ These categories are not arbitrary. A study of 33,873 assertions drawn from 105 
 
 ## Layering Assertions for Clearer Failures
 
-A specific operator improves a single check. When the value under test is structured, a second technique improves the test as a whole. Consider a function that lists the sections a student can currently enrol in: those they have not already completed and whose prerequisites they have all met. We reuse the `Section` and `Student` types from the previous chapter, with a catalog that now offers two first-year courses:
+A specific operator improves a single check. When the value under test is structured, a second technique improves the test as a whole. Consider a function that lists the sections a student can currently enrol in: those they have not already completed and whose prerequisites they have all met. We reuse the `Section` and `Student` types from the previous chapter, with a catalogue that now offers two first-year courses:
+
+<CollapsibleCode>
 
 ```typescript
 type Section = {
@@ -135,7 +137,7 @@ type Student = {
     completed: string[]; // ids of courses already passed
 };
 
-const catalog: Section[] = [
+const catalogue: Section[] = [
     { id: "CPSC110", prerequisite: [] },
     { id: "CPSC121", prerequisite: [] },
     { id: "CPSC210", prerequisite: ["CPSC110"] },
@@ -166,16 +168,16 @@ function hasAllPrerequisites(student: Student, section: Section): boolean {
  *
  * A section is eligible when the student has not already completed it and
  * has completed all of its prerequisites. Eligible sections are returned
- * in catalog order.
+ * in catalogue order.
  *
- * @param {Section[]} catalog the sections on offer
+ * @param {Section[]} catalogue the sections on offer
  * @param {Student} student the student enrolling
  * @returns {Section[]} the eligible sections, or an empty array when none
  * are available
  */
-function eligibleSections(catalog: Section[], student: Student): Section[] {
+function eligibleSections(catalogue: Section[], student: Student): Section[] {
     const result: Section[] = [];
-    for (const section of catalog) {
+    for (const section of catalogue) {
         if (student.completed.includes(section.id)) {
             continue; // already completed, so not on offer again
         }
@@ -187,12 +189,14 @@ function eligibleSections(catalog: Section[], student: Student): Section[] {
 }
 ```
 
+</CollapsibleCode>
+
 A student who has finished both first-year courses can take `CPSC210`, but not yet `CPSC213`. One assertion can pin the answer down exactly:
 
 ```typescript
 test("a student who finished first year can take CPSC210", () => {
     const student: Student = { id: "s1", completed: ["CPSC110", "CPSC121"] };
-    expect(eligibleSections(catalog, student)).to.deep.equal([{ id: "CPSC210", prerequisite: ["CPSC110"] }]);
+    expect(eligibleSections(catalogue, student)).to.deep.equal([{ id: "CPSC210", prerequisite: ["CPSC110"] }]);
 });
 ```
 
@@ -203,7 +207,7 @@ Now write the same expectation as a sequence of assertions, ordered from the mos
 ```typescript
 test("a student who finished first year can take CPSC210", () => {
     const student: Student = { id: "s1", completed: ["CPSC110", "CPSC121"] };
-    const result = eligibleSections(catalog, student);
+    const result = eligibleSections(catalogue, student);
 
     expect(result).to.exist;                              // not null or undefined
     expect(result).to.be.an("array");                     // the right kind of value
@@ -234,6 +238,8 @@ For the rest of the chapter we move to a video streaming service, which gives us
 > As a streaming service, I want to show each viewer only the titles they can play right now, so that no one is offered something they cannot watch.
 
 A viewer can play a title when the title is published, it is licensed in the viewer's region, and, if it is a premium title, the viewer is on a premium plan.
+
+<CollapsibleCode>
 
 ```typescript
 type Tier = "free" | "premium";
@@ -282,16 +288,16 @@ function canPlay(viewer: Viewer, title: Title): boolean {
  * Lists the titles a viewer can currently play.
  *
  * A title is included exactly when canPlay accepts it. Titles are returned
- * in catalog order.
+ * in catalogue order.
  *
- * @param {Title[]} catalog the titles on offer
+ * @param {Title[]} catalogue the titles on offer
  * @param {Viewer} viewer the viewer watching
  * @returns {Title[]} the playable titles, or an empty array when none are
  * available
  */
-function playableTitles(catalog: Title[], viewer: Viewer): Title[] {
+function playableTitles(catalogue: Title[], viewer: Viewer): Title[] {
     const result: Title[] = [];
-    for (const title of catalog) {
+    for (const title of catalogue) {
         if (canPlay(viewer, title)) {
             result.push(title);
         }
@@ -300,10 +306,12 @@ function playableTitles(catalog: Title[], viewer: Viewer): Title[] {
 }
 ```
 
-The examples below all run against one catalog: a published free title licensed in two regions, an unpublished free title, and a published premium title.
+</CollapsibleCode>
+
+The examples below all run against one catalogue: a published free title licensed in two regions, an unpublished free title, and a published premium title.
 
 ```typescript
-const catalog: Title[] = [
+const catalogue: Title[] = [
     { id: "t1", published: true,  tier: "free",    regions: ["CA", "US"] },
     { id: "t2", published: false, tier: "free",    regions: ["CA"] },
     { id: "t3", published: true,  tier: "premium", regions: ["CA"] }
@@ -312,7 +320,7 @@ const catalog: Title[] = [
 
 ### Partitioning a Composite Input
 
-`playableTitles` does not take a number; it takes a whole `Viewer` and a `catalog`. Its meaningful classes are not numeric ranges but *relationships* between fields: between a viewer's plan and a title's tier, and between a viewer's region and the regions a title is licensed in. The viewer input divides into classes such as:
+`playableTitles` does not take a number; it takes a whole `Viewer` and a `catalogue`. Its meaningful classes are not numeric ranges but *relationships* between fields: between a viewer's plan and a title's tier, and between a viewer's region and the regions a title is licensed in. The viewer input divides into classes such as:
 
 | Class | Representative viewer |
 |---|---|
@@ -320,7 +328,7 @@ const catalog: Title[] = [
 | Premium plan, in a licensed region | `{ plan: "premium", region: "CA" }` |
 | In a region nothing is licensed for | `{ plan: "free", region: "EU" }` |
 
-The catalog adds further dimensions that the specification treats distinctly: a published title versus an unpublished one, and a free title versus a premium one. The classes are the meaningful *combinations* of these, so a thorough suite needs more than one viewer paired with one title. As with a numeric input, the classes come from the specification rather than the code; the only difference is that a representative is now a constructed `Viewer` and `catalog`, not a single value.
+The catalogue adds further dimensions that the specification treats distinctly: a published title versus an unpublished one, and a free title versus a premium one. The classes are the meaningful *combinations* of these, so a thorough suite needs more than one viewer paired with one title. As with a numeric input, the classes come from the specification rather than the code; the only difference is that a representative is now a constructed `Viewer` and `catalogue`, not a single value.
 
 ### Partitioning by Output
 
@@ -328,10 +336,12 @@ With a single-number result like `lateFee` from Part 1, partitioning the input w
 
 The mismatch is easy to see. The viewer's plan is the most visible input dimension, but it does not decide whether the result is empty: the *largest* result here comes from the most permissive input, a premium viewer, while the empty result comes from a viewer in a region where nothing is licensed, whatever their plan. Reaching each output class takes a deliberately chosen input, and each test layers its assertions from general to specific, as before, so that a failure names which aspect of the result is wrong:
 
+<CollapsibleCode>
+
 ```typescript
 test("a free viewer sees only published, licensed, non-premium titles", () => {
     const viewer: Viewer = { id: "v1", plan: "free", region: "CA" };
-    const result = playableTitles(catalog, viewer);
+    const result = playableTitles(catalogue, viewer);
 
     expect(result).to.be.an("array"); // the right kind of value
     expect(result).to.have.length(1); // the single-result class
@@ -340,7 +350,7 @@ test("a free viewer sees only published, licensed, non-premium titles", () => {
 
 test("a premium viewer also sees premium titles", () => {
     const viewer: Viewer = { id: "v2", plan: "premium", region: "CA" };
-    const result = playableTitles(catalog, viewer);
+    const result = playableTitles(catalogue, viewer);
 
     expect(result).to.be.an("array"); // the right kind of value
     expect(result).to.have.length(2); // the several-results class
@@ -349,12 +359,14 @@ test("a premium viewer also sees premium titles", () => {
 
 test("a viewer outside every licensed region sees nothing", () => {
     const viewer: Viewer = { id: "v3", plan: "free", region: "EU" };
-    const result = playableTitles(catalog, viewer);
+    const result = playableTitles(catalogue, viewer);
 
     expect(result).to.be.an("array"); // the right kind of value
     expect(result).to.be.empty; // the empty-result class
 });
 ```
+
+</CollapsibleCode>
 
 Partitioning the input tells you which situations to feed a function; partitioning the output tells you which kinds of answer to confirm it can produce. A function with a structured result needs both, because either partitioning alone can leave a whole category of behaviour untested.
 
@@ -420,11 +432,63 @@ function canPlay(viewer: Viewer, title: Title): boolean {
 
 This version has four branches. A suite with an unpublished title, a premium title for a premium viewer, a premium title for a free viewer, and a published free title executes all four, for 100% branch coverage, and it is still wrong: a free title that is not licensed in the viewer's region is judged playable, because the rule that would reject it was never written. Coverage could not reveal the fault, because the fault was not an untested branch but a *missing* one. Coverage measures the code you wrote, never the code the specification required. This is why white-box testing supplements black-box testing but never replaces it: reading the code tells you whether your tests reach what is there, while only the specification can tell you what ought to be there.
 
+## Testing Object-Oriented Code
+
+Every example so far has tested a pure function: pass arguments, inspect the return value. A class is different. An object carries _state_ between calls, so a test usually constructs the object, performs a sequence of operations, and then asserts on the state that results. The value under test is the object's observable behaviour, not a single return value.
+
+Recall the `Playlist` class from the abstraction chapter, which tracks a current song as songs are added and removed. A test for it reads as a short story: set up an object, drive it through some calls, and check where it ended up.
+
+```typescript
+const songA: Song = { title: "Aubade", artist: "Dawn Quartet", durationSeconds: 180 };
+const songB: Song = { title: "Bassline", artist: "Low End", durationSeconds: 240 };
+
+test("removing the current song keeps the position valid", () => {
+    const playlist = new Playlist();
+    playlist.add(songA);
+    playlist.add(songB);
+    playlist.next();                                  // current is now songB
+    playlist.remove(songB);                           // remove the current song
+    expect(playlist.current()).to.deep.equal(songA);  // the position stayed valid
+});
+```
+
+The test-design ideas carry over unchanged. Equivalence classes and boundaries now describe _sequences of method calls_ rather than single arguments (an empty playlist, a one-song playlist, removing the current song versus another song), and layered assertions still apply to whatever the object exposes.
+
+### Setup and Teardown
+
+Almost every test of a class starts the same way: build a fresh object to work on. Writing `new Playlist()` at the top of every test is repetitive, and reusing one shared object across tests is worse than repetitive: one test's mutations would leak into the next, and the suite would quietly depend on the order its tests happen to run in. Test runners solve this with **lifecycle hooks**, functions the runner calls around your tests. The most useful is `beforeEach`, which runs before every test, the natural place to create a fresh object:
+
+```typescript
+let playlist: Playlist;
+
+beforeEach(() => {
+    playlist = new Playlist();   // a fresh, empty playlist before each test
+});
+
+test("a new playlist has no current song", () => {
+    expect(playlist.current()).to.equal(null);
+});
+
+test("the first song added becomes current", () => {
+    playlist.add(songA);
+    expect(playlist.current()).to.deep.equal(songA);
+});
+```
+
+Each test now receives its own `playlist`, untouched by any other, so the tests are independent and may run in any order. The hook removed the duplicated construction and, more importantly, the shared state that would have coupled the tests together.
+
+There are four hooks provided by most testing frameworks:
+
+- `beforeEach` runs before each test and `afterEach` runs after each test. These are helpful for per-test setup and teardown.
+- `beforeAll` runs once before the first test and `afterAll` runs once after the last test is complete. These are best for setup too expensive to repeat, such as opening a connection shared, read-only, by every test.
+
+For the in-memory objects in this course, a `beforeEach` that constructs a fresh object is almost always all you need; the teardown hooks matter most when a test touches something outside the program, such as a file or a network connection, that must be released whether the test passed or threw.
+
 ## Regression Testing
 
 A program is not finished when it first passes its tests. Code changes over time: bugs are fixed, features are added, and working code is reorganised. Every change is a chance to introduce a **regression**, a change that breaks behaviour that previously worked.
 
-Tests guard against regressions. Suppose that months later a teammate sets out to tidy `canPlay`. They reason that every title in the catalog is live by the time it ships, so the published check at the top is redundant, and remove it:
+Tests guard against regressions. Suppose that months later a teammate sets out to tidy `canPlay`. They reason that every title in the catalogue is live by the time it ships, so the published check at the top is redundant, and remove it:
 
 ```typescript
 function canPlay(viewer: Viewer, title: Title): boolean {
@@ -449,3 +513,75 @@ This is the second job of a test suite, and over the life of a program it is the
 
 Effective verification strategies are layered such that each approach provides additional unique insight into the correctness of a program. The type checker rules out malformed programs before they run. Tests show that the program behaves as its contract promises when it does run. Specific, layered assertions make a failing test explain not merely that something is wrong but what kind of fault occurred. Partitioning the inputs and the outputs makes a passing suite meaningful rather than merely green. Coverage reveals the code the suite still ignores, and re-running the suite on every change keeps a correct program correct. No single one of these is enough on its own. Together they are how we move from claiming that an abstraction honours its contract to having earned the confidence that it does.
 
+<details class="tooltip exercise">
+  <summary>Exercise: Verifying a Shipping Calculator</summary>
+
+The function below is complete. Your task is to verify it with a thorough suite of `expect` assertions.
+
+> As a shipping desk, I want each parcel priced by its weight, with express doubling the rate and unshippable parcels rejected, so that customers are charged correctly and never quoted a price we cannot honour.
+
+```typescript
+/**
+ * Computes the shipping cost for a parcel, in dollars.
+ *
+ * Standard rates by weight: up to 1kg costs $5; over 1kg and up to 5kg
+ * costs $10; over 5kg and up to 20kg costs $20. Express shipping doubles
+ * the standard rate.
+ *
+ * @param {number} weightKg the parcel weight in kilograms
+ * @param {boolean} express whether express shipping was selected
+ * @returns {number} the shipping cost in dollars
+ * @throws {Error} "weight must be positive" when weightKg <= 0
+ * @throws {Error} "too heavy to ship" when weightKg > 20
+ */
+function shippingCost(weightKg: number, express: boolean): number {
+    if (weightKg <= 0) {
+        throw new Error("weight must be positive");
+    }
+    if (weightKg > 20) {
+        throw new Error("too heavy to ship");
+    }
+    let base: number;
+    if (weightKg <= 1) {
+        base = 5;
+    } else if (weightKg <= 5) {
+        base = 10;
+    } else {
+        base = 20;
+    }
+    return express ? base * 2 : base;
+}
+```
+
+Design the tests, do not just write them. Work through:
+
+1. _Equivalence classes._ Group the weights the specification treats alike, and choose one representative from each, for both standard and express shipping.
+2. _Boundary values._ The tier edges (1kg, 5kg, 20kg) and the lower limit (0kg) are where off-by-one mistakes hide. Decide which values just inside, on, and just outside each boundary a thorough suite should include.
+3. _Outputs._ Confirm each distinct cost the function can produce, and that express is exactly double the standard rate for the same weight.
+4. _Exceptions._ The contract names two ways the function throws. Assert each with `expect(() => ...).to.throw(...)`.
+
+Fill in the cases below, adding or removing rows so that every class, boundary, and exception above is represented:
+
+```typescript
+test("standard rate by weight tier", () => {
+    expect(shippingCost(0.5, false)).to.equal(/* ? */);
+    // ... a representative from each standard tier
+});
+
+test("express doubles the standard rate", () => {
+    // ... the same representative weights, with express = true
+});
+
+test("boundary weights fall in the expected tier", () => {
+    // ... 1, 5, and the values just above them
+});
+
+test("invalid and unshippable weights are rejected", () => {
+    expect(() => shippingCost(0, false)).to.throw("weight must be positive");
+    // ... a weight over 20
+});
+```
+
+When you are done, consider whether your suite would provide you the informative errors you would want as an engineer. Would a single failing assertion tell you which class, boundary, or exception broke?
+
+</details>
