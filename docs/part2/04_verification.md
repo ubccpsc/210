@@ -223,7 +223,7 @@ expected [ 'CPSC213' ] to include 'CPSC210'       // returned the wrong section
 
 Only a result that exists, is an array of the right length, and contains the expected id, yet still differs somewhere in its contents, survives to the final `deep.equal`. Ordering matters: with the general checks first, the earliest failure is always the most fundamental one, and you learn the *kind* of mistake before its details.
 
-This is not a licence to attach five assertions to every test. Most tests need only one, and the study above found that most have exactly one; redundant checks clutter a test without adding meaning. Layering earns its place when a value is structured enough that a bare equality failure would be hard to read, or when a function makes several independent guarantees worth confirming separately. The aim is not more assertions but more *informative* ones. Specifically for this example, it would be easy to skip the assertion checking that the value existed, and the one performing the `map` operation.
+This is not a licence to attach five assertions to every test. Most tests need only one, and the study above found that most have exactly one; redundant checks clutter a test without adding meaning. Layering is worthwhile when a value is structured enough that a bare equality failure would be hard to read, or when a function makes several independent guarantees worth confirming separately. The aim is not more assertions but more *informative* ones. Specifically for this example, it would be easy to skip the assertion checking that the value existed, and the one performing the `map` operation.
 
 ## Partitioning Inputs and Outputs
 
