@@ -187,7 +187,7 @@ everyone.push("bob");
 everyone.push("carol"); // and now over capacity
 ```
 
-No method of `GuestList` was called to break the invariant, and no `private` rule was violated; the array *escaped*. `private` protected the field, the binding from the name `invited` to an array, but not the array that binding points to. The fix is to hand back a copy:
+No method of `GuestList` was called to break the invariant, and no `private` rule was violated; the array _escaped_. `private` prevented external code from directly accessing the `invited` field, the `guests()` method exposed the field to callers. The fix is to hand back a copy:
 
 ```typescript
 guests(): string[] {
@@ -195,7 +195,7 @@ guests(): string[] {
 }
 ```
 
-Now pushing onto `everyone` modifies a separate array and leaves the list untouched. Returning a copy of internal data rather than the data itself is called **defensive copying**. Forgetting it is one of the most common mistakes in this area, because the unsafe version looks correct and passes every test that does not specifically try to mutate the result.
+The array returned by `guests()` is now a separate array from the field within `GuestList`. Returning a copy of internal data rather than the data itself is called **defensive copying**. Forgetting to make defensive copies is one of the most common ways to violate encapsulation, because the unsafe version looks correct and passes every test that does not specifically try to mutate the result.
 
 <details class="tooltip deep-dive">
 <summary>Copies and Shared References</summary>
@@ -203,6 +203,7 @@ Now pushing onto `everyone` modifies a separate array and leaves the list untouc
 A variable holding an array or object does not hold the data; it holds a reference to data that lives elsewhere. Assigning or returning that variable copies the reference, not the data, so two names end up pointing at the same array, and a change through one is visible through the other. `slice()` (for arrays) builds a new array, which is why returning `this.invited.slice()` is safe.
 
 There is a depth limit worth knowing. `slice()` makes a **shallow copy**: a new array whose elements are the same references as the original's. For an array of strings that is completely safe, because strings cannot be mutated. For an array of objects it is not: the copy is a new array, but its elements are the same objects, so a caller could still reach through and mutate one of them. When the elements are themselves mutable, you need either a deeper copy or elements that cannot be changed, which is the subject of the next section.
+
 
 </details>
 

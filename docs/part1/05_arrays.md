@@ -64,12 +64,39 @@ The array literal plays the role of `list` from CPSC 110: `[ -4, -1, 3 ]` is the
 
 </details>
 
+<details class="tooltip deep-dive">
+<summary>The JSON Data Interchange Format</summary>
 
-(TODO: need to fully introduce JSON)
-<details class="tooltip ts-tips">
-<summary>Arrays are JSON values too</summary>
+Programs rarely keep their data to themselves. They save it to files, send it across the network to other machines, and exchange it with programs written in entirely different languages. To do any of that, the data has to be written down in a format that is agreed on ahead of time. One of the most commonly used formats is **JSON**, short for JavaScript Object Notation. You have already seen some JSON files in this course: `package.json` and `tsconfig.json` are both written in it.
 
-The modelling chapter introduced **JSON** and listed its values: an object, a string, a number, a boolean, or `null`. The array is the one kind we had not yet met. An array literal is a JSON value whenever its elements are, so JSON can represent a whole sequence of records. Our `day` of readings is valid JSON:
+JSON is quick to learn because its syntax is almost exactly the object and array literals you have been writing in this chapter and the last. Once you can read a TypeScript literal, you can very nearly read JSON. Every piece of JSON is a single value, and every value is one of a small, fixed set of kinds. Four of them are the primitive values you already know, written just as they are in TypeScript:
+
+- `string`: always in double quotes: `"CPSC 210"`
+- `number`, with no distinction drawn between integers and decimals: `4`, `-273.15`
+- `boolean`: `true` or `false`
+- `null`, for the deliberate absence of a value: `null`
+
+The other two kinds are containers that hold other values, which is what lets JSON describe structured data.
+
+**A JSON object** groups related values together inside `{ }`:
+
+```json
+{
+  "hour": 6,
+  "tempCelsius": -4,
+  "freezing": true
+}
+```
+
+Each entry has two parts separated by a colon. The name on the left, such as `"hour"`, is the **key**, and the value on the right is what is filed under that key. A key is always a string in double quotes. Within a single object each key is _unique_: a key is a label, and each label names exactly one value, so asking an object for the value under `"hour"` always has one unambiguous answer. (This pattern, a collection of unique keys that each map to a value, returns later under its own name; here it is simply how an object is put together.)
+
+**A JSON array** is an ordered list of values inside `[ ]`, just as in this chapter:
+
+```json
+[ -4, -1, 3, 8, 2, -2 ]
+```
+
+The values in an array need not be numbers. They can be any JSON value, including objects:
 
 ```json
 [
@@ -79,7 +106,33 @@ The modelling chapter introduced **JSON** and listed its values: an object, a st
 ]
 ```
 
-Objects and arrays nest freely, so a JSON value can describe data of almost any shape: an array of objects, an object whose properties are themselves arrays, and so on.
+JSON is flexible because of its ability to nest data. The value filed under a key, or sitting in an array, may itself be an object or an array, and those may hold further objects and arrays, nested as deeply as the data requires. A full weather-station report might bring every kind together at once:
+
+```json
+{
+  "stationId": "YVR-2",
+  "active": true,
+  "location": {
+    "name": "Vancouver International",
+    "latitude": 49.19,
+    "longitude": -123.18
+  },
+  "elevationMetres": 4,
+  "readings": [
+    { "hour": 6, "tempCelsius": -4, "note": null },
+    { "hour": 9, "tempCelsius": -1, "note": "frost reported" }
+  ],
+  "tags": [ "coastal", "automated" ]
+}
+```
+
+The whole document is one object. The value under `"location"` is a second object, nested inside the first. The value under `"readings"` is an array of objects, and inside one of those, `"note"` is `null` for the reading with no note and a string for the one that has it. The value under `"tags"` is an array of strings. Every value, at every depth, is one of the kinds above. That is the entirety of JSON: four primitive values, the object, and the array, combined without limit.
+
+JSON itself is text, and only text. A JSON document is a sequence of characters, whether it sits in a file or arrives over a network. It carries data and nothing else: no functions, no computation, no variables, and no way for one part to refer to another. The restriction is deliberate, and it is the reason JSON is so widely used. Because a JSON value is inert data in a notation that no single language owns, a program written in Python can produce it, a file can store it, and your TypeScript program can consume it, with the two sides needing to agree only on the shape of the data and not on a shared programming language. That independence, together with the fact that a person can open the text and simply read it, is why JSON has become the common format for configuration files and for web services.
+
+A few differences from a TypeScript literal can be tricky: In JSON, keys must be wrapped in double quotes (`"hour"`, never a bare `hour`), and strings must use double quotes, never single. JSON permits no trailing comma after the final entry, and no comments anywhere. And the only values allowed are the kinds above: there is no `undefined`, and no special form for dates or anything else, only the primitives, objects, and arrays.
+
+Because JSON is text, a program cannot work with it as values directly. The text has to be turned into real objects, arrays, and numbers first, and your own values turned back into text to send them out. One challenge with JSON is it usually originates in external systems (files, the network, provided as parameters from other code), and needs to be validated so we know what its actual type is. This challenge, and how we read and write JSON files will be covered explicitly in lab.
 
 </details>
 
