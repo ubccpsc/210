@@ -524,7 +524,7 @@ Design a class for the scenario below, following the same path this chapter used
 
 > As a homeowner, I want a thermostat whose target temperature I can nudge up or down but never set outside a safe range, so that the house is never driven dangerously hot or cold.
 
-For this task, design a class, give it a name, and determine its invariants. Figure out what fields it should maintain, and design the methods that should update the stored state. 
+For this task, design a class, give it a name, and determine its invariants. Figure out what fields it should maintain, and design the methods that should update the stored state. Since there are many possible abstractions for a problem like this, try to come up with more than one and compare and contrast them so you can think about the strengths and weaknesses of each.
 
 </details>
 
