@@ -124,6 +124,8 @@ These categories are not arbitrary. A study of 33,873 assertions drawn from 105 
 
 A specific operator improves a single check. When the value under test is structured, a second technique improves the test as a whole. Consider a function that lists the sections a student can currently enrol in: those they have not already completed and whose prerequisites they have all met. We reuse the `Section` and `Student` types from the previous chapter, with a catalogue that now offers two first-year courses:
 
+<CollapsibleCode>
+
 ```typescript
 type Section = {
     id: string;
@@ -187,6 +189,8 @@ function eligibleSections(catalogue: Section[], student: Student): Section[] {
 }
 ```
 
+</CollapsibleCode>
+
 A student who has finished both first-year courses can take `CPSC210`, but not yet `CPSC213`. One assertion can pin the answer down exactly:
 
 ```typescript
@@ -234,6 +238,8 @@ For the rest of the chapter we move to a video streaming service, which gives us
 > As a streaming service, I want to show each viewer only the titles they can play right now, so that no one is offered something they cannot watch.
 
 A viewer can play a title when the title is published, it is licensed in the viewer's region, and, if it is a premium title, the viewer is on a premium plan.
+
+<CollapsibleCode>
 
 ```typescript
 type Tier = "free" | "premium";
@@ -300,6 +306,8 @@ function playableTitles(catalogue: Title[], viewer: Viewer): Title[] {
 }
 ```
 
+</CollapsibleCode>
+
 The examples below all run against one catalogue: a published free title licensed in two regions, an unpublished free title, and a published premium title.
 
 ```typescript
@@ -328,6 +336,8 @@ With a single-number result like `lateFee` from Part 1, partitioning the input w
 
 The mismatch is easy to see. The viewer's plan is the most visible input dimension, but it does not decide whether the result is empty: the *largest* result here comes from the most permissive input, a premium viewer, while the empty result comes from a viewer in a region where nothing is licensed, whatever their plan. Reaching each output class takes a deliberately chosen input, and each test layers its assertions from general to specific, as before, so that a failure names which aspect of the result is wrong:
 
+<CollapsibleCode>
+
 ```typescript
 test("a free viewer sees only published, licensed, non-premium titles", () => {
     const viewer: Viewer = { id: "v1", plan: "free", region: "CA" };
@@ -355,6 +365,8 @@ test("a viewer outside every licensed region sees nothing", () => {
     expect(result).to.be.empty; // the empty-result class
 });
 ```
+
+</CollapsibleCode>
 
 Partitioning the input tells you which situations to feed a function; partitioning the output tells you which kinds of answer to confirm it can produce. A function with a structured result needs both, because either partitioning alone can leave a whole category of behaviour untested.
 
