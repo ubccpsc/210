@@ -4,7 +4,7 @@ Much of Part 1 was concerned with invariants: the properties a value must satisf
 
 **Encapsulation** closes the gap by hiding a class's representation so that the invariant cannot be broken by external code. The data becomes accessible only to the class's own methods, which are designed to maintain the invariant. This is **information hiding**, and TypeScript's access modifiers make it more than a polite request: where Part 1 could only write a comment asking other code to leave a field alone, now the compiler can enforce it. This chapter covers the mechanism (`private`, `public`, and `readonly`), the process of deciding what to hide, and how this improves the design of the overall system.
 
-## A Guest List That Must Stay Valid
+#### A Guest List That Must Stay Valid
 
 We will work with one running example throughout this chapter.
 
@@ -87,7 +87,7 @@ TypeScript's `private` is enforced by the compiler and then erased: it is a rule
 
 </details>
 
-## The Constructor
+## Establishing and Preserving the Invariant
 
 Because the representation is private, the constructor is the only way to bring a `GuestList` into existence, which makes it the natural place to establish the invariant. The version above still accepts invalid input: `new GuestList(-1)` produces a list whose capacity can never be met. The constructor should reject input it cannot turn into a valid object:
 
@@ -121,8 +121,6 @@ class GuestList {
 ```
 
 </CollapsibleCode>
-
-## Preserving Invariants
 
 A validating constructor guarantees the object *starts* valid. Keeping it valid as it changes is the job of the methods, and it is a rule with no exceptions: every method that touches the representation must leave the invariant true. Adding a guest is the case that puts both invariants at risk:
 
@@ -267,6 +265,26 @@ class GuestList {
 
 Every public method has the same name, the same parameters, and the same return type as before. Code written against the array version keeps working without a single change, because from the outside there *is* no change: the public shape is identical. We replaced the internal data structure and rewrote the method bodies, and all of it stayed inside the boundary that `private` creates. This freedom is the deeper reason to hide a representation. Callers depend on what a `GuestList` does, never on how it stores its guests, so how it stores its guests is ours to change. In addition, the `Set` makes the duplicate invariant *structural*: the representation is now incapable of holding a duplicate at all, rather than relying on `add` to check.
 
+<details class="tooltip deep-dive">
+<summary>Built-in Encapsulated Types</summary>
+
+The `Set` we used is itself an encapsulated type: you use it through methods like `add`, `has`, `delete`, and `size`, never touching how it stores its elements. The standard collections are worth knowing precisely because they are the representations you will most often hide inside your own classes, and they are examples of an internal choice you can change without leaking.
+
+- **Array.** An `Array` holds a linear sequence of elements. You have written arrays with the syntactic sugar `string[]`. They can also be constructed explicitly with `new Array<string>()`, which produces the same kind of value as `[]` typed as `string[]`. An array keeps its elements in insertion order and allows access by position, but testing whether it contains a value scans the whole sequence, and it can hold duplicates.
+- **Set.** A `Set` holds each value at most once. Build one with `new Set<string>()`; adding a value it already contains does nothing. There is no literal shorthand, so a `Set` must be created with `new`. A set tests membership and enforces uniqueness quickly, which is why we used it above, but it offers no access by position: you can ask whether a value is present, never for the element at a given index.
+- **Map.** A `Map` associates keys with values, for example `new Map<string, number>()` to count tickets per guest. Its core methods are `set`, `get`, `has`, and `delete`, and it reports its entry count through `.size`. Like `Set`, it has no literal form and requires `new`. A map looks a value up by its key quickly and accepts keys of any type, but it carries more overhead than a plain array or object and is the wrong choice when you need only an ordered list or a set of bare values.
+
+A plain object can also serve as a key-to-value table, what is often called a dictionary. Using an _index signature_, the type `{ [guestId: string]: number }` reads as "any string key maps to a number":
+
+```typescript
+const tickets: { [guestId: string]: number } = {};
+tickets["alice"] = 2;
+```
+
+A plain-object dictionary and a `Map` overlap, but differ in ways that decide between them. A plain object's keys are always strings; a `Map`'s keys may be of any type. A `Map` iterates its entries in the order they were inserted, and can report its. Use a `Map` when you need keys that are not strings, a reliable iteration order, or a running size; use a dictionary for a small, fixed-shape, string-keyed record.
+
+</details>
+
 ## Mutability and Immutability
 
 `GuestList` is a **mutable object**: `add` and `remove` change it in place. It is worth separating two guarantees that are easily confused, because they guard against different risks:
@@ -299,7 +317,7 @@ A caller writes `list.count`, with no parentheses, but the body still runs, so i
 
 </details>
 
-## Testing Through Public Members
+## Testing Encapsulated Code
 
 Because callers reach a `GuestList` only through its public methods, so do its tests. A test constructs an object, drives it with method calls, and asserts on what it can observe:
 
@@ -329,38 +347,6 @@ test("the array from guests() cannot change the list", () => {
 </CollapsibleCode>
 
 This is black-box testing by construction: with the representation hidden, there is nothing left to test but behaviour. It also reveals a design pressure worth naming. An object is testable exactly to the extent that its important behaviour is observable through its public surface. If a `GuestList` could fall into an invalid state but offered no way to observe its contents, no test could catch the fault. Designing for testability means giving callers, and therefore tests, enough public behaviour to confirm the invariant holds, without exposing the representation that would let them break it. The third test above is only possible because `guests()` and `size()` together let us observe that the escape attempt failed.
-
-## An Encapsulation Process
-
-The example followed a repeatable process, worth stating on its own so you can apply it to a new class:
-
-1. _State the invariant_ the object must always satisfy.
-2. _Choose a representation_ that can express it.
-3. _Make the representation `private`_ (and `readonly` wherever it never changes).
-4. _Establish the invariant in the constructor_, rejecting any input it cannot satisfy.
-5. _Expose a minimal set of public methods_, each written to preserve the invariant.
-6. _Return copies or read-only views_, so the representation cannot escape.
-
-Followed through, the result is an object that cannot be constructed invalid, cannot be driven invalid, and cannot leak the internals that would let someone else do either.
-
-## Built-in Encapsulated Types
-
-The `Set` we used is itself an encapsulated type: you use it through methods like `add`, `has`, `delete`, and `size`, never touching how it stores its elements. The standard collections are worth knowing precisely because they are the representations you will most often hide inside your own classes, and they are examples of an internal choice you can change without leaking.
-
-- **Array.** An `Array` holds a linear sequence of elements. You have written arrays with the syntactic sugar `string[]`. They can also be constructed explicitly with `new Array<string>()`, which produces the same kind of value as `[]` typed as `string[]`. 
-- **Set.** A `Set` holds each value at most once. Build one with `new Set<string>()`; adding a value it already contains does nothing. There is no literal shorthand, so a `Set` must be created with `new`.
-- **Map.** A `Map` associates keys with values, for example `new Map<string, number>()` to count tickets per guest. Its core methods are `set`, `get`, `has`, and `delete`, and it reports its entry count through `.size`. Like `Set`, it has no literal form and requires `new`.
-
-A plain object can also serve as a key-to-value table, what is often called a dictionary. Using an *index signature*, the type `{ [guestId: string]: number }` reads as "any string key maps to a number":
-
-```typescript
-const tickets: { [guestId: string]: number } = {};
-tickets["alice"] = 2;
-```
-
-A plain-object dictionary and a `Map` overlap, but differ in ways that decide between them. A plain object's keys are always strings; a `Map`'s keys may be of any type. A `Map` iterates its entries in the order they were inserted, and reports its size directly, where a plain object offers no count. Use a `Map` when you need keys that are not strings, a reliable iteration order, or a running size; reach for a plain object for a small, fixed-shape, string-keyed record.
-
-## Testing and Encapsulation
 
 Encapsulation and testing are often in tension. Encapsulation hides the representation; a test wants to confirm that the representation is being maintained correctly. A test cannot read a `private` field to check the invariant, and most of the time that is exactly right: you confirm behaviour through the public methods, as we did when testing `GuestList`. Occasionally, though, the public surface is too minimal to test against effectively, which will require some design changes to overcome.
 
@@ -438,14 +424,15 @@ A test can now assert the lock state directly instead of probing it with a `try`
 
 ## Designing for Encapsulation
 
-A class with a hidden representation and a small public surface is an invariant you can rely on. The constructor establishes it, `private` stops anyone bypassing the methods, the methods preserve it, and copies keep it from escaping. What this discipline buys is worth making explicit:
+This chapter's example followed a process you can reuse when designing any class:
 
-- _Local reasoning._ You can confirm the invariant by reading a single class, because nothing outside it can break the invariant. This is the same argument the Error Handling chapter made for keeping behaviour understandable from one place rather than scattered across the whole program.
-- _Freedom to change._ Because callers depend only on the public methods, the representation is yours to change, as the move from an array to a `Set` showed. Internal changes stay internal.
-- _A stable surface to build on._ A team can write code against a class's public methods while its internals are still being worked out, as long as the public methods keep their promises.
-- _Fewer places for bugs._ There is less code that can put the object in a bad state, so there are fewer places a bug can hide.
+1. _Name the invariant_, and choose a `private` representation that can express it.
+2. _Establish the invariant in the constructor_, rejecting input it cannot satisfy.
+3. _Expose a small set of methods_ that each preserve the invariant, returning copies so the representation cannot escape.
 
-Encapsulation is the point where the invariants of Part 1 stop being promises and become guarantees. The next chapter builds on it.
+This results in an object that can only be constructed in a valid state, stays valid through use, and cannot leak the internals that would let someone else violate the invariant.
+
+This design discipline has many benefits. Because nothing outside the class can break its invariant, you can confirm that invariant by reading a single class. Because callers depend only on the public methods, the representation is free to change, as the move from an `Array` to a `Set` showed, and internal changes stay internal. That stable surface also lets a team build against a class while its internals are still being worked out, as long as the public methods maintain their signatures. And because far less code can put the object into a bad state, there are far fewer places for bugs to hide. Encapsulation is the point where the invariants of Part 1 stop being promises and become guarantees.
 
 <details class="tooltip exercise">
   <summary>Exercise: Encapsulating a Leaderboard</summary>
