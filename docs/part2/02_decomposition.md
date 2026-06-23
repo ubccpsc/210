@@ -1,283 +1,251 @@
 # Cohesive Decomposition
 
-## Motivation
+The previous chapter established the class as the unit of abstraction: a class bundles state with the operations that maintain an invariant, bounds reasoning to one kind of thing at a time, and gives the rest of the program a named type it can depend on. That tells us how to build an abstraction, but it does not tell us how to build a _good_ abstraction. We still have to decide what classes we need, what state they maintain, and what operations they afford.
 
-Decomposing a system into classes only pays off if each class makes sense on its own; a class that enforces several invariants stops being a useful abstraction, since its users must understand all of them at once. We anchor what belongs inside a class to the invariant it enforces, applying the Single Responsibility Principle at both the class and method level to decompose the system into cohesive classes. A cohesive class is understandable from its invariant alone and can be modified without impacting the rest of the system.
-
+This chapter is about those decisions. Classes only improve the design of a system when they make sense on their own: a class that maintains several unrelated invariants stops being an idea a reader can hold in their head. When we think about what state and operations belong in a class, we think about **cohesion**, and the principle that follows from it is one invariant per class.
 
 ## The Problem
 
-[Abstraction](./01_abstraction) established the class as the unit of abstraction: classes bundle state with the operations that maintain an invariant, bound reasoning to one kind of thing at a time, and give the rest of the program a named type it can depend on. That tells us how to build an abstraction. This does not guide us towards building *good* abstractions. We still have to decide what each class should be, and what functionality and state belongs in each class, so that every class actually delivers those properties.
+Classes rarely start out doing too much: they gain responsibilities one reasonable change at a time. Our `Playlist` from the previous chapter contained a single invariant: the current index is always a valid position in the song list. 
 
-<!--
-The L1 `CourseSection` already did. It was organised around a single invariant, its capacity rule, so it could be understood, named, and depended on as one thing. That was not an accident, though we never named the principle behind it. 
--->
+> As a listener, I want my music app to remember what I have recently played, so that I can return to a song without searching for it again.
 
-Decomposition isolates functionality until it is small enough to understand, but big enough to do something useful. The pressure to do this well shows up as classes grow. A class rarely starts out doing too much; it gains responsibilities one reasonable change at a time. 
+Suppose we now add a new feature, remembering recently played songs. Adding it to the class we already have is the path of least resistance:
 
-
-<details class="tooltip ts-tips">
-  <summary>`CourseSection` with the waitlist bolted on</summary>
-
-Suppose we decide that when a section is full, hopeful students should join a waitlist and be offered a seat automatically when one opens. Adding this to the class we already have is the path of least resistance, but the class now maintains two unrelated invariants at once: its original capacity invariant, and a new waitlist invariant (a student waits at most once, and seats are offered in arrival order). Worse, the two become tangled, because registering and withdrawing now have to touch the waitlist as well. To understand or safely change either invariant, a software engineer has to hold both in their head. The abstraction that was clear before the waitlist has quietly become harder to reason about.
-
+<CollapsibleCode>
 
 ```typescript
-class CourseSection {
+class Playlist {
 
-	id: string;
-	cap: number;
-	registered: string[] = [];
-	waitlisted: string[] = [];
+    songs: Song[] = [];
+    currentIndex: number = -1;
+    recentlyPlayed: Song[] = [];   // a second responsibility, bolted on
 
-	constructor(courseId: string, cap: number) {
-		this.id = courseId;
-		this.cap = cap;
-	}
+    // navigation: maintains the current-index invariant
+    add(song: Song): void { /* ... */ }
+    remove(song: Song): void { /* ... */ }
+    next(): void { /* ... */ }
+    current(): Song | null { /* ... */ }
 
-	register(studentId: string): boolean {
-		if (this.isFull() === false) {
-			this.registered.push(studentId);
-			return true;
-		}
-		this.addToWaitlist(studentId); // full: fall back to the waitlist
-		return false;
-	}
+    /** Plays the current song and records it as recently played. */
+    play(): Song | null {
+        const song = this.current();
+        if (song !== null) {
+            // history bookkeeping, tangled into the playlist
+            const i = this.recentlyPlayed.indexOf(song);
+            if (i !== -1) {
+                this.recentlyPlayed.splice(i, 1);
+            }
+            this.recentlyPlayed.unshift(song);
+        }
+        return song;
+    }
 
-	/**
-	 * Withdraw a student; if there is space on the waitlist
-	 * move the first waitlisted student into the course. 
-	 */
-	withdraw(studentId: string): void {
-		const index = this.registered.indexOf(studentId);
-		if (index !== -1) {
-			this.registered.splice(index, 1);
-			const next = this.nextFromWaitlist(); // a seat opened
-			if (next !== undefined) {
-				this.register(next);
-			}
-		}
-	}
-
-	isFull(): boolean {
-		return this.registered.length >= this.cap;
-	}
-
-	isRegistered(studentId: string): boolean {
-		return this.registered.includes(studentId);
-	}
-
-	addToWaitlist(studentId: string): void {
-		if (this.waitlisted.includes(studentId) === false) {
-			this.waitlisted.push(studentId);
-		}
-	}
-
-	nextFromWaitlist(): string | undefined {
-		return this.waitlisted.shift();
-	}
-
-	isWaitlisted(studentId: string): boolean {
-		return this.waitlisted.includes(studentId);
-	}
+    recentlyPlayedSongs(): Song[] {
+        return this.recentlyPlayed;
+    }
 }
 ```
 
-The split runs right through the class. The fields `registered` and `cap` serve the capacity invariant, while `waitlisted` serves the waitlist invariant. The methods divide the same way, except that `register` and `withdraw` now have to manage both: each has to maintain capacity and reach into the waitlist. 
-</details>
+</CollapsibleCode>
+
+The class now maintains two unrelated invariants at once: the original navigation invariant says the current index is valid, and a new history invariant says the recently played list holds each song at most once, most-recently-played first. The two have nothing to do with each other, yet they now live in one class, and `play()` straddles both: it observes the navigation state through `current()` and maintains the history state directly. To understand or safely change either invariant, an engineer now has to consider multiple invariants.
 
 ## God Classes
 
-Left unchecked, a class that keeps absorbing responsibilities becomes a god class: one type that knows about and does everything. Each addition seemed reasonable on its own, but the result is a class with many fields and methods that answer to no single invariant. This often happens because it is easier to just add one more method to a class than make a new class and ensure all of its functionality is cohesive.
+Left unchecked, a class that keeps absorbing responsibilities becomes a **god class**: one type that knows about and does everything. Each addition seemed reasonable on its own, but the result is a class with many fields and methods that collaborate on multiple invariants. This happens because adding one more method to an existing class is easier than creating a new class and keeping its contents cohesive.
 
-A god class is hard to maintain, for the reason we have already seen: there is no one invariant to reason about, so any change risks disturbing something unrelated. But it is also hard to use, and that cost is easy to overlook. Clients use classes by finding the class that models what they care about and calling the methods that provide that behaviour. That depends on a class having a clear, single purpose. When functionality is undifferentiated, piled into one class with no organising invariant, an engineer cannot predict where a feature lives. In a god class the answer is that it could be anywhere, and the engineer is left scrolling a long list of unrelated methods hoping to recognise the right one.
+A god class is hard to maintain: there is no one invariant to reason about, so any change risks disturbing something unrelated. It is also hard to _use_, and that cost is easy to overlook. Clients use a class by finding the one that models what they care about and calling the methods that provide that behaviour. That depends on a class having a clear, single purpose. When disparate functionality is included in one class with no organising invariant, an engineer cannot predict where a feature lives. In a god class the answer is that it could be anywhere, and the engineer is left scrolling a long list of unrelated methods hoping to recognise the right one.
 
-Cohesion is what makes features findable. When every class is organised around a single invariant, an engineer can reason about where a capability should live and look there first, and the name of the class confirms whether they have found the right place. A system made of many small, cohesive classes is easier to navigate than one made of a few large ones, even though it has more parts, because each part announces what it is responsible for.
+Cohesion is what makes features findable. When every class is organised around a single invariant, an engineer can reason about where a capability should live and look there first, and the name of the class confirms whether they have found the right place. A system of many small, cohesive classes is easier to navigate than one of a few large ones, even though it has more parts, because each part announces what it is responsible for.
 
 <details class="tooltip ts-tips">
-  <summary>A `CourseSection` that has grown into a god class</summary>
+  <summary>A <code>Playlist</code> that has grown into a god class</summary>
 
-After a few terms of successful deployment `CourseSection` has gained features around grades, scheduling, communication, and reports, all in addition to the initial capacity feature and the waitlist addition.
+After a few releases, `Playlist` has gained features for history, ratings, shuffling, and sharing, all in addition to its original navigation responsibility:
+
+<CollapsibleCode>
 
 ```typescript
-class CourseSection {
+class Playlist {
 
-	// capacity
-	register(studentId: string): boolean { /* ... */ }
-	withdraw(studentId: string): void { /* ... */ }
-	isFull(): boolean { /* ... */ }
+    // navigation
+    add(song: Song): void { /* ... */ }
+    remove(song: Song): void { /* ... */ }
+    next(): void { /* ... */ }
+    current(): Song | null { /* ... */ }
 
-	// waitlist
-	addToWaitlist(studentId: string): void { /* ... */ }
-	promoteFromWaitlist(): void { /* ... */ }
+    // play history
+    play(): Song | null { /* ... */ }
+    recentlyPlayedSongs(): Song[] { /* ... */ }
 
-	// grades
-	setGrade(studentId: string, grade: number): void { /* ... */ }
-	classAverage(): number { /* ... */ }
+    // ratings
+    rate(song: Song, stars: number): void { /* ... */ }
+    averageRating(): number { /* ... */ }
 
-	// scheduling
-	setMeetingTime(day: string, hour: number): void { /* ... */ }
-	conflictsWith(other: CourseSection): boolean { /* ... */ }
+    // shuffle
+    shuffle(): void { /* ... */ }
+    restoreOrder(): void { /* ... */ }
 
-	// notification
-	emailRegistered(message: string): void { /* ... */ }
-	emailWaitlisted(message: string): void { /* ... */ }
-
-	// reporting
-	exportRoster(): string { /* ... */ }
+    // sharing
+    exportAsText(): string { /* ... */ }
+    shareWith(userId: string): void { /* ... */ }
 }
 ```
 
-Consider where you would look in a class like this to change how waitlisted students are notified, to adjust a grade, or to export the roster. Nothing about the class points you anywhere, because it is responsible for all of it. Each comment marks a cluster that answers to a different invariant, and each cluster belongs in its own class.
+</CollapsibleCode>
+
+Consider where you would look in a class like this to change how recently played songs are tracked, to adjust how ratings are averaged, or to export the playlist. Nothing about the class points you anywhere, because it is responsible for all of it. Each comment marks a cluster that answers to a different invariant, and each cluster belongs in its own class.
 
 </details>
 
 ## Cohesion as the Design Criterion
 
-A class is cohesive when everything it contains works toward a single purpose. We make "single purpose" precise by anchoring it to one invariant: a cohesive class enforces exactly one invariant, and every field and method exists to establish, preserve, or observe it. A cohesive class can be understood from its invariant alone and changed without reaching into the rest of the system. These are the properties of an abstraction: it bounds reasoning to one kind of thing and offers a named type the rest of the program can depend on. Evaluating cohesion is how we judge whether a decomposition keeps those properties true. 
+A class is cohesive when everything it contains works toward a single purpose. We make "single purpose" precise by anchoring it to one invariant: a cohesive class enforces exactly one invariant, and every field and method exists to establish, preserve, or observe it. Such a class can be understood from its invariant alone and changed without reaching into the rest of the system. These are the properties of an abstraction: it bounds reasoning to one kind of thing and offers a named type the rest of the program can depend on. Evaluating cohesion is how we judge whether a decomposition keeps those properties true.
 
-Sometimes classes are not built around explicit invariants: a pure value object or a stateless helper holds no such invariant, and is cohesive around a single concept or operation instead. The underlying principle, one purpose per class, is unchanged, and a class that serves several purposes fails it however that purpose is expressed.
+Some classes are not built around an explicit invariant. A pure value object or a stateless helper holds no invariant, and is cohesive around a single concept or operation instead. The underlying principle, one purpose per class, is unchanged, and a class that serves several purposes fails regardless of how its purpose is expressed.
 
-Cohesion also shapes how a system behaves under change. When each invariant lives in exactly one class, a bug fix or a new feature for that invariant stays inside the class that owns it, instead of being spread across the system. The change stays localized, which makes it easier to make and far less likely to cause the cascading errors that follow when one edit forces matching edits in many other places.
+Cohesion also shapes how a system behaves when it needs to change. When each invariant lives in exactly one class, a bug fix or a new feature for that invariant stays inside the class that owns it, instead of spreading across the system. The change stays local, which makes it easier to make and less likely to cause the cascading edits that follow when one change forces matching changes in many other places.
 
 ## One Class, One Invariant
 
-This is the **Single Responsibility Principle** at the class level: one class, one invariant. A class should have exactly one reason to change, and that reason is the invariant it protects. Deciding where one class ends and another begins is the core activity of decomposition, and cohesion is how we differentiate a good split from a bad one.
+This is the **Single Responsibility Principle** at the class level: one class, one invariant. A class should have exactly one reason to change, and that reason is the invariant it protects. Deciding where one class ends and another begins is the core activity of **decomposition**, the act of breaking a problem into smaller pieces that have well-defined roles. We use cohesion to reason about the quality of a decomposition to differentiate a good split from a bad one.
 
-<details class="tooltip deep-dive">
-  <summary>A decision procedure for what belongs in a class</summary>
 
-While software design is rarely a top-down activity with a set procedure, the process for figuring out if a field or method belongs in a class can be thought of as a linear set of steps:
-
-1. Name the invariant the class exists to protect.
-2. For each field, ask whether the invariant is stated in terms of it. If not, the field belongs elsewhere.
-3. For each method, ask whether it acts on the class invariant. If it serves a different invariant, it belongs with that invariant.
-4. When a second invariant emerges, extract it into its own class rather than letting the current class grow.
-</details>
-
-There is rarely a single correct decomposition. The same system can usually be split several reasonable ways, and competent engineers will sometimes disagree about which is best. What cohesion gives us is not the one *right* split but a reliable way to recognise a *poor* one. A class that is poorly decomposed leaves some clues you can detect from the code itself: the class enforces more than one invariant, it has one or more fields the invariant never mentions, it has methods that maintain some other invariants, or the class name itself seems disconnected from the fields and methods it contains. Those are easy to spot once you know to look for them, so the goal is less about finding the perfect decomposition than about steering clear of the clearly bad ones. Invariants that range over disjoint state are natural points to split classes along; invariants that share mutable state belong together, even if the operations serve multiple invariants.
-
+There is rarely a single correct decomposition. The same system can usually be split in several reasonable ways, and competent engineers will sometimes disagree about which is best. What cohesion gives us is not the one _right_ split but a reliable way to recognise _poor_ splits. A poorly decomposed class leaves clues in the code itself: it enforces more than one invariant, it has fields the invariant never mentions, it has methods that maintain some other invariant, or its name is disconnected from the fields and methods it contains. These are easy to spot once you know to look, so the goal is less about finding the perfect decomposition than about steering clear of bad ones.
 
 <details class="tooltip deep-dive">
   <summary>When one class legitimately manages several invariants</summary>
 
-The Single Responsibility Principle reads as one invariant per class, but in reality, a practical statement is one *cluster of coherent invariants* per class. Counting alone is unreliable because invariants compose: when several invariants constrain the *same* state and must hold together, for example an `Order` whose total must equal the sum of its line items and which may not ship before payment, they form a single consistency boundary and belong in one class. That is still cohesion: the unit is the smallest set of state that must stay mutually consistent. The `Waitlist` separates cleanly from `CourseSection` because capacity and waiting order have no such shared state.
+The Single Responsibility Principle reads as one invariant per class, but a more practical statement is one _cluster of coherent invariants_ per class. Counting alone is unreliable because invariants compose. When several invariants constrain the _same_ state and must hold together, for example an `Order` whose total must equal the sum of its line items and which may not ship before payment, they form a single consistency boundary and belong in one class. That is still cohesion: the unit is the smallest set of state that must stay mutually consistent. `PlayHistory` separates cleanly from `Playlist` precisely because navigation and play history share no state.
+
 </details>
+
+## Designing a Decomposition
+
+The previous sections diagnose an existing class. It is just as useful to work top-down, from a high-level problem to a lower-level set of classes, the way the Part 1 modelling chapter moved from a problem to a data definition. A workable process:
+
+1. Identify the invariants the system must maintain.
+2. For each invariant, identify the state it constrains.
+3. Give each invariant its own class, owning the state and the operations on it.
+4. Where one responsibility needs another, have one class hold the other and delegate to it.
+5. Name each class for its single responsibility. When it is hard to come up with a name, it is often a signal the split was poor.
+
+Applied to the music app, step 1 finds two invariants: the current position is valid, and the recently played list is deduplicated and ordered. Step 2 assigns the songs and the index to the first, and the recent list to the second. Step 3 gives us two classes, `Playlist` and `PlayHistory`. Steps 4 and 5 are the subject of the rest of this chapter.
 
 ## Field Cohesion
 
-Every field should participate in the invariant the class protects. Once the class invariant is known, each field can be checked against it: a field the invariant refers to belongs in the class, and a field the invariant never mentions is the clearest signal that a second responsibility has crept in. The usual exception is the field that holds the object's identity, such as a name or id; it names the thing the invariant is about rather than taking part in the invariant. This check assumes a class built around an invariant; for a value object or a stateless helper, the same test reads against the single concept the class represents, and a field that has nothing to do with that concept exhibits the same smell.
+Every field should participate in the invariant the class protects. Once the class invariant is known, each field can be checked against it: a field the invariant refers to belongs in the class, and a field the invariant never mentions is the clearest signal that a second responsibility has crept in. The usual exception is a field that holds the object's identity, such as a name or id; it names the thing the invariant is about rather than taking part in the invariant. For a value object or a stateless helper, the same test reads against the single concept the class represents, and a field that has nothing to do with that concept exhibits the same smell.
 
 ## Method Cohesion
 
 The Single Responsibility Principle applies at the method level too: one method, one operation on the invariant. Every method should act in maintenance of the class invariant, and nothing else. A method that maintains a different invariant is the method-level version of the same smell, and it points to the same fix: the invariant it serves, and the method with it, belongs in another class.
 
 <details class="tooltip deep-dive">
-  <summary>Diagnosing the bloated `CourseSection`</summary>
+  <summary>Diagnosing the bloated <code>Playlist</code></summary>
 
-For our `CourseSection` running example, you can evaluate the capacity invariant (`registered.length <= cap`) and check each field and method in the class against it.
+For the play-history version of `Playlist`, evaluate the navigation invariant (the current index is a valid position) and check each field and method against it.
 
-- `cap` and `registered`: named in the invariant, so they belong to the capacity invariant.
-- `id`: the section's identity, the permitted exception.
-- `waitlisted`: never mentioned by the invariant.
-- `register` and `withdraw`: preserve capacity, but also reach into the waitlist.
-- `isFull` and `isRegistered`: observe capacity.
-- `addToWaitlist`, `nextFromWaitlist`, and `isWaitlisted`: maintain or observe the waitlist, not capacity.
+- `songs` and `currentIndex`: named in the invariant, so they belong to navigation.
+- `recentlyPlayed`: never mentioned by the navigation invariant.
+- `add`, `remove`, `next`, and `current`: maintain or observe navigation.
+- `play`: observes navigation through `current()`, but also maintains the history.
+- `recentlyPlayedSongs`: observes the history, not navigation.
 
-Everything that does not mention capacity is exactly the waitlist material. This represents a second complete responsibility with its own invariant, and should be decomposed into its own class.
+Everything that does not mention the current index is exactly the play-history material. It is a second complete responsibility with its own invariant, and it should become its own class.
+
 </details>
+
+## Decomposing the Playlist
+
+The fix is to give the second invariant its own class. We move the play-history material into a `PlayHistory` class that owns the history invariant, and leave `Playlist` responsible for navigation alone.
+
+<CollapsibleCode>
+
+```typescript
+// Owns one invariant: a song appears at most once, most-recently-played first.
+class PlayHistory {
+
+    recent: Song[] = [];
+
+    /** Records that a song was played, moving it to the front. */
+    record(song: Song): void {
+        const i = this.recent.indexOf(song);
+        if (i !== -1) {
+            this.recent.splice(i, 1);
+        }
+        this.recent.unshift(song);
+    }
+
+    songs(): Song[] {
+        return this.recent;
+    }
+}
+```
+
+</CollapsibleCode>
+
+`Playlist` no longer implements history. Instead it *holds* a `PlayHistory` and asks it to do the recording:
+
+<CollapsibleCode>
+
+```typescript
+class Playlist {
+
+    songs: Song[] = [];
+    currentIndex: number = -1;
+    playHistory: PlayHistory = new PlayHistory();   // a collaborator
+
+    // navigation methods (add, remove, next, current) unchanged
+
+    play(): Song | null {
+        const song = this.current();
+        if (song !== null) {
+            this.playHistory.record(song);   // delegate to the collaborator
+        }
+        return song;
+    }
+
+    recentlyPlayedSongs(): Song[] {
+        return this.playHistory.songs();
+    }
+}
+```
+
+</CollapsibleCode>
+
+Each class is now understandable from a single invariant. `PlayHistory` can change how it orders or deduplicates songs without `Playlist` knowing, and `Playlist` owns the navigation invariant by itself. `play` shrank to two ideas a reader can hold at once: get the current song, and tell the history it was played.
+
+### Composition and Delegation
+
+The relationship we just created has a name. When one object holds a reference to another, we call it **composition**: a `Playlist` _has a_ `PlayHistory`. When the holding object forwards work to the held one rather than doing it itself, we call it **delegation**: `play` does not implement the deduplication-and-ordering rule, it _delegates_ that to `playHistory.record`.
+
+Composition and delegation are how a system of cohesive classes does anything larger than a single class can. Decomposition splits a responsibility out; composition puts the pieces back into a working whole, without merging their invariants. Each class keeps its own state, and richer behaviour is assembled by objects holding and calling one another. We will rely on this constantly: most useful objects are composed of smaller ones they delegate to.
 
 <details class="tooltip ts-tips">
-	<summary>Decomposing `CourseSection`</summary>
+  <summary>Does the <code>playHistory</code> field break field cohesion?</summary>
 
-The fix is to give the second invariant its own class. We move the waitlist material into a `Waitlist` class that owns the waitlist invariant, and we leave `CourseSection` responsible for capacity alone. `CourseSection` no longer implements waitlisting; it collaborates with a `Waitlist`, holding one and delegating to it when a section fills or a seat opens. Each class is then understandable from a single invariant: `Waitlist` can change how it orders students without `CourseSection` knowing, and `CourseSection` owns the capacity invariant by itself.
+The navigation invariant does not range over `playHistory`, so at first glance the field looks like the smell we just removed. The difference is _ownership_. `playHistory` is not state that the navigation invariant constrains; it is a collaborator that `Playlist` holds so it can delegate a responsibility it no longer maintains itself. A field that holds a collaborator is part of how the class does its job, not a second invariant hiding inside it. The test still works: ask whether the field is governed by the class's own invariant. The songs and index are; the history collaborator is not, and `Playlist` never touches its internals.
 
-```typescript
-// Owns one invariant: a student waits at most once, served in arrival order.
-class Waitlist {
-
-	waiting: string[] = [];
-
-	add(studentId: string): void {
-		if (this.waiting.includes(studentId) === false) {
-			this.waiting.push(studentId);
-		}
-	}
-
-	next(): string | undefined {
-		return this.waiting.shift();
-	}
-
-	isWaiting(studentId: string): boolean {
-		return this.waiting.includes(studentId);
-	}
-}
-```
-
-```typescript
-// Owns one invariant: registered.length <= cap.
-class CourseSection {
-
-	id: string;
-	cap: number;
-	registered: string[] = [];
-	waitlist: Waitlist = new Waitlist();
-
-	constructor(courseId: string, cap: number) {
-		this.id = courseId;
-		this.cap = cap;
-	}
-
-	register(studentId: string): boolean {
-		if (this.isFull() === false) {
-			this.registered.push(studentId);
-			return true;
-		}
-		this.waitlist.add(studentId);
-		return false;
-	}
-
-	withdraw(studentId: string): void {
-		const index = this.registered.indexOf(studentId);
-		if (index !== -1) {
-			this.registered.splice(index, 1);
-			const next = this.waitlist.next();
-			if (next !== undefined) {
-				this.registered.push(next);
-			}
-		}
-	}
-
-	isFull(): boolean {
-		return this.registered.length >= this.cap;
-	}
-
-	isRegistered(studentId: string): boolean {
-		return this.registered.includes(studentId);
-	}
-}
-```
-
-_Does the `waitlist` field break field cohesion?_
-
-The capacity invariant does not range over `waitlist`, so at first glance it looks like the same smell we just removed. The difference is ownership: `Waitlist` is a collaborator that `CourseSection` holds so it can delegate a responsibility it no longer maintains itself; it is not state that the capacity invariant constrains. 
-
-_The decomposed classes working together_
-
-TODO: Not sure if this is worth having (and if it is whether it should be `checkExpect`)
-
-```typescript
-const w1 = new CourseSection("CPSC 210w1", 2);
-
-w1.register("s1");           // true
-w1.register("s2");           // true
-w1.register("s3");           // false: full, so s3 joins the waitlist
-w1.isRegistered("s3");       // false: on waitlist, not registered
-
-w1.withdraw("s1");           // a seat opens; s3 is promoted automatically
-w1.isRegistered("s3");       // true
-```
 </details>
+
+### Each Class Is Independently Testable
+
+Cohesion pays off again when we verify the system. Because `PlayHistory` owns its invariant and holds its own state, it can be tested entirely on its own, without constructing a `Playlist`: record a few songs and check that the result is deduplicated and ordered. `Playlist` can likewise be tested against the navigation invariant alone. When the two were tangled in one class, no test could exercise one invariant without dragging in the other. The verification chapter develops how to write these tests; the point here is that a cohesive decomposition is what makes each invariant testable in isolation in the first place.
+
+## When a Split Is a Judgment Call
+
+The `Playlist` and `PlayHistory` split is clear-cut, because the two invariants share no state. Most real decisions are less obvious, and here we examine a more judgment-based decomposition.
+
+> As an author, I want to publish an article with tags and reader comments, so that readers can find it and respond to it.
+
+An `Article` holds its title and body, a set of tags, and a list of reader comments. Reading the requirements for invariants, we find three candidates: the article's own content, a tag rule (no duplicate tags), and a comment rule (comments are kept in the order they were posted, each with an author).
+
+The comments are an easy decision. Keeping comments ordered, attributing each to an author, and later supporting editing or moderation is a complete responsibility with its own invariant and room to grow. It belongs in its own `CommentThread` class that the `Article` holds and delegates to, exactly as `Playlist` holds `PlayHistory`.
+
+Where the tags should live is more of a judgment call. "No duplicate tags" is a one-line rule over a single `string[]`. One engineer extracts a `TagSet` class for it; another keeps `tags: string[]` as a field on `Article` and enforces the rule inside an `addTag` method. Both are reasonable, and the deciding question is how much the tag rules are likely to grow. If tags will only ever be a deduplicated set of strings, a separate class adds an abstraction without adding clarity, and inlining is the better call. If tags will gain rules of their own like a maximum number of tags or a controlled vocabulary, then those rules would make more sense decomposed into their own `TagSet` class.
+
+This is the balance decomposition involves. Splitting is the cure for a class that owns more than one invariant, but it is not free: every new class is another name to learn and another small unit of code to navigate and manage. Extracting a class for a rule that will never grow beyond one line causes design fragmentation without improving the clarity that cohesion is supposed to provide. Our goal is clarity and understandability, not the largest possible number of classes.
 
 ## Naming and Cohesive Intent
 
@@ -285,4 +253,20 @@ Naming is a core design concern, not a cosmetic one. A cohesive class is easy to
 
 ## A Cohesive Decomposition
 
-A cohesive decomposition gives every invariant exactly one home. Each class can be understood from its own invariant, tested against that invariant, and changed in isolation, so a fix or a feature stays local instead of rippling outward; and because each is named for its single responsibility, an engineer can find the one they need. This is what lets a system of classes scale as it grows from one class into many: not only is state bundled with the behaviour that maintains it, but each bundle stays small enough to reason about and clear enough to locate. Cohesion is what keeps our abstractions effective and durable over time.
+A cohesive decomposition gives every invariant exactly one home. Each class can be understood from its own invariant, tested against that invariant, and changed in isolation, so a fix or a feature stays local. Because each class is named for its single responsibility, an engineer can easily find the class they need. Composition and delegation then reassemble these small, single-purpose classes into a working system, each still owning its own state and rule. This is what lets a design scale as it grows from one class into many: not only is state bundled with the behaviour that maintains it, but each bundle stays small enough to reason about and clear enough to locate. Cohesion is what keeps our abstractions effective and durable as the system grows.
+
+<details class="tooltip exercise">
+  <summary>Exercise: Finding the Classes</summary>
+
+Work through a decomposition for a problem you have not seen before:
+
+> As a member of a group chat, I want to send messages to a conversation, see who has read each message, and mute conversations that are too noisy, so that I can keep up with the group on my own terms.
+
+1. Apply the process from [Designing a Decomposition](#designing-a-decomposition): list the invariants this system must maintain, then identify the state each one constrains.
+2. Propose at least two different decompositions into classes. For each, name the classes and state the single invariant each one owns.
+3. Identify which splits are clear-cut, where the invariants share no state, and which are judgment calls, where a rule is small enough that keeping it inline is also reasonable.
+4. Make one judgment call and argue it both ways: when would you extract a separate class, and when would you keep the rule inline?
+
+As a starting point, a message has an author, text, and a time; a conversation keeps its messages in order; read receipts record how far each member has read; and a mute setting belongs to a member rather than to the conversation. Whether each of those becomes its own class is the decision this exercise is about.
+
+</details>
