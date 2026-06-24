@@ -79,14 +79,14 @@ A **data definition** is a precise description of which values a type can expres
 
 To get you started in this course, we propose a systematic process to turn a natural-language description of a problem into a type. The main steps are:
 
-1. Identify the main entities
-2. Identify any distinct cases
-3. Determine what information each case needs
-4. Translate into a TypeScript type
-5. Write concrete examples to check your model
-6. Look for generalisation
+1. Identify the main entities.
+2. Identify any distinct cases.
+3. Determine what information each case needs.
+4. Translate into a TypeScript type.
+5. Write concrete examples to check your model.
+6. Look for generalisation.
 
-The rest of this chapter works through this process on the examples below, from the simplest to the most involved. As we go we will meet the building blocks TypeScript provides for specifying types: *primitive values* for atomic facts, *restricted values* for *fixed* choices (TODO: is this the same as unions?), types that *group* related values together, *unions* for distinct cases, and *self-reference* for recursive structure.
+The rest of this chapter works through this process on the examples below, from the simplest to the most involved. As we go we will meet the building blocks TypeScript provides for specifying types: *primitive values* for atomic facts, *literal union* for fixed choices, types that *group* related values together, and *self-reference* for recursive structure.
 
 <details class="tooltip link-110">
   <summary>Types and Data Definitions</summary>

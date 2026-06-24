@@ -2,7 +2,7 @@
 
 We previously introduced the distinction between the **static** and **dynamic** views of a program. The compiler checks the static view: it reads your source code, analyses your types, and flags inconsistencies before the program runs. But a program that passes the type checker can still produce the wrong results. Types tell you what *kind* of value a function returns; they do not tell you whether that value is *correct*.
 
-The properties a correct program must maintain beyond its types are called **invariants**. This chapter is about working with them: what an invariant is, how to identify the invariants in a problem, how to record them in a function's documentation so they can be detected later, and how to check them with automated tests. (TODO: are we gonna define what automated testing is? is it simpler to just use the term testing to avoid talking about CI/CD here?)
+The properties a correct program must maintain beyond its types are called **invariants**. This chapter is about working with them: what an invariant is, how to identify the invariants in a problem, how to record them in a function's documentation so they can be detected later, and how to test whether the invariant holds.
 
 In this course we will mainly focus on what are known as **unit tests**, as they test individual units of a program, usually at the function level.
 
@@ -65,7 +65,7 @@ To identify these in your own functions, you need to examine the *gap* between t
 - Identifying **preconditions**: For each parameter, ask: *of all the values this type allows, which are actually meaningful?* Any restriction you state is a precondition. Look for ranges, wholeness, non-empty strings, and relationships between parameters (for example, `min <= max`).
 - Identifying **postconditions**: For the result, ask: *what can the caller rely on beyond the return type?* Any guarantee you state is a postcondition.
 
-A useful invariant statement has three qualities. It is *precise*: terms must be backed by definitions; words like "valid" or "sensible" without qualification are not valuable. It is *testable*: you can programmatically validate whether the invariant is true. And it is *operational*: it is strong enough that an implementation can actually rely on it. (TODO: unbolded these three.. should they be keywords?)
+A useful invariant statement has three qualities. It is *precise*: terms must be backed by definitions; words like "valid" or "sensible" without qualification are not valuable. It is *testable*: you can programmatically validate whether the invariant is true. And it is *operational*: it is strong enough that an implementation can actually rely on it.
 
 For example, consider the invariant stated as: `daysLate is reasonable`. This is not precise, testable, or operational: it cannot be checked or relied upon.
 
@@ -76,7 +76,7 @@ In contrast, the invariant `daysLate is a whole number and daysLate >= 0` can be
 
 Unlike **types**, which the compiler's type-checker checks, the compiler does not know about, nor check the **invariants** that restrict the values in your code.  The only way a caller, a test author, or a future maintainer can detect invariants later is if they are *written down where the function lives*. That is, in its documentation. 
 
-We record invariants in the function's doc comment, alongside its purpose. For `lateFee`, the full documented function is: (TODO: should doc comment be vocab?)
+We record invariants in the function's **doc comment**, alongside its purpose. Doc comments precede function declarations, and are formatted within `/** <text comments> */`. Details relevant to the `@param` elements passed to a function and the `@return` value are also included. For `lateFee`, the full documented function is:
 
 ```typescript
 /**
@@ -170,12 +170,14 @@ import { test, checkExpect, checkError } from "@course/toolkit";
 ```
 (The toolkit's `assert`, which we will meet at the end of this chapter, is imported the same way by files in `src/`.) 
 
-Tests in this course are run with `pnpm test` from the terminal (TODO: many students are unfamiliar with the terminal... could we tell them what directory this should be run in at least? I don't think teaching the terminal is in scope for this course), or using the IDE's test-running feature. The test framework executes every test case it can find in the `test/` directory. Test cases are aggregated by the files that contain them. Passing test cases are printed in green; failing test cases are printed in red, along with what was expected and what was actually returned.
+To run the tests, you can either open the testing feature within your IDE (we will demo this in class), or open the terminal view within your IDE (also an in-class demo) and execute `pnpm test`. The **terminal** is a text-based interface where you type commands to direct your computer to perform tasks for you, where the input and output are textual. 
+
+When executed by either your IDE or your terminal command, the test framework executes every test case it can find in the `test/` directory. Passing test cases are printed in green; failing test cases are printed in red, along with what was expected and what was actually returned.
 </details>
 
 ## The Testing Process
 
-So far we have treated tests as something you write for code that already exists. In practice, the order is often reversed: we write the tests _first_ (TODO: is this really true?). Writing tests first forces you to think about the expected behaviours of the *code under test* before you spend time implementing it. 
+So far we have treated tests as something you write for code that already exists. When you are learning, it is strongly recommended that you write the tests _first_. Writing tests first forces you to think about the expected behaviours of the **code under test**, that is the code your test case is validating, before you spend time implementing it. 
 
 Having a precise set of input/output pairs is extremely helpful when you are implementing the code. Before writing the implementation you can execute your tests to confirm they fail; once the implementation has been correctly created, the tests should pass. Confirming that a test fails first is what makes its eventual pass a meaningful signal. A test that passes even when you haven't implemented the function is meaningless. 
 
