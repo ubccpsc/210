@@ -34,14 +34,11 @@ More precisely, we would call any syntax where the operator appears before the o
 In BSL, *all* syntax was prefix. In TypeScript, most basic operations (e.g., addition, comparison) are written in infix syntax.
 </details>
 
-
 A more important way languages differ though is in the **mechanisms the language enforces for you**. A language can check things about your program before it ever runs, or it can leave those checks to you. 
 
 Enforcement mechanisms are where TypeScript differs most from BSL. TypeScript makes **types** an explicit, checked part of the program, and it analyses and transforms your source code with a **compiler** before the program executes. The compiler catches many common programming mistakes and makes it easier to build large systems. 
 
 Another big difference is that TypeScript primarily expresses control flow using **statements**, which differ from the expressions you used in BSL.
-
-
 
 ## Quick Primer on Functions
 
@@ -79,7 +76,6 @@ In TypeScript you annotate each value with its type *directly in the code*, and 
 - First, the type communicates *intent*: a well-chosen type tells the next reader exactly which kinds of values are valid. 
 - Second, the type is *enforced* by a **type checker** within the compiler. The compiler will report a wrong type of value as an error, rather than leaving it for you to discover the bug when you run the program. A whole category of mistakes is caught before the program runs.
 
-
 <!--- NOTE arguments and parameters are covered in 110: https://cs110.students.cs.ubc.ca/reference/glossary.html --->
 
 Extending our `letterGrade` example above, we will add the ability to pass in a numerical `score` out of 100 that we want to calculate the corresponding letter grade for. Recall that the named inputs a function declares (such as `score`) are its **parameters**, and the actual values passed in when it is called are its **arguments**. 
@@ -100,10 +96,7 @@ fn(x: X, y: Y, b: Z): A
 defines a function with the name `fn`, with parameters: `x` of type `X`, `y` of type `Y`, and `b` of type `Z`. It also specifies that `fn` returns a value of type `A`. A function signature can have any number of parameters. 
 
 Parameter types come after the parameter they type, separated by a `:`. The return type is placed after the parameter list, following a second `:`.
-
 </details>
-
-
 
 Note that the type checker *only* helps where types are *written down*. In TypeScript we type the inputs and output of every function: each parameter gets a type, and so does the return value. These are the same places you would have written type comments in BSL.
 
@@ -126,13 +119,6 @@ But BSL does not use the signature to check that `letter-grade` is invoked corre
 ```
 
 </details>
-
-
-
-
-
-
-
 
 ## Compilation and Type Checking
 
@@ -343,8 +329,7 @@ The `return` keyword is necessary to make functions in TypeScript return values.
 
 For instance, if `return <expression>;` is in the function `foo`, wherever the call `foo()` appears, when we execute `return  <expression>;` within `foo`, `foo` evaluates `<expression>` to `v`, and the call to `foo()` is then replaced with `v`.
 
-The `return` statement only makes sense if it appears in a function definition (or method defintion, which we'll see in Part 2).
-
+The `return` statement only makes sense if it appears in a function definition (or method definition, which we'll see in Part 2).
 </details>
 
 
@@ -450,7 +435,7 @@ Keeping these two views apart is useful because different kinds of problems appe
 
 While the TypeScript compiler checks the static view of the program, we need to check the dynamic view ourselves. We do this through a process called *testing*. 
 
-In Part 1 of this course, we will use a `checkExpect` (TODO: describe checkExpect as an assertion mechanism.)mechanism to validate that our program does not contain known errors when it executes dynamically. For example, to ensure that `letterGrade(88)` evaluates to `"A"`, we can write the following check:
+In Part 1 of this course, we will use a `checkExpect`, a function call that can validate whether the actual output of a function aligns with its expected output when it is executed. For example, to ensure that `letterGrade(88)` evaluates to `"A"`, we can write the following check:
 
 
 ```typescript
@@ -459,7 +444,22 @@ checkExpect(letterGrade(88), "A");
 
 This cannot be checked statically; we must execute the `checkExpect` statement to verify the program behaviour. If the the two arguments to `checkExpect` evaluate to the same value the program will execute successfully; if it does not, the program will crash with an error that describes the expected behaviour that was violated.
 
-TODO: add a TS details block on the mechanics of a test case (test name, checkExpect, test expression, "message")
+<details class="tooltip ts-tips">
+<summary>Anatomy of a <code>checkExpect</code></summary>
+
+A `checkExpect` takes two arguments:
+
+```typescript
+checkExpect(<actual>, <expected>);
+```
+
+`<actual>` is an expression whose value you want to verify. This is usually a call to the function under test, such as `letterGrade(88)`, although sometimes the value being returned by the function will be assigned to a variable and passed in as `<actual>`. `<expected>` is the value you are claiming that expression should produce, such as `"A"`.
+
+When the check runs, it evaluates both arguments and compares the resulting values. If they are equal, the check passes and execution continues. If they differ, the check fails: the program stops at that check and reports a message describing the expected behaviour that was violated, so you can see which expectation failed and what was produced instead.
+
+A `checkExpect` only does anything when it is executed, which makes it a *dynamic* check: it reports nothing about the program until the program runs, unlike the type checker, which works on the static text. Each `checkExpect` is usually placed inside a named test case, which we introduce next.
+
+</details>
 
 Suppose we had a more fine-grained expectation of how letter grades should be computed and wrote the following check:
 
@@ -469,7 +469,7 @@ checkExpect(letterGrade(95), "A+");
 
 In this case the program would crash, because `letterGrade(95)` evaluates to `"A"` in our current implementation. The type system cannot detect this failure statically; we rely on tests written and executed dynamically to detect this fault. 
 
-TypeScript does not natively have a checkExpect. It is a utility we've built for Part 1. To use it, we must put it in a full test case, like this:
+TypeScript does not natively have a `checkExpect`, we have built the utility to better align with 110 and require less syntax than most test approaches. To use it, we must put it in a full test case, like this:
 
 ```typescript
 test("Return an A for a score of 88", () => {
@@ -477,9 +477,24 @@ test("Return an A for a score of 88", () => {
 });
 ```
 
+<details class="tooltip ts-tips">
+<summary>Anatomy of a Test Case</summary>
 
-The first parameter to `test` is a string that describes the test case. The second parameter `() =>` is new syntax: what it is doing is creating an *anonymous* **arrow function**, and that function is being passed as a parameter to `test` so the testing framework can control the execution of the test.
+A test case wraps one or more checks in a call to `test`, which registers it with the testing framework. Both `test` and `checkExpect` are provided by the course toolkit, imported once at the top of a test file:
 
+```typescript
+import { test, checkExpect } from "@course/toolkit";
+
+test(<description>, () => {
+    <checks>
+});
+```
+
+`test` takes two arguments. `<description>` is a string that names the case, such as `"Return an A for a score of 88"`; it is printed in the test output, so it should state what the case verifies. The second argument is the body of the test, wrapped in an _anonymous_ **arrow function** (the `() => { ... }` syntax we explain below). The `<checks>` block should hold one or more `checkExpect` calls.
+
+When the test suite is executed, each test file is executed top-to-bottom running each test in turn. If every `checkExpect` inside passes, the case passes; if any one fails, the case fails, and the framework reports the case's description along with the message from the check that failed.
+
+</details>
 
 <details class="tooltip ts-tips">
 <summary>Arrow Functions</summary>
