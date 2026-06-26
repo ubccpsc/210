@@ -12,11 +12,11 @@ Our programs in Part 1 stay small enough that one person can hold the whole desi
 
 By the end of Part 1, you will be able to:
 
-1. **Model information as precise types**, designing data definitions whose structure drives the code that operates on them.
-2. **Specify behaviour with contracts and invariants, and construct tests** that target the cases most likely to reveal faults, then judge whether a suite genuinely covers them.
-3. **Decide how each property should be corroborated**, whether by the type system, by tests and assertions, or by controlling how values are created, and design code that enforces the invariants the language cannot.
-4. **Reason about state and time**, tracing how references, scope, and mutation determine what a change affects, and weighing the trade-offs of mutation, side effects, and asynchronous computation.
-5. **Build working programs** that combine these ideas to process collections and interact with files and web services.
+1. _Model information as precise types_, designing data definitions whose structure drives the code that operates on them.
+2. _Specify behaviour with contracts and invariants, and construct tests_ that target the cases most likely to reveal faults, then judge whether a suite genuinely covers them.
+3. _Decide how each property should be corroborated_, whether by the type system, by tests and assertions, or by controlling how values are created, and design code that enforces the invariants the language cannot.
+4. _Reason about state and time_, tracing how references, scope, and mutation determine what a change affects, and weighing the trade-offs of mutation, side effects, and asynchronous computation.
+5. _Build working programs_ that combine these ideas to process collections and interact with files and web services.
 
 ## Building on CPSC 110
 
@@ -48,10 +48,10 @@ One concern remains. An invariant the language cannot check must still be kept t
 
 Four failure modes account for most broken guarantees, and each corresponds to a missing layer:
 
-1. **Over-trusting types**: assuming that type-correct means semantically correct.
-2. **Vague contracts**: wording like "valid" or "correct" with no explicit criteria, leaving a promise no one can check.
-3. **Unowned representation**: exposing the raw shape of the data so clients can bypass the safe operations entirely.
-4. **Happy-path tests**: checking typical outputs but never whether the invariants survive a sequence of operations.
+1. Over-trusting types: assuming that type-correct means semantically correct.
+2. Vague contracts: wording like "valid" or "correct" with no explicit criteria, leaving a promise no one can check.
+3. Unowned representation: exposing the raw shape of the data so clients can bypass the safe operations entirely.
+4. Happy-path tests: checking typical outputs but never whether the invariants survive a sequence of operations.
 
 When you find a bug that "should have been impossible," it is usually worth asking which of these four is responsible.
 </details>
