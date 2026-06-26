@@ -120,7 +120,7 @@ You'll have noticed this reader includes some nested content. All this nested co
  **We'll format the code with Markdown's `racket` option, but it will be in the teaching languages.*
 </details>
 
-TODO: Chapter-to-lecture mapping. Concrete in-class workspace for each. Even if not enrolled, each chapter should stand alone w/o lecture or workspace.
+Each chapter in this textbook corresponds to one in-class lecture. Each lecture will be accompanied by an active learning activity, provided to registered students through a PrairieLearn workspace (see course webpage for links). While the textbook chapters are standalone resources, they are most effective if read prior to each lecture.
 
 ## Course Structure
 
