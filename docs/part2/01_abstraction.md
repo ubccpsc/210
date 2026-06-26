@@ -514,7 +514,7 @@ Look back at how we used `favourites`. We called `add(..)`, `next()`, `current()
 This confines each concern to a single place. The class is the one location responsible for its own state, which frees the rest of the program from that responsibility. Because the operations that maintain the invariant live alongside the state they protect, rather than in the calling code, a client cannot accidentally leave an object in an inconsistent configuration by following the intended path.
 
 <!--
-So far this is the class *offering* an interface that a client has no need to look past. It is not yet a guarantee. Nothing in this chapter stops a determined caller from reaching in and writing `favourites.currentIndex = 99` directly, breaking the invariant from outside. Guaranteeing that a client genuinely *cannot* reach past the interface, so that an object's state is truly the class's own, is the role of [encapsulation](./05_encapsulation).
+So far this is the class *offering* an interface that a client has no need to look past. It is not yet a guarantee. Nothing in this chapter stops a determined caller from reaching in and writing `favourites.currentIndex = 99` directly, breaking the invariant from outside. Guaranteeing that a client *cannot* reach past the interface, so that an object's state is truly the class's own, is the role of [encapsulation](./05_encapsulation).
 -->
 
 <details class="tooltip exercise">
