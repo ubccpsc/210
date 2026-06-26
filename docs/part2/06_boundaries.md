@@ -209,4 +209,39 @@ An interface is the public surface of a class extracted into a named type that a
 
 Now we have a boundary in place, with one contract and several classes implementing it. The next chapter asks what happens when those classes are not merely interchangeable but embody different behaviour, so that one call does different work depending on the object behind the interface. That is polymorphism, and it is what makes interfaces more than a tidy way to organise types.
 
-<!-- TODO: end of chapter example -->
+<details class="tooltip exercise">
+  <summary>Exercise: Input Validation Rules</summary>
+
+> As a developer building a registration form, I want to run each field through a set of independent rules, so that every violated constraint is reported to the user rather than only the first one found.
+
+Here is the interface and a function that collects the descriptions of all failed rules:
+
+```typescript
+interface Validator {
+    /** Returns true if the input satisfies this rule. */
+    check(input: string): boolean;
+    /** A short description of what this rule requires, suitable for an error message. */
+    rule(): string;
+}
+
+/**
+ * Returns the description of every rule that input fails.
+ * Returns an empty array if all rules are satisfied.
+ *
+ * @param {Validator[]} validators the rules to apply, in order
+ * @param {string} input the value to check
+ * @returns {string[]} descriptions of every violated rule
+ */
+function failedRules(validators: Validator[], input: string): string[] {
+    /* ... */
+}
+```
+
+Work through the following:
+
+1. _Implementing `failedRules`._ The `Validator` contract says `check` returns `true` for a passing input, and `rule` returns the violation message. Write the body of `failedRules` so that it collects the `rule()` of every validator whose `check` returns `false`.
+2. _Writing validators._ Implement two classes that satisfy `Validator`: a `MinLengthValidator` that fails when the input is shorter than a configurable minimum, and a `NoSpacesValidator` that fails when the input contains a space. Neither should require any change to `failedRules`.
+3. _Testability._ Write a `RecordingValidator` that records every input passed to `check` and always returns `true`. Use it to confirm that `failedRules` calls `check` on every validator, even after an earlier one has failed.
+4. _Interface size._ Suppose you need validators to carry a severity so that callers can display warnings differently from hard errors. What are the costs of adding a `severity(): string` method to `Validator`, compared with defining a separate `SeverityRated` interface that only some validators implement?
+
+</details>
