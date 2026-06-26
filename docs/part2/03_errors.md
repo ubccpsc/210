@@ -420,7 +420,7 @@ function hasSection(catalogue: Section[], id: string): boolean {
 }
 ```
 
-The binding is omitted because the recovery does not depend on which error was thrown, only that one was; writing `catch (error)` would introduce a name that is never read. The `catch` in `sectionOrBackup` above leaves it out for the same reason. Reach for the shorter form whenever the handler ignores the error's details.
+The binding is omitted because the recovery does not depend on which error was thrown, only that one was; writing `catch (error)` would introduce a name that is never read. The `catch` in `sectionOrBackup` above leaves it out for the same reason. Use the shorter form whenever the handler ignores the error's details.
 
 </details>
 
