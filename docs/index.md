@@ -3,7 +3,7 @@ The goal of this course is to teach you to design, build, and update multi-file 
  
 Core to doing all these tasks is the skill of **code fluency**. When you are fluent in a natural language, you can write, read, listen, and speak in that language without requiring lengthy translation in your head. Code fluency aims to get you to the same place with code. We want you to be able to easily translate ideas in your head to concrete code; we want you to be able to read code and grasp the underlying logic and design. As with any natural language, getting to this place requires you to read and write a lot of code.
 
-Unlike a natural language, you probably won't be *speaking* code or *listening* code, per-se. But software rarely exists in a vaccuum: it exists to accomplish some task. Users will use it without looking at the code. But fellow maintainers will interact with the code directly. To *speak* code and design to other, you'll need to get familiar with language *about* code. In CPSC 210, you'll learn this language as you go. We'll introduce you to both the practice of coding and the language to describe that practice. 
+Unlike a natural language, you probably won't be *speaking* code or *listening* code, per-se. But software rarely exists in a vacuum: it exists to accomplish some task. Users will use it without looking at the code. But fellow maintainers will interact with the code directly. To *speak* code and design to other, you'll need to get familiar with language *about* code. In CPSC 210, you'll learn this language as you go. We'll introduce you to both the practice of coding and the language to describe that practice. 
 
 <details class="tooltip deep-dive">
   <summary>The Language of Coding
@@ -67,7 +67,6 @@ If you don't know TypeScript, this reader will introduce relevant TypeScript syn
 That being said, we *will* explain the coding concepts *behind* the syntax. Those concepts will help you learn new programming languages as you go on in your studies.
 
 
-
 ## Using This Book
 
 We'll assume in lecture you've read the book chapters as indicated on the course website. We'll cover the key points in lecture, but we'll devote most of lecture to writing and reading code. The reader is intended to provide you with the authority on what we covered in lecture. We'll provide lecture slides, but those should be a subset of what's discussed in the reader.
@@ -120,6 +119,8 @@ You'll have noticed this reader includes some nested content. All this nested co
  
  **We'll format the code with Markdown's `racket` option, but it will be in the teaching languages.*
 </details>
+
+TODO: Chapter-to-lecture mapping. Concrete in-class workspace for each. Even if not enrolled, each chapter should stand alone w/o lecture or workspace.
 
 ## Course Structure
 
