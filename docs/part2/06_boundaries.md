@@ -53,7 +53,7 @@ interface Notifier {
 
 interface Notifier
 
-Notifier : +send(message: string)
+Notifier : +send(message: string): void
 
 @enduml
 ```
@@ -127,7 +127,7 @@ interface Notifier
 Notifier <|.. EmailNotifier
 Notifier <|.. SmsNotifier
 
-Notifier : +send(..)
+Notifier : +send(message: string): void
 EmailNotifier : -address: string 
 EmailNotifier : +send(..)
 SmsNotifier : -phone: string
@@ -213,16 +213,16 @@ interface Notifier
 Notifier <|.. EmailNotifier
 Notifier <|.. SmsNotifier
 
-Notifier : +send(..)
+Notifier : +send(message: string): void
 EmailNotifier : -address: string
-EmailNotifier : +send(..)
+EmailNotifier : +send(msg)
 SmsNotifier : -phone: string
-SmsNotifier : +send(..)
+SmsNotifier : +send(msg)
 
 package test {
     Notifier <|.. RecordingNotifier
     RecordingNotifier : +sent: string[]
-    RecordingNotifier : +send(..)
+    RecordingNotifier : +send(msg)
 }
 
 @enduml
@@ -264,12 +264,12 @@ Notifier <|.. EmailNotifier
 Notifier <|.. SmsNotifier
 Confirmable <|.. SmsNotifier
 
-Notifier : +send(..)
-Confirmable : +wasDelivered()
+Notifier : +send(message: string): void
+Confirmable : +wasDelivered(): boolean
 EmailNotifier : -address: string
-EmailNotifier : +send(..)
+EmailNotifier : +send(msg)
 SmsNotifier : -phone: string
-SmsNotifier : +send(..)
+SmsNotifier : +send(msg)
 SmsNotifier : +wasDelivered()
 
 @enduml
@@ -326,12 +326,12 @@ RecordingValidator .. N1
 
 Validator : +check(input: string): boolean
 Validator : +rule(): string
-MinLengthValidator : +check(input: string): boolean
-MinLengthValidator : +rule(): string
-NoSpacesValidator : +check(input: string): boolean
-NoSpacesValidator : +rule(): string
-RecordingValidator : +check(input: string): boolean
-RecordingValidator : +rule(): string
+MinLengthValidator : +check(in)
+MinLengthValidator : +rule()
+NoSpacesValidator : +check(in)
+NoSpacesValidator : +rule()
+RecordingValidator : +check(in)
+RecordingValidator : +rule()
 
 @enduml
 ```
