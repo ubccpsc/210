@@ -115,9 +115,8 @@ export default defineConfig({
             configureDiagramsPlugin(md, {
                 diagramsDir: "docs/public/diagrams",
                 publicPath: "/210/diagrams", // works on GitHub
-                // publicPath: "/diagrams", // works locally
-                krokiServerUrl: "https://kroki.io", // Optional: custom Kroki server URL
-                excludedDiagramTypes: [], // Optional: exclude specific diagram types
+                krokiServerUrl: "https://kroki.io", // diagram generation service
+                excludedDiagramTypes: [],
             });
         },
     },
