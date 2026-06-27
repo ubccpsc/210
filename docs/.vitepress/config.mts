@@ -111,13 +111,13 @@ export default defineConfig({
         ],
     },
     markdown: {
-    config: (md) => {
-      configureDiagramsPlugin(md, {
-        diagramsDir: "res/diagrams", // Optional: custom directory for SVG files
-        publicPath: "/diagrams", // Optional: custom public path for images
-        krokiServerUrl: "https://kroki.io", // Optional: custom Kroki server URL
-        excludedDiagramTypes: ["mermaid"], // Optional: exclude specific diagram types
-      });
+        config: (md) => {
+            configureDiagramsPlugin(md, {
+                diagramsDir: "res/diagrams", // Optional: custom directory for SVG files
+                publicPath: "/diagrams", // Optional: custom public path for images
+                krokiServerUrl: "https://kroki.io", // Optional: custom Kroki server URL
+                excludedDiagramTypes: [], // Optional: exclude specific diagram types
+            });
+        },
     },
-  },
 });
