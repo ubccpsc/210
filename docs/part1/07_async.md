@@ -110,6 +110,19 @@ A promise's type says what it will eventually deliver: a `Promise<string>` will 
 
 Promises have three possible states. Every promise begins as **pending**: the work is still underway. Each promise completes, or *settles*, in one of two ways: **fulfilled**, holding the delivered value, or **rejected**, holding an error that explains why the value could not be produced. The language maintains two invariants on every promise, and you can rely on them the way you rely on your own data invariants: a promise settles *at most once*, and once settled, its state and value *never change again*. A fulfilled promise is permanently fulfilled, and a rejected promise is permanently rejected.
 
+```mermaid
+stateDiagram-v2
+    [*] --> Pending
+    Pending --> Fulfilled: success
+    Pending --> Rejected: failure
+    Fulfilled --> [*]
+    Rejected --> [*]
+%%    note right of Pending
+%%      Settles at most once.
+%%    end note
+```
+<!-- caption="Promise states. Promises settle once and only once." -->
+
 You will rarely create a promise yourself. Promises are what slow operations *give you*: the file-reading and web-fetching functions later in this chapter all return them. Where you *will* meet promises constantly is in return types. When a function's signature says it returns a `Promise<string>`, the signature is telling you two things: the call itself will return immediately, and what it returns will not yet contain the value you actually want. The promise comes back right away; the result is available when the promise settles later. Here is what happens when the promise itself is treated as the value:
 
 ```typescript
@@ -164,7 +177,45 @@ A TypeScript program is the top layer of a stack, and each layer below it does p
 
 Follow one `readFile` all the way down: Your function calls `readFile`, the runtime asks the operating system for the file, and the operating system instructs the disk hardware to fetch the bytes, then turns to its other work. No one at any layer sits and watches: the request exists only as bookkeeping, an entry in a table recording who should be told when the bytes show up. When the disk finishes, it signals the operating system (using a mechanism called an interrupt), the operating system passes the data up to the runtime, and the runtime fulfills the promise and places your paused function on the event loop's queue. The next time the loop reaches it, your function resumes at the `await` with the value.
 
+Following one `readFile` down the stack and back, with no layer standing still while the disk works:
+
+```plantuml
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+participant "your function" as F
+participant "runtime" as R
+participant "operating system" as OS
+participant "disk" as D
+
+F -> R : readFile(...)
+R -> OS : ask for the file
+OS -> D : fetch the bytes
+R --> F : Promise (pending), returns at once
+note over F: thread runs other ready work
+D --> OS : bytes ready (interrupt)
+OS --> R : hand the data up
+R --> F : resume the awaiting function
+@enduml
+```
+<!-- caption="A file read passing down the runtime and operating system and back" -->
+
 Notice what this means about `await`: your paused function returns to execution through the very same queue that clicks and timer callbacks travel through. There is one loop, one thread, and one line to wait in, which is also why a long-running computation delays everything: file results, button clicks, and resumed functions all stand in the same queue behind it.
+
+Everything that wants the thread waits in one queue, and the single thread takes them one at a time:
+
+```mermaid
+flowchart LR
+    timer["timer<br/>callback"] --> queue["event loop queue"]
+    click["button<br/>click"] --> queue
+    resume["resumed<br/>await"] --> queue
+    queue -- "one at a time" --> thread["single thread"]
+    classDef q fill:#eeeeee,stroke:#999
+    classDef t fill:#cfe8ff,stroke:#69a
+    class queue q
+    class thread t
+```
+<!-- caption="Every event waits in one queue, served by the single thread one at a time" -->
 
 This layered design is why a single thread is enough. The expensive waiting is done by hardware and the operating system, which are built for it and can juggle thousands of requests at once; the one thread in your program is reserved for the only thing that really needs it: running your code. A Node-based web server handling thousands of simultaneous connections on a single thread is this stack working as intended.
 

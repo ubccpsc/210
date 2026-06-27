@@ -220,6 +220,35 @@ Each class is now understandable from a single invariant. `PlayHistory` can chan
 
 The relationship we just created has a name. When one object holds a reference to another, we call it **composition**: a `Playlist` _has a_ `PlayHistory`. When the holding object forwards work to the held one rather than doing it itself, we call it **delegation**: `play` does not implement the deduplication-and-ordering rule, it _delegates_ that to `playHistory.record`.
 
+`Playlist` _has a_ `PlayHistory` and forwards the recording work to it:
+
+```plantuml
+@startuml
+
+hide empty members
+skinparam groupInheritance 2
+
+class Playlist {
+  songs : Song[]
+  currentIndex : number
+  add(song : Song)
+  next()
+  play() : Song
+  recentlyPlayedSongs() : Song[]
+}
+
+class PlayHistory {
+  recent : Song[]
+  record(song : Song)
+  songs(): song[]
+}
+
+Playlist *--> PlayHistory : delegates history
+
+@enduml
+```
+<!-- caption="Playlist composes a PlayHistory and delegates the recording work to it" -->
+
 Composition and delegation are how a system of cohesive classes does anything larger than a single class can. Decomposition splits a responsibility out; composition puts the pieces back into a working whole, without merging their invariants. Each class keeps its own state, and richer behaviour is assembled by objects holding and calling one another. We will rely on this constantly: most useful objects are composed of smaller ones they delegate to.
 
 The direction of composition follows need. `Playlist` holds `PlayHistory` because `Playlist` needs to delegate the recording work; `PlayHistory` does not need anything from `Playlist`. The class that needs a capability holds the class that provides it, and that relationship makes the field declaration tell you where the dependency lies. Reversing it, letting `PlayHistory` hold a back-reference to `Playlist`, would bind the two classes together in both directions and make each harder to understand and test in isolation.

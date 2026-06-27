@@ -167,6 +167,28 @@ Notice where new account states come from. `deposit` and `withdraw` do not build
 
 The structural change is what makes this more than a convention. There is no longer a `balance` property anywhere in the program for a client to read, to forge, or to copy incorrectly. The only access to the number is `getBalance`, and the only way to produce a new state is through `deposit` and `withdraw`. The literal `{ balance: -100 }` does not represent a `BankAccount` anymore. The invariant is no longer protected by the discipline of every client; it is protected because the state cannot be reached any other way.
 
+The operations and the balance live together inside the closure, and only the operations are handed back, so nothing outside can reach the balance:
+
+```ditaa
+    
+              makeAccount (creates closure)
+            | 
+            | 
+            v  
+    +--------------------------------------------+
+    |    +------------------+                    |
+    |    | balance꞉ number  |                    |
+    |    +------------------+                    |
+    |                                            |
+    |  deposit(..)  withdraw(..)  getBalance()   |
+    +--------------------------------------------+
+           ^             ^            ^
+           |             |            |
+       only operations visible to callers
+       (balance cannot be accessed directly)
+```
+<!-- caption="State hidden inside a closure, balance not directly reachable." -->
+
 ```typescript
 test("deposits and withdrawals preserve the balance invariant", () => {
     const account = makeAccount(0);
