@@ -48,6 +48,17 @@ interface Notifier {
 
 `Notifier` contains a single method signature and no fields. This is intentional: an interface describes the operations a caller may invoke but never its state or representation. Where the encapsulation chapter chose which methods a class exposes, an interface takes that public surface and gives it a name of its own, detached from any class.
 
+```plantuml
+@startuml
+
+interface Notifier
+
+Notifier : +send(message: string)
+
+@enduml
+```
+<!-- caption: "Notifier interface. -->
+
 Because an interface is a contract that one body of code implements and another depends on, it is documented with care. Every member is part of a promise that callers rely on and implementers must keep, so the documentation that was good practice for a function is closer to essential for an interface.
 
 <details class="tooltip ts-tips">
@@ -108,6 +119,24 @@ class SmsNotifier implements Notifier {
 
 Each class has its own private representation (an email address, a phone number) and its own way of delivering a message, and each is fully encapsulated in the sense of the previous chapter. What is new is that both now share a public type, `Notifier`, that neither of them owns.
 
+```plantuml
+@startuml
+
+interface Notifier
+
+Notifier <|.. EmailNotifier
+Notifier <|.. SmsNotifier
+
+Notifier : +send(..)
+EmailNotifier : -address: string 
+EmailNotifier : +send(..)
+SmsNotifier : -phone: string
+SmsNotifier : +send(..)
+
+@enduml
+```
+<!-- caption: "Notifier with multiple concrete classes.
+
 <details class="tooltip deep-dive">
 <summary>Structural Typing</summary>
 
@@ -156,7 +185,7 @@ A boundary that callers depend on is also a boundary that tests can exploit. The
 
 ```typescript
 class RecordingNotifier implements Notifier {
-    readonly sent: string[] = [];
+    public readonly sent: string[] = [];
 
     send(message: string): void {
         this.sent.push(message);
@@ -184,18 +213,21 @@ interface Notifier
 Notifier <|.. EmailNotifier
 Notifier <|.. SmsNotifier
 
-Notifier : send(..)
-EmailNotifier : send(..)
-SmsNotifier : send(..)
+Notifier : +send(..)
+EmailNotifier : -address: string
+EmailNotifier : +send(..)
+SmsNotifier : -phone: string
+SmsNotifier : +send(..)
 
 package test {
     Notifier <|.. RecordingNotifier
-    RecordingNotifier : send(..)
+    RecordingNotifier : +sent: string[]
+    RecordingNotifier : +send(..)
 }
 
 @enduml
 ```
-<!-- caption: "Notifier with multiple concrete classes." -->
+<!-- caption: "Notifier with multiple concrete classes including one that is just for testing." -->
 
 ## Keeping Interfaces Small
 
@@ -221,6 +253,28 @@ class SmsNotifier implements Notifier, Confirmable {
 ```
 
 Now each caller depends on exactly the contract it needs: code that only sends takes a `Notifier`, and code that also checks receipts takes a `Confirmable`. A channel that cannot confirm anything remains a plain `Notifier` and is never forced to fake an operation it does not support.
+
+```plantuml
+@startuml
+
+interface Notifier
+interface Confirmable
+
+Notifier <|.. EmailNotifier
+Notifier <|.. SmsNotifier
+Confirmable <|.. SmsNotifier
+
+Notifier : +send(..)
+Confirmable : +wasDelivered()
+EmailNotifier : -address: string
+EmailNotifier : +send(..)
+SmsNotifier : -phone: string
+SmsNotifier : +send(..)
+SmsNotifier : +wasDelivered()
+
+@enduml
+```
+<!-- caption: "SmsNotifier implementing two interfaces." -->
 
 Keeping interfaces small in this way is the interface-level equivalent of the advice for cohesion: classes should have a single responsibility. A small, focused interface describes one capability; a large interface that bundles several forces implementers to support operations that have nothing to do with one another, and forces callers to depend on more than they use. This guidance, that it is better to have many small interfaces than one large one, is known as the **interface segregation principle**.
 
@@ -257,6 +311,31 @@ function failedRules(validators: Validator[], input: string): string[] {
     /* ... */
 }
 ```
+
+```plantuml
+@startuml
+
+interface Validator
+
+Validator <|.. MinLengthValidator
+Validator <|.. NoSpacesValidator
+
+Validator <|.. RecordingValidator
+note "For testing: check always true" as N1
+RecordingValidator .. N1
+
+Validator : +check(input: string): boolean
+Validator : +rule(): string
+MinLengthValidator : +check(input: string): boolean
+MinLengthValidator : +rule(): string
+NoSpacesValidator : +check(input: string): boolean
+NoSpacesValidator : +rule(): string
+RecordingValidator : +check(input: string): boolean
+RecordingValidator : +rule(): string
+
+@enduml
+```
+<!-- caption: "Desired class layout for activity." -->
 
 Work through the following:
 
