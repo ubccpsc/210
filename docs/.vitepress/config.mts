@@ -114,7 +114,7 @@ export default defineConfig({
         config: (md) => {
             configureDiagramsPlugin(md, {
                 diagramsDir: "docs/diagrams", // Optional: custom directory for SVG files
-                publicPath: "/diagrams", // Optional: custom public path for images
+                publicPath: "/210/docs/diagrams", // Optional: custom public path for images local: /diagrams
                 krokiServerUrl: "https://kroki.io", // Optional: custom Kroki server URL
                 excludedDiagramTypes: [], // Optional: exclude specific diagram types
             });
