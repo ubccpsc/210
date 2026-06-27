@@ -366,6 +366,19 @@ Our original suite does catch this fault, but only by luck: we happened to choos
 
 This example is the essence of boundary value analysis: off-by-one faults are often invisible everywhere except at a single input value, so those values must be in the suite by design rather than by chance.
 
+The whole input space, drawn as a line: three equivalence classes, separated by the two boundaries the suite must pin down.
+
+```svgbob
+grace       accruing ( $0.50 / day )             capped ( $10 )
+*-----------*------------------------------------*------------------->
+0 days      2 days                               22 days      overdue
+            :                                    :
+            :                                    :            
+            boundary                             boundary
+            ( 2 -> 3 )                           ( 21 -> 22 )
+```
+<!-- caption="The three equivalence classes for daysLate." -->
+
 ## Expected and Unexpected Errors
 
 Not all failures are alike. Think about a bank account: an account whose balance is negative is in a state the system should never allow, so if one is ever observed, the program itself is broken. But a customer trying to withdraw more than their balance is not unusual at all; it is a normal interaction the design must anticipate. 

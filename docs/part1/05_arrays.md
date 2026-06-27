@@ -50,6 +50,25 @@ const second = day[1];       // { hour: 9, tempCelsius: -1 }
 const count = day.length;    // 6
 ```
 
+In memory, `day` is a row of six cells laid out in order, each holding one `Reading`. An index names a cell by its position (counting from zero), and `length` is the number of cells:
+
+```graphviz
+digraph readingArray {
+  rankdir = TB;
+
+  day [shape = record, label = "<c0> [0]\n\{h: 6, t: -4\} | <c1> [1]\n\{h: 9, t: -1\} | <c2> [2]\n\{h: 12, t: 3\} | <c3> [3]\n\{h: 15, t: 8\} | <c4> [4]\n\{h: 18, t: 2\} | <c5> [5]\n\{h: 21, t: -2\}"];
+
+  e0  [shape = plaintext, label = "day[0]"];
+  e1  [shape = plaintext, label = "day[1]"];
+
+  e0  -> day:c0;
+  e1  -> day:c1;
+
+  { rank = same; e0; e1; }
+}
+```
+<!-- caption="Each index selects one Reading cell by position." -->
+
 <details class="tooltip link-110">
 <summary>Lists in BSL</summary>
 

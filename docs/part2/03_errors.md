@@ -369,6 +369,21 @@ try {
 
 While `finally` blocks are often not needed, you will likely encounter them whenever your code requires a cleanup step no matter how a block exits.
 
+`finally` runs on every path out of the `try`, whether the body finished or threw, and an uncaught exception keeps travelling afterward:
+
+```mermaid
+flowchart TD
+    A[Enter try] --> B{Throws?}
+    B -- No --> C[Finish try body]
+    B -- Yes --> D[Run catch, if present]
+    C --> E[Run finally, if present]
+    D --> E
+    E --> F{Caught?}
+    F -- Yes --> G[Execute next statement]
+    F -- No --> H[Exception propagates up call stack]
+```
+<!-- caption="Control flow through try, catch, and finally." -->
+
 <details class="tooltip ts-tips">
 <summary>Optional <code>finally</code> Block</summary>
 
@@ -435,6 +450,19 @@ The power of exceptions, and what makes them worth a separate mechanism, is that
 Trace the unknown-section failure through our program. `enrolStudent` calls `enrolAll`, which calls `requireSection`, which discovers the bad id and throws. The exception now rises back through that exact chain: it leaves `requireSection`, passes through `enrolAll` without `enrolAll` doing anything, and arrives at the `try` in `enrolStudent`, where it is finally caught. `enrolAll` is on the path but is not a participant; it neither checks for the error nor forwards it, because propagation is automatic. This is the plumbing the `Result` version had to write by hand, now handled by the language.
 
 This is the deeper reason the success path stayed focused. The intermediate layers carry no error-handling code not because we were careful to leave it out, but because they need none: an exception they do not catch passes straight through them. The further apart detection and handling are, the more this saves.
+
+`requireSection` throws, and the exception rises back through `enrolAll`, which does nothing, to the `try` in `enrolStudent`:
+
+```seqdiag
+seqdiag {
+  edge_length = 220;
+  enrolStudent -> enrolAll [label = "call"];
+  enrolAll -> requireSection [label = "call"];
+  requireSection --> enrolAll [label = "throw", color = "red"];
+  enrolAll --> enrolStudent [label = "propagates (caught here)", color = "red"];
+}
+```
+<!-- caption="An exception rising from requireSection to the handler in enrolStudent" -->
 
 <details class="tooltip deep-dive">
 <summary>What Is a Call Stack?</summary>

@@ -287,6 +287,28 @@ type NonEmptyPlaylist = {
 
 `EmptyPlaylist` carries no song data; `NonEmptyPlaylist` carries the first `Song` and the rest of the playlist. The `rest` property has type `Playlist` again, and that self-reference is what lets one type describe a playlist of any length.
 
+The self-reference makes a playlist a chain: each `songs` node holds one `Song` and points at the rest, until the chain ends in `empty`.
+
+```graphviz
+digraph Playlist {
+  rankdir = LR;
+
+  n1 [shape = record, label = "<k> songs | <f> first: Song | <r> rest: Playlist"];
+  n2 [shape = record, label = "<k> songs | <f> first: Song | <r> rest: Playlist"];
+  e  [shape = record, label = "empty"];
+
+  s1 [shape = note, label = "Song A"];
+  s2 [shape = note, label = "Song B"];
+  e [shape = note, label = "Empty"];
+
+  n1:r -> n2:k;
+  n2:r -> e;
+  n1:f -> s1;
+  n2:f -> s2;
+}
+```
+<!-- caption="Visual representation of Playlist data structure." -->
+
 <details class="tooltip ts-tips">
   <summary>Tagged Unions</summary>
 

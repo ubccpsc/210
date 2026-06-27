@@ -162,12 +162,32 @@ This is the performance decision this section opened with. In a simpler world, a
 
 ```typescript
 const r = { hour: 6, tempCelsius: -4 };
-const s = r;                     // s receives a copy of the reference
+const t = { hour: 6, tempCelsius: -4 };
+const s = r;                     // s receives r's reference
 s.tempCelsius = 0;
-checkExpect(r.tempCelsius, 0);   // r sees the change!
+checkExpect(r.tempCelsius, 0);   // change visible to r and s
 ```
 
-<!-- RTH: consider adding a diagram here to show this behaviour -->
+```graphviz
+digraph aliasing {
+  rankdir = LR;
+  node [fontname = "sans-serif", fontsize = 12];
+
+  t [shape = box, label = "t"];
+  r [shape = box, label = "r"];
+  s [shape = box, label = "s"];
+  
+  shared [shape = record, label = "{ hour: 6, tempCelsius: 0 }"];
+  other  [shape = record, label = "{ hour: 6, tempCelsius: -4 }"];
+
+  r -> shared;
+  s -> shared;
+  t -> other;
+
+  { rank = same; r; s; t; }
+}
+```
+<!-- caption="r and s reference the same object." -->
 
 One way to think about this is in terms of boxes. A variable is a labelled box. For a primitive, the box contains the value. For an object, the box contains an arrow pointing to the object, which lives elsewhere. `const s = r` copies the *arrow*. There is still exactly one `Reading`; it simply has two arrows pointing at it, and a change made through either arrow is visible through both. Two variables referring to the same object are called **aliases**, and *aliasing* is the single most common source of mutation surprises: code changes an object through one name, and the change appears under another name somewhere else entirely.
 
@@ -282,6 +302,33 @@ The three cases, summarised:
 |---|---|---|---|
 | `number`, `string`, `boolean` | a copy of the value | invisible to the caller | n/a (primitives have no parts to change) |
 | object or array | a copy of the reference | invisible to the caller | **visible to the caller** |
+
+The same distinction, drawn out:
+
+```ditaa
+ Primitive argument: the parameter is a separate copy.
+
+    caller            function
+    +------+          +------+
+    |  6   |          |  6   |
+    +------+          +------+
+    (independent; changing one cannot affect the other)
+
+
+ Object argument: the parameter copies the arrow, not the object.
+
+    caller  ---+
+               |
+               v
+          +----------+
+          |  object  |
+          +----------+
+               ^
+               |
+    function---+
+    (mutating through either arrow is seen by both)
+```
+<!-- caption="A primitive argument is copied; an object argument shares one object through a copied reference" -->
 
 <details class="tooltip ts-tips">
 <summary>The <code>void</code> Return Type</summary>

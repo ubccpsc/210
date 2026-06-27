@@ -154,6 +154,30 @@ This changes when errors in your program are surfaced to you. In BSL and other d
 
 In TypeScript, the `tsc` compiler checks your types *first*, before execution. Any type errors in your *entire program* are flagged to you to fix before your code can execute.  This is what is meant when we say that types help catch bugs "before runtime": the compiler is the thing doing the catching, before you execute (i.e., run) your program. We call these errors, and any other errors that are flagged *before running* the program, **static** errors. 
 
+The compiler sits between the source you write and the program that runs, and it is where static errors are caught before anything executes:
+
+```mermaid
+flowchart LR
+    src["TypeScript File<br/>(.ts)"] --> tsc["tsc<br/>Compiler"]
+    tsc --> X{Compiles &<br/>Type Checks?}
+    
+    X -->|No| err["Static Error<br/> Invalid Program"]
+    X -->|Yes| js["JavaScript File<br/>(.js)"] --> run["Browser/Node<br/>Runtime"]
+    
+
+    classDef step fill:#f5f5dc
+    classDef good fill:#d6f5d6
+    classDef bad fill:#fe6f5e
+    classDef decision fill:#98f5ff
+
+    class X decision
+    class tsc step
+    class js step
+    class run good
+    class err bad
+```
+<!-- caption="How tsc type checks and transforms TypeScript before it can execute." -->
+
 <details class="tooltip deep-dive">
   <summary>Tools for Writing Source Code</summary>
 
