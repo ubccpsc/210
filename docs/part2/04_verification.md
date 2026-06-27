@@ -513,6 +513,8 @@ This is the second job of a test suite, and over the life of a program it is the
 
 Effective verification strategies are layered such that each approach provides additional unique insight into the correctness of a program. The type checker rules out malformed programs before they run. Tests show that the program behaves as its contract promises when it does run. Specific, layered assertions make a failing test explain not merely that something is wrong but what kind of fault occurred. Partitioning the inputs and the outputs makes a passing suite meaningful rather than merely green. Coverage reveals the code the suite still ignores, and re-running the suite on every change keeps a correct program correct. No single one of these is enough on its own. Together they are how we move from claiming that an abstraction honours its contract to having earned the confidence that it does.
 
+Tests confirm how an abstraction behaves. The next chapter examines how to structure a class so that the invariant those tests rely on cannot be broken from the outside.
+
 <details class="tooltip exercise">
   <summary>Exercise: Verifying a Shipping Calculator</summary>
 

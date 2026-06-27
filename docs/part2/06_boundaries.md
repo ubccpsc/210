@@ -176,6 +176,23 @@ test("alertAll delivers the message over every channel", () => {
 
 `RecordingNotifier` is a third implementation of `Notifier`, written only for tests. A stand-in like this is called a **test double**, or a **mock object**: it satisfies the same contract as the real thing but is simpler and observable, so the code under test can be exercised in isolation. This is the black-box testing of the verification chapter, now made easy by an interface: the test depends on the contract, the code under test depends on the contract, and the real delivery mechanism is simply not present. Designing against interfaces is, among other things, what makes code testable.
 
+<!-- NOTE: an experiment to see if SVG works in vitepress -->
+
+<svg viewBox="0 0 490 178" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Class diagram: EmailNotifier and SmsNotifier implement the Notifier interface" style="max-width:490px;width:100%;display:block;margin:1.5rem auto;font-family:var(--vp-font-family-base,sans-serif)">
+  <rect x="175" y="10" width="140" height="55" rx="2" fill="var(--vp-c-bg-soft,#f6f6f7)" stroke="var(--vp-c-divider,#c2c2c4)" stroke-width="1.5"/>
+  <text x="245" y="29" text-anchor="middle" font-style="italic" font-size="11" fill="var(--vp-c-text-1,#213547)">«interface»</text>
+  <text x="245" y="49" text-anchor="middle" font-weight="bold" font-size="14" fill="var(--vp-c-text-1,#213547)">Notifier</text>
+  <rect x="30" y="122" width="145" height="40" rx="2" fill="var(--vp-c-bg-soft,#f6f6f7)" stroke="var(--vp-c-divider,#c2c2c4)" stroke-width="1.5"/>
+  <text x="102" y="146" text-anchor="middle" font-weight="bold" font-size="13" fill="var(--vp-c-text-1,#213547)">EmailNotifier</text>
+  <rect x="295" y="122" width="145" height="40" rx="2" fill="var(--vp-c-bg-soft,#f6f6f7)" stroke="var(--vp-c-divider,#c2c2c4)" stroke-width="1.5"/>
+  <text x="367" y="146" text-anchor="middle" font-weight="bold" font-size="13" fill="var(--vp-c-text-1,#213547)">SmsNotifier</text>
+  <line x1="102" y1="122" x2="102" y2="100" stroke="var(--vp-c-text-2,#476582)" stroke-width="1.5" stroke-dasharray="6,4" fill="none"/>
+  <line x1="367" y1="122" x2="367" y2="100" stroke="var(--vp-c-text-2,#476582)" stroke-width="1.5" stroke-dasharray="6,4" fill="none"/>
+  <line x1="102" y1="100" x2="367" y2="100" stroke="var(--vp-c-text-2,#476582)" stroke-width="1.5" stroke-dasharray="6,4" fill="none"/>
+  <line x1="245" y1="100" x2="245" y2="73" stroke="var(--vp-c-text-2,#476582)" stroke-width="1.5" stroke-dasharray="6,4" fill="none"/>
+  <polygon points="237,73 253,73 245,65" fill="var(--vp-c-bg-soft,#f6f6f7)" stroke="var(--vp-c-text-2,#476582)" stroke-width="1.5"/>
+</svg>
+
 ## Keeping Interfaces Small
 
 `Notifier` declares one method, and that restraint is itself a design choice. Suppose some channels can also report whether a message was acknowledged by the provider. It is tempting to add that to `Notifier`, but doing so would force _every_ implementation, including ones that can confirm nothing, to provide the operation. The capability belongs in its own small interface:

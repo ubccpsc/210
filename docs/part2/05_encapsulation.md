@@ -1,6 +1,6 @@
 # Encapsulation
 
-Much of Part 1 was concerned with invariants: the properties a value must satisfy to be meaningful and the preconditions and postconditions that make up a function's contract. Those approaches describe and detect invariant violations, but cannot prevent them. A documented invariant is a promise, and the rest of the program is free to break it: the object `{ renewalsRemaining: -1 }` satisfies the `Loan` type and simultaneously violates the `Loan` invariant, and the compiler will not object. Classes provide a mechanism for starting to close this gap through the constructor, which provides a single, controlled path for building an object. But a constructor only controls how an object begins. If a class's fields are accessible to anywhere else in a program, any code holding the object can read and write to them directly, and the invariant the constructor established can be undone. A careful constructor is not enough on its own.
+Much of Part 1 was concerned with invariants: the properties a value must satisfy to be meaningful and the preconditions and postconditions that make up a function's contract (an approach sometimes called **design by contract**). Those approaches describe and detect invariant violations, but cannot prevent them. A documented invariant is a promise, and the rest of the program is free to break it: the object `{ renewalsRemaining: -1 }` satisfies the `Loan` type and simultaneously violates the `Loan` invariant, and the compiler will not object. Classes provide a mechanism for starting to close this gap through the constructor, which provides a single, controlled path for building an object. But a constructor only controls how an object begins. If a class's fields are accessible to anywhere else in a program, any code holding the object can read and write to them directly, and the invariant the constructor established can be undone. A careful constructor is not enough on its own.
 
 **Encapsulation** closes the gap by hiding a class's representation so that the invariant cannot be broken by external code. The data becomes accessible only to the class's own methods, which are designed to maintain the invariant. This is **information hiding**, and TypeScript's access modifiers make it more than a polite request: where Part 1 could only write a comment asking other code to leave a field alone, now the compiler can enforce it. This chapter covers the mechanism (`private`, `public`, and `readonly`), the process of deciding what to hide, and how this improves the design of the overall system.
 
@@ -89,7 +89,7 @@ TypeScript's `private` is enforced by the compiler and then erased: it is a rule
 
 ## Establishing and Preserving the Invariant
 
-Because the representation is private, the constructor is the only way to bring a `GuestList` into existence, which makes it the natural place to establish the invariant. The version above still accepts invalid input: `new GuestList(-1)` produces a list whose capacity can never be met. The constructor should reject input it cannot turn into a valid object:
+Because the representation is private, the constructor is the only way to bring a `GuestList` into existence, which makes it the natural place to establish the invariant, and, as the error handling chapter showed, to throw when the input cannot be turned into a valid object. The version above still accepts invalid input: `new GuestList(-1)` produces a list whose capacity can never be met. The constructor should reject input it cannot turn into a valid object:
 
 <CollapsibleCode>
 
@@ -295,6 +295,35 @@ A plain-object dictionary and a `Map` overlap, but differ in ways that decide be
 
 An **immutable object** carries the second idea to its conclusion: none of its fields ever change, and methods that would modify it instead return a new object. An immutable guest list would establish its invariant once, at construction, and never have any later state to corrupt, so it would be valid for its whole life with no per-method effort. The cost is that every change allocates a new object. A mutable object is more economical and is often the natural choice for a guest list that is edited over time, but it accepts the obligation that *every* method preserve the invariant. Immutability buys safety by removing change; encapsulation buys safety by controlling it.
 
+A minimal immutable guest list shows the pattern:
+
+```typescript
+class ImmutableGuestList {
+    private readonly guests: string[];
+
+    constructor(guests: string[] = []) {
+        this.guests = guests.slice();
+    }
+
+    add(guest: string): ImmutableGuestList {
+        return new ImmutableGuestList(this.guests.concat([guest]));
+    }
+
+    includes(guest: string): boolean {
+        return this.guests.includes(guest);
+    }
+}
+```
+
+`add(..)` returns a new list rather than altering the receiver. The invariant is established once, in the constructor, and cannot be violated thereafter: there is no in-place `add(..)` to misuse and no fields to reassign.
+
+<details class="tooltip ts-tips">
+<summary>Default Parameter Values</summary>
+
+`constructor(guests: string[] = [])` uses a **default parameter value**: when the caller omits `guests`, TypeScript substitutes the default `[]` automatically. Any parameter can have a default, written as `parameter: Type = expression`, and the default is used only when the caller passes nothing (or `undefined`) for that argument. Default parameters must come after all required parameters in a method's signature.
+
+</details>
+
 ## Choosing What to Expose
 
 Information hiding is not only about marking fields `private`; it is about keeping the public side of a class small and behavioural. Every public member is a promise to callers, so the fewer and the more stable they are, the more freedom the class keeps for itself. Three habits help:
@@ -434,6 +463,8 @@ This chapter's example followed a process you can reuse when designing any class
 This results in an object that can only be constructed in a valid state, stays valid through use, and cannot leak the internals that would let someone else violate the invariant.
 
 This design discipline has many benefits. Because nothing outside the class can break its invariant, you can confirm that invariant by reading a single class. Because callers depend only on the public methods, the representation is free to change, as the move from an `Array` to a `Set` showed, and internal changes stay internal. That stable surface also lets a team build against a class while its internals are still being worked out, as long as the public methods maintain their signatures. And because far less code can put the object into a bad state, there are far fewer places for bugs to hide. Encapsulation is the point where the invariants of Part 1 stop being promises and become guarantees.
+
+The next chapter asks how to take the next step by extracting a class's public surface into a named type of its own, so that the entire class behind the contract can change without impacting any callers.
 
 <details class="tooltip exercise">
   <summary>Exercise: Encapsulating a Leaderboard</summary>
