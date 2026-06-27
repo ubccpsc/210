@@ -26,3 +26,13 @@
   display: block;
   margin: 0 auto;
 }
+
+/* Opaque backing for diagrams. Many Kroki diagram types render with a
+   transparent background, so their black arrows and text become invisible
+   against the dark page background in dark mode. A white backing keeps every
+   diagram legible in both light and dark themes. */
+.vp-doc figure:has(img[src*="/diagrams/"]) img {
+  background: #ffffff;
+  padding: 0.5rem;
+  border-radius: 6px;
+}
