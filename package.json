@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "docs:dev": "vitepress dev --base / docs",
+    "docs:dev": "vitepress dev --base /210/ docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"
   },
