@@ -50,24 +50,45 @@ const second = day[1];       // { hour: 9, tempCelsius: -1 }
 const count = day.length;    // 6
 ```
 
-In memory, `day` is a row of six cells laid out in order, each holding one `Reading`. An index names a cell by its position (counting from zero), and `length` is the number of cells:
+In memory, `day` is a row of six cells, one per index. The cells do not contain the `Reading` objects themselves; each cell holds a *reference* to a separate `Reading` that lives elsewhere. An index like `day[0]` names a cell and follows its reference to the object. (What a reference is, exactly, is the subject of a later chapter.)
 
+<!-- graph playground:
+hhttps://dreampuf.github.io/GraphvizOnline/?engine=dot
+-->
 ```graphviz
 digraph readingArray {
-  rankdir = TB;
+  rankdir = LR;
+  
+  compound = true;
 
-  day [shape = record, label = "<c0> [0]\n\{h: 6, t: -4\} | <c1> [1]\n\{h: 9, t: -1\} | <c2> [2]\n\{h: 12, t: 3\} | <c3> [3]\n\{h: 15, t: 8\} | <c4> [4]\n\{h: 18, t: 2\} | <c5> [5]\n\{h: 21, t: -2\}"];
+  subgraph cluster_day_container {
+    day [shape = record, label = "<c0> [0] | <c1> [1] | <c2> [2] | <c3> [3] | <c4> [4] | <c5> [5]"];
+  }
 
-  e0  [shape = plaintext, label = "day[0]"];
-  e1  [shape = plaintext, label = "day[1]"];
+  r0 [shape = record, label = "hour: 6 | tempCelsius: -4"];
+  r1 [shape = record, label = "hour: 9 | tempCelsius: -1"];
+  r2 [shape = record, label = "hour: 12 | tempCelsius: 3"];
+  r3 [shape = record, label = "hour: 15 | tempCelsius: 8"];
+  r4 [shape = record, label = "hour: 18 | tempCelsius: 2"];
+  r5 [shape = record, label = "hour: 21 | tempCelsius: -2"];
 
-  e0  -> day:c0;
-  e1  -> day:c1;
+  day:c0 -> r0;
+  day:c1 -> r1;
+  day:c2 -> r2;
+  day:c3 -> r3;
+  day:c4 -> r4;
+  day:c5 -> r5;
 
-  { rank = same; e0; e1; }
+  dl [shape = plaintext, label = "day"];
+  e0 [shape = plaintext, label = "day[0]"];
+  e1 [shape = plaintext, label = "day[1]"];
+
+  dl -> day: nw [lhead=cluster_day_container];
+  e0 -> day:c0
+  e1 -> day:c1;
 }
 ```
-<!-- caption="Each index selects one Reading cell by position." -->
+<!-- caption="Each cell holds a reference to a separate Reading object, which can be accessed by its index." -->
 
 <details class="tooltip link-110">
 <summary>Lists in BSL</summary>

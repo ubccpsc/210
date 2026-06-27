@@ -63,6 +63,28 @@ list.capacity = -1;         // compile error: 'capacity' is private
 
 The representation is now encapsulated within `GuestList`. The only code that can touch `invited` and `capacity` is the code we write inside `GuestList`, which means we are responsible for keeping the invariants true, and know they cannot be broken by external code. Information hiding has become a boundary the compiler checks rather than a convention we hope callers respect.
 
+External code is prohibited by the compiler from accessing the private fields:
+
+```graphviz
+digraph encapsulation {
+  rankdir = LR;
+  // node [fontname = "sans-serif", fontsize = 12];
+
+  subgraph cluster_guestlist {
+    label = "class GuestList";
+    style = filled;
+    color = "#eef3ff";
+    invited  [shape = record, label = "private invited: string[];"];
+    capacity [shape = record, label = "private capacity: number;"];
+  }
+
+  client [shape = box, label = "External Code"];
+  client -> invited [label = "Compile Error", color = "red", style = dashed];
+  client -> capacity [label = "Compile Error", color = "red", style = dashed];
+}
+```
+<!-- caption="External code may call the public methods but not reach the private fields" -->
+
 <details class="tooltip ts-tips">
 <summary><code>public</code>, <code>private</code>, and <code>readonly</code></summary>
 
@@ -158,6 +180,40 @@ size(): number {
 ```
 
 This captures the essence of encapsulation. In Part 1 an invariant was documented and checked after the fact. Here, the constructor establishes it and every method preserves it, while the private representation guarantees that no other path exists. The invariant has gone from a property we *hoped held* to one that *always holds*.
+
+
+```graphviz
+digraph encapsulation {
+  rankdir = LR;
+  // node [fontname = "sans-serif", fontsize = 12];
+
+  subgraph cluster_guestlist {
+    label = "class GuestList";
+    style = filled;
+    color = "#eef3ff";
+    invited  [shape = record, label = "private invited: string[];"];
+    capacity [shape = record, label = "private capacity: number;"];
+    add      [shape = box, style = rounded, label = "add(..)"];
+    isFull   [shape = box, style = rounded, label = "isFull(): boolean"];
+    isInvited   [shape = box, style = rounded, label = "isInvited(name: string): boolean"];
+    size   [shape = box, style = rounded, label = "size(): number"];
+    add -> invited [style = dashed];
+    isFull -> capacity [style = dashed];
+  }
+
+  client [shape = box, label = "External Code"];
+  
+  client -> add    [label = "Allowed"];
+  client -> isFull    [label = "Allowed"];
+  client -> isInvited [label = "Allowed"];
+  client -> size    [label = "Allowed"];
+  // turn this one off; lays out poorly
+  // client -> capacity [label = "Compile Error", color = "red", style = dashed];
+  client -> invited [headlabel = "Compile Error", labelangle = 45, labeldistance = 4, color = "red", style = dashed];
+
+}
+```
+<!-- caption="External code may call the public methods." -->
 
 <details class="tooltip link-110">
 <summary>Invariants in CPSC 110</summary>
