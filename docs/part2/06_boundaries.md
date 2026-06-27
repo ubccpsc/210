@@ -51,6 +51,9 @@ interface Notifier {
 ```plantuml
 @startuml
 
+hide empty members
+skinparam groupInheritance 2
+
 interface Notifier
 
 Notifier : +send(message: string): void
@@ -121,6 +124,9 @@ Each class has its own private representation (an email address, a phone number)
 
 ```plantuml
 @startuml
+
+hide empty members
+skinparam groupInheritance 2
 
 interface Notifier
 
@@ -208,6 +214,9 @@ test("alertAll delivers the message over every channel", () => {
 ```plantuml
 @startuml
 
+hide empty members
+skinparam groupInheritance 2
+
 interface Notifier
 
 Notifier <|.. EmailNotifier
@@ -256,6 +265,9 @@ Now each caller depends on exactly the contract it needs: code that only sends t
 
 ```plantuml
 @startuml
+
+hide empty members
+skinparam groupInheritance 2
 
 interface Notifier
 interface Confirmable
@@ -315,6 +327,9 @@ function failedRules(validators: Validator[], input: string): string[] {
 ```plantuml
 @startuml
 
+hide empty members
+skinparam groupInheritance 2
+
 interface Validator
 
 Validator <|.. MinLengthValidator
@@ -326,10 +341,13 @@ RecordingValidator .. N1
 
 Validator : +check(input: string): boolean
 Validator : +rule(): string
+MinLengthValidator : todo
 MinLengthValidator : +check(in)
 MinLengthValidator : +rule()
+NoSpacesValidator : todo
 NoSpacesValidator : +check(in)
 NoSpacesValidator : +rule()
+RecordingValidator : todo
 RecordingValidator : +check(in)
 RecordingValidator : +rule()
 
