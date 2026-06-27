@@ -222,6 +222,8 @@ The relationship we just created has a name. When one object holds a reference t
 
 Composition and delegation are how a system of cohesive classes does anything larger than a single class can. Decomposition splits a responsibility out; composition puts the pieces back into a working whole, without merging their invariants. Each class keeps its own state, and richer behaviour is assembled by objects holding and calling one another. We will rely on this constantly: most useful objects are composed of smaller ones they delegate to.
 
+The direction of composition follows need. `Playlist` holds `PlayHistory` because `Playlist` needs to delegate the recording work; `PlayHistory` does not need anything from `Playlist`. The class that needs a capability holds the class that provides it, and that relationship makes the field declaration tell you where the dependency lies. Reversing it, letting `PlayHistory` hold a back-reference to `Playlist`, would bind the two classes together in both directions and make each harder to understand and test in isolation.
+
 <details class="tooltip ts-tips">
   <summary>Does the <code>playHistory</code> field break field cohesion?</summary>
 
@@ -254,6 +256,8 @@ Naming is a core design concern, not a cosmetic one. A cohesive class is easy to
 ## A Cohesive Decomposition
 
 A cohesive decomposition gives every invariant exactly one home. Each class can be understood from its own invariant, tested against that invariant, and changed in isolation, so a fix or a feature stays local. Because each class is named for its single responsibility, an engineer can easily find the class they need. Composition and delegation then reassemble these small, single-purpose classes into a working system, each still owning its own state and rule. This is what lets a design scale as it grows from one class into many: not only is state bundled with the behaviour that maintains it, but each bundle stays small enough to reason about and clear enough to locate. Cohesion is what keeps our abstractions effective and durable as the system grows.
+
+A well-decomposed system of cohesive classes still has to handle operations that cannot always succeed. The next chapter examines how a class communicates those failures to its callers as deliberately as it communicates its successes.
 
 <details class="tooltip exercise">
   <summary>Exercise: Finding the Classes</summary>

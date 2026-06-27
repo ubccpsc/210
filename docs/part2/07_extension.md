@@ -150,6 +150,27 @@ interface ConfirmingNotifier extends Notifier, Confirmable {
 
 A class implementing `ConfirmingNotifier` must satisfy both `Notifier` and `Confirmable`. Small contracts combine into larger ones without any class being forced to depend on more than it needs.
 
+<!-- SVG test -->
+<svg viewBox="0 0 490 285" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Class diagram: EmailNotifier and SmsNotifier extend abstract BaseNotifier, which implements the Notifier interface" style="max-width:490px;width:100%;display:block;margin:1.5rem auto;font-family:var(--vp-font-family-base,sans-serif)">
+  <rect x="175" y="10" width="140" height="55" rx="2" fill="var(--vp-c-bg-soft,#f6f6f7)" stroke="var(--vp-c-divider,#c2c2c4)" stroke-width="1.5"/>
+  <text x="245" y="29" text-anchor="middle" font-style="italic" font-size="11" fill="var(--vp-c-text-1,#213547)">«interface»</text>
+  <text x="245" y="49" text-anchor="middle" font-weight="bold" font-size="14" fill="var(--vp-c-text-1,#213547)">Notifier</text>
+  <rect x="130" y="108" width="230" height="65" rx="2" fill="var(--vp-c-bg-soft,#f6f6f7)" stroke="var(--vp-c-divider,#c2c2c4)" stroke-width="1.5"/>
+  <text x="245" y="127" text-anchor="middle" font-style="italic" font-size="11" fill="var(--vp-c-text-1,#213547)">«abstract»</text>
+  <text x="245" y="148" text-anchor="middle" font-weight="bold" font-size="14" fill="var(--vp-c-text-1,#213547)">BaseNotifier</text>
+  <rect x="30" y="233" width="160" height="40" rx="2" fill="var(--vp-c-bg-soft,#f6f6f7)" stroke="var(--vp-c-divider,#c2c2c4)" stroke-width="1.5"/>
+  <text x="110" y="257" text-anchor="middle" font-weight="bold" font-size="13" fill="var(--vp-c-text-1,#213547)">EmailNotifier</text>
+  <rect x="290" y="233" width="160" height="40" rx="2" fill="var(--vp-c-bg-soft,#f6f6f7)" stroke="var(--vp-c-divider,#c2c2c4)" stroke-width="1.5"/>
+  <text x="370" y="257" text-anchor="middle" font-weight="bold" font-size="13" fill="var(--vp-c-text-1,#213547)">SmsNotifier</text>
+  <line x1="245" y1="108" x2="245" y2="73" stroke="var(--vp-c-text-2,#476582)" stroke-width="1.5" stroke-dasharray="6,4" fill="none"/>
+  <polygon points="237,73 253,73 245,65" fill="var(--vp-c-bg-soft,#f6f6f7)" stroke="var(--vp-c-text-2,#476582)" stroke-width="1.5"/>
+  <line x1="110" y1="233" x2="110" y2="213" stroke="var(--vp-c-text-2,#476582)" stroke-width="1.5" fill="none"/>
+  <line x1="370" y1="233" x2="370" y2="213" stroke="var(--vp-c-text-2,#476582)" stroke-width="1.5" fill="none"/>
+  <line x1="110" y1="213" x2="370" y2="213" stroke="var(--vp-c-text-2,#476582)" stroke-width="1.5" fill="none"/>
+  <line x1="245" y1="213" x2="245" y2="181" stroke="var(--vp-c-text-2,#476582)" stroke-width="1.5" fill="none"/>
+  <polygon points="237,181 253,181 245,173" fill="var(--vp-c-bg-soft,#f6f6f7)" stroke="var(--vp-c-text-2,#476582)" stroke-width="1.5"/>
+</svg>
+
 ## Replacing a Branch with Polymorphism
 
 It is worth seeing the alternative to this design, because the contrast is the subject of the final chapter. Without polymorphism, sending over a channel chosen at run time means branching on a tag:
@@ -253,6 +274,8 @@ test("a subclass inherits the send pipeline and supplies only delivery", () => {
 ```
 
 `CapturingNotifier` writes no `send(..)` of its own, yet calling `send(..)` formats the message with the base's `decorate(..)` and then dispatches to the subclass's `deliver(..)`. The `[ALERT]` prefix in the recorded text is the inherited pipeline at work, and the captured delivery is dynamic dispatch routing the final step to the actual type.
+
+The contrast with `RecordingNotifier` from the previous chapter is deliberate. That test double implemented `Notifier` directly because the test needed only to confirm what was sent, with no inherited behaviour involved. `CapturingNotifier` extends `BaseNotifier` because this test needs to exercise the inherited pipeline; extending the abstract class is the only way to confirm that the decorator prefix arrives in what `deliver(..)` receives.
 
 <details class="tooltip exercise">
   <summary>Exercise: Quiz Scoring Schemes</summary>

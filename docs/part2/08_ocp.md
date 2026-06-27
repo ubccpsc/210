@@ -26,20 +26,7 @@ function alertAll(channels: Notifier[], message: string): void {
 
 Suppose alerts must now also go out as push notifications. There are two ways to meet the requirement, and the difference between them is the whole point.
 
-The first design routes delivery through a function that branches on a channel tag:
-
-```typescript
-// every new channel adds another branch here, in code that already works
-function notify(channel: string, target: string, message: string): void {
-    if (channel === "email") {
-        // deliver by email to target
-    } else if (channel === "sms") {
-        // deliver by SMS to target
-    }
-}
-```
-
-Adding push means opening `notify(..)` and adding a branch. In a real system the channel tag is rarely tested in only one place: formatting, validation, and logging tend to branch on it too, so a single conceptual change, one new channel, is scattered across every function that switches on the tag. Each of those functions already works and is already tested.
+One design is the tag-switching approach from the previous chapter: the `notify(..)` function that branches on a channel string must add an `else if` branch for push, reopening code that already works and is already tested. In a real system the channel tag is rarely tested in only one place: formatting, validation, and logging tend to branch on it too, so a single conceptual change is scattered across every function that switches on the same tag.
 
 The second design is the one we have been building. A new channel is a new implementation of `Notifier`. Because the channels share a delivery skeleton, it extends `BaseNotifier` and supplies only its own delivery:
 
@@ -141,6 +128,8 @@ What the list captures as individual principles is, in practice, one experience:
 The Open/Closed Principle is where we move fully into design. A system organised around contracts and polymorphic implementations grows by accretion: a new requirement of an anticipated kind is a new class, and the working system around it is left alone. That is the property that lets software keep changing without becoming impossible to change, which is what the next part of the course is about.
 
 One question this chapter has left open points the way there. The notifier system depends on `Notifier` everywhere except in a single place: wherever the list of channels is actually assembled, some code must still name `EmailNotifier`, `SmsNotifier`, and now `PushNotifier` in order to create them. Concentrating and controlling that one place, so that a new channel can be wired in without editing the code that assembles the system, is the start of Part 3. From there it takes up the larger questions of evolution and scale: how a program is composed from interchangeable parts, how it admits extensions it was not shipped with, and how change is managed across many modules and the teams that own them.
+
+The principle underlying this arrangement already has a name. Code at every layer should depend on abstractions rather than on concrete classes: `alertAll(..)` depends on `Notifier`, never on `EmailNotifier` or `SmsNotifier`, so the policy of "alert all channels" is decoupled from the delivery of any one. That inversion, where high-level policy reaches down to an abstraction rather than directly to a concrete implementation, is called the **Dependency Inversion Principle**, and Part 3 develops it into the question of who constructs the concrete objects and how they are wired together at the program's boundary.
 
 The notifier system in its final form illustrates what the principle looks like once it is in place. `alertAll` has not changed since it was first written; only the list of channels has grown:
 
