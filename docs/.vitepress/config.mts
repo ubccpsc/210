@@ -2,6 +2,10 @@ import {
     defineConfig
 } from "vitepress";
 
+import {
+    configureDiagramsPlugin
+} from "vitepress-plugin-diagrams";
+
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
     title: "CPSC 210 Handbook",
@@ -54,8 +58,8 @@ export default defineConfig({
             }, {
                 text: "Asynchronousity",
                 link: "/part1/07_async"
-            } ]
-      
+            }]
+
         }, // end part 1
         {
             text: "Part 2: Design",
@@ -106,4 +110,14 @@ export default defineConfig({
         },
         ],
     },
+    markdown: {
+    config: (md) => {
+      configureDiagramsPlugin(md, {
+        diagramsDir: "res/diagrams", // Optional: custom directory for SVG files
+        publicPath: "/diagrams", // Optional: custom public path for images
+        krokiServerUrl: "https://kroki.io", // Optional: custom Kroki server URL
+        excludedDiagramTypes: ["mermaid"], // Optional: exclude specific diagram types
+      });
+    },
+  },
 });
