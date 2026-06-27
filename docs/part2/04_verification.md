@@ -484,6 +484,45 @@ There are four hooks provided by most testing frameworks:
 
 For the in-memory objects in this course, a `beforeEach` that constructs a fresh object is almost always all you need; the teardown hooks matter most when a test touches something outside the program, such as a file or a network connection, that must be released whether the test passed or threw.
 
+The runner wraps each test in the per-test hooks, with the run-once hooks on the outside. The inner `beforeEach`, test, `afterEach` cycle repeats for every test case:
+
+<!-- pikchr playground: https://pikchr.org/home/pikchrshow -->
+```pikchr
+$yOnce = 1.4
+$yEach = 0.7
+$yCase = 0.0
+
+box wid 8.9 ht 0.52 at (4.6,$yOnce) fill 0xf3f3f3 color 0xe6e6e6
+box wid 8.9 ht 0.52 at (4.6,$yEach) fill 0xeaf2fb color 0xe6e6e6
+box wid 8.9 ht 0.52 at (4.6,$yCase) fill 0xeaf7ea color 0xe6e6e6
+
+text "Once per Test File" small rjust at (0.05,$yOnce)
+text "Around Each Test Case" small rjust at (0.05,$yEach)
+text "Test Case(s)" small rjust at (0.05,$yCase)
+
+boxwid = 0.84
+boxht = 0.34
+boxrad = 0.06
+
+BA: box "beforeAll"  at (1.3,$yOnce) fill 0xcccccc
+B1: box "beforeEach" at (2.3,$yEach) fill 0x9ec5e8
+T1: box "test 1"     at (3.3,$yCase) fill 0x9ed29e
+E1: box "afterEach"  at (4.3,$yEach) fill 0x9ec5e8
+B2: box "beforeEach" at (5.3,$yEach) fill 0x9ec5e8
+T2: box "test 2"     at (6.3,$yCase) fill 0x9ed29e
+E2: box "afterEach"  at (7.3,$yEach) fill 0x9ec5e8
+AA: box "afterAll"   at (8.3,$yOnce) fill 0xcccccc
+
+arrow from BA.s to B1.n
+arrow from B1.s to T1.n
+arrow from T1.n to E1.s
+arrow from E1.e to B2.w
+arrow from B2.s to T2.n
+arrow from T2.n to E2.s
+arrow from E2.n to AA.s
+```
+<!-- caption="beforeEach and afterEach wrap every test; beforeAll and afterAll run once for the file" -->
+
 ## Regression Testing
 
 A program is not finished when it first passes its tests. Code changes over time: bugs are fixed, features are added, and working code is reorganised. Every change is a chance to introduce a **regression**, a change that breaks behaviour that previously worked.
