@@ -113,8 +113,8 @@ export default defineConfig({
     markdown: {
         config: (md) => {
             configureDiagramsPlugin(md, {
-                diagramsDir: "docs/diagrams", // Optional: custom directory for SVG files
-                publicPath: "/210/docs/diagrams", // Optional: custom public path for images local: /diagrams
+                diagramsDir: "docs/public/diagrams", // Optional: custom directory for SVG files
+                publicPath: "/210/diagrams", // Optional: custom public path for images local: /diagrams
                 krokiServerUrl: "https://kroki.io", // Optional: custom Kroki server URL
                 excludedDiagramTypes: [], // Optional: exclude specific diagram types
             });
