@@ -565,3 +565,15 @@ graph TD
     B -->|No| D[Cancel]
 ```
 <!-- diagram id="1" caption: "System Design Flow" -->
+
+```plantuml
+@startuml
+Object <|-- ArrayList
+
+Object : equals()
+ArrayList : Object[] elementData
+ArrayList : size()
+
+@enduml
+```
+<!-- caption: "Sample UML Diagram" -->
