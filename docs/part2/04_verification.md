@@ -521,7 +521,7 @@ arrow from B2.s to T2.n
 arrow from T2.n to E2.s
 arrow from E2.n to AA.s
 ```
-<!-- caption="beforeEach and afterEach wrap every test; beforeAll and afterAll run once for the file" -->
+<!-- caption: "beforeEach and afterEach wrap every test; beforeAll and afterAll run once for the file." -->
 
 ## Regression Testing
 

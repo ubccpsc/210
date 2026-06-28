@@ -141,7 +141,7 @@ SmsNotifier : +send(..)
 
 @enduml
 ```
-<!-- caption: "Notifier with multiple concrete classes.
+<!-- caption: "Notifier with multiple concrete classes." -->
 
 <details class="tooltip deep-dive">
 <summary>Structural Typing</summary>

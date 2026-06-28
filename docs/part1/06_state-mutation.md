@@ -328,7 +328,7 @@ The same distinction, drawn out:
     function---+
     (mutating through either arrow is seen by both)
 ```
-<!-- caption="A primitive argument is copied; an object argument shares one object through a copied reference" -->
+<!-- caption: "A primitive argument is copied; an object argument shares one object through a copied reference." -->
 
 <details class="tooltip ts-tips">
 <summary>The <code>void</code> Return Type</summary>

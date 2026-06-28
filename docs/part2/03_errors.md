@@ -462,7 +462,7 @@ seqdiag {
   enrolAll --> enrolStudent [label = "propagates (caught here)", color = "red"];
 }
 ```
-<!-- caption="An exception rising from requireSection to the handler in enrolStudent" -->
+<!-- caption: "An exception rising from requireSection to the handler in enrolStudent." -->
 
 <details class="tooltip deep-dive">
 <summary>What Is a Call Stack?</summary>
