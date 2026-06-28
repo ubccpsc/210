@@ -132,6 +132,31 @@ Each piece of the closure maps onto a piece of the class:
 
 The behaviour is identical. What the class adds is everything the hand-built version lacked: a name, `Playlist`, that is a type the rest of the program can use; a standard construction path through `new`; and operations that the language groups with the data instead of leaving us to wire together. The rest of this chapter develops each of these pieces.
 
+```plantuml
+@startuml
+
+hide empty members
+skinparam groupInheritance 2
+
+class Playlist
+class Song
+
+Playlist *-> "*" Song
+
+Playlist : songs: Song[]
+Playlist : currentIndex: number
+Playlist : add(song: Song): void
+Playlist : current(): Song | null
+Playlist : next(): void
+
+Song : title: string
+Song : artist: string
+Song : durationSeconds: number
+
+@enduml
+```
+<!-- caption: "Playlist and its operations." -->
+
 ## The Solution: Classes
 
 A class is the primary unit of abstraction in object-oriented programs. It can be read as a _template_ for a kind of value: it describes the state every value of that kind holds, and the operations every such value provides. All major object-oriented languages, including C++, Java, Rust, and TypeScript, provide classes for this purpose.
@@ -345,6 +370,33 @@ class Playlist {
 </CollapsibleCode>
 
 Removing a song can invalidate the current index: if the removed song was before the current one in the song list, every later index shifts down by one; if the removed song was the last one and it was current, the index now points past the end. Each branch repairs the index so that the invariant still holds when `remove` returns. The caller does not have to think about any of this. That is the point: the work of keeping the index valid lives _with_ the data it constrains, inside the method, not scattered through the calling code.
+
+```plantuml
+@startuml
+
+hide empty members
+skinparam groupInheritance 2
+
+class Playlist
+class Song
+
+Playlist *-> "*" Song
+
+Playlist : songs: Song[]
+Playlist : currentIndex: number
+Playlist : add(song: Song): void
+Playlist : current(): Song | null
+Playlist : next(): void
+Playlist : remove(song: Song): void
+Playlist : totalDuration(): number
+
+Song : title: string
+Song : artist: string
+Song : durationSeconds: number
+
+@enduml
+```
+<!-- caption="The same Playlist after adding the remove and totalDuration operations." -->
 
 <details class="tooltip ts-tips">
 <summary>Methods (and <code>this</code> again)</summary>
