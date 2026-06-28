@@ -2,9 +2,20 @@ import {
     defineConfig
 } from "vitepress";
 
-import {
-    configureDiagramsPlugin
+// import {
+//     configureDiagramsPlugin
+// } from "vitepress-plugin-diagrams";
+
+import { 
+    createBuildTimeDiagramsPlugin 
 } from "vitepress-plugin-diagrams";
+
+const { configureMarkdown, vitePlugin } = createBuildTimeDiagramsPlugin({
+  diagramsDir: "docs/public/diagrams",
+  publicPath: "/210/diagrams",
+  // Optional: emit SVGs as build assets at this path
+  diagramsDistDir: "diagrams",
+});
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -111,13 +122,17 @@ export default defineConfig({
         ],
     },
     markdown: {
-        config: (md) => {
-            configureDiagramsPlugin(md, {
-                diagramsDir: "docs/public/diagrams",
-                publicPath: "/210/diagrams", // works on GitHub
-                krokiServerUrl: "https://kroki.io", // diagram generation service
-                excludedDiagramTypes: [],
-            });
-        },
+        // config: (md) => {
+        //     configureDiagramsPlugin(md, {
+        //         diagramsDir: "docs/public/diagrams",
+        //         publicPath: "/210/diagrams", // works on GitHub
+        //         krokiServerUrl: "https://kroki.io", // diagram generation service
+        //         excludedDiagramTypes: [],
+        //     });
+        // },
+        config: (md) => configureMarkdown(md),
     },
+    vite: {
+        plugins: [vitePlugin()],
+  },
 });
