@@ -81,6 +81,33 @@ class SmsNotifier extends BaseNotifier {
 
 `super.decorate(message)` calls the base class's version, and the subclass shortens its result, so the shared formatting is reused rather than copied. Overriding a method, and calling `super` to build on the inherited version, are the two basic moves of refining a base class.
 
+```plantuml
+@startuml
+
+hide empty members
+skinparam groupInheritance 2
+
+interface Notifier
+abstract class BaseNotifier
+
+Notifier <|.. BaseNotifier
+BaseNotifier <|-- EmailNotifier
+BaseNotifier <|-- SmsNotifier
+
+Notifier : +send(message: string): void
+BaseNotifier : +send(message: string): void
+BaseNotifier : #decorate(message: string): string
+BaseNotifier : {abstract} #deliver(text: string): void
+EmailNotifier : -address: string
+EmailNotifier : #deliver(..)
+SmsNotifier : -phone: string
+SmsNotifier : #decorate(..)
+SmsNotifier : #deliver(..)
+
+@enduml
+```
+<!-- caption: "BaseNotifier providing common features." -->
+
 <details class="tooltip ts-tips">
 <summary>Abstract Classes and <code>protected</code></summary>
 
@@ -150,26 +177,6 @@ interface ConfirmingNotifier extends Notifier, Confirmable {
 
 A class implementing `ConfirmingNotifier` must satisfy both `Notifier` and `Confirmable`. Small contracts combine into larger ones without any class being forced to depend on more than it needs.
 
-<!-- SVG test -->
-<svg viewBox="0 0 490 285" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Class diagram: EmailNotifier and SmsNotifier extend abstract BaseNotifier, which implements the Notifier interface" style="max-width:490px;width:100%;display:block;margin:1.5rem auto;font-family:var(--vp-font-family-base,sans-serif)">
-  <rect x="175" y="10" width="140" height="55" rx="2" fill="var(--vp-c-bg-soft,#f6f6f7)" stroke="var(--vp-c-divider,#c2c2c4)" stroke-width="1.5"/>
-  <text x="245" y="29" text-anchor="middle" font-style="italic" font-size="11" fill="var(--vp-c-text-1,#213547)">«interface»</text>
-  <text x="245" y="49" text-anchor="middle" font-weight="bold" font-size="14" fill="var(--vp-c-text-1,#213547)">Notifier</text>
-  <rect x="130" y="108" width="230" height="65" rx="2" fill="var(--vp-c-bg-soft,#f6f6f7)" stroke="var(--vp-c-divider,#c2c2c4)" stroke-width="1.5"/>
-  <text x="245" y="127" text-anchor="middle" font-style="italic" font-size="11" fill="var(--vp-c-text-1,#213547)">«abstract»</text>
-  <text x="245" y="148" text-anchor="middle" font-weight="bold" font-size="14" fill="var(--vp-c-text-1,#213547)">BaseNotifier</text>
-  <rect x="30" y="233" width="160" height="40" rx="2" fill="var(--vp-c-bg-soft,#f6f6f7)" stroke="var(--vp-c-divider,#c2c2c4)" stroke-width="1.5"/>
-  <text x="110" y="257" text-anchor="middle" font-weight="bold" font-size="13" fill="var(--vp-c-text-1,#213547)">EmailNotifier</text>
-  <rect x="290" y="233" width="160" height="40" rx="2" fill="var(--vp-c-bg-soft,#f6f6f7)" stroke="var(--vp-c-divider,#c2c2c4)" stroke-width="1.5"/>
-  <text x="370" y="257" text-anchor="middle" font-weight="bold" font-size="13" fill="var(--vp-c-text-1,#213547)">SmsNotifier</text>
-  <line x1="245" y1="108" x2="245" y2="73" stroke="var(--vp-c-text-2,#476582)" stroke-width="1.5" stroke-dasharray="6,4" fill="none"/>
-  <polygon points="237,73 253,73 245,65" fill="var(--vp-c-bg-soft,#f6f6f7)" stroke="var(--vp-c-text-2,#476582)" stroke-width="1.5"/>
-  <line x1="110" y1="233" x2="110" y2="213" stroke="var(--vp-c-text-2,#476582)" stroke-width="1.5" fill="none"/>
-  <line x1="370" y1="233" x2="370" y2="213" stroke="var(--vp-c-text-2,#476582)" stroke-width="1.5" fill="none"/>
-  <line x1="110" y1="213" x2="370" y2="213" stroke="var(--vp-c-text-2,#476582)" stroke-width="1.5" fill="none"/>
-  <line x1="245" y1="213" x2="245" y2="181" stroke="var(--vp-c-text-2,#476582)" stroke-width="1.5" fill="none"/>
-  <polygon points="237,181 253,181 245,173" fill="var(--vp-c-bg-soft,#f6f6f7)" stroke="var(--vp-c-text-2,#476582)" stroke-width="1.5"/>
-</svg>
 
 ## Replacing a Branch with Polymorphism
 
@@ -237,6 +244,38 @@ class EmailNotifier implements Notifier {
 ```
 
 Any formatter can now be paired with any channel by passing a different `Formatter` when the notifier is built, and a new format is a new `Formatter` class that no channel needs to know about. Inheritance cannot offer this freedom, because a class's base is fixed when the class is written, whereas a held collaborator can be chosen when the object is created.
+
+```plantuml
+@startuml
+
+hide empty members
+skinparam groupInheritance 2
+
+interface Notifier
+interface Formatter
+
+Notifier <|.. EmailNotifier
+Notifier <|.. SmsNotifier
+Formatter <|.. TerseFormatter
+Formatter <|.. VerboseFormatter
+
+EmailNotifier *--> Formatter
+SmsNotifier *--> Formatter
+
+Notifier  : +send(message: string): void
+Formatter : +format(message: string): string
+EmailNotifier : -address: string
+EmailNotifier : -formatter: Formatter
+EmailNotifier : +send(..)
+SmsNotifier : -phone: string
+SmsNotifier : -formatter: Formatter
+SmsNotifier : +send(..)
+TerseFormatter : +format(..)
+VerboseFormatter : +format(..)
+
+@enduml
+```
+<!-- caption: "Each channel holds a Formatter and delegates formatting to it, instead of inheriting it." -->
 
 The freedom matters more as the system grows. Suppose it must support _c_ channels in _f_ formats. Baking formatting into the hierarchy means a class for each combination, _c_ times _f_ of them, and every new channel or format multiplies the count again. Holding the formatter as a collaborator needs only _c_ channel classes and _f_ formatter classes, _c_ plus _f_ in all, and a new format is a single class that pairs with every existing channel without any of them changing. Composition turns a multiplying cost into an adding one.
 

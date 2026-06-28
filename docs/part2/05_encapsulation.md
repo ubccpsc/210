@@ -83,7 +83,7 @@ digraph encapsulation {
   client -> capacity [label = "Compile Error", color = "red", style = dashed];
 }
 ```
-<!-- caption="External code may call the public methods but not reach the private fields" -->
+<!-- caption: "External code may call the public methods but not reach the private fields." -->
 
 <details class="tooltip ts-tips">
 <summary><code>public</code>, <code>private</code>, and <code>readonly</code></summary>
