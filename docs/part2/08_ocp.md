@@ -57,6 +57,40 @@ alertAll([
 
 One design meets the new requirement by editing code that already works; the other by adding code that did not exist before. That is the difference between a design closed to extension and one open to it.
 
+```plantuml
+@startuml
+
+hide empty members
+skinparam groupInheritance 2
+hide <<function>> circle
+
+class "alertAll(channels: Notifier[])" as alertAll <<function>>
+interface Notifier
+abstract class BaseNotifier
+class PushNotifier
+
+alertAll ..> Notifier
+Notifier <|.. BaseNotifier
+BaseNotifier <|-- EmailNotifier
+BaseNotifier <|-- SmsNotifier
+BaseNotifier <|-- PushNotifier
+
+Notifier : +send(message: string): void
+BaseNotifier : +send(message: string): void
+BaseNotifier : {abstract} #deliver(text: string): void
+EmailNotifier : #deliver(..)
+SmsNotifier : #deliver(..)
+PushNotifier : #deliver(..)
+
+note bottom of PushNotifier
+  added without changing
+  any existing code
+end note
+
+@enduml
+```
+<!-- caption="Adding PushNotifier requires no change to Notifier, alertAll, or the existing channels." -->
+
 <details class="tooltip link-110">
 <summary>When the Data Grows</summary>
 
