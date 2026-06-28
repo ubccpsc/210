@@ -382,7 +382,7 @@ flowchart TD
     F -- Yes --> G[Execute next statement]
     F -- No --> H[Exception propagates up call stack]
 ```
-<!-- caption="Control flow through try, catch, and finally." -->
+<!-- caption: "Control flow through try, catch, and finally." -->
 
 <details class="tooltip ts-tips">
 <summary>Optional <code>finally</code> Block</summary>
@@ -453,16 +453,16 @@ This is the deeper reason the success path stayed focused. The intermediate laye
 
 `requireSection` throws, and the exception rises back through `enrolAll`, which does nothing, to the `try` in `enrolStudent`:
 
-```seqdiag
-seqdiag {
-  edge_length = 220;
-  enrolStudent -> enrolAll [label = "call"];
-  enrolAll -> requireSection [label = "call"];
-  requireSection --> enrolAll [label = "throw", color = "red"];
-  enrolAll --> enrolStudent [label = "propagates (caught here)", color = "red"];
-}
+```mermaid
+sequenceDiagram
+    enrolStudent->>enrolAll: call
+    enrolAll->>requireSection: call
+    rect rgb(255, 235, 235)
+    requireSection-->>enrolAll: throw
+    enrolAll-->>enrolStudent: propagates (caught here)
+    end
 ```
-<!-- caption: "An exception rising from requireSection to the handler in enrolStudent." -->
+<!-- caption="An exception rising from requireSection to the handler in enrolStudent." -->
 
 <details class="tooltip deep-dive">
 <summary>What Is a Call Stack?</summary>
