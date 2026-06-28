@@ -498,6 +498,36 @@ checkExpect(workout.current(), null);   // workout is untouched and still empty
 
 </CollapsibleCode>
 
+After the three `add` calls, the objects and the references between them look like this. Each variable holds a reference to its own `Playlist`, and `favourites`' `songs` cells hold references to three separate `Song` objects, while `currentIndex` is an ordinary number rather than a reference:
+
+```graphviz
+digraph objects {
+  rankdir = LR;
+  nodesep = 0.4;
+  ranksep = 0.7;
+  node [fontname = "sans-serif", fontsize = 11];
+
+  favourites [shape = box, label = "favourites"];
+  workout    [shape = box, label = "workout"];
+
+  p1 [shape = record, label = "Playlist | { songs | { <s0> 0 | <s1> 1 | <s2> 2 } } | currentIndex = 0"];
+  p2 [shape = record, label = "Playlist | { songs | (empty) } | currentIndex = -1"];
+
+  a [shape = record, label = "Song | Aubade | 180s"];
+  b [shape = record, label = "Song | Bassline | 240s"];
+  c [shape = record, label = "Song | Cadence | 200s"];
+
+  favourites -> p1;
+  workout -> p2;
+  p1:s0 -> a;
+  p1:s1 -> b;
+  p1:s2 -> c;
+
+  { rank = same; favourites; workout; }
+}
+```
+<!-- caption: "favourites and workout are distinct objects; the songs cells reference separate Song objects, while currentIndex contains a primitive value." -->
+
 <!--
 <details class="tooltip exercise">
 <summary>Exercise: Testing</summary>
