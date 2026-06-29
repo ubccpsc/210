@@ -205,6 +205,13 @@ The complexity mutation brings is justified by what it models: in the real world
 
 Arrays carry both _mutating_ and _non-mutating_ operations: you must know which is which. 
 
+<!-- TODO(NCB)
+filter/map return a new array, but the elements inside are the same objects as the
+source, so mutating an element of a filtered result reaches back to the original.
+Students lean on filter as "the safe, non-mutating one," so a one-line example showing 
+that might be helpful.
+-->
+
 `map` and `filter` are _non-mutating_: they return a *new array* and leave the original untouched. This is why the previous chapter could use them freely without introducing mutation. 
 
 `push`, `pop`, and `sort` *mutate the array in-place*. The names do not announce them as _mutating_, so when using an array operation for the first time, check its documentation to see whether it modifies the array or returns a new one. A surprising number of real-world bugs are due to a `sort` that quietly reordered an array somebody else was still using.
@@ -475,7 +482,7 @@ function calibrateDay(day: Reading[], offset: number): void {
 <!---- need to make this a div to keep the whole-para indentation and the MD formatting--->
 <div style="padding-left: 20px;">
 
-Every name in sight here is short-lived: `reading` is re-created each iteration, and `day` the parameter vanishes when the function returns. Yet every change survives, because the *objects* those names pointed at belong to the caller's array, which is still in scope outside the function. 
+Every name in sight here is short-lived: `reading` is re-created each iteration, and the `day` parameter vanishes when the function returns. Yet every change survives, because the *objects* those names pointed at belong to the caller's array, which is still in scope outside the function. 
 </div>
 
 Scope governs **names**; it does not govern **objects**. In TypeScript, an object lives as long as anything, anywhere, still refers to it. Mutations made to it through a short-lived name are permanent all the same. Block structure determines whether a variable name still exists; the arrows determine whether a change persists.
