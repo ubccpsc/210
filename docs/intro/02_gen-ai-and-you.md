@@ -47,7 +47,6 @@ One of the authors of the reader used GenAI to create these nicely formatted too
 - Satisfied, I commit this change without fully changing all the tooltips, wanting to go back to it later.
 - Later, I go back and apply the change to all tooltip types. I document the CSS and push the changes to the book's `main` branch on GitHub.   
 
-
 </details>
 
 Furthermore, while we don't know exactly what GenAI will look like 4 years from now, we think it is likely it will play *some* part in software development. Thus, we want to allow students who are interested to explore the use of GenAI in the project to be able to. In doing so, they will form their own opinions of how they want to use it. 
