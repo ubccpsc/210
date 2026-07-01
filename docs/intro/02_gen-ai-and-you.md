@@ -9,13 +9,13 @@ And yet, the words "agent", "GenAI", "LLM", or "prompt" appear nowhere in the in
 
 We have thought carefully on how to allow and integrate GenAI into CPSC 210. Why have we chosen to allow is usage on the project and labs, but not in in-class exercises or the exams?
 
-## Learning is about Process
+## Summary: Learning is about Process
  
 We will not be asking you to code a function that turns a numerical grade into a letter grade because we need such a function. We can write one ourselves, or get GenAI to write it. No, we ask you to do such coding tasks so that you have the opportunity to *translate your ideas into code*, *encounter errors for yourself*, . This process is what we care about---not the outputted code.
 
 Asking GenAI to write code for you because the assignment asks for code is confusing process and outcomes. We don't ask you to do homework because we need the solutions---we know them already. Those outcomes are not important. What is important is that in the process of reading and writing code by yourself, you gain code fluency.
 
-You can use Google Translate to correspond with someone in another human language. That's fine if you care just about the outcome of _communicating in this conversation_. But this will be *much slower* at teaching you that human language than if you put in the (ugh, difficult!) effort of _manually_ writing or saying your thoughts in that language. 
+You can use Google Translate to correspond with someone in another human language. That's fine if you care just about the outcome of _communicating in this conversation_. But this will be *much slower* at teaching you that human language than if you put in the _difficult_ effort of _manually_ writing or saying your thoughts in that language. 
 
 "Is it the outcome or the process that matters to me?" is a good question to ask yourself when you're considering GenAI usage.
 
@@ -51,93 +51,50 @@ One of the authors of the reader used GenAI to create these nicely formatted too
 
 Furthermore, while we don't know exactly what GenAI will look like 4 years from now, we think it is likely it will play *some* part in software development. Thus, we want to allow students who are interested to explore the use of GenAI in the project to be able to. In doing so, they will form their own opinions of how they want to use it. 
 
-On the other hand, we do not want to force students uninterested in GenAI to use it. The open-endedness of the project makes it an excellent place to allow its use without creating equity issues.
+On the other hand, we do not want to force students uninterested in GenAI to use it. The open-endedness of the project makes it an reasonable place to allow its use without creating equity issues.
 
 As for labs---well, we'd really recommend you do the labs without AI. Your first exposure to material will be in lecture exercises. We think your labs are early-enough exposure that it will still be beneficial to your learning to try (and fail!) to do them on your own.    
 
 ## Full Adoption May Hamper Learning Outcomes
 
-"Do students still need to learn to write code themselves, or can they become effective programmers without code?" 
 
-This question is being discussed amongst faculty in computers science broadly. Part of the question depends on what the definition of "programmers" means. We are on the lookout for evidence of the effect of AI-based completion on learning.
+**If you want a TL;DR**, [JetBrains Academy made a video](https://www.youtube.com/watch?v=HTUh0OO6Kmo) mostly focused on the fourth paper we discuss. Note that JetBrains is a company that develops IDEs. Anthropic, a company that develops GenAI tools, has [a blog post](https://www.anthropic.com/research/AI-assistance-coding-skills) on the third paper we discuss here.
 
-So far, the evidence we've seen suggests that, _on average_, using AI-based completion of writing and code can hamper learning outcomes. 
  
- 
-(Not yet peer-reviewed) Researchers at MIT studied brain activity when participants wrote an essay with and without AI. They actually had 3 treatments: no external resources, allowed to Google things, and allowed to use an LLM to write text. The participants that used an LLM to write text spent a lot of their time reading the LLM-written text and copying and pasting it. (This is similar to what we've observed in students and colleagues using LLMs to write code: there may be a perception of productivity because the LLM writes a lot of code, but time shifts to reading possibly huge amounts of LLM-generated code... which can be harder than just writing the code themselves.) Brain activation varied per each group---as not a brain experts, we're not sure what to conclude from that. Interestingly, LLM users struggled to quote their own essays: no participant was able to provide correct quotes of "their" essays. When it comes to learning, the paper states:
+The main way in which LLMs harm learning is not new. Whether you're asking ChatGPT to provide an answer, or copy-and-pasting a code solution from somewhere else with zero thought, you're giving up on your opportunity to practice. Educators provide you with practice exercises not because they need another solution to the practice exercises, but because they think you will _learn_ through practice. 
+The paper [_Plagiarism in the Age of Generative AI: Cheating Method Change and Learning Loss in an Intro to CS Course_](https://dl.acm.org/doi/pdf/10.1145/3657604.3662046
+), from researchers at the University of Illinois Urbana-Champaign, attempts to measure the negative consequences of students skipping practice. The paper covers both LLM-based and traditional cheating (i.e., finding code solutions and submitting them as your own). The researchers manually analyze proven and likely plagiarised solutions, and develop features that allow them to estimate a student's _plagiarism ratio_: the proportion of a student's assignments that were likely plagiarised (either copying LLM code or code from solutions banks online). From this, they can then look at whether this plagiarism ratio is related to a student's performance on the final exam, controlling for their performance on the first exam. Their results suggest that if a student were to (likely) plagiarize every assignment between the first and final exam, their performance on the final exam would drop by _36%_, in a setting were ChatGPT is available. They also find that likely plagiarism became more common after the emergence of ChatGPT.
+
+When it comes to using LLMs in a more interactive manner, however, the automation provided by LLMs appears to alter outcomes differently than the automation provided by search engines.  In [_Your Brain on ChatGPT: Accumulation
+of Cognitive Debt when Using an AI
+Assistant for Essay Writing Task_](https://arxiv.org/pdf/2506.08872) (not yet peer-reviewed), researchers at MIT study brain activity when participants wrote an essay with and without AI. They have 3 treatments: no external resources ("brain-only"), allowed to use search engines, and allowed to use an LLM to write text. The participants that used an LLM to write text spent a lot of their time reading the LLM-written text and copying and pasting it. (This is similar to what we've observed in students using LLMs to write code for course projects: time shifts to reading and trying to verify possibly huge amounts of LLM-generated code... which can be harder than just writing the code.) Brain activation varied per each group: as not a brain science experts, we're not sure what to conclude from that. Interestingly, LLM users struggled to quote their own essays: no participant was able to provide correct quotes of "their" essays. When it comes to learning, the paper states:
 > If users rely heavily on AI tools, they may achieve superficial
 fluency but fail to internalize the knowledge or feel a sense of ownership over it.
 
-Our goal in this course is to increase your code fluency, your self-efficacy around programming tasks (less "I could _never_ do this without _<Insert AI Tool>_!"), your self-efficacy around learning new programming languages and frameworks. This findinding suggests heavy reliance around AI tools won't get you there.  
-https://arxiv.org/pdf/2506.08872
+Our goal in this course is to increase your code fluency, your self-efficacy around programming tasks (less "I could _never_ do this without _[Insert AI Tool]_!"), your self-efficacy around learning new programming languages and frameworks. This findinding suggests heavy reliance around LLM tools is less likely to get you there.  
+
 
  
-(Not yet peer-reviewed) Researchers at Anthropic, the company that provides Claude Code, an agentic coding tool, conducted a study where they asked engineers to complete a coding task with and without AI. The coding task included learning a framework that was unfamiliar to them. What they find is interesting. Using AI leads to a non-significant speedup on time to code the solution (a p-value of 0.391 means that their statistical modeling implies a 39% chance the observed value was just random), from 25 minutes to 23 minutes. But it leads to a significant reduction in quiz score (p-value of 0.010; 1% chance the observed difference is due to randomness), from 65% to 50%. The quiz included questions about error propagation in the framework being used, and about asynchronous programming more generally. A really interesting finding that's a little buried: the task time _was_ significantly faster for novice developers (1-3 years of coding experience), around 22m vs 33m. But it was _not_ significantly faster for experienced (4-6 years) and advanced (7+ years) developers, with task times staying between 22-25 minutes regardless of AI use. Our takeaway from this study: on constrained coding tasks, like the one in the study, and the ones in labs and exercise in this class, AI will make you faster---for now. Once you gain more experience, it won't benefit you very much. And it will almost definitely reduce the understanding you gain from doing the task. (A few participants who used AI still did well on the quiz, but they took time to consider their own understanding of what was going on, and write out this understanding to the AI, rather than asking the AI to explain).
-https://www.anthropic.com/research/AI-assistance-coding-skills 
+In [How AI Impacts Skill Formation](https://arxiv.org/abs/2601.20245) (not peer-reviewed) researchers at Anthropic---the company that provides Claude Code, an agentic coding tool---asked developers to complete a coding task with and without LLM tool use. The coding task included learning a framework that was unfamiliar to them. What they find is interesting. Using the LLM tool leads to a _non-significant_ (p-value of 0.391, i.e. statistical modeling estimates a 39% chance the observed difference was just due to randomness) speedup on time to code the solution, from 25 minutes to 23 minutes. But it leads to a _significant_ (p-value of 0.010; 1% chance the observed difference is due to randomness) reduction in quiz score, from 65% to 50%. The quiz included questions about error propagation in the framework being used, and about asynchronous programming more generally. A really interesting finding that's a little buried: the task time _was_ significantly faster for novice developers (1-3 years of coding experience), from 33 minutes down to 22 minutes. But it was _not_ significantly faster for experienced (4-6 years) and advanced (7+ years) developers, whose average task times were between 22-25 minutes regardless of LLM use. Our takeaway from this study: on constrained coding tasks, like the one in the study, and the ones in labs and exercise in this class, LLMs will make you faster---for now. Once you gain more experience, LLMs won't benefit you very much on tasks like those. However, LLM use will almost definitely reduce the understanding you gain from doing the task. That said, a few participants who used LLMs still did well on the quiz. These were particpants that took time to consider their own understanding of what was going on, and write out this understanding to the LLMs, rather than asking the LLMs to explain.
+
+What's interesting about the Anthropic study is they separate out a coding task and an understanding task. The UIUC study (first one) looked at grades on the programming parts of exams. It may make sense to you that, yeah, the students who use LLMs to code will struggle without LLMs to code. But does it matter? Can't the students learn the concepts behind coding by prompting LLMs to code? The Anthropic study suggests the answer to this question is: no. 
 
 
-(Peer-reviewed) https://dl.acm.org/doi/pdf/10.1145/3632620.3671116
+Which leads us to [_The Widening Gap: The Benefits and Harms of Generative AI for Novice Programmers_](https://dl.acm.org/doi/pdf/10.1145/3632620.3671116), a study by researchers at institutions across the USA and Europe. In this study, the researchers observed students in a first programming course as they attempted to solve a programming problem. The students were allowed to use both Copilot (a code-completion-based LLM tool) and ChatGPT (a chat interface, not inherently aware of the code being written). The researchers found mixed results of these LLM-based tools: for a few students, the LLM-based tools accelerated their performance, but for many others, the LLM-based tools interfered with their performance. The split between these groups? The presence of _metacognitive_ difficulties. Meta-cognition is thinking about thinking; for example, noticing that when you're faced with a certain type of programming problem, you get nervous. Meta-cognitive skills won't necessarily mean you won't get nervous, but it might allow you to take a step back from your current (nervous) thoughts, and think back to the design recipe steps. Another problem: students that had metacognitive difficulties and used LLMs didn't accurately recognize how they used the LLMs. For example, they might state they only use the LLM to confirm their solution, but it was clear from their interactions that the solution came from the LLM in the first place. The researchers found that Copilot, the code-completion based LLM, introduced a whole new metacognitive difficulty: its suggestions would interrupt the students' trains of thought.
 
-JetBrains created a video on this paper: https://www.youtube.com/watch?v=HTUh0OO6Kmo
-
-> our findings show an unfortunate divide in the use of
-GenAI tools between students who did and did not struggle. Some
-students who did not struggle were able to use GenAI to accelerate, creating code they already intended to make, and were able to
-ignore unhelpful or incorrect inline code suggestions. But for students who struggled, our findings indicate that previously known
-metacognitive difficulties persist, and that GenAI unfortunately can
-compound them and even introduce new metacognitive difficulties.
-Furthermore, struggling students often expressed cognitive dissonance about their problem solving ability, thought they performed
-better than they did, and finished with an illusion of competence
-
-
-(Peer-reviewed) https://dl.acm.org/doi/pdf/10.1145/3657604.3662046
-This paper covers both AI-based and traditional plagiarism (i.e., finding code solutions and submitting them as your own). In a way, the problems of AI are not new. Whether you're asking ChatGPT to provide an answer, or copy-and-pasting a code solution from somewhere else with zero thought, you're giving up on your opportunity to practice. It does appear that students plagiarized more after the emerge of ChatGPT
-> Through manual review of the flagged solutions obtained above,
-we identified four binary features that are potentially indicative
-of plagiarism: advanced syntax, extra comment, extra print, and
-extra code. Answers that demonstrate each of these markers can
-be found in Table 1.
-> 
-> Advanced Syntax marker: The advanced syntax marker is present
-if there is any appearance of list/set/dictionary comprehensions,
-generator expressions, map, reduce, or lambda
->
-> Extra Comment marker: The extra comment marker is present if
-there is any appearance of comments. [...] As an introductory CS course for non-majors, the course neither
-emphasizes documentation of code nor penalizes students for a
-lack of documentation
-> 
-> Extra Print marker: The extra print marker is present if there is any
-print statement in a question that does not require print to receive
-full credit [...]
-> 
-> Extra Code marker: The extra code marker is present if there is any
-code that is outside the scope of the function that the question is
-asking the students to write, except import ... [students are encouraged to test, but not to submit their tests for grading]
-
-> The key output of the regression is the coefficient 𝛾 (plotted in
-Figure 6), which relates learning loss to the degree of observed
-plagiarism. In both semesters, this parameter is statistically significantly positive. The Fall 2022 data suggests that a student observed
-to plagiarize every assignment would perform 47 percentage points
-lower than they would if they had not cheated. Spring 2023 data
-suggests the drop would only be 36 percentage points. Because we
-usually detect plagiarism on only a fraction of a student’s submissions (see Figure 3), the observed learning losses are smaller than
-these numbers would suggest.
-
-
-We know that some students will continue to use GenAI even knowing it harms their learning outcomes. Just like some students continue to cheat. Think carefully about the opportunities being at UBC provides you. We will be happy, in class and in office hours, to spend time with you discussing things you don't understand, and hopefully helping you reach an understanding! We will be best able to help you reach an understanding if you've attempted the assignment yourself _up to the point you get stuck_. As educators, we use the understanding of where you got stuck to make our engagement with you more relevant to the hurdle you currently face. As the class continues, you'll clear those hurdles, and maybe meet other ones. You can use AI to run a race parallel to the hurdles, and get the solution to the problem sets. But the literature suggests that parallel race won't help you overcome the hurdles. 
+In this study, the students who succeeded in using LLMs to accelerate their performance showed one ability the students who struggled had trouble with: they were able to quickly determine _when the LLM was wrong_. To be able to quickly determine whether LLM-generated code is wrong, you need to be able to process that code's meaning clearly. This is a core part of _code fluency_ we aim to form in this course. 
 
 ## Low-Level "Optimal" GenAI Use Evolves Rapidly
 
-What we won't teach you in this class _at all_ is "Optimal" GenAI usage. What do we mean by this? We mean tips to use GenAI that are _incredibly particular_ to the models and interaction modes of GenAI that are currently in vogue. This includes tips on prompt engineering---persona setting, giving some examples, suggesting to turn off sycophancy---and tips on, say, coordinating agent usage.
+What we won't teach you in this class is "optimal" GenAI usage. What do we mean by this? We mean tips to use GenAI that are _incredibly particular_ to the models and interaction modes of GenAI that are currently in vogue. This includes tips on prompt engineering---persona setting, giving some examples, suggesting to turn off sycophancy---and tips on, say, coordinating agent usage.
 
-We're not teaching you these low-level details because the details are evolving in sync with rapidly evolving GenAI models and usage. Since OpenAI introduced the original Codex model for coding in August 2021, we've seen LLMs move through various modalities:
+One reason we're not teaching you these low-level details is because the details are evolving in sync with rapidly evolving GenAI models and usage. Since OpenAI introduced the original Codex model for coding in August 2021, we've seen LLMs move through various modalities. Here's a chain of different things we could consider teaching, and when they became (ir)relevant:
 
 - early on, [Codex](https://en.wikipedia.org/wiki/OpenAI_Codex_(language_model)) was pitched as a code-completion model. There was no ChatGPT or personification of the model. We would have taught you to interact with this model by suggesting you write detailed comments in your source code, and get the model to do line completion from there.
 - we might have suggested you do [few-shot prompting](https://en.wikipedia.org/wiki/Prompt_engineering#Multi-shot), rather than zero-shot prompting. That is, giving the LLM a few examples of the of answers to questions like the one you want to ask, rather than simply asking the question.
 - we might have later suggested that not only do you give examples of answers, but give examples that _spell out the intermediate step_ of the answers, in ["chain-of-thought"](https://en.wikipedia.org/wiki/Prompt_engineering#Multi-shot] prompting)
 - when ChatGPT became generally available, the "chat" interface led to personification of the LLM. When the LLM was a viewed as a code completion model, it made little sense to say "please" or other niceties in the prompt. Once it was viewed as a "chat", we saw the emergence of persona-setting ("you are an expert sofware engineer..."), and other prompting techniques that treat the LLM as something close to a person. 
-- As nearly all data on the internet has been trained on, it is possible more weight has been put on RLHF. The [RLHF](https://en.wikipedia.org/wiki/Reinforcement_learning_from_human_feedback) part of LLM's training appears to be making LLMs [sycophantic](https://en.wikipedia.org/wiki/Sycophancy_(artificial_intelligence)). The "HF" stands for Human Feedback, and the LLMs are rewarded for answers that humans give better feedback on. This turns out to incentivize sycophantic behaviour: agreeing with the human prompter, praising the human prompter, etc.  This gets dangerous: it is difficult to trust a "yes" from the LLM if the question was worded in a way where the human would have wanted agreement. Further, praise is easy for the LLM to spit out, but also meaningless: the LLM is spitting out because it's been trained that humans _like_ such praise, not because it "thinks" the prompt is deserving of such praise.
+- As nearly all data on the internet has been trained on, more improvements in LLM performance come from direct feedback (either from humans or other LLMs) to the LLM as to what outputs are "good". The [RLHF](https://en.wikipedia.org/wiki/Reinforcement_learning_from_human_feedback) part of LLM's training appears to be making LLMs [sycophantic](https://en.wikipedia.org/wiki/Sycophancy_(artificial_intelligence)). The "HF" stands for Human Feedback, and the LLMs are rewarded for answers that humans give better feedback on. This turns out to incentivize sycophantic behaviour: agreeing with the human prompter, praising the human prompter, etc.  This gets dangerous: it is difficult to trust a "yes" from the LLM if the question was worded in a way where the human would have wanted agreement. Further, praise is easy for the LLM to spit out, but also meaningless: the LLM is spitting out because it's been trained that humans _like_ such praise, not because it "thinks" the prompt is deserving of such praise.
    - From the paper [Towards Understanding Sycophancy in Large Language Models](https://proceedings.iclr.cc/paper_files/paper/2024/hash/0105f7972202c1d4fb817da9f21a9663-Abstract-Conference.html): 
    
 > We find that when a response matches a user's views, it is more likely to be preferred. Moreover, both humans and preference models (PMs) __prefer convincingly-written sycophantic responses over correct ones__ [emphasis added] a non-negligible fraction of the time. 
@@ -149,7 +106,9 @@ We're not teaching you these low-level details because the details are evolving 
 
 At the same time as GenAI seems to be evolving to a place where GenAI tools need less and less human feedback, we are seeing costs emerge. Less and less human feedback, and in particular AI agent "loops", mean that more AI compute is being used. In summer 2026, several companies were documented as over-spending on tokens: notably, an unnamed company spending $500 million on Anthropic model usage; Uber now putting a $1,500/month spend cap on each employee's AI usage [4]. When Anthropic announced a price hike to its model services in May 2026 that more accurately reflected model costs, users were suprised to see how quickly these costs went up [5].
 
-It is not clear to us where industry will land on quantity and mode of AI usage. We have decided we don't want to teach you to code in any way that _depends_ on access to a particular quantity or mode of AI usage. We think building up your code fluency will make you better able to evaluate and question LLM responses (in the presence of LLM sycophancy, you must rely on your _own judgements_ of correctness). And we think the software construction skills you will learn, which are inherently abstraction and decomposition skills, will come to be useful to you in using GenAI effectively. 
+For a concrete example of how rapidly this "optimal use" evolves: in 2023, Microsoft launched [GenAIScript](https://microsoft.github.io/genaiscript/). The GitHub touts the tagline "Prompting is Coding", and Microsoft released [several](https://www.youtube.com/watch?v=ENunZe--7j0) [videos](https://www.youtube.com/watch?v=ajEbAm6kjI4) touting the project, and researchers at Microsoft Research touted this project at a Pacific Northwest gathering of Programming Languages experts. This project aimed to help developers interact with LLMs through prompting, save and programmatize their prompts. In May 2026, the project was quietly sunsetted, archived on GitHub. (Amusingly, Gemini failed to notice that it was deprecated until I forced it to [go look at the GitHub](https://share.google/aimode/gS2W65sqEC2c75TIb) repo.) We don't know exactly why this is: the project had 35 contributors, 229 forks and 2.9k stars on GitHub, so it was not altogether unsuccessful. We think it's likely because industry is moving from prompt-completion-centred AI usage to agentic AI usage. That one of the leads on the GenAIScript project is now touted as creating [GitHub Agentic Workflows](https://github.github.com/gh-aw/) suggests this might be true. We would not feel good if we had focused on teaching you GenAIScript-prompt-centered coding two years ago, only for that whole toolchain to be deprecated.
+
+The takeaway is: it is not clear to us where industry will land on _quantity_ and _mode_ of AI usage.  So, we have decided we don't want to teach you to code in any way that _depends_ on access to a particular quantity or mode of AI usage. We think building up your code fluency will make you better able to _evaluate_ and _question_ LLM responses (in the presence of LLM sycophancy, you must rely on your _own judgements_ of correctness---just like how I had to tell the LLM to go look at GenAIScript's GitHub page). And we think the software construction skills you will learn, which are inherently _abstraction_ and decomposition skills, will come to be useful to you in using GenAI effectively---whatever that looks like in the future.
 
 ## High-Level Use of GenAI Requires Problem Solving
 
@@ -163,14 +122,11 @@ We believe the software construction skills you'll learn in this class will help
 
 These ablities are the hard work. We believe they are the abilities that will make you stand out as an AI-assisted engineer. Picking up on the AI interaction strategies that will be relevant will be easy by comparison.
 
+## Conclusion
 
-## Equity
+Think carefully about the opportunities being at UBC provides you. We will be happy, in class and in office hours, to spend time with you discussing things you don't understand, and hopefully helping you reach an understanding! We will be best able to help you reach an understanding if you've attempted the assignment yourself _up to the point you get stuck_. As educators, we use the understanding of where you got stuck to make our engagement with you more relevant to the hurdle you currently face. As the class continues, you'll clear those hurdles, and maybe meet other ones. Those hurdles won't feel like hurdles any more. But if you rely on GenAI tools to clear the hurdles for you, you will continue to need to rely on these tools.
 
-As of the time of this writing, it is widely believed that Claude Code is one of the best coding agents out there. Accessing it requires paying a monthly fee, which not all students can afford. Thus, for parts of the class that are heavily graded on the correctness of code following a certain spec---notably, the exams---we want to ensure students with access to "better" models don't have an unfair advantage. (TODO: how are labs graded)
-
-The design of the exams and the grading of the course, in our opinion, should overall discencentivize AI use. Giving up on learning opportunities we provide to you throughout the course
-
-
+  TODO: make these all links?
 
 [1] https://cacm.acm.org/blogcacm/the-return-of-soft-skills-in-the-age-of-genai-and-agentic-software-development/
 
@@ -185,89 +141,4 @@ The design of the exams and the grading of the course, in our opinion, should ov
 [6] https://fortune.com/2026/05/26/uber-coo-ai-spending-tokens-claude-code/
 
 
-
-
-
-
-# OLD outline
-
-I think I want to make 3 points:
-
-- there is hype about AI replacing all of SE. We have thought about it, and our conclusion is that the best way to prepare you to work with AI is to provide you solid foundational knowledge of code.
-- There are 3 reasons for this:
-	- our own experience seeing our junior and senior colleagues use AI (crista lopes)
-	- AI-specific tooling is changing rapidly; it's unclear what technology you'll have access to in the future, and teaching in a way that's dependent on this technology  
-	- papers
-- we don't know whether AI will totally replace human coding, much like a hairstylist will use a calculator rather than do math in their head to decide how many abrasive chemicals to put on a clients' head, or wolframalpha for differential calculus. We currently think it is unlikely it will fully replace human coding, but. However, the experiences above make us strongly believe that becoming code fluent is the best way to position you as a value-add over AI. 
-	
-
-
-# OLD TEXT: won't make any sense
-
-*Preface: It is unusual to have a page like this in a course reader: it describes course policy, not course content. But in discussions with other department members, and computer science educators across the world, the topic of GenAI involvement in our curriculum is constant. We have for months discussed what our GenAI policy should be, and how we should express this policy to our students. In the end, we feel that having a page that fully discusses the __why__ of our GenAI policy is valuable to our students, and so, it is here. We may move this page from the reader to course materials if we change our minds.*
-
-And yet, nowhere in the introduction to your Software Construction courses
-
-The low-level skills of programming will no longer dominate software engineering jobs;
-https://cacm.acm.org/blogcacm/the-return-of-soft-skills-in-the-age-of-genai-and-agentic-software-development/
-
-building towards a goal of AI agents being trusted collaborators
-
-
-emphasizing that AI has "tremendous potential"
-https://cacm.acm.org/careers/teaching-programmers-a-survival-mindset/
-
-stating that AI will reduce demand for junior engineers, and we must work strategically to ensure we do not lose all our talent.
-https://cacm.acm.org/opinion/redefining-the-software-engineering-profession-for-ai/
-
-the emergence of the "AI Orchestrator" role. 
-[3] https://cacm.acm.org/opinion/orchestrating-the-schema/
-
-<details class="tooltip deep-dive">
-<summary>
-What is Gen AI?
-</summary>
-By "Gen AI", we mean "Generative AI". Here we are using it as particular shorthand to include large language models offered by various industrial actors, as well as open-source 
-</details>
-
-The first page of your Software Construction course reader does not mention the word "GenAI", "LLM", "agent", or "prompt". What gives? Are its writers ostriches?
-
-
-GenAI
-https://fortune.com/2026/05/26/uber-coo-ai-spending-tokens-claude-code/
-
-> The comments follow reports that the firm had already burnt through its entire 2026 AI coding tools budget in just four months after incentivizing employees to adopt the technology through an internal leaderboard ranking teams by total AI tool usage. 
-
-> Uber isn’t the only company facing this issue. Microsoft earlier this month reportedly began canceling most of its direct Claude Code licenses, according to The Verge, instead moving engineers toward using GitHub Copilot CLI. A number of other business leaders have walked back their initial bullish AI views. Duolingo CEO Luis von Ahn last year reversed his outlook on AI, saying he doesn’t see the tech replacing the tasks his employees perform.
-
-https://financialpost.com/technology/companies-burning-through-ai-tokens-racking-up-bills
-
-> In a now-viral example, one company reportedly spent US$500 million in one month on Claude licences from Anthropic PBC, according to the Axios news site. Other companies are withholding employee raises as a result of their unexpected AI spending or saying that human employees are now cheaper to hire than deploying AI.
-> Some execs are attempting to rein in costs by setting AI usage limits. For example, Uber Technologies Inc. has implemented a monthly cap of US$1,500 in AI token spending per coding tool.
->
-
-
-<details class="tooltip deep-dive">
-<summary>
-Ostriches?
-</summary>
-Mention of us being ostriches is a joke referencing the English-language idiom "to bury ones head in the sand". This idiom means, roughly, "to willfully ignore very obvious things". It is related to ostriches in that it was believed ostriches [would bury their heads in the sand](https://en.wikipedia.org/wiki/Common_ostrich#Head_in_sand) when afraid. Apparently, this is a myth. 
-</details>
-
-We have thought carefully on how to allow and integrate GenAI into CPSC 210. From anecdotal reports from students and social media, it appears that many students are using GenAI---particularly chatbot interfaces---to study and complete assignments. Altogether banning its use seems futile. Also, unrealistic: we don't abstain from GenAI use ourselves. 
-
-After all, in the past, we did not ban using a search engine or answers from Stack Overflow. 
-
-
-Our goal in CPSC 210 is to teach you evergreen skills. Skills that will assist you in problem solving regardless of the extent you use AI. We have found in our use of AI that we apply software engineering practice in our use.
-
-As an example of how things have changed rapidly. In 2024, agents were not in vogue. If we had wanted to teach you to in an AI-centric way, we may have tried to suggest prompt engineering methods (persona setting, etc.). By 2026, discourse is all about agents: those prompt engineering methods are less relevant, instead the questions may be about sandboxing the agents and stuff. But already by the writing of this article, we are seeing pushback that agents are simply too expensive. If we taught this course in a way that would depend on use of agents, could you work in a position where the company has decided agents are too expensive?
-
-What is the evergreen concept in all this? Problem decomposition. Being able to quickly understand what code does. Knowing what needs to be tested --- either in an exploratory or programatic fashion
-
-## About Your Learning Experience 
-
-A particularly
-https://www.anthropic.com/research/AI-assistance-coding-skills
-https://arxiv.org/abs/2506.08872
 
