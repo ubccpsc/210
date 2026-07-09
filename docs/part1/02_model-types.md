@@ -105,12 +105,12 @@ Consider the natural language description of traffic light data:
 
 Let's apply our systematic process. One design is as follows:
 
-1. **Entities:** the signal at an intersection.
-2. **Cases:** it shows one of three colours: red, yellow, or green.
-3. **Information per case:** none; a colour is a bare label that carries nothing beyond itself.
-4. **Translate:** a value that is one of a fixed set of labels is exactly a **union** of string literals.
-5. **Concrete examples:** one valid colour, plus an invalid one to confirm the type is enforced.
-6. **Generalisation:** none; a small enumeration stands on its own.
+1. _Entities:_ the signal at an intersection.
+2. _Cases:_ it shows one of three colours: red, yellow, or green.
+3. _Information per case:_ none; a colour is a bare label that carries nothing beyond itself.
+4. _Translate:_ a value that is one of a fixed set of labels is exactly a _union_ of string literals.
+5. _Concrete examples:_ one valid colour, plus an invalid one to confirm the type is enforced.
+6. _Generalisation:_ none; a small enumeration stands on its own.
 
 In this case, in step 4, we translate the data definition into the following typescript Type:
 
@@ -149,20 +149,20 @@ type HttpStatus = 200 | 301 | 404 | 500;
 
 > As a listener, I want to set playback to one of off, on, or repeat-one, so that I can control how my music is ordered.
 
-1. **Entities:** the shuffle mode
-2. **Cases:** off, on, or repeat-one
-3. **Information per case:** information is totally encoded by the cases.
-4. **Translate:** again, we can use a union of literals:
+1. _Entities:_ the shuffle mode
+2. _Cases:_ off, on, or repeat-one
+3. _Information per case:_ information is totally encoded by the cases.
+4. _Translate:_ again, we can use a union of literals:
 ```typescript
 type ShuffleMode = "off" | "on" | "repeat-one";
 ```
 
-5. **Concrete examples:** again, we will have one correct and one incorrect mode:
+5. _Concrete examples:_ again, we will have one correct and one incorrect mode:
 ```typescript
 const mode: ShuffleMode = "on"; // ok
 const mode2: ShuffleMode = "repeat-album"; //error
 ```
-6. **Generalisation:** nothing to generalize, all possible cases are expressed.
+6. _Generalisation:_ nothing to generalize, all possible cases are expressed.
 
 
 ## Example: Songs
@@ -171,10 +171,10 @@ Let's move on to applying our systematic process to the song example we started 
 
 > As a listener, I want each song to carry its title, artist, and length, so that I can see what is playing and how long it will last.
 
-1. **Entities:** the only entity here is a **song**.
-2. **Cases:** A song has just one case: every song has the same shape, so there are no alternatives to distinguish.
-3. **Information per Case:** for the natural language description above, what is relevant is that a song carries three facts: a `title`, an `artist`, and a duration in seconds.
-4. **Translate:**
+1. _Entities:_ the only entity here is a _song_.
+2. _Cases:_ A song has just one case: every song has the same shape, so there are no alternatives to distinguish.
+3. _Information per Case:_ for the natural language description above, what is relevant is that a song carries three facts: a `title`, an `artist`, and a duration in seconds.
+4. _Translate:_
 A song's facts belong together, so we describe their shape with a **type**, which lists named properties and their types. It helps to keep two words apart: a *type* describes a shape, but it is not itself a value. `Song` is the shape. 
 
 <!--- , listing the properties directly between braces; there is no `makeSong` function to call.--->
@@ -205,7 +205,7 @@ declares a type `TypeName` which has 3 pieces of data. Each piece of data has a 
 
 
 
-5. **Concrete Examples:** An actual song is an **object**: a value that has that shape, an _instance_ of the type. We create an object by writing an **object literal**. Below, `song1` and `song2` are two separate songs that share the `Song` type.
+5. _Concrete Examples:_ An actual song is an _object_: a value that has that shape, an _instance_ of the type. We create an object by writing an _object literal_. Below, `song1` and `song2` are two separate songs that share the `Song` type.
 
 ```typescript
 const song1: Song = {
@@ -243,7 +243,7 @@ Note a syntax difference between object values and object types; property defini
 
 </details>
 
-6. **Generalisation:** A song is a single fixed shape, so there is nothing to generalise.
+6. _Generalisation:_ A song is a single fixed shape, so there is nothing to generalise.
 
 
 <details class="tooltip link-110">
@@ -257,18 +257,17 @@ While in CPSC 110 you would have made instances of that struct with `(make-song 
 
 ## Example: Playlists
 
-
 This example builds on the `Song` type from above:
 
 > As a listener, I want to build an ordered list of songs of any length, so that I can queue up exactly the music I want to hear.
 
-1. **Entities:** The nouns give us a **playlist**, built from the **song** we just modelled.
+1. _Entities:_ The nouns give us a _playlist_, built from the _song_ we just modelled.
 
-2. **Cases:** A playlist has two distinct cases: it is empty or non-empty.
+2. _Cases:_ A playlist has two distinct cases: it is empty or non-empty.
 
-3. **Information per Case:** The empty case needs no information; knowing that it is empty is the whole story. The non-empty case needs two things: its first song, and the rest of the playlist after that song. That last piece, the rest, is itself a playlist, so this definition is **recursive**.
+3. _Information per Case:_ The empty case needs no information; knowing that it is empty is the whole story. The non-empty case needs two things: its first song, and the rest of the playlist after that song. That last piece, the rest, is itself a playlist, so this definition is _recursive_.
 
-4. **Translate:**
+4. _Translate:_
 A playlist has cases, so we model it as a **tagged union**: a union of one type per case, where each case carries a shared **discriminator** property (here `kind`) set to a different constant. Checking the discriminator tells both us and the compiler which case we are in, and therefore which properties are available.
 
 ```typescript
@@ -338,11 +337,12 @@ To relate to a prior concept, you can understand the type of the `kind` property
 
 Reading a `kind` back to recover which case you are looking at can feel indirect, since the case is something the value already is. `EmptyPlaylist` and `NonEmptyPlaylist` are different: why do we need to specify they have different kinds?
 
-**Object-oriented programming** offers a solution to this inelegance: we will get a more elegant design once we cover **classes**, in Part 2. In particular, we will return to this when we reach **polymorphism** in Part 2.
+*Object-oriented programming* offers a solution to this inelegance: we will get a more elegant design once we cover *classes*, in Part 2. In particular, we will return to this when we cover *polymorphism*.
+
 </details>
 
 
-5. **Concrete Examples:** With the type written, we build concrete examples from the songs we already have. If they are easy to construct, the design fits; if they are awkward, the model is probably too complicated. These examples also become the data our tests run against later.
+5. _Concrete Examples:_ With the type written, we build concrete examples from the songs we already have. If they are easy to construct, the design fits; if they are awkward, the model is probably too complicated. These examples also become the data our tests run against later.
 
 
 ```typescript
@@ -363,7 +363,7 @@ const twoTracks: Playlist = {
 
 Because an object is a value like any other, `oneTrack` reuses the `empty` object we already named rather than building a fresh one; only the new node in `twoTracks` has to be written out.
 
-6. **Generalisation:** A playlist is one instance of a more general shape: a list of any element type. If a program needed lists of several different things, we would write that shape once and let it take the element type as a **parameter**, written in angle brackets. A type parameter lets one definition serve many content types:
+6. _Generalisation:_ A playlist is one instance of a more general shape: a list of any element type. If a program needed lists of several different things, we would write that shape once and let it take the element type as a **parameter**, written in angle brackets. A type parameter lets one definition serve many content types:
 
 ```typescript
 type LinkedList<T> =
@@ -381,11 +381,27 @@ In a type definition, `type TypeName<T,S,R> = ...`, the names in angle brackets 
 We call `TypeName<T,S,R>` a **generic type** when it has any type variable in its definition. 
 
 Note that while we have been using `<` to indicate when code can be filled in with various syntactical constructs, `<expression>` capturing all types of expressions (e.g., `3`, `3 + 2`, `foo(3)`), in generics, `<` is concrete, necessary syntax.
+
+For the `LinkedList` example above, the compiler will ensure we are correctly populating the list based on is type:
+
+TODO: verify the code below:
+
+```typescript
+    // valid song list
+    const playlist: LinkedList<Song> = {
+        first: song1,
+        rest: { kind: "node", first: song2, rest: empty } };
+
+    // invalid song list; second 'song' is only a song title
+    const badList: LinkedList<Song> = {
+        first: song1,
+        rest: { kind: "node", first: "song title", rest: empty } };
+    }
+};
+```
 </details>
 
-
-Reach for generics only when you see real duplication in your code; until then they add abstraction without benefit.
-
+Use generics only when you see real duplication in your code; until then they add abstraction without benefit.
 
 ## Functions Follow Data Shapes
 
@@ -432,8 +448,7 @@ function firstTitle(p: Playlist): string | null {
 }
 ```
 
-
-Checking the discriminator also unlocks the case's data. This is called **type narrowing**: once you have tested that `p.kind === "songs"`, the compiler knows that `p.first` and `p.rest` exist and lets you use them, while preventing you from reaching for properties the other case does not have. For instance, the following code would not pass the type checker:
+Checking the discriminator also unlocks the case's data. This is called **type narrowing**: once you have tested that `p.kind === "songs"`, the compiler knows that `p.first` and `p.rest` exist and lets you use them, while preventing you from accessing properties the other case does not have. For instance, the following code would not pass the type checker:
 
 
 ```typescript
@@ -446,7 +461,6 @@ function firstTitle(p: Playlist): string  {
   }
 }
 ```
-
 
 ### Recurring over the Structure
 
@@ -528,7 +542,7 @@ const bad1: Song = { title: "A", artist: "B" };
 const bad2: Song = { title: "A", artist: "B", durationSeconds: "200" };
 // error: 'string' is not assignable to 'number'
 
-// reaching for data the case may not have
+// accessing data the case may not have
 function firstSong(p: Playlist): Song {
   return p.first;
   // error: 'first' does not exist on an empty playlist
@@ -560,7 +574,7 @@ These run the functions and confirm they produce the expected values. The compil
 
 A precise data definition is the foundation everything else rests on. It catches mistakes early, it mirrors the structure of the problem, and it drives the structure of the code that consumes it: once the data is modelled, the functions largely follow its shape. In this chapter we followed one process across a sequence of examples, from a simple enumeration through a song to a recursive playlist, and then wrote functions whose shape follows the data's shape.
 
-From here, Part 1 builds directly on this work: writing functions that are themselves generic, deriving tests from the structure of data, and leaning further on the type checker. In Part 2, when we move to **object-oriented programming**, the **tagged unions** you wrote here become class hierarchies. the underlying ideas will carry over even as the syntax changes.
+From here, Part 1 builds directly on this work: writing functions that are themselves generic, deriving tests from the structure of data, and leaning further on the type checker. In Part 2, when we move to _object-oriented programming_, the _tagged unions_ you wrote here become class hierarchies. the underlying ideas will carry over even as the syntax changes.
 
 <details class="tooltip exercise">
   <summary>Exercise: Modelling a Journey</summary>
