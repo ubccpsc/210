@@ -31,8 +31,8 @@ Goal: Solving real problems using software. These problems should expose student
             - don't like this dataset as it changes and is used in class
         - flights
         - web usage data
-        - academic genoelogy (both seem like they could get stale)
-            - erdos number
+        - academic genealogy (both seem like they could get stale)
+            - Erdos number
             - publication data
         - music data (probably gets stale)        
 
@@ -48,10 +48,10 @@ Goal: Solving real problems using software. These problems should expose student
     - late in the course
     - interact with a CMS without building a CMS?
         - get, put, post, delete
-    - just an online task tracker
+    - online task tracker
         - tasks
-            - nested tasks
             - title/description/deadline/status
+            - nested tasks
 
 * Some kind of a game?
     - 110 does soduku
@@ -78,3 +78,6 @@ Goal: Solving real problems using software. These problems should expose student
         - favour early classes
         - favour late classes
  
+* Medium lab to fix a bug and add a new feature to an existing codebase
+
+* Large lab with a larger project to refactor existing code to replace with library that already provides a (similar) API
