@@ -1,3 +1,0 @@
-# Asynchronous Programming
-
-## The Problem
