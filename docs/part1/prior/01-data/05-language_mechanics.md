@@ -1,4 +1,17 @@
+## RTH: Leaving for now. We can decide if we want to have a list of TypeScript features that are unexplored in the course.
+
 ## RTH: I've added opinionated notes to most of the subsections below; we can incorporate the topics we want as we encounter the need.
+
+Other things we don't cover:
+
+* Type inference
+* `any`
+* `switch`
+* `break` and `continue`
+* `...` (spread operator)
+* structured returns
+* optional parameters
+* default values (I think we do cover these, but do we want to?)
 
 # TypeScript's Type Checker
 
