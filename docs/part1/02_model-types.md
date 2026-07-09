@@ -382,23 +382,30 @@ We call `TypeName<T,S,R>` a **generic type** when it has any type variable in it
 
 Note that while we have been using `<` to indicate when code can be filled in with various syntactical constructs, `<expression>` capturing all types of expressions (e.g., `3`, `3 + 2`, `foo(3)`), in generics, `<` is concrete, necessary syntax.
 
-For the `LinkedList` example above, the compiler will ensure we are correctly populating the list based on is type:
-
-TODO: verify the code below:
+For the `LinkedList` example above, the compiler will ensure we are correctly populating the list based on its type:
 
 ```typescript
-    // valid song list
-    const playlist: LinkedList<Song> = {
-        first: song1,
-        rest: { kind: "node", first: song2, rest: empty } };
+// valid song list
+const playlist: LinkedList<Song> = {
+  kind: "node",
+  head: song1,
+  tail: { kind: "node", head: song2, tail: { kind: "empty" } }
+};
 
-    // invalid song list; second 'song' is only a song title
-    const badList: LinkedList<Song> = {
-        first: song1,
-        rest: { kind: "node", first: "song title", rest: empty } };
-    }
+// invalid song list; the second 'song' is only a song title
+const badList: LinkedList<Song> = {
+  kind: "node",
+  head: song1,
+  tail: { kind: "node", head: "song title", tail: { kind: "empty" } }
 };
 ```
+
+The compiler's error for `badList` points at the exact property that violates the type parameter:
+
+```
+Type 'string' is not assignable to type 'Song'.
+```
+
 </details>
 
 Use generics only when you see real duplication in your code; until then they add abstraction without benefit.
@@ -574,7 +581,7 @@ These run the functions and confirm they produce the expected values. The compil
 
 A precise data definition is the foundation everything else rests on. It catches mistakes early, it mirrors the structure of the problem, and it drives the structure of the code that consumes it: once the data is modelled, the functions largely follow its shape. In this chapter we followed one process across a sequence of examples, from a simple enumeration through a song to a recursive playlist, and then wrote functions whose shape follows the data's shape.
 
-From here, Part 1 builds directly on this work: writing functions that are themselves generic, deriving tests from the structure of data, and leaning further on the type checker. In Part 2, when we move to _object-oriented programming_, the _tagged unions_ you wrote here become class hierarchies. the underlying ideas will carry over even as the syntax changes.
+From here, Part 1 builds directly on this work: using generic types such as arrays and promises, deriving tests from the structure of data, and leaning further on the type checker. In Part 2, when we move to _object-oriented programming_, the _tagged unions_ you wrote here become class hierarchies. The underlying ideas will carry over even as the syntax changes.
 
 <details class="tooltip exercise">
   <summary>Exercise: Modelling a Journey</summary>
