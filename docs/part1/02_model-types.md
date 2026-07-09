@@ -311,7 +311,7 @@ digraph Playlist {
 <details class="tooltip ts-tips">
   <summary>Tagged Unions</summary>
 
-Previously we saw **unions of literals**. **Tagged unions** have similar syntax, but bind together various type names, rather than literal values:
+Previously we saw *unions of literals*. **Tagged unions** have similar syntax, but bind together various type names, rather than literal values:
 
 ```typescript
 type UnionType = Type1 | Type2 | Type3;
@@ -327,7 +327,7 @@ type Type1 = {
 };
 ```
 
-`kind` should map to a specific primitive value `v_1`, while the other properties should map to types. The `kind` is the "tag" in **tagged union**.
+`kind` should map to a specific primitive value `v_1`, while the other properties should map to types. The `kind` is the "tag" in *tagged union*.
 
 To relate to a prior concept, you can understand the type of the `kind` property of any value of `UnionType` to be a union of literals. However, we know more than that: we know that `kind` is a specific one of those literals for each option in the tagged union.  
 </details>
@@ -363,7 +363,7 @@ const twoTracks: Playlist = {
 
 Because an object is a value like any other, `oneTrack` reuses the `empty` object we already named rather than building a fresh one; only the new node in `twoTracks` has to be written out.
 
-6. _Generalisation:_ A playlist is one instance of a more general shape: a list of any element type. If a program needed lists of several different things, we would write that shape once and let it take the element type as a **parameter**, written in angle brackets. A type parameter lets one definition serve many content types:
+6. _Generalisation:_ A playlist is one instance of a more general shape: a list of any element type. If a program needed lists of several different things, we would write that shape once and let it take the element type as a *type parameter*, written in angle brackets. A type parameter lets one definition serve many content types:
 
 ```typescript
 type LinkedList<T> =
@@ -419,7 +419,7 @@ We won't strictly enforce a template step in CPSC 210. But, if you find yourself
 
 ### Branching on the Case
 
-When data has multiple cases, a function analyses which case it has and responds to each. We do this with a compound `if`/`else` chain: one branch per case, testing the value itself for a **union of literals**, and the value of the **discriminator** for a **tagged union**.
+When data has multiple cases, a function analyses which case it has and responds to each. We do this with a compound `if`/`else` chain: one branch per case, testing the value itself for a *union of literals*, and the value of the *discriminator* for a *tagged union*.
 
 An `if`/`else` chain over a union of literals, has one branch per value:
 
