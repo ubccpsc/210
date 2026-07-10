@@ -507,7 +507,7 @@ test("Return an A for a score of 88", () => {
 A test case wraps one or more checks in a call to `test`, which registers it with the testing framework. Both `test` and `checkExpect` are provided by the course toolkit, imported once at the top of a test file:
 
 ```typescript
-import { test, checkExpect } from "@course/toolkit";
+import { test, checkExpect } from "@ubccpsc/210-toolkit";
 
 test(<description>, () => {
     <checks>

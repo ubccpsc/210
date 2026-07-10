@@ -166,7 +166,7 @@ BSL used `check-expect` as a standalone expression at the top level of a file. T
 
 `test`, `checkExpect`, and `checkError` are provided by the course toolkit; each test file imports them at the top of the file with: 
 ```typescript
-import { test, checkExpect, checkError } from "@course/toolkit";
+import { test, checkExpect, checkError } from "@ubccpsc/210-toolkit";
 ```
 (The toolkit's `assert`, which we will meet at the end of this chapter, is imported the same way by files in `src/`.) 
 
@@ -425,7 +425,7 @@ evaluates `<condition>`. If `<condition>` is true, the program continues to exec
 Unlike in some other languages, `assert` is not a TypeScript built-in. It is a function we provide in the course's toolkit:
 
 ```typescript
-import { assert } from "@course/toolkit";
+import { assert } from "@ubccpsc/210-toolkit";
 ```
 
 Some TypeScript/JavaScript frameworks beyond the course provide `assert`-like functions as well. By the end of Part 2, you'll know how to implement `assert` yourself, so you'll be able to use this concept in whatever code you write. 

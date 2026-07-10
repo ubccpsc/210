@@ -52,7 +52,7 @@ As with `checkError`, the call under test is wrapped in `() =>` so that `expect`
 From here on, test files import `expect` in place of `checkExpect` and `checkError`:
 
 ```typescript
-import { test, expect } from "@course/toolkit";
+import { test, expect } from "@ubccpsc/210-toolkit";
 ```
 
 `test` groups and names cases exactly as before. `expect` is the assertion function from the chai library, which the vitest runner uses to evaluate your tests; the course toolkit re-exports it so the import stays in one place.
