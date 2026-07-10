@@ -168,7 +168,6 @@ BSL used `check-expect` as a standalone expression at the top level of a file. T
 ```typescript
 import { test, checkExpect, checkError } from "@ubccpsc/210-toolkit";
 ```
-(The toolkit's `assert`, which we will meet at the end of this chapter, is imported the same way by files in `src/`.) 
 
 To run the tests, you can either open the testing feature within your IDE (we will demo this in class), or open the terminal view within your IDE (also an in-class demo) and execute `pnpm test`. The **terminal** is a text-based interface where you type commands to direct your computer to perform tasks for you, where the input and output are textual. 
 
@@ -422,13 +421,13 @@ assert(<condition>, <description>)
 ```
 evaluates `<condition>`. If `<condition>` is true, the program continues to execution as if `assert` was not there. 
 
-Unlike in some other languages, `assert` is not a TypeScript built-in. It is a function we provide in the course's toolkit:
+`assert` is not part of the TypeScript language itself. In this course we use the standard `assert` function provided by the Node runtime:
 
 ```typescript
-import { assert } from "@ubccpsc/210-toolkit";
+import assert from "node:assert/strict";
 ```
 
-Some TypeScript/JavaScript frameworks beyond the course provide `assert`-like functions as well. By the end of Part 2, you'll know how to implement `assert` yourself, so you'll be able to use this concept in whatever code you write. 
+Many TypeScript/JavaScript frameworks provide their own `assert`-like functions as well, and any of them serves the same role. By the end of Part 2, you'll know how to implement `assert` yourself, so you'll be able to use this concept in whatever code you write. 
 </details>
 
 The presence of assertions in the implementation like this can make the code much easier to write, because your implementation can trust that the invariants are valid for the remainder of the function. This helps reduce defensive checks you might otherwise need to make in your code. `assert` also communicates to other developers that these are checks for valid input, rather than checks part of the core program logic. 
