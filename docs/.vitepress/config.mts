@@ -49,25 +49,25 @@ export default defineConfig({
             text: "Part 1: Foundations",
             link: "/part1/",
             items: [{
-                text: "Learning a New Language",
+                text: "01: Learning a New Language",
                 link: "/part1/01_new-language"
             }, {
-                text: "Modelling With Types",
+                text: "02: Modelling With Types",
                 link: "/part1/02_model-types"
             }, {
-                text: "Checking Invariants",
+                text: "03: Checking Invariants",
                 link: "/part1/03_checking-invariants"
             }, {
-                text: "Maintaining Invariants",
+                text: "04: Maintaining Invariants",
                 link: "/part1/04_maintaining-invariants"
             }, {
-                text: "Arrays and Iteration",
+                text: "05: Arrays and Iteration",
                 link: "/part1/05_arrays"
             }, {
-                text: "Mutation and Side Effects",
+                text: "06: Mutation and Side Effects",
                 link: "/part1/06_state-mutation"
             }, {
-                text: "Asynchronousity",
+                text: "07: Asynchronousity",
                 link: "/part1/07_async"
             }]
 
@@ -76,28 +76,28 @@ export default defineConfig({
             text: "Part 2: Design",
             link: "/part2/",
             items: [{
-                text: "Abstraction",
+                text: "08: Abstraction",
                 link: "/part2/01_abstraction"
             }, {
-                text: "Decomposition",
+                text: "09: Decomposition",
                 link: "/part2/02_decomposition"
             }, {
-                text: "Error Handling",
+                text: "10: Error Handling",
                 link: "/part2/03_errors"
             }, {
-                text: "Verification",
+                text: "11: Verification",
                 link: "/part2/04_verification"
             }, {
-                text: "Encapsulation",
+                text: "12: Encapsulation",
                 link: "/part2/05_encapsulation"
             }, {
-                text: "Boundaries",
+                text: "13: Boundaries",
                 link: "/part2/06_boundaries"
             }, {
-                text: "Extension",
+                text: "14: Extension",
                 link: "/part2/07_extension"
             }, {
-                text: "Open/Closed",
+                text: "15: Open/Closed",
                 link: "/part2/08_ocp"
             }],
         }, // end part 2
