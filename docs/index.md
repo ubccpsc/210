@@ -9,7 +9,7 @@ Unlike a natural language, you probably won't be *speaking* code or *listening* 
   <summary>The Language of Coding
   </summary>
   
-  By the end of the course, you'll understand what these terms mean: **type-driven development**, **test-driven development**, **functional programming**, **imperative programming**, **object-oriented programming**, **functions**, **expressions**, **statements**, **types**, **structs**, **values** **classes**, **recursion**, **iteration** **object**, **primitives**, **unit test**, **cohesion**, **coupling**. (TODO:  add other terms, organize into order)
+  By the end of the course, you'll understand what these terms mean: *type-driven development*, *test-driven development*, *functional programming*, *imperative programming*, *object-oriented programming*, *functions*, *expressions*, *statements*, *types*, *structs*, *values* *classes*, *recursion*, *iteration*, *object*, *primitives*, *unit test*, *cohesion*, *coupling*. (TODO:  add other terms, organize into order)
     
    Don't worry, we won't quiz you on these! We want you to learn these terms for the long run through applying them, rather than through flash card definitions.    
  
@@ -17,7 +17,7 @@ Unlike a natural language, you probably won't be *speaking* code or *listening* 
   <summary>Exercise: What do you know?
   </summary>
     
-   Some of these words may be familiar to you already—which ones? Try writing down a definition for them yourself, before starting the course. This will reveal the current boundaries of your knowledge. (**Don't peek at existing definitions before trying to write your own: else you won't find the boundary!**)
+   Some of these words may be familiar to you already—which ones? Try writing down a definition for them yourself, before starting the course. This will reveal the current boundaries of your knowledge. (*Don't peek at existing definitions before trying to write your own: else you won't find the boundary!*)
     
    Revisit the exercise again as we cover the material throughout the course, to assess how the boundaries of your knowledge are pushing out.       
 </details>
@@ -126,13 +126,12 @@ Each chapter in this textbook corresponds to one in-class lecture. Each lecture 
 
 The course is separated into 3 parts.
 
-In Part 1, you will learn how to build software that is correct even when developers make mistakes. Along the way, you will learn the core of a new programming language, TypeScript. Along the way, you will learn **imperative programming**, a programming style which is common to many programming languages. Keywords for Part 1 include: **types**, **statements** (`if`, `return`, `for`), **pre-conditions**, **post-conditions**, **tests**, **mutation**, **side effects**, **threads**, **asynchronous**.
+In Part 1, you will learn how to build software that is correct even when developers make mistakes. Along the way, you will learn the core of a new programming language, TypeScript. Along the way, you will learn *imperative programming*, a programming style which is common to many programming languages. Some keywords for Part 1 include: *types*, *statements* (`if`, `return`, `for`), *pre-conditions*, *post-conditions*, *tests*, *mutation*, *side effects*, and *asynchronous* development.
 
-In Part 2, you will learn how to design software split into distinct components, and how to make those components *interact* with each other without *negatively interfering* with each other. Along the way, you will learn **object-oriented programming**, a programming style Java is well-known for, but that exists in most popular programming languages. Keywords for Part 2 include: **classes**, **constructor**, **method**, **cohesion**, **exception**, **assertion**, **information hiding**, **polymorphism**.
+In Part 2, you will learn how to design software split into distinct components, and how to make those components *interact* with each other without *negatively interfering* with each other. Along the way, you will learn *object-oriented programming*, a programming style Java is well-known for, but that exists in most popular programming languages. Some keywords for Part 2 include: *classes*, *constructor*, *method*, *cohesion*, *exception*, *assertion*, *information hiding*, *polymorphism*.
 
-In Part 3, you will learn how to work with and on software systems that interact with software in wholly different code bases. Here we will scale to handling software you did not fully write yourself: nearly all software engineering done in practice is of this type. Keywords for Part 3 include: **coupling**, **readability**, **complexity**, **refactoring**, **API**, **REST API**, **fault localization**.
+In Part 3, you will learn how to work with and on software systems that interact with software in wholly different code bases. Here we will scale to handling software you did not fully write yourself: nearly all software engineering done in practice is of this type. Some keywords for Part 3 include: *coupling*, *readability*, *complexity*, *refactoring*, *API*, *REST*, and *fault localization*.
 
 ## Getting Started
 
-For logistics and syllabus, refer to the course website (TODO). 
-
+For term-specific logistics and syllabus, refer to the course website.
