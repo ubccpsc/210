@@ -11,12 +11,15 @@ Students will individually design and build a web application of their own choos
 
 ## Restrictions
 
-* The model must include a non-trivial class that maintains a collection of an _arbitrary_ (not fixed) number of items.
-    * TBD: This is the biggest weakness of the current project and should be extended with more interesting required functionality.
+* The model must include a non-trivial class that maintains a collection of an _arbitrary_ (not fixed) number of items. Specifically:
+    * Each item must itself be a class with at least one behaviour or rule of its own; a collection of bare strings or plain data objects is not sufficient. (By the end of P1.)
+    * The collection class must enforce at least one documented invariant that spans its items (e.g., no duplicates, a capacity limit, an ordering rule, no conflicting entries), established in the constructor and preserved by every method. (By the end of P1.)
+    * The model must provide at least two operations that compute a result from many items (e.g., search, filter, aggregate, rank) rather than only adding, removing, or listing them. (By the end of P2.)
+    * At least two model operations must have documented expected failures, with tests covering the failure paths. (At least one by the end of P1; at least two by the end of P2.)
 * Must be your own code; no code from other students, prior terms, or course materials may be in the repository, though npm packages are permitted.
 * TypeScript is required throughout; plain JavaScript is not permitted in either the frontend or the backend.
 * Phases must be completed in order; each phase builds on the last.
-* The domain cannot duplicate a lab, lecture example, or activity from the course, and cannod be a TODO app.
+* The domain cannot duplicate a lab, lecture example, or activity from the course, and cannot be a TODO app.
 * No calling external web-service APIs; the application must be self-contained.
 
 ## Phases
@@ -27,11 +30,9 @@ Goal: Decide what to build, document it, and implement and test the model.
 
 Tasks:
 
-* T1: Choose an application. It must be:
-    * Your own work, from within this term.
-    * Comply with the project restrictions above.
-    * Must have a non-trivial model class that keeps track of an arbitrary number of items.
-    * TBD: there must be _something_ more we we want, that can be described generally enough to apply to all projects.
+* T1: Choose an application. It must:
+    * Be your own work, from within this term.
+    * Comply with the project restrictions above. The model requirements in particular should guide your choice: pick a domain rich enough to support an invariant, derived operations, and meaningful failures.
 * T2: Write 1-2 paragraphs in `README.md` describing what the application does, who it is for, and why it is useful.
 * T3: Interview a user for the app, and follow a user-centred design approach to craft a set of at least four user stories that capture what the app should do.
     * Must include role-goal-benefit statements.
@@ -41,11 +42,12 @@ Tasks:
     * Should be independent, but can have an implied ordering (e.g., the ability to log in might be required for deleting elements).
     * Must be fully captured in the `README.md`; each user story should be called `Story N: <TITLE>` and appear under its own `##` heading.
     * One user story must be about viewing a list of items and another must be about manipulating the list. None of the user stories can be about persistence.
-* T4: Implement the model in TypeScript (just the elements, with the programmatic ability to add/remove them). Define interfaces for key abstractions, implement classes that satisfy them, and write tests covering the model elements needed for the four user stories.
+* T4: Implement the model in TypeScript (just the elements, with the programmatic ability to add/remove them). Define interfaces for key abstractions, implement classes that satisfy them, and write tests covering the model elements needed for the four user stories. Your user stories may anticipate the derived operations required by the model restrictions; those only need to work by the end of Phase 2.
 
 Grading notes:
 * Tests are required for all model classes.
 * Commit history is taken into account; you need to be able to show your work.
+* The Phase 1 model requirements from the restrictions are assessed here: be ready to state your collection invariant, show the code and tests that enforce it, and show at least one expected failure being tested.
 * Graded orally: Demonstrate test coverage, and an understanding of how all four user stories are supported by the code written.
 
 ### Phase 2: REST Backend
@@ -55,17 +57,18 @@ Goal: Expose the model over REST and make data persist across sessions.
 Tasks:
 
 * T1: Write two additional user stories (`Story 5` and `Story 6`) to `README.md`, using the same format as from P1 that describes saving state and loading/restoring state.
-* T2: Persist data to disk as JSON so the application does not start from scratch on restart.
-* T3: Implement and test a REST backend (using Express or the course-provided framework) with routes that support all user stories from Phases 1 and 2.
-* T4: Write endpoing documentation (saved in `API.md`) describing each endpoint, its inputs, outputs, and any other 
+* T2: Complete the model: implement and test the derived operations and any remaining expected-failure handling required by the model restrictions.
+* T3: Persist data to disk as JSON so the application does not start from scratch on restart.
+* T4: Implement and test a REST backend (using Express or the course-provided framework) with routes that support all user stories from Phases 1 and 2.
+* T5: Write endpoint documentation (saved in `API.md`) describing each endpoint, its inputs, outputs, and any other 
 information a developer would need to effectively use the endpoint.
-* T5: Add two new user stories (`Story 7` and `Story 8`) to `README.md` using the same format as P1 that explores new aspects of the project not captured in the original user stories or in the work done in this deliverable. At the end of this phase you have eight user stories, six of which are implemented.
+* T6: Add two new user stories (`Story 7` and `Story 8`) to `README.md` using the same format as P1 that explores new aspects of the project not captured in the original user stories or in the work done in this deliverable. At the end of this phase you have eight user stories, six of which are implemented.
 
 Grading notes:
 * The four P1 user stories and the two persistence stories are each worth 15% of the deliverable.
 * If a user story is missing from P1, that story is graded as 0 for this deliverable, but it should be written now so it is not penalised again in P3.
 * The last 10% is from the quality of the REST endpoint developer documentation.
-* Graded orally: Demonstrate test coverage and REST endpoint documentation, and demonstrate an understanding of how the backend supports the six user stories, including exceptional behaviour handling.
+* Graded orally: Demonstrate test coverage and REST endpoint documentation, and demonstrate an understanding of how the backend supports the six user stories, including the derived operations and exceptional behaviour handling.
 
 ### Phase 3: Web Frontend
 
@@ -75,7 +78,7 @@ Tasks:
 
 * T1: Implement and test any backend work required for the two new user stories from P2.
 * T2: Implement a web frontend for the eight user stories.
-* T3: Add a `## Final Design` section to the end of `README.md` describing the final design of the system, and detailing at least two strenghts and two weaknesses (specifically about future evolvability) of this design. For each weakness, describe how it could be improved.
+* T3: Add a `## Final Design` section to the end of `README.md` describing the final design of the system, and detailing at least two strengths and two weaknesses (specifically about future evolvability) of this design. For each weakness, describe how it could be improved.
 * T4: Create a demo video for your app (max 2 minutes 30 seconds):
     * 30 seconds intro.
     * 15 seconds demonstrating each of the eight user stories.
