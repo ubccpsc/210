@@ -1,6 +1,6 @@
 # 210 Project
 
-Students will individually design and build a web application of their own choosing. The project runs across three phases. Phase 1 focuses on user-centred design and the TypeScript model that will drive the application. Phase 2 adds a REST backend that persists data and exposes the model over HTTP. Phase 3 adds a web frontend that consumes the backend.
+Students will individually design and build a web application of their own choosing. The project runs across three phases. Phase 1 focuses on user-centred design and the TypeScript model that will drive the application. Phase 2 adds a REST backend that persists data and exposes the model over HTTP. Phase 3 adds a web frontend that consumes the backend. Each of the three project deliverables is equally weighted within the project grade for the course. Deadlines are firm and cannot be extended.
 
 ## Goals
 
@@ -11,13 +11,13 @@ Students will individually design and build a web application of their own choos
 
 ## Restrictions
 
-* Must be your own code; no code from other students, prior terms, or course materials may be in the repository, though npm packages are permitted.
-* The domain cannot be a TODO list.
-* The domain cannot duplicate a lab, lecture example, or activity from the course.
 * The model must include a non-trivial class that maintains a collection of an _arbitrary_ (not fixed) number of items.
-* No calling external web-service APIs; the application must be self-contained.
+    * TBD: This is the biggest weakness of the current project and should be extended with more interesting required functionality.
+* Must be your own code; no code from other students, prior terms, or course materials may be in the repository, though npm packages are permitted.
 * TypeScript is required throughout; plain JavaScript is not permitted in either the frontend or the backend.
 * Phases must be completed in order; each phase builds on the last.
+* The domain cannot duplicate a lab, lecture example, or activity from the course, and cannod be a TODO app.
+* No calling external web-service APIs; the application must be self-contained.
 
 ## Phases
 
@@ -27,7 +27,11 @@ Goal: Decide what to build, document it, and implement and test the model.
 
 Tasks:
 
-* T1: Choose an application. It must be original, cannot be a TODO app, and must have a non-trivial model class that keeps track of an arbitrary number of items.
+* T1: Choose an application. It must be:
+    * Your own work, from within this term.
+    * Comply with the project restrictions above.
+    * Must have a non-trivial model class that keeps track of an arbitrary number of items.
+    * TBD: there must be _something_ more we we want, that can be described generally enough to apply to all projects.
 * T2: Write 1-2 paragraphs in `README.md` describing what the application does, who it is for, and why it is useful.
 * T3: Interview a user for the app, and follow a user-centred design approach to craft a set of at least four user stories that capture what the app should do.
     * Must include role-goal-benefit statements.
@@ -50,11 +54,12 @@ Goal: Expose the model over REST and make data persist across sessions.
 
 Tasks:
 
-* T1: Write two additional user stories, one for saving state and one for loading/restoring it, and add them to `README.md`.
-* T2: Implement and test a REST backend (using Express or the course-provided framework) with routes that support all user stories from Phases 1 and 2.
-* T3: Persist data to disk as JSON so the application does not start from scratch on restart.
-* T4: Write endpoing documentation (saved in `API.md`) describing each endpoint, its inputs, outputs, and any other information a developer would need to effectively use the endpoint.
-* T5: Add two new user stories to `README.md` that explore new aspects of the project not captured in the original user stories or in the work done in this deliverable. At the end of this phase you have eight user stories, six of which are implemented.
+* T1: Write two additional user stories (`Story 5` and `Story 6`) to `README.md`, using the same format as from P1 that describes saving state and loading/restoring state.
+* T2: Persist data to disk as JSON so the application does not start from scratch on restart.
+* T3: Implement and test a REST backend (using Express or the course-provided framework) with routes that support all user stories from Phases 1 and 2.
+* T4: Write endpoing documentation (saved in `API.md`) describing each endpoint, its inputs, outputs, and any other 
+information a developer would need to effectively use the endpoint.
+* T5: Add two new user stories (`Story 7` and `Story 8`) to `README.md` using the same format as P1 that explores new aspects of the project not captured in the original user stories or in the work done in this deliverable. At the end of this phase you have eight user stories, six of which are implemented.
 
 Grading notes:
 * The four P1 user stories and the two persistence stories are each worth 15% of the deliverable.
@@ -70,7 +75,7 @@ Tasks:
 
 * T1: Implement and test any backend work required for the two new user stories from P2.
 * T2: Implement a web frontend for the eight user stories.
-* T3: Add a section to the end of `README.md` describing the final design of the system, and detailing at least two strenghts and two weaknesses (specifically about future evolvability) of this design. For each weakness, describe how it could be improved.
+* T3: Add a `## Final Design` section to the end of `README.md` describing the final design of the system, and detailing at least two strenghts and two weaknesses (specifically about future evolvability) of this design. For each weakness, describe how it could be improved.
 * T4: Create a demo video for your app (max 2 minutes 30 seconds):
     * 30 seconds intro.
     * 15 seconds demonstrating each of the eight user stories.
@@ -82,6 +87,8 @@ Grading notes:
 
 
 # Prior Project
+
+This is the format of the 210 project in past terms, for reference as we develop the new project requirements.
 
 5 phases:
 
