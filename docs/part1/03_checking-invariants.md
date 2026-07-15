@@ -265,6 +265,7 @@ function lateFee(daysLate: number): number {
 ```
 <details class="tooltip exercise">
 <summary>Where's <code>else</code>?</summary>
+
 `lateFee` is written with no `else` cases, but this is not the only way to write the function. Rewrite `lateFee` such that all statements are nested within an `if` or `else`. You'll need more than one statement in some of the blocks.
 </details>
 
@@ -430,7 +431,7 @@ import { assert } from "@course/toolkit";
 Some TypeScript/JavaScript frameworks beyond the course provide `assert`-like functions as well. By the end of Part 2, you'll know how to implement `assert` yourself, so you'll be able to use this concept in whatever code you write. 
 </details>
 
-The presence of assertions in the implementation like this can make the code much easier to write, because your implementation can trust that the invariants are valid for the remainder of the function. This helps reduce defensive checks you might otherwise need to make in your code. `assert` also communicates to other developers that these are checks for valid input, rather than checks part of the core program logic. 
+The presence of assertions in the implementation like this can make the code much easier to write and debug, because your implementation can trust that the invariants are valid for the remainder of the function. This helps reduce defensive checks you might otherwise need to make in your code. `assert` also communicates to other developers that these are checks for valid input, rather than checks part of the core program logic. 
 
 ```typescript
 /**
@@ -447,7 +448,7 @@ The presence of assertions in the implementation like this can make the code muc
  */
 function renew(loan: Loan): Result<Loan, string> {
     assert(loan.renewalsRemaining >= 0, "Loan invariant violated: negative renewals");
-    assert(loan.renewalsRemaining > 2, "Loan invariant violated: too many renewals");
+    assert(loan.renewalsRemaining <= 2, "Loan invariant violated: too many renewals");
 
     if (loan.renewalsRemaining === 0) {
         // expected: running out of renewals is a normal outcome
@@ -465,11 +466,17 @@ function renew(loan: Loan): Result<Loan, string> {
 
 Note where the `assert` calls live: unlike `checkExpect`, which sits in `test/` and probes chosen inputs from the outside, `assert` sits in the source code in `src/` and is evaluated on *every* execution of the function, whoever the caller is. Halting may seem drastic, but it is the right response to an impossible state.
 
-At the start of this chapter, we saw that operations built on a value whose invariant has failed quietly produce nonsense. For instance, `lateFee(5.5)` returns a value, even though late fees are only defined as whole numbers.  An assertion *stops* the program at the *first sign of corruption*, before the nonsense can spread or be written somewhere permanent. This is the behaviour we deferred earlier in the chapter: when a caller *violates* a precondition, an assertion is how the function *refuses to continue*. 
+At the start of this chapter, we saw that operations built on a value whose invariant has failed quietly produce nonsense. For instance, `lateFee(5.5)` returns a value, even though late fees are only defined as whole numbers.  An assertion *stops* the program at the *first sign of corruption*, before the nonsense can spread or be written somewhere permanent. This is the behaviour we deferred earlier in the chapter: when a caller *violates* a precondition, an `assert` is how the function *refuses to continue*. 
 
-One relaxation to this approach is for functions that take *user-specified input*. Rather than crashing, user-specified input is often explicitly validated and rejected as expected errors (because in practice it is useful to expect users to do unreasonable things). For example, when you pass an TypeScript program with invalid syntax to `tsc`, it tells you where an error is, rather than simply 
+<details class="tooltip deep-dive">
+<summary>Failing with User-Specified Inputs: Give More Detail</summary>
 
-Now the tests, and a distinction worth being careful about. The expected error is a *documented outcome*: the postcondition names the exact value the caller receives (an `ok: false` result carrying the reason), so we test it with `checkExpect`, the same way we test every other clause of the contract:
+One relaxation to the `assert` approach is for functions that take *user-specified input*. Rather than crashing, user-specified input is often explicitly validated and rejected as expected errors (because in practice, it is useful to expect users to do unreasonable things). 
+
+For example, when you pass an TypeScript program with invalid syntax to `tsc`, it tells you where an error is, rather than raising an error that says only `SyntaxError`.  
+</details>
+
+To write tests for errors, we must be clear about the difference between unexpected and expected errors. The expected error is a *documented outcome*: the postcondition names the exact value the caller receives (an `ok: false` result carrying the reason), so we test it with `checkExpect`, the same way we test every other clause of the contract:
 
 ```typescript
 test("renewal succeeds while renewals remain", () => {
@@ -505,13 +512,25 @@ checkError(() => functionUnderTest(arg1, arg2), <message>);
 ```
 `checkError` then executes its first function argument and checks whether an error occurs during execution. If it does, `checkError` passes. 
 
-If we were to pass `renew(corrupted)` directly as an argument, `renew(corrupted)` would execute, and fail, before `checkError`, which will check the error, was ever called.
+For example, in the above, 
+```typescript
+checkError(() => renew(corrupted), "Loan invariant violated: negative renewals");
+```
+`checkError` calls `renew(corrupted)` and checks whether and error occurs.
+
+By contrast, if we were to try and write something like: 
+```typescript
+checkExpect(renew(corrupted), "Loan invariant violated: negative renewals")
+```
+`renew(corrupted)` would execute, and fail, before `checkExpect` is called, halting the entire execution of the test suite. 
 </details>
 <details class="tooltip link-110">
 <summary>Higher-Order Functions</summary>
 
 `checkError` is a higher-order function, so called because it takes a function as an argument. You've seen this before, notably in `map`, `filter`, and `fold`.
 </details>
+
+In short:
 
 **Expected errors** should be tested analogously to how a user would interact with a function, which means we should use `checkExpect`: a refused renewal is not a malfunction but a specified result, and the contract tells you exactly what value to expect. 
 
