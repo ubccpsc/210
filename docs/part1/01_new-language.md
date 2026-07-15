@@ -4,7 +4,7 @@ This chapter introduces TypeScript, the language we use for the rest of the cour
 
 To make the transition concrete, we scaffold from the teaching languages you learned in 110. Each new concept is related back to the idea it corresponds to in the teaching languages, and the differences are called out as they arise. The next language you learn may offer no such scaffolding, and that is fine. Having built these comparisons once, you will know which questions to ask of any new language. If you came from another language this still applies, and if that language was Python, the notion of **types** will be new to you as well.
 
-For brevity's sake, we'll use the term BSL ([Beginning Student Language](https://docs.racket-lang.org/htdp-langs/beginner.html)) as shorthand for the teaching languages used in CPSC 110.
+For brevity's sake, we'll use the term ISL ([Intermediate Student Language with Lambdas](https://docs.racket-lang.org/htdp-langs/intermediate-lam.html)) as shorthand for the teaching languages used in CPSC 110. Many ISL features are also present in BSL ([Beginner Student Language](https://docs.racket-lang.org/htdp-langs/beginner.html)).
 
 ## Software Systems and Programming Languages
 
@@ -15,7 +15,7 @@ The most obvious way languages differ is **syntax**. Syntax represents the requi
 <details class="tooltip link-110">
 <summary>A Difference in Syntax: Prefix vs Infix</summary>
 
-In BSL, to add 2 and 3, we write:
+In ISL, to add 2 and 3, we write:
 
 ```racket
 (+ 2 3)
@@ -31,14 +31,14 @@ While the characters are different (syntax), both have exactly the same meaning.
 
 More precisely, we would call any syntax where the operator appears before the operands `(+ 2 3)` or `+ 2 3` *prefix* syntax. When the operator appears between the operands, such as `2 + 3`, we call this *infix* syntax. 
 
-In BSL, *all* syntax was prefix. In TypeScript, most basic operations (e.g., addition, comparison) are written in infix syntax.
+In ISL, *all* syntax was prefix. In TypeScript, most basic operations (e.g., addition, comparison) are written in infix syntax.
 </details>
 
 A more important way languages differ though is in the **mechanisms the language enforces for you**. A language can check things about your program before it ever runs, or it can leave those checks to you. 
 
-Enforcement mechanisms are where TypeScript differs most from BSL. TypeScript makes **types** an explicit, checked part of the program, and it analyses and transforms your source code with a **compiler** before the program executes. The compiler catches many common programming mistakes and makes it easier to build large systems. 
+Enforcement mechanisms are where TypeScript differs most from ISL. TypeScript makes **types** an explicit, checked part of the program, and it analyses and transforms your source code with a **compiler** before the program executes. The compiler catches many common programming mistakes and makes it easier to build large systems. 
 
-Another big difference is that TypeScript primarily expresses control flow using **statements**, which differ from the expressions you used in BSL.
+Another big difference is that TypeScript primarily expresses control flow using **statements**, which differ from the expressions you used in ISL.
 
 ## Quick Primer on Functions
 
@@ -60,7 +60,7 @@ We will expand on function declarations later in this chapter.
 
 ## Types as a Language Mechanism
 
-In BSL you documented type information as comments. A function's signature, like `; Number -> String`, told the reader what the function expected (a value representing a `Number`) and produced (a value representing a `String`). However, the language *did not check* that those types were honoured. If you passed a string where a number was expected, the language did not object; the mistake surfaced later, when you ran the program and it did not do what you expected.
+In ISL you documented type information as comments. A function's signature, like `; Number -> String`, told the reader what the function expected (a value representing a `Number`) and produced (a value representing a `String`). However, the language *did not check* that those types were honoured. If you passed a string where a number was expected, the language did not object; the mistake surfaced later, when you ran the program and it did not do what you expected.
 
 <details class="tooltip deep-dive">
   <summary>Basic Types: <code>number</code>, <code>string</code>, and <code>boolean</code></summary>
@@ -98,12 +98,12 @@ defines a function with the name `fn`, with parameters: `x` of type `X`, `y` of 
 Parameter types come after the parameter they type, separated by a `:`. The return type is placed after the parameter list, following a second `:`.
 </details>
 
-Note that the type checker *only* helps where types are *written down*. In TypeScript we type the inputs and output of every function: each parameter gets a type, and so does the return value. These are the same places you would have written type comments in BSL.
+Note that the type checker *only* helps where types are *written down*. In TypeScript we type the inputs and output of every function: each parameter gets a type, and so does the return value. These are the same places you would have written type comments in ISL.
 
 <details class="tooltip link-110">
-<summary>Type Comments in BSL</summary>
+<summary>Type Comments in ISL</summary>
 
-In BSL, we would have captured the `letterGrade` type information as a comment in the signature:
+In ISL, we would have captured the `letterGrade` type information as a comment in the signature:
 
 ```racket
 ; Number -> String
@@ -111,7 +111,7 @@ In BSL, we would have captured the `letterGrade` type information as a comment i
 (define (letter-grade score) ... )
 ```
 
-But BSL does not use the signature to check that `letter-grade` is invoked correctly.
+But ISL does not use the signature to check that `letter-grade` is invoked correctly.
 
 ```racket
 ; no error reported before running the program
@@ -150,7 +150,7 @@ The compiler will tell you both where the error is and what is wrong with your c
 The computer will not be able to execute the program until the invalid calls to `letterGrade` are fixed.
 </details>
 
-This changes when errors in your program are surfaced to you. In BSL and other dynamically-typed languages (e.g. Python), a type mistake surfaces *while the program runs*, and only if you happened to execute code that hits that type mistake. These are **runtime** errors, because they happen at the *time* the program *runs*. Sometimes you'll see the term **dynamic**: this means the same thing as **runtime**. 
+This changes when errors in your program are surfaced to you. In ISL and other dynamically-typed languages (e.g. Python), a type mistake surfaces *while the program runs*, and only if you happened to execute code that hits that type mistake. These are **runtime** errors, because they happen at the *time* the program *runs*. Sometimes you'll see the term **dynamic**: this means the same thing as **runtime**. 
 
 In TypeScript, the `tsc` compiler checks your types *first*, before execution. Any type errors in your *entire program* are flagged to you to fix before your code can execute.  This is what is meant when we say that types help catch bugs "before runtime": the compiler is the thing doing the catching, before you execute (i.e., run) your program. We call these errors, and any other errors that are flagged *before running* the program, **static** errors. 
 
@@ -189,7 +189,7 @@ An IDE runs the language's type checker continuously in the background as you ty
 ## Control Flow Statements (<code>if</code> and <code>return</code>)
 
 
-There are two main kinds of syntax in all programming languages: expressions and statements. BSL is built almost entirely from **expressions**. Every chunk of BSL code is evaluated to produce a value, and that value is passed into the expression that contains it. 
+There are two main kinds of syntax in all programming languages: expressions and statements. ISL is built almost entirely from **expressions**. Every chunk of ISL code is evaluated to produce a value, and that value is passed into the expression that contains it. 
 
 TypeScript has expressions too, but it adds a second kind of construct: the **statement**. A statement's purpose is not to evaluate to a single value; it performs an action, such as making a decision or returning from a function. Often this action can change program **state**: *state* includes the names that are defined (e.g., variable or function names), and the values those names take on. A TypeScript program is written as a sequence of statements that run in order.
 
@@ -197,7 +197,7 @@ We saw one type of statement already: the function definition. Today we will int
 
 #### <code>if</code> statements
 
-The `if` statement chooses whether to run a block of code based on a condition. Unlike BSL's `cond`, it does not evaluate to a value, it only directs which code runs. The `if` statement is the most basic **control flow** statement in most languages. By directing how the program executes, the `if` controls the flow of execution.
+The `if` statement chooses whether to run a block of code based on a condition. Unlike ISL's `cond`, it does not evaluate to a value, it only directs which code runs. The `if` statement is the most basic **control flow** statement in most languages. By directing how the program executes, the `if` controls the flow of execution.
 
 A basic if block is shown below. If the condition `grade >= 50` is `true`, the code labelled `// (A)` will execute. If the condition `grade >= 50` is `false`, the code labelled `// (B)` will execute. 
 
@@ -392,7 +392,7 @@ Each `return` exits the function immediately, so the order of the checks matters
 
 `if` operates very similarly to `cond`. 
 
-An equivalent BSL function to `letterGrade` looks like:
+An equivalent ISL function to `letterGrade` looks like:
 
 ```racket
 ; Number -> String
@@ -408,7 +408,7 @@ An equivalent BSL function to `letterGrade` looks like:
 
 the TypeScript version says the same thing with statements: each `cond` clause becomes an `if` whose body returns that clause's value, and `else` becomes the final `return`. The behaviour is identical; what changed is that you spell out the control flow step-by-step rather than as a single expression.
 
-The core difference between `if` and `cond` is that `cond` is an expression: `cond` evaluates to one value. The bodies of the functions you defined in BSL contained a single expression `e` (above,`e` is the `cond` expression) and `(letter-grade 87)` simply evaluates `e` with `87` in the place of `score`. 
+The core difference between `if` and `cond` is that `cond` is an expression: `cond` evaluates to one value. The bodies of the functions you defined in ISL contained a single expression `e` (above,`e` is the `cond` expression) and `(letter-grade 87)` simply evaluates `e` with `87` in the place of `score`. 
 
 In TypeScript, a function body is not a single expression: it is a list of statements which will be run in order. TypeScript functions will not return a value unless they are told to by a `return` statement. Later, we'll see that we might want to write functions that have no `return` statements at all. 
 

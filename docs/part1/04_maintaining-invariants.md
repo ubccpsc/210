@@ -106,7 +106,7 @@ So far, every object property we have used has held a data value: `song.title` h
 </details>
 
 <details class="tooltip link-110">
-<summary>Operations in Structures in BSL</summary>
+<summary>Operations in Structures in ISL</summary>
 
 CPSC 110 allowed the same move: a structure's fields could hold functions, so a data definition could bundle a value's operations with the value itself.
 

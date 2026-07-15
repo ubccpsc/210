@@ -4,7 +4,7 @@
 
 You already know how to program, and you already know that programs can go wrong. In CPSC 110 you learned to defend against mistakes through discipline: you documented each function's signature, you wrote examples before the function bodies, and you followed design recipes carefully. That discipline worked, but almost none of it was enforced. A signature comment that said `Number -> String` was a promise you made to yourself, and neither the language nor any other tool checked it.
 
-Part 1 builds on that groundwork and lays the foundations of software construction that apply across a broad set of programming languages. Along the way we will learn TypeScript, a language that checks far more of your work than BSL did. Two concerns develop together across these chapters. The first is **correctness**: specifying what a program should do precisely enough that the language, the tests, or you can confirm that it does. The second is **capability**: the building blocks a real program needs, from structured data to collections, changing state, and communication with files and services. Throughout, we are careful to separate three kinds of assurance: guarantees the compiler can check before the program runs, behaviours that can only be confirmed by running it, and promises that still rest on the discipline of the programmer.
+Part 1 builds on that groundwork and lays the foundations of software construction that apply across a broad set of programming languages. Along the way we will learn TypeScript, a language that checks far more of your work than ISL did. Two concerns develop together across these chapters. The first is **correctness**: specifying what a program should do precisely enough that the language, the tests, or you can confirm that it does. The second is **capability**: the building blocks a real program needs, from structured data to collections, changing state, and communication with files and services. Throughout, we are careful to separate three kinds of assurance: guarantees the compiler can check before the program runs, behaviours that can only be confirmed by running it, and promises that still rest on the discipline of the programmer.
 
 Our programs in Part 1 stay small enough that one person can hold the whole design in their head. That assumption is what allows personal discipline to uphold the promises the language cannot. Part 2 moves beyond this size restriction and asks what happens when programs, teams, and lifetimes outgrow any one person.
 
@@ -20,7 +20,7 @@ By the end of Part 1, you will be able to:
 
 ## Building on CPSC 110
 
-TypeScript is introduced by scaffolding from the BSL you already know. Where a concept is familiar we point at its BSL counterpart; where it differs we call the difference out explicitly. Many of the ideas are not new. Designing data, breaking a problem into functions, and writing examples before code all carry over. What changes is how much the language records and checks for you. The central change is the **type**: in BSL a signature like `; Number -> String` was a comment the language ignored, while in TypeScript it is a checked part of the program, and a whole category of mistakes becomes an error reported before the program runs rather than a bug discovered afterward.
+TypeScript is introduced by scaffolding from the ISL you already know. Where a concept is familiar we point at its ISL counterpart; where it differs we call the difference out explicitly. Many of the ideas are not new. Designing data, breaking a problem into functions, and writing examples before code all carry over. What changes is how much the language records and checks for you. The central change is the **type**: in ISL a signature like `; Number -> String` was a comment the language ignored, while in TypeScript it is a checked part of the program, and a whole category of mistakes becomes an error reported before the program runs rather than a bug discovered afterward.
 
 <details class="tooltip link-110">
 <summary>Discipline in CPSC 110</summary>
@@ -62,7 +62,7 @@ Part 1 covers three broad themes across seven chapters.
 
 **The language and its data:**
 
-1. [Learning a New Programming Language](./01_new-language) introduces TypeScript from BSL: types as a checked mechanism, the compiler, statements like `if` and `return`, and the static and dynamic views the rest of the part builds on.
+1. [Learning a New Programming Language](./01_new-language) introduces TypeScript from ISL: types as a checked mechanism, the compiler, statements like `if` and `return`, and the static and dynamic views the rest of the part builds on.
 2. [Using Types to Model Problems](./02_model-types) designs precise data: compound types, unions for distinct cases, and recursive structure, with functions whose shape follows the shape of the data.
 
 **Correctness:**

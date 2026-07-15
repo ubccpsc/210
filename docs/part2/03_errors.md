@@ -257,7 +257,7 @@ The reason a failed assertion halts the program is simply that nothing ever catc
 </details>
 
 <details class="tooltip link-110">
-<summary>Raising Errors in BSL</summary>
+<summary>Raising Errors in ISL</summary>
 
 You raised errors in CPSC 110 with `error`, which stopped the program with a message:
 
