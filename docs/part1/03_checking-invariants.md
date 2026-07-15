@@ -448,7 +448,7 @@ The presence of assertions in the implementation like this can make the code muc
  */
 function renew(loan: Loan): Result<Loan, string> {
     assert(loan.renewalsRemaining >= 0, "Loan invariant violated: negative renewals");
-    assert(loan.renewalsRemaining <= 2, "Loan invariant violated: too many renewals");
+    assert(loan.renewalsRemaining > 2, "Loan invariant violated: too many renewals");
 
     if (loan.renewalsRemaining === 0) {
         // expected: running out of renewals is a normal outcome
