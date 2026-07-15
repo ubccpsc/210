@@ -1,6 +1,8 @@
 # 210 Project
 
-Students will individually design and build a web application of their own choosing. The project runs across three phases. Phase 1 focuses on user-centred design and the TypeScript model that will drive the application. Phase 2 adds a REST backend that persists data and exposes the model over HTTP. Phase 3 adds a web frontend that consumes the backend. Each of the three project deliverables is equally weighted within the project grade for the course. Deadlines are firm and cannot be extended.
+Students will individually design and build a web application of their own choosing. The project runs across three phases. Phase 1 focuses on user-centred design and the TypeScript model that will drive the application. Phase 2 adds a REST backend that persists data and exposes the model over HTTP. Phase 3 adds a web frontend that consumes the backend. 
+
+Each of the three project deliverables is equally weighted within the project grade for the course. Deadlines detailed on the course schedule and are firm and cannot be extended. Since grading is oral, failure to attend your lab session the week after a project deadline will result in a grade of 0 for the project phase.
 
 ## Goals
 
@@ -34,14 +36,14 @@ Tasks:
     * Be your own work, from within this term.
     * Comply with the project restrictions above. The model requirements in particular should guide your choice: pick a domain rich enough to support an invariant, derived operations, and meaningful failures.
 * T2: Write 1-2 paragraphs in `README.md` describing what the application does, who it is for, and why it is useful.
-* T3: Interview a user for the app, and follow a user-centred design approach to craft a set of at least four user stories that capture what the app should do.
-    * Must include role-goal-benefit statements.
-    * Must have an explicit definition of done.
-    * Should detail preconditions and postconditions.
-    * Should detail how errors are detected or handled. 
-    * Should be independent, but can have an implied ordering (e.g., the ability to log in might be required for deleting elements).
-    * Must be fully captured in the `README.md`; each user story should be called `Story N: <TITLE>` and appear under its own `##` heading.
-    * One user story must be about viewing a list of items and another must be about manipulating the list. None of the user stories can be about persistence.
+* T3: Interview a user for the app, and follow a user-centred design approach to craft a set of exactly four user stories that capture what the app should do. Note in `README.md` who you interviewed and what you learned from them.
+    * Must include a role-goal-benefit statement: As a `<role>`, I want `<goal>`, so that `<benefit>`.
+    * Must list acceptance criteria in Given/When/Then form: the specific, checkable conditions under which the story is done. Given states the preconditions and Then states the postconditions, so the contract vocabulary you already use for functions applies to a whole feature.
+    * The acceptance criteria must cover at least one failure path as well as the success path.
+    * Should be independent, but can have an implied ordering (e.g., creating a collection might be required before adding items to it).
+    * Must be fully captured in the `README.md`; each user story should be called `### Story N: <TITLE>` and appear under a global `## User Stories` header.
+    * Must be ordered by priority, with `Story 1` the most important; include a one-sentence justification for the ordering.
+    * One user story must be about viewing a list of items and another must be about manipulating the list. At least one must involve a derived behaviour (searching, filtering, aggregating, or ranking items). None of the user stories can be about persistence.
 * T4: Implement the model in TypeScript (just the elements, with the programmatic ability to add/remove them). Define interfaces for key abstractions, implement classes that satisfy them, and write tests covering the model elements needed for the four user stories. Your user stories may anticipate the derived operations required by the model restrictions; those only need to work by the end of Phase 2.
 
 Grading notes:
@@ -60,8 +62,7 @@ Tasks:
 * T2: Complete the model: implement and test the derived operations and any remaining expected-failure handling required by the model restrictions.
 * T3: Persist data to disk as JSON so the application does not start from scratch on restart.
 * T4: Implement and test a REST backend (using Express or the course-provided framework) with routes that support all user stories from Phases 1 and 2.
-* T5: Write endpoint documentation (saved in `API.md`) describing each endpoint, its inputs, outputs, and any other 
-information a developer would need to effectively use the endpoint.
+* T5: Write endpoint documentation (saved in `API.md`) describing each endpoint, its inputs, outputs, and any other information a developer would need to effectively use the endpoint.
 * T6: Add two new user stories (`Story 7` and `Story 8`) to `README.md` using the same format as P1 that explores new aspects of the project not captured in the original user stories or in the work done in this deliverable. At the end of this phase you have eight user stories, six of which are implemented.
 
 Grading notes:
@@ -77,15 +78,15 @@ Goal: Create a browser-based interface for the backend.
 Tasks:
 
 * T1: Implement and test any backend work required for the two new user stories from P2.
-* T2: Implement a web frontend for the eight user stories.
+* T2: Implement a web frontend for the eight user stories. It must enable the user you interviewed in P1 to accomplish all of the specified user stories. 
 * T3: Add a `## Final Design` section to the end of `README.md` describing the final design of the system, and detailing at least two strengths and two weaknesses (specifically about future evolvability) of this design. For each weakness, describe how it could be improved.
 * T4: Create a demo video for your app (max 2 minutes 30 seconds):
-    * 30 seconds intro.
-    * 15 seconds demonstrating each of the eight user stories.
-    * Must either be committed to the repo as a single file (max file size 100 MB if in the repo), or be on a single publicly accessible link (e.g., YouTube) that the TAs can access without an account.
+    * 30 second intro.
+    * 15 seconds for demonstrating each of the eight user stories.
+    * Must either be committed to the repo as a single file (max file size 100 MB if in the repo), or be on a single publicly accessible link (e.g., a public or private YouTube video) that the TAs can access without an account or authentication credentials.
 
 Grading notes:
-* Each user story is worth 10% of the deliverable grade; the final 20% is from the video.
+* Each user story is worth 10% of the deliverable grade; the final 20% is from T3/T4.
 * Graded orally: Demonstrate the eight user stories and error handling. Demonstrate an understanding of how the code is designed, how it works, and how it can be extended in the future.
 
 
