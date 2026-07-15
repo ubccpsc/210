@@ -153,7 +153,7 @@ Assertions are the core of any test case: they validate that a dynamic behaviour
 <details class="tooltip link-110">
 <summary>Tests vs <code>check-expect</code></summary>
 
-BSL used `check-expect` as a standalone expression at the top level of a file. TypeScript's `test` wrapper is a small change in form: it names the test and groups related checks together. The underlying idea is the same: write down what you expect and let the framework compare.
+ISL used `check-expect` as a standalone expression at the top level of a file. TypeScript's `test` wrapper is a small change in form: it names the test and groups related checks together. The underlying idea is the same: write down what you expect and let the framework compare.
 
 ```racket
 (check-expect (late-fee 2) 0)
@@ -278,9 +278,8 @@ All three tests now pass:
 Ntice what did *not* change: the tests. They were correct all along, because they were written from the specification, and so the requirement our implementation forgot had nowhere to hide. If we had written our tests *after* the implementation, by reading our own code and checking that it does what it appears to do, we would probably not have thought to test the maximum: the first prototype of `lateFee` contained  no hint that a maximum should exist. Tests written first keep the specification in charge; tests written after tend to mirror the code, mistakes included.
 
 
-(TODO: we already introduced const in Chapter 2)
 <details class="tooltip ts-tips">
-<summary>The <code>const</code> Keyword</summary>
+<summary>Recall: <code>const</code> </summary>
 
 `const` introduces a named value. Here `fee` names the result of the per-day calculation so it can be compared against the maximum and then returned. A `const` cannot be reassigned after it is defined.
 </details>
@@ -307,7 +306,7 @@ We wrote the `lateFee` suite by instinct: read the specification, turn each clau
 
 ### Equivalence Class Partitioning
 
-The most direct way to choose test inputs is to divide the input space into **equivalence classes**: groups of inputs that the specification says should be handled the same way. You then choose at least one **representative**  (TODO: should it be bolded?) from each class.
+The most direct way to choose test inputs is to divide the input space into **equivalence classes**: groups of inputs that the specification says should be handled the same way. You then choose at least one **representative**  from each class.
 
 The `lateFee` specification divides its input into three classes:
 

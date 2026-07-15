@@ -56,7 +56,7 @@ const notSet: undefined = undefined;
 <details class="tooltip link-110">
   <summary><code>const</code> vs <code>define</code></summary>
 
-Where in BSL, you wrote 
+Where in ISL, you wrote 
 ```racket
 (define course-name "CPSC 210")
 ```

@@ -91,9 +91,9 @@ digraph readingArray {
 <!-- caption="Each cell holds a reference to a separate Reading object, which can be accessed by its index." -->
 
 <details class="tooltip link-110">
-<summary>Lists in BSL</summary>
+<summary>Lists in ISL</summary>
 
-The array literal plays the role of `list` from CPSC 110: `[ -4, -1, 3 ]` is the counterpart of `(list -4 -1 3)`. Underneath, BSL lists were built from `cons` cells, which is exactly the recursive structure we rebuilt as `LinkedList` in an earlier chapter. Arrays package the same idea as a single built-in type, with direct access to any position by index.
+The array literal plays the role of `list` from CPSC 110: `[ -4, -1, 3 ]` is the counterpart of `(list -4 -1 3)`. Underneath, ISL lists were built from `cons` cells, which is exactly the recursive structure we rebuilt as `LinkedList` in an earlier chapter. Arrays package the same idea as a single built-in type, with direct access to any position by index.
 
 </details>
 
