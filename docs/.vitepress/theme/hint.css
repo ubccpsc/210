@@ -1,0 +1,22 @@
+/* orignally taken from: https://stackoverflow.com/a/52722370 */
+
+.hint {
+  padding-top: 1px;
+  padding-bottom: 3px;
+  border-radius: 3px;
+  position: relative; /* needed for placeholder positioning */
+}
+
+.hint:not(:active), 
+.hint:not(:active) code  {
+  background-color: #000; 
+  color: #000; /* color of text: needs to be same as BG color for spoiler to black out */
+  user-select: none; /* if you want it to be copyable, may highlight spoiler text when they click */
+}
+
+html.dark .hint:not(:active), 
+html.dark .hint:not(:active) code  {
+  background-color: #fff; 
+  color: #fff; /* color of text: needs to be same as BG color for spoiler to black out */
+  user-select: none; /* if you want it to be copyable, may highlight spoiler text when they click */
+}
