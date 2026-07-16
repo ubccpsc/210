@@ -314,16 +314,15 @@ function makeCounter(count: number): Counter {
  * Precondition: count < MAX_CAPACITY
  * Postcondtion: count <= MAX_CAPACITY
  *
- * @param {Counter} the current counter
+ * @param {Counter} the counter to increment
  * @returns {Counter} a new Counter satisfying the invariant
  */
 function increment(counter: Counter): Counter {
-  assert(count < MAX_CAPACITY, "Invariant violation: Venue is full, can't admit anyone else!");
   return {n: counter.n + 1};
 }
 ```
 
-Do you find one of these pieces of code easier to read? Why? Does preserving `n` as a field of `Counter` affect readability? What having `increment` be defined inline, as in the closure version?
+Do you find one of these pieces of code easier to read? Why? Does preserving `n` as a field of `Counter` affect readability? What about having `increment` be defined inline, as in the closure version, versus as a top-level function?
 
 If you could tell TypeScript that `n` can only be changed by certain functions, could you ensure the fire-safety invariant without closures? Explain.
 

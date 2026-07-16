@@ -326,8 +326,9 @@ Within a class, one representative is as informative as another. `lateFee(12)` a
 <details class="tooltip deep-dive">
 <summary>Equivalence Classes are Only Derived From the Specification</summary>
 
+In Chapter 1, we defined a **branch** as the side of an if-statement that was taken when executed on an input. A **path** is the sequence of branches that are taken when a program executes on a given input. 
+
 Two inputs belong to the same class when the *specification* says they should behave the same way, not when they happen to take the same path through the code you wrote. In our buggy implementation, `lateFee(12)` and `lateFee(30)` took the same path through the code; classes derived from that implementation would have merged them, and the fault would have survived. Classes derived from the specification kept them apart, which is exactly why the fault was caught.
-(TODO: needs checking, where do we introduce "path"? I think we introduce "branch" explicitly in Chap 1. Should we introduce path here, now that we have multiple if-elses?)
 </details>
 
 ### Boundary Value Analysis
