@@ -60,7 +60,7 @@ We will expand on function declarations later in this chapter.
 
 ## Types as a Language Mechanism
 
-In ISL you documented type information as comments. A function's signature, like `; Number -> String`, told the reader what the function expected (a value representing a `Number`) and produced (a value representing a `String`). However, the language *did not check* that those types were honoured. If you passed a string where a number was expected, the language did not object; the mistake surfaced later, when you ran the program and it did not do what you expected.
+In ISL you documented type information as comments. A function's signature, like `(@signature Number -> String)`, told the reader what the function expected (a value representing a `Number`) and produced (a value representing a `String`). However, the language *did not check* that those types were honoured. If you passed a string where a number was expected, the language did not object; the mistake surfaced later, when you ran the program and it did not do what you expected.
 
 <details class="tooltip deep-dive">
   <summary>Basic Types: <code>number</code>, <code>string</code>, and <code>boolean</code></summary>
@@ -101,7 +101,7 @@ Parameter types come after the parameter they type, separated by a `:`. The retu
 Note that the type checker *only* helps where types are *written down*. In TypeScript we type the inputs and output of every function: each parameter gets a type, and so does the return value. These are the same places you would have written type comments in ISL.
 
 <details class="tooltip link-110">
-<summary>Type Comments in ISL</summary>
+<summary>Signatures in ISL</summary>
 
 In ISL, we would have captured the `letterGrade` type information as a comment in the signature:
 
@@ -110,8 +110,15 @@ In ISL, we would have captured the `letterGrade` type information as a comment i
 ; produce the letter grade for a percentage score
 (define (letter-grade score) ... )
 ```
+or a signature annotation:
 
-But ISL does not use the signature to check that `letter-grade` is invoked correctly.
+```racket
+(@signature Number -> String)
+; produce the letter grade for a percentage score
+(define (letter-grade score) ... )
+```
+
+But either way, ISL does not use the signature to check that `letter-grade` is invoked correctly.
 
 ```racket
 ; no error reported before running the program
@@ -176,7 +183,7 @@ flowchart LR
     class run good
     class err bad
 ```
-<!-- caption="How tsc type checks and transforms TypeScript before it can execute." -->
+<!-- caption="Figure 01.01: How <code>tsc</code> type checks and transforms TypeScript before it can execute." -->
 
 <details class="tooltip deep-dive">
   <summary>Tools for Writing Source Code</summary>
@@ -250,7 +257,7 @@ A block statement is started by `{` and `}`. It groups together a list of statem
    <statement-3>;
 }
 ```
-so that first `<statement-1>` will run, then `<statement-3>` will run, etc. It can group together any number of statements. 
+so that first `<statement-1>` will run, then `<statement-3>` will run, etc. It can group together any number of statements. We use `<>` to designate that any statement can be held there, `<>` is _not_ part of the actual TypeScript syntax for blocks.
 
 In general typescript, if you separate your statements with `;`, you can write them on the same line, and the meaning is the same: `{ <statement-1>; <statement-2>; <statement-3> }`. However, in this course, we will always put statements on separate lines for clarity.
 
@@ -529,13 +536,13 @@ Arrow functions have two forms. The first has a single expression in its body:
 ```
 this defines an anonymous function with  3 parameters (`x`, `y`, `b` of types `X`, `Y`, `Z`), which, when called, evaluates the expression `<return-exp>` with the given argument values, and return the resulting value.
 
-The second form has a block expression in its body:
+The second form has a block expression as its body:
 
 ```typescript
 (x: X, y: Y, b: Z) => {
-    s_1;
-    s_2;
-    s_3;
+    <statement-1>;
+    <statement-2>;
+    <statement-3>;
 }
 ```
 
