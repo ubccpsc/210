@@ -576,14 +576,16 @@ Mapping constructs in a new language back to the ideas you already know from pri
 <details class="tooltip exercise">
   <summary>Exercise: Battery Status</summary>
 
+_Note: End-of-chapter exercises will contain hints hidden like so: <span class="hint">hello I'm a hint!</span>. In general, these hints hide *design decisions* which, by the end of the course, we expect you to be able to make on your own. However, if you are going through the exercise for the first time and simply want coding practice, you can reveal the hints._ 
+
 Put this chapter's pieces together on a new problem: a typed function, an `if`/`return` chain, and a test.
 
 > As a phone user, I want the battery percentage shown as a status word, so that I can tell at a glance how urgently I need to charge.
 
 Write a function called `batteryStatus` that turns a battery percentage number into a status string. The function should return `"critical"` for numbers below 10, `"low"` from 10 up to (but not including) 30, `"ok"` from 30 up to 80, and `"full"` for 80 or above.
 
-1. Write the function signature, naming the parameter `percent` with the type `number`; the function should specify `string` for the return type.
-2. Implement the body with a chain of `if` / `else if` / `else` statements, each branch `return`ing the right status. The order of the statements will matter here!
+1. Write the function signature, <span class="hint">naming the parameter `percent` with the type `number`; the function should specify `string` for the return type.</span>
+2. Implement the body <span class="hint">with a chain of `if` / `else if` / `else` statements,</span> <span class="hint">each branch `return`ing the right status.</span> The order of the statements will matter here!
 3. Write a `test` with a `checkExpect` for each status, choosing one representative percentage per case. Predict each result before running the tests, then run them.
 4. What does the compiler report if you call `batteryStatus("low")`? Decide before you try it, then confirm.
 
