@@ -14,7 +14,7 @@ The data we choose to associate with a song below is *one example* of how we mig
 </details>
 
 
-For instance, a song has at least a title, an artist, and a duration. This data only means something when associated to the *same* song. With only primitive types we would carry these as three separate values and have to remember, everywhere, that they belong to the same song. Nothing would stop us from pairing one song's title with another's duration, or forgetting the duration entirely, or passing an *artist* where a *title* was expected (both are strings, so the compiler would stay silent). The information has a *shape*, and primitive annotations cannot capture it.
+For instance, a song has _at least_ a title, an artist, and a duration. This data only means something when associated to the *same* song. With only primitive types we would carry these as three separate values and have to remember, everywhere, that they belong to the same song. Nothing would stop us from pairing one song's title with another's duration, or forgetting the duration entirely, or passing an *artist* where a *title* was expected (both are strings, so the compiler would stay silent). The information has a *shape*, and primitive annotations cannot capture it.
 
 Other information cannot be expressed with primitives at all. A playlist is either *empty* or *a song followed by another playlist*. This spells out two distinct cases, and the playlist can be any length. No single `number` or `string` means "either nothing, or a song and then more songs."
 
@@ -225,7 +225,7 @@ const song2: Song = {
 An object is an instance of its type, and each object is its own independent value. Below, `song1` and `song2` are two separate songs that share the `Song` type.
 
 <details class="tooltip ts-tips">
-  <summary>Creating Object Values</summary>
+  <summary>Creating Object Values with Object Literals</summary>
   
 The syntax
 ```typescript
@@ -306,7 +306,7 @@ digraph Playlist {
   n2:f -> s2;
 }
 ```
-<!-- caption="Visual representation of Playlist data structure." -->
+<!-- caption="Figure 02.01: Visual representation of Playlist data structure, containing Song A and Song B." -->
 
 <details class="tooltip ts-tips">
   <summary>Tagged Unions</summary>
@@ -333,7 +333,7 @@ To relate to a prior concept, you can understand the type of the `kind` property
 </details>
 
 <details class="tooltip deep-dive">
-<summary>Preview: The Inelegance of <code>kind</code></summary>
+<summary>Part 2 Preview: The Inelegance of <code>kind</code></summary>
 
 Reading a `kind` back to recover which case you are looking at can feel indirect, since the case is something the value already is. `EmptyPlaylist` and `NonEmptyPlaylist` are different: why do we need to specify they have different kinds?
 
@@ -592,10 +592,10 @@ Let's apply the process from this chapter to a new problem, then write functions
 
 A journey is either _arrived_ (there are no more legs) or a _leg_: a single mode of travel, a duration in minutes, and the rest of the journey after it. The mode of travel is one of `"walk"`, `"bus"`, `"train"`, or `"bike"`.
 
-1. Model the data. Following the process, write a `Mode` type as a restricted value (a union of the four literals), and a `Journey` type as a tagged union with a `kind` discriminator, one case for _arrived_ and one for a _leg_. Notice that `Journey` has the same shape as `Playlist`: an empty case, and a "first thing plus the rest" case.
+1. Model the data. Following the process, write a `Mode` type <span class="hint">as a restricted value (a union of the four literals),</span> and a `Journey` type <span class="hint">as a tagged union with a `kind` discriminator, one case for _arrived_ and one for a _leg_.</span> <span class="hint">Notice that `Journey` has the same shape as `Playlist`: an empty case, and a "first thing plus the rest" case.</span>
 2. Write two example journeys: one that is simply _arrived_, and one with at least two legs.
-3. Following the shape of the data, write `totalMinutes(journey: Journey): number`, using case analysis on `kind` and recursion on the rest.
-4. Write `usesTransit(journey: Journey): boolean`, which is `true` when any leg travels by `"bus"` or `"train"`.
+3. Following the shape of the data, write `totalMinutes(journey: Journey): number`, <span class="hint">using case analysis on `kind` and recursion on the rest.</span>
+4. Write `usesTransit(journey: Journey): boolean`, <span class="hint">which is `true` when any leg travels by `"bus"` or `"train"`.</span>
 5. Write a `checkExpect` for each function against your example journeys. Predict each result before you run them.
 
 Bonus task: which step of the modelling process suggests turning `Journey` into a generic type, and what would it become?
