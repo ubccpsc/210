@@ -1,6 +1,6 @@
 # Checking Invariants
 
-We previously introduced the distinction between the **static** and **dynamic** views of a program. The compiler checks the static view: it reads your source code, analyses your types, and flags inconsistencies before the program runs. But a program that passes the type checker can still produce the wrong results. Types tell you what *kind* of value a function returns; they do not tell you whether that value is *correct*.
+In Chapter 1 we introduced the distinction between the **static** and **dynamic** views of a program. The compiler checks the static view: it reads your source code, analyses your types, and flags inconsistencies before the program runs. But a program that passes the type checker can still produce the wrong results. Types tell you what *kind* of value a function returns; they do not tell you whether that value is *correct*.
 
 The properties a correct program must maintain beyond its types are called **invariants**. This chapter is about working with them: what an invariant is, how to identify the invariants in a problem, how to record them in a function's documentation so they can be detected later, and how to test whether the invariant holds.
 
@@ -37,7 +37,7 @@ Invariants are everywhere once you look for them: durations are positive, percen
 
 <details class="tooltip deep-dive">
 <summary>Could We Statically Check Invariants?</summary>
-In the previous chapters, we saw how types allowed us to bring enforcement that in CPSC 110 we simply had to trust. In CPSC 210, invariants capture what we cannot check solely through types---unforutnately, those won't be statically enforceable. This is where we bring in dynamic checking of invariants, through testing.
+In the previous chapters, we saw how types allowed us to bring enforcement that in CPSC 110 we simply had to trust. In CPSC 210, invariants capture what we cannot check solely through types---unfortunately, those won't be statically enforceable. This is where we bring in dynamic checking of invariants, through testing.
 
 But some of the invariants we have aren't too complicated: if we can enforce that `x` is a `number` statically, why can we not enforce that that `x > 10` statically? We won't cover that in CPSC 210, but if this question is interesting to you, you may be interesting in learning more about the fields of *formal verification* (CPSC 513, 539S) and *programming languages* (CPSC 311, 411, 509, 511) in the future.
 </details>
@@ -58,7 +58,7 @@ lateFee(daysLate: number): number
 
 A **precondition** is an invariant that must be true of the arguments when the function is called. The parameter type admits any number: `-4`, `3.7`, `40000`. But `daysLate` is a count of days, so the function is only meaningful when `daysLate` is a whole number and at least 0. That restriction is the **precondition** on `daysLate`.
 
-A **postcondition** is an invariant about what the function guarantees about its result, *assuming the precondition held*. The return type says only `number`, but the policy promises more: the fee is never negative, and it never exceeds $10. Those guarantees are **postconditions**.
+A **postcondition** is an invariant about what the function guarantees about its result, *assuming the precondition held*. The return type says only `number`, but the policy promises more: the fee is never negative, and it never exceeds $10. Each of those guarantees is a **postcondition**.
 
 To identify these in your own functions, you need to examine the *gap* between the *type* you have included in a signature and the type's *meaning*:
 
@@ -378,7 +378,7 @@ grace       accruing ( $0.50 / day )             capped ( $10 )
             boundary                             boundary
             ( 2 -> 3 )                           ( 21 -> 22 )
 ```
-<!-- caption="The three equivalence classes for daysLate." -->
+<!-- caption="Figure 03.01: The three equivalence classes for daysLate." -->
 
 ## Expected and Unexpected Errors
 
@@ -412,7 +412,7 @@ type Result<T, E> =
 
 By contrast: a `Loan` whose `renewalsRemaining` is `-1`, is an *unexpected* error. No sequence of correct operations can produce it, so if `renewalsRemaining` is `-1`, something else has already gone wrong. 
 
-We detect unexpected errors and signal them to our program using the `assert` function. These calls look like `assert(<condition>, <description>)`. When an **assertion** fails, the program is immediately terminated with the provided description. 
+We detect unexpected errors and signal them to our program using the `assert` function. These calls look like `assert(<condition>, <description>)`. When an **assert** fails, the program is immediately terminated with the provided description. 
 
 <details class="tooltip ts-tips">
 <summary><code>assert</code></summary>
@@ -421,7 +421,9 @@ Calling the `assert` function:
 ```typescript
 assert(<condition>, <description>)
 ```
-evaluates `<condition>`. If `<condition>` is true, the program continues to execution as if `assert` was not there. 
+evaluates `<condition>`. If `<condition>` is true, the program continues to execute as if `assert` was not there. If `<condition>` is false, the program will terminate and print out `<description>`.
+
+A tricky thing about asserts: the `<condition>` describes what _should hold_, while `<description>`, which is only printed out when `<condition>` fails, usually describes what _did not_ hold. 
 
 Unlike in some other languages, `assert` is not a TypeScript built-in. It is a function we provide in the course's toolkit:
 
