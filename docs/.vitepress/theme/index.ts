@@ -1,6 +1,7 @@
 import DefaultTheme from 'vitepress/theme'
 import './style.css'
 import './tooltips.css'
+import './hint.css'
 import { onMounted, watch } from 'vue'
 import { useRoute } from 'vitepress'
 import CollapsibleCode from './collapsiblecode.vue'

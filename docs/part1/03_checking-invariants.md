@@ -548,6 +548,8 @@ Documented **invariants** are the bridge between the two. The **preconditions** 
 
 An invariant that is written down can be turned into a test suite and into assertions; an invariant that lives only in someone's head cannot be checked by anything.
 
+
+
 <details class="tooltip exercise">
   <summary>Exercise: Parking Fees</summary>
 
@@ -555,12 +557,12 @@ Practise this chapter's concepts on a new problem: write a contract, derive test
 
 > As a parking garage, I want to compute the parking fee by counting how many whole hours a car is parked, with a free first hour and a daily maximum, so that drivers are charged fairly and predictably.
 
-The policy policy states that parking is free for the first hour; after that, each additional hour costs $4; and the total never exceeds $24. The function will have the signature `parkingFee(hours: number): number`.
+The policy policy states that parking is free for the first hour; after that, each additional hour costs $4; and the total never exceeds $24. The function will have the signature <span class="hint">`parkingFee(hours: number): number`</span>.
 
-1. Write the contract. Document `parkingFee` with a doc comment giving its purpose, a precondition (`hours` is a whole number and `hours >= 0`), a postcondition (the fee is between 0 and 24), and `@param`/`@returns` lines.
+1. Write the contract. Document `parkingFee` with a doc comment giving its purpose, a precondition (<span class="hint">`hours` is a whole number and `hours >= 0`</span>), a postcondition (<span class="hint">the fee is between 0 and 24</span>), and `@param`/`@returns` lines.
 2. Derive the tests first. Use equivalence class partitioning to find the input classes the policy treats alike, and pick one representative of each. Then use boundary value analysis to add the edges: where the free hour ends, and where the cap is reached.
 3. Stub `parkingFee` so it returns a clearly wrong value, run your tests, and confirm they all fail.
 4. Implement `parkingFee`, run the tests again, and confirm they pass.
-5. Guard the precondition. Decide what should happen when the precondition is violated, for example `parkingFee(-1)`. Add an `assert` for it, and write a `checkError` test that confirms the violation is caught.
+5. Guard the precondition. Decide what should happen when the precondition is violated, for example <span class="hint">`parkingFee(-1)`</span>. Add an `assert` for it, and write a `checkError` test that confirms the violation is caught.
 
 </details>
