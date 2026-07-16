@@ -4,7 +4,7 @@ The previous chapter placed invariants in documentation, tests, and assertions. 
 
 A shortcoming of these mechanisms though is that they cannot *prevent* invalid values from being created in the first place. This chapter is about closing that gap: designing code that wholly prevents invalid values from being created, rather than writing code that checks for violations.
 
-In this chapter, we will show how this can be done _solely with programming constructs_ you know from CPSC 110. The solution we'll get to is not standard TypeScript; you may, in fact, find it unwieldy. This is expected. It will better motivate the object-oriented programming we'll get to in Part 2.
+In this chapter, we will show how this can be done _solely with programming constructs_ you know from CPSC 110. The solution we'll get to is not standard TypeScript; you may, in fact, find it unwieldy. This is expected. In fact, it will motivate the object-oriented programming we'll get to in Part 2.
 
 ## Initial Design with No Enforcement
 
@@ -282,6 +282,8 @@ Connecting back to the previous chapter, the second test treats a click at full 
 
 Compare the closure above to an implementation of `Counter` without them:
 
+<CollapsibleCode>
+
 ```typescript
 const MAX_CAPACITY: number = 1000;
 
@@ -321,6 +323,7 @@ function increment(counter: Counter): Counter {
   return {n: counter.n + 1};
 }
 ```
+</CollapsibleCode>
 
 Do you find one of these pieces of code easier to read? Why? Does preserving `n` as a field of `Counter` affect readability? What about having `increment` be defined inline, as in the closure version, versus as a top-level function?
 
@@ -335,7 +338,7 @@ If you could tell TypeScript that `n` can only be changed by certain functions, 
 
 ## Using Closures to Protect BankAccount
 
-Let's now use closures, to keep the advantage of removing `balance` as a field (outsiders can't access it!) while removing its disadvantage (operations can't access it!).
+Let's now use closures to keep the advantage of removing `balance` as a field (outsiders can't access it!) while removing its disadvantage (operations can't access it!).
 
 We do this by creating the three operations inside `makeAccount`, while `balance` is in scope. Each of them closes over it:
 
@@ -380,7 +383,7 @@ Notice where new account states come from. `deposit` and `withdraw` do not build
 
 
 
-The structural change  ensures that the invariant is _enforced by the programming language_ rather than by _programmer disciplines_. There is no longer a `balance` property anywhere in the program for a client to read, to forge, or to copy incorrectly. The only access to the balance is `getBalance`, and the only way to produce a new state is through `deposit` and `withdraw`. The literal `{ balance: -100 }` no longer represents `BankAccount`; the type checker will reject `const ba: BankAccount = {balance: -100}`. Here's an example use of our new `BankAccount` type:
+The structural change  ensures that the invariant is _enforced by the programming language_ rather than by _programmer discipline_. There is no longer a `balance` property anywhere in the program for a client to read, to forge, or to copy incorrectly. The only access to the balance is `getBalance`, and the only way to produce a new state is through `deposit` and `withdraw`. The literal `{ balance: -100 }` no longer represents `BankAccount`; the type checker will reject `const ba: BankAccount = {balance: -100}`. Here's an example use of our new `BankAccount` type:
 
 
 ```typescript
@@ -440,10 +443,10 @@ Practise this chapter's process on a new problem.
 
 A character's health has a current hit-point count and a maximum, and must always satisfy the invariant `0 <= hp <= maxHp`. A holder of a `Health` value should be able to apply damage, apply healing, read the current hit points, and ask whether the character is still alive, but should never be able to reach the underlying numbers directly.
 
-1. Define a `Health` type whose properties are _operations_, not data: `damage(amount: number): Health`, `heal(amount: number): Health`, `getHp(): number`, and `isAlive(): boolean`. There should be no `hp` or `maxHp` field on the type.
-2. Write a constructor function `makeHealth(maxHp: number, hp: number): Health` that _establishes_ the invariant with an `assert` (reject a `maxHp` below 1, or an `hp` outside `0` to `maxHp`) and hides `hp` and `maxHp` in a closure. Model it on `makeCounter`.
-3. Implement `damage` and `heal` so they _preserve_ the invariant: damage never drops hit points below 0, and heal never raises them above `maxHp`. Each should return a new `Health` produced by `makeHealth`, so the invariant is re-established on every change.
+1. Define a `Health` type whose properties are _operations_, not data: <span class="hint">`damage(amount: number): Health`</span>, <span class="hint">`heal(amount: number): Health`</span>, <span class="hint">`getHp(): number`</span>, and <span class="hint">`isAlive(): boolean`</span>. There should be no `hp` or `maxHp` field on the type.
+2. Write a constructor function `makeHealth(maxHp: number, hp: number): Health` that _establishes_ the invariant with an `assert` <span class="hint">(reject a `maxHp` below 1, or an `hp` outside `0` to `maxHp`)</span> and hides `hp` and `maxHp` in a closure. Model it on `makeCounter`.
+3. Implement `damage` and `heal` so they _preserve_ the invariant: <span class="hint">damage never drops hit points below 0, and heal never raises them above `maxHp`</span>. Each should return a new `Health` produced by `makeHealth`, so the invariant is re-established on every change.
 4. Add a `newCharacter(maxHp: number): Health` helper that starts a character at full health.
-5. Write tests: `checkExpect` that damage and heal land on the right hit points, including that they stop at 0 and at `maxHp`; and `checkError` that `makeHealth` rejects an invalid starting value such as `makeHealth(10, -1)`.
+5. Write tests: <span class="hint">`checkExpect` that damage and heal land on the right hit points, including that they stop at 0 and at `maxHp`; and `checkError` that `makeHealth` rejects an invalid starting value such as `makeHealth(10, -1)`.</span>
 
 </details>
