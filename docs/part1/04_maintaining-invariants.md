@@ -419,7 +419,14 @@ In short, the invariant is no longer protected by _programmer discipline_; it is
 ```
 <!-- caption="Figure 04.01: Illustration of state hidden inside a closure, with balance not being directly reachable." -->
 
+<details class="tooltip deep-dive">
+<summary>Course Preview: Does Software in Practice Enforce Security Invaraints?</summary>
 
+This chapter has focused on how we can ensure that invariants are enforced in code. The examples we have are small, but even in this small example we see a real-world safety implication (that venues not be filled over fire-code limits!). Code nowadays runs on so many platforms and has access to so much of our data. How do we ensure that only code we expect to run runs on our machines, and how do we ensure that that code doesn't leak our information to people who shouldn't have it?
+
+The answer is: much code in the wild *doesn't* manage to enforce such invariants, leading to many security and privacy issues in the wild. If this is interesting to you from a technical standpoint, you may be interested in learning more about *computer security*, either through courses (CPSC 337, CPSC 541), or cyber-securtity competitions ([Maple Bacon Team](https://maplebacon.org/)). If you're interested in the societal implications, you may be interested in CPSC 430.
+
+</details>
 
 
 ## Protecting Invariants Drives Design

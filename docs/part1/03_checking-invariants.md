@@ -36,7 +36,7 @@ This object has the right *shape*, so the static type check passes. But its *mea
 Invariants are everywhere once you look for them: durations are positive, percentage scores sit between 0 and 100, counts are whole numbers. None of these facts appear in the types `number`, `number`, `number`. They are constraints that exist in the space between what the type allows and what the problem requires.
 
 <details class="tooltip deep-dive">
-<summary>Could We Statically Check Invariants?</summary>
+<summary>Course Preview: Could We Statically Check Invariants?</summary>
 In the previous chapters, we saw how types allowed us to bring enforcement that in CPSC 110 we simply had to trust. In CPSC 210, invariants capture what we cannot check solely through types---unfortunately, those won't be statically enforceable. This is where we bring in dynamic checking of invariants, through testing.
 
 But some of the invariants we have aren't too complicated: if we can enforce that `x` is a `number` statically, why can we not enforce that that `x > 10` statically? We won't cover that in CPSC 210, but if this question is interesting to you, you may be interesting in learning more about the fields of *formal verification* (CPSC 513, 539S) and *programming languages* (CPSC 311, 411, 509, 511) in the future.
