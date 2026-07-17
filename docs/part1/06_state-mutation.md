@@ -142,11 +142,11 @@ The debugger should be the main tool you think of whenever a program runs to mor
 <details class="tooltip exercise">
 <summary>Challenge Exercise: No-Mutation Longest Freezing Streak</summary>
 
-We said above that _"No single `map`, `filter`, or `find` computes this"_... but what about `reduce`? As it turns out, `reduce`, with a carefully-designed accumulator value, can compute longest freezing streaks, *without mutation*! 
+We said above that _"No single `map`, `filter`, or `find` computes this"_... but what about `reduce`? As it turns out... `reduce` can compute longest freezing streaks, *without mutation*! 
 
-If you're not sure where to start, try applying the design recipe from CPSC 110, then translate to TypeScript. 
-
-If you manage to do this, compare the `reduce` solution to the iteration-and-mutation solution above. While they may produce the same result, which one do you think would be easier for another developer to read? Why?
+1. What makes `reduce` different from `map`, `filter`, or `find`? Why can this difference be used to simulate state?
+2. Try writing `longestFreezingStreak` with `reduce`, with _no_ mutation. If you're not sure where to start, try applying the design recipe from CPSC 110, then translate to TypeScript. Hint 1: <span class="hint">the trace table above shows how the simulated state should evolve.</span> Hint 2: <span class="hint"> Build your accumulator so it can store the same information as in the trace table, and build your reduce function argument so it updates the accumulator value as the trace table does.</span> 
+3. If you manage to do this, compare the `reduce` solution to the iteration-and-mutation solution above. While they may produce the same result, which one do you think would be easier for another developer to read? Why?
 
 <!------ Example solution:
 
