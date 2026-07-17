@@ -394,8 +394,14 @@ The three cases, summarised:
 
 The same distinction, drawn out:
 
+<!---- CL: ditaa interprets : as a contol character, using ∶ instead ---->
+<!---- CL: unfortuantely that replacement doesn't work within ditaa boxes
+       because it is slightly different width. ꞉ might work, but doesn't
+       render in vitepress. Fine, use ;        --->
+       
+
 ```ditaa
- Primitive argument: the parameter is a separate copy.
+ Primitive argument; the parameter is a separate copy.
 
     caller            function
     +------+          +------+
@@ -404,7 +410,7 @@ The same distinction, drawn out:
     (independent; changing one cannot affect the other)
 
 
- Object argument: the parameter copies the arrow, not the object.
+ Object argument; the parameter copies the arrow, not the object.
 
     caller  ---+
                |

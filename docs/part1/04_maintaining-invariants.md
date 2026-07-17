@@ -407,7 +407,7 @@ In short, the invariant is no longer protected by _programmer discipline_; it is
             v  
     +--------------------------------------------+
     |    +------------------+                    |
-    |    | balance: number  |                    |
+    |    | balance; number  |                    |
     |    +------------------+                    |
     |                                            |
     |  deposit(..)  withdraw(..)  getBalance()   |
