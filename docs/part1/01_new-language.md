@@ -62,7 +62,7 @@ We will expand on function declarations later in this chapter.
 
 In ISL you documented type information as comments. A function's signature, like `(@signature Number -> String)`, told the reader what the function expected (a value representing a `Number`) and produced (a value representing a `String`). However, the language *did not check* that those types were honoured. If you passed a string where a number was expected, the language did not object; the mistake surfaced later, when you ran the program and it did not do what you expected.
 
-<details class="tooltip deep-dive">
+<details class="tooltip ts-tips">
   <summary>Basic Types: <code>number</code>, <code>string</code>, and <code>boolean</code></summary>
 
 TypeScript provides several basic types to describe individual values. Three of the most common are `number`, `string`, and `boolean`. `number` is the standard numeric type that can be used for both integer (e.g., `3`) and floating point (e.g., `3.14`) values. `string` is used to describe textual data; these values are enclosed in either single quotes `'CPSC'` or double quotes `"CPSC"`, although it is best practice to be consistent about the kind of quote used in a program. `boolean` values provide means for capturing whether a value is `true` or `false`.
