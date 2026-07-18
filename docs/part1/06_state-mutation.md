@@ -12,9 +12,9 @@ Mutation introduces the dimension of *time* into our programs: the answer to "wh
 So far, every variable we have declared has been using the `const` keyword. `const` guarantees that the value associated with the name will remain unchanged for the duration of a program. TypeScript provides a second way to declare a variable: `let`, which allows variables to be **reassigned** zero or more times as the program runs.
 
 ```typescript
-const absZero = -273;
+const absZero: number = -273;
 absZero = -273.15;              // error: absZero is defined const and cannot be reassigned
-let temperature = -4;           // temperature holds -4 after this line executes
+let temperature: number = -4;           // temperature holds -4 after this line executes
 temperature = 1;                // temperature now holds 1 after this line executes
 temperature = temperature + 2;  // temperature now holds 3 after this line executes
 ```
@@ -52,7 +52,7 @@ A reassignment is performed in two steps: first the right-hand side is evaluated
 Reassignment is a statement, like `if` and `return` from the first chapter: it produces no value, it performs an action. And because each reassignment replaces a value, the *order* of statements now matters in a way it never did before:
 
 ```typescript
-let x = 1;
+let x: number = 1;
 x = x * 2;
 x = x + 3;
 // x holds 5; if the two reassignments were swapped, x would hold 8
@@ -92,8 +92,8 @@ Here's a solution that uses mutation to introduce state that _keeps track of_ th
  * @returns {number} the length of the longest freezing streak
  */
 function longestFreezingStreak(day: Reading[]): number {
-    let current = 0; // consecutive freezing readings ending here
-    let longest = 0; // best streak seen so far
+    let current: number = 0; // consecutive freezing readings ending here
+    let longest: number = 0; // best streak seen so far
 
     for (const reading of day) {
         if (reading.tempCelsius < 0) {
@@ -181,7 +181,7 @@ const freezingrun: Acc = day.reduce(
 Reassigning a variable is one kind of mutation. The second kind is changing the *contents* of an object or array, and it needs no `let` at all:
 
 ```typescript
-const reading = { hour: 6, tempCelsius: -4 };
+const reading: Reading = { hour: 6, tempCelsius: -4 };
 
 reading.tempCelsius = -3;                  // allowed: the object's contents changed
 reading = { hour: 6, tempCelsius: -3 };    // compile error: reading is a const
@@ -193,7 +193,7 @@ Arrays are objects, and they mutate the same ways. Elements can be replaced thro
 
 ```typescript
 day.push({ hour: 22, tempCelsius: -3 });   // adds a seventh reading to the end
-const removed = day.pop();                 // removes that reading; day has six again
+const removed: Reading = day.pop();                 // removes that reading; day has six again
 day[0] = { hour: 5, tempCelsius: -6 };     // replaces the first element entirely
 day[1].tempCelsius = -2;                   // reaches into the second element and changes it
 ```
@@ -218,8 +218,8 @@ To understand what a variable holds, we unfortunately need to deal with the fact
 To predict which changes are visible where, we need a precise picture of what a variable actually holds. There are two cases. In the first case,  a variable holding a **primitive** value (a `number`, `string`, or `boolean`) holds the value itself. Assigning it to another variable **copies the value**, and from then on the two variables are entirely independent:
 
 ```typescript
-let a = 5;
-let b = a;          // b receives its own copy of 5
+let a: number = 5;
+let b: number = a;          // b receives its own copy of 5
 b = 6;
 checkExpect(a, 5);  // a is unaffected
 ```
@@ -233,9 +233,9 @@ A primitive has a small, fixed size, so copying one is essentially free. An obje
 So, objects are never copied on assignment. What is copied instead is the reference, which stays the same small size no matter how large the object it leads to. This efficiency has a consequence: assigning an object to another variable copies *the reference*, not the object, so both variables now refer to the **same object**:
 
 ```typescript
-const r = { hour: 6, tempCelsius: -4 };
-const t = { hour: 6, tempCelsius: -4 };
-const s = r;                     // s receives r's reference
+const r: Reading = { hour: 6, tempCelsius: -4 };
+const t: Reading = { hour: 6, tempCelsius: -4 };
+const s: Reading = r;                     // s receives r's reference
 s.tempCelsius = 0;
 checkExpect(r.tempCelsius, 0);   // change visible to r and s
 ```
@@ -286,17 +286,17 @@ References explain the `const` surprise from the previous section: `const` locks
 For *primitives*, `===` compares _values_. Two numbers that happen to be equal are `===`, whether or not they were declared together:
 
 ```typescript
-let x = 5;
-let y = 5;
+let x: number = 5;
+let y: number = 5;
 checkExpect(x === y, true);   // equal values
 ```
 
 For *objects*, `===` compares _identity_: it asks whether two variables refer to the same object in memory, _not_ whether their contents match (value).
 
 ```typescript
-const r = { hour: 6, tempCelsius: -4 };
-const s = r;                              // s refers to r's object
-const t = { hour: 6, tempCelsius: -4 };   // a separate object with equal contents
+const r: Reading = { hour: 6, tempCelsius: -4 };
+const s: Reading = r;                              // s refers to r's object
+const t: Reading = { hour: 6, tempCelsius: -4 };   // a separate object with equal contents
 
 checkExpect(r === s, true);    // the same object
 checkExpect(r === t, false);   // different objects, even though their contents are identical
@@ -329,7 +329,7 @@ function bump(n: number): void {
     n = n + 1;          // changes only the function's own copy
 }
 
-let hour = 6;
+let hour: number = 6;
 bump(hour);
 checkExpect(hour, 6);   // unchanged: bump accomplished nothing observable
 ```
@@ -348,7 +348,7 @@ function calibrate(reading: Reading, offset: number): void {
     reading.tempCelsius = reading.tempCelsius + offset;
 }
 
-const morning = { hour: 6, tempCelsius: -4 };
+const morning: Reading = { hour: 6, tempCelsius: -4 };
 calibrate(morning, 1);                  // the sensor reads one degree low
 checkExpect(morning.tempCelsius, -3);   // the caller's object changed
 ```
@@ -369,7 +369,7 @@ function reset(reading: Reading): void {
     reading = { hour: reading.hour, tempCelsius: 0 };  // redirects the local arrow only
 }
 
-const evening = { hour: 21, tempCelsius: -2 };
+const evening: Reading = { hour: 21, tempCelsius: -2 };
 reset(evening);
 checkExpect(evening.tempCelsius, -2);   // unchanged
 ```
@@ -436,7 +436,7 @@ The rule in TypeScript is **block scope**: a variable exists from its declaratio
 ```typescript
 function describe(reading: Reading): string {
     if (reading.tempCelsius < 0) {
-        const label = "freezing";
+        const label: string = "freezing";
         return label;        // fine: label is in scope here
     }
     return label;            // compile error: Cannot find name 'label'
@@ -447,7 +447,7 @@ Blocks nest, and the rule works one way: an inner block can use names declared i
 
 ```typescript
 for (const reading of day) {
-    let current = 0;             // a brand-new current for every element
+    let current: number = 0;             // a brand-new current for every element
     if (reading.tempCelsius < 0) {
         current = current + 1;   // always computes 0 + 1
     }
