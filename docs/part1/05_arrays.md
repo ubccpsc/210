@@ -208,7 +208,7 @@ The four operations we use most are `map`, `filter`, `reduce`, and `find`. These
 <details class="tooltip ts-tips">
 <summary>Calling Array Operations</summary>
 
-Given an array of name `a`, we will call operations with `a.operation_name(fun)`. This is because each operation (`map`, `filter`, `reduce`, and `find`) _belongs_ to arrays, similar to the functions as properties we saw in Chapter 4. `fun` represents the input function that characterize the mapping/filter/reduction/find we should do. Usually we will specify it with an arrow function; `(elem) => <expression-that-we-want-to-derive-from-elem>`.
+Given an array of name `a`, we will call operations with `a.operation_name(fun)`. This is because each operation (`map`, `filter`, `reduce`, and `find`) _belongs_ to arrays, similar to the functions as properties we saw in Chapter 4. `fun` represents the input function that characterize the mapping/filter/reduction/find we should do. Usually we will specify it with an arrow function; `(elem: elemType) => <expression-that-we-want-to-derive-from-elem>`.
 
 </details>
 <!---- Already introduced in chapter 1
@@ -244,7 +244,7 @@ Built-in sequence abstractions are not new to you: CPSC 110 introduced `map`, `f
 `map` applies a function to every element and returns a **new array** of the results, in the same order. The original array is not changed. Our forecasters publish in Fahrenheit, so we convert every reading:
 
 ```typescript
-const fahrenheit: number[] = day.map((reading) => reading.tempCelsius * 9 / 5 + 32);
+const fahrenheit: number[] = day.map((reading: Reading) => reading.tempCelsius * 9 / 5 + 32);
 // fahrenheit contains [24.8, 30.2, 37.4, 46.4, 35.6, 28.4]
 ```
 
@@ -274,7 +274,7 @@ If you compare this carefully with `day.map(f)`, you will see that `map` perform
 `filter` returns a new array containing only the elements for which the given function returns `true`. The report needs to know which hours were below freezing:
 
 ```typescript
-const freezing: Reading[] = day.filter((reading) => reading.tempCelsius < 0);
+const freezing: Reading[] = day.filter((reading: Reading) => reading.tempCelsius < 0);
 // [{ hour: 6, tempCelsius: -4 }, { hour: 9, tempCelsius: -1 }, { hour: 21, tempCelsius: -2 }]
 ```
 
@@ -285,7 +285,7 @@ A `filter` never changes the elements themselves; it only selects which ones app
 `map` and `filter` produce arrays; `reduce` collapses an array into a single value. It carries an **accumulator** through the array: for each element, a combining function takes the accumulator so far and the current element, and produces the next accumulator. `reduce` takes two arguments: the combining function, and the accumulator's starting value.
 
 ```typescript
-const totalCelsius: number = day.reduce((sum, reading) => sum + reading.tempCelsius, 0);
+const totalCelsius: number = day.reduce((sum: number, reading: Reading) => sum + reading.tempCelsius, 0);
 // 6
 ```
 
@@ -301,7 +301,7 @@ With `reduce` and `length` we can write, document, and test a summary function i
  * @returns {number} the mean of the temperatures in day
  */
 function meanTemp(day: Reading[]): number {
-    const total = day.reduce((sum, reading) => sum + reading.tempCelsius, 0);
+    const total: number = day.reduce((sum: number, reading: Reading) => sum + reading.tempCelsius, 0);
     return total / day.length;
 }
 ```
@@ -319,7 +319,7 @@ The precondition matters here in exactly the way the previous chapter described:
 `find` returns the *first* element for which the given function returns `true`. The report wants the first hour the temperature rose above freezing:
 
 ```typescript
-const thaw = day.find((reading) => reading.tempCelsius > 0);
+const thaw: Reading = day.find((reading: Reading) => reading.tempCelsius > 0);
 // { hour: 12, tempCelsius: 3 }
 ```
 
@@ -329,7 +329,7 @@ This is a deliberate language design choice. Recall the two absence values from 
 
 ```typescript
 test("find returns undefined when nothing matches", () => {
-    checkExpect(day.find((reading) => reading.tempCelsius > 30), undefined);
+    checkExpect(day.find((reading: Reading) => reading.tempCelsius > 30), undefined);
 });
 ```
 
@@ -340,8 +340,8 @@ We can chain these operations , and we will frequently combine them to perform m
 For instance, to take the mean of only the above-freezing temperatures:
 
 ```typescript
-const aboveFreezing = day.filter((reading) => reading.tempCelsius > 0);
-const meanAbove = aboveFreezing.reduce((sum, reading) => sum + reading.tempCelsius, 0) / aboveFreezing.length;
+const aboveFreezing: Reading[] = day.filter((reading: Reading) => reading.tempCelsius > 0);
+const meanAbove: number = aboveFreezing.reduce((sum: number, reading: Reading) => sum + reading.tempCelsius, 0) / aboveFreezing.length;
 // 13 / 3
 ```
 
