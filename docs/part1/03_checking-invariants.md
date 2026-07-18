@@ -1,6 +1,6 @@
 # Checking Invariants
 
-We previously introduced the distinction between the **static** and **dynamic** views of a program. The compiler checks the static view: it reads your source code, analyses your types, and flags inconsistencies before the program runs. But a program that passes the type checker can still produce the wrong results. Types tell you what *kind* of value a function returns; they do not tell you whether that value is *correct*.
+In Chapter 1 we introduced the distinction between the **static** and **dynamic** views of a program. The compiler checks the static view: it reads your source code, analyses your types, and flags inconsistencies before the program runs. But a program that passes the type checker can still produce the wrong results. Types tell you what *kind* of value a function returns; they do not tell you whether that value is *correct*.
 
 The properties a correct program must maintain beyond its types are called **invariants**. This chapter is about working with them: what an invariant is, how to identify the invariants in a problem, how to record them in a function's documentation so they can be detected later, and how to test whether the invariant holds.
 
@@ -36,8 +36,8 @@ This object has the right *shape*, so the static type check passes. But its *mea
 Invariants are everywhere once you look for them: durations are positive, percentage scores sit between 0 and 100, counts are whole numbers. None of these facts appear in the types `number`, `number`, `number`. They are constraints that exist in the space between what the type allows and what the problem requires.
 
 <details class="tooltip deep-dive">
-<summary>Could We Statically Check Invariants?</summary>
-In the previous chapters, we saw how types allowed us to bring enforcement that in CPSC 110 we simply had to trust. In CPSC 210, invariants capture what we cannot check solely through types---unforutnately, those won't be statically enforceable. This is where we bring in dynamic checking of invariants, through testing.
+<summary>Course Preview: Could We Statically Check Invariants?</summary>
+In the previous chapters, we saw how types allowed us to bring enforcement that in CPSC 110 we simply had to trust. In CPSC 210, invariants capture what we cannot check solely through types---unfortunately, those won't be statically enforceable. This is where we bring in dynamic checking of invariants, through testing.
 
 But some of the invariants we have aren't too complicated: if we can enforce that `x` is a `number` statically, why can we not enforce that that `x > 10` statically? We won't cover that in CPSC 210, but if this question is interesting to you, you may be interesting in learning more about the fields of *formal verification* (CPSC 513, 539S) and *programming languages* (CPSC 311, 411, 509, 511) in the future.
 </details>
@@ -58,7 +58,7 @@ lateFee(daysLate: number): number
 
 A **precondition** is an invariant that must be true of the arguments when the function is called. The parameter type admits any number: `-4`, `3.7`, `40000`. But `daysLate` is a count of days, so the function is only meaningful when `daysLate` is a whole number and at least 0. That restriction is the **precondition** on `daysLate`.
 
-A **postcondition** is an invariant about what the function guarantees about its result, *assuming the precondition held*. The return type says only `number`, but the policy promises more: the fee is never negative, and it never exceeds $10. Those guarantees are **postconditions**.
+A **postcondition** is an invariant about what the function guarantees about its result, *assuming the precondition held*. The return type says only `number`, but the policy promises more: the fee is never negative, and it never exceeds $10. Each of those guarantees is a **postcondition**.
 
 To identify these in your own functions, you need to examine the *gap* between the *type* you have included in a signature and the type's *meaning*:
 
@@ -153,7 +153,7 @@ Assertions are the core of any test case: they validate that a dynamic behaviour
 <details class="tooltip link-110">
 <summary>Tests vs <code>check-expect</code></summary>
 
-BSL used `check-expect` as a standalone expression at the top level of a file. TypeScript's `test` wrapper is a small change in form: it names the test and groups related checks together. The underlying idea is the same: write down what you expect and let the framework compare.
+ISL used `check-expect` as a standalone expression at the top level of a file. TypeScript's `test` wrapper is a small change in form: it names the test and groups related checks together. The underlying idea is the same: write down what you expect and let the framework compare.
 
 ```racket
 (check-expect (late-fee 2) 0)
@@ -264,6 +264,7 @@ function lateFee(daysLate: number): number {
 ```
 <details class="tooltip exercise">
 <summary>Where's <code>else</code>?</summary>
+
 `lateFee` is written with no `else` cases, but this is not the only way to write the function. Rewrite `lateFee` such that all statements are nested within an `if` or `else`. You'll need more than one statement in some of the blocks.
 </details>
 
@@ -277,9 +278,8 @@ All three tests now pass:
 Ntice what did *not* change: the tests. They were correct all along, because they were written from the specification, and so the requirement our implementation forgot had nowhere to hide. If we had written our tests *after* the implementation, by reading our own code and checking that it does what it appears to do, we would probably not have thought to test the maximum: the first prototype of `lateFee` contained  no hint that a maximum should exist. Tests written first keep the specification in charge; tests written after tend to mirror the code, mistakes included.
 
 
-(TODO: we already introduced const in Chapter 2)
 <details class="tooltip ts-tips">
-<summary>The <code>const</code> Keyword</summary>
+<summary>Recall: <code>const</code> </summary>
 
 `const` introduces a named value. Here `fee` names the result of the per-day calculation so it can be compared against the maximum and then returned. A `const` cannot be reassigned after it is defined.
 </details>
@@ -306,7 +306,7 @@ We wrote the `lateFee` suite by instinct: read the specification, turn each clau
 
 ### Equivalence Class Partitioning
 
-The most direct way to choose test inputs is to divide the input space into **equivalence classes**: groups of inputs that the specification says should be handled the same way. You then choose at least one **representative**  (TODO: should it be bolded?) from each class.
+The most direct way to choose test inputs is to divide the input space into **equivalence classes**: groups of inputs that the specification says should be handled the same way. You then choose at least one **representative**  from each class.
 
 The `lateFee` specification divides its input into three classes:
 
@@ -325,8 +325,9 @@ Within a class, one representative is as informative as another. `lateFee(12)` a
 <details class="tooltip deep-dive">
 <summary>Equivalence Classes are Only Derived From the Specification</summary>
 
+In Chapter 1, we defined a **branch** as the side of an if-statement that was taken when executed on an input. A **path** is the sequence of branches that are taken when a program executes on a given input. 
+
 Two inputs belong to the same class when the *specification* says they should behave the same way, not when they happen to take the same path through the code you wrote. In our buggy implementation, `lateFee(12)` and `lateFee(30)` took the same path through the code; classes derived from that implementation would have merged them, and the fault would have survived. Classes derived from the specification kept them apart, which is exactly why the fault was caught.
-(TODO: needs checking, where do we introduce "path"? I think we introduce "branch" explicitly in Chap 1. Should we introduce path here, now that we have multiple if-elses?)
 </details>
 
 ### Boundary Value Analysis
@@ -376,7 +377,7 @@ grace       accruing ( $0.50 / day )             capped ( $10 )
             boundary                             boundary
             ( 2 -> 3 )                           ( 21 -> 22 )
 ```
-<!-- caption="The three equivalence classes for daysLate." -->
+<!-- caption="Figure 03.01: The three equivalence classes for daysLate." -->
 
 ## Expected and Unexpected Errors
 
@@ -410,7 +411,7 @@ type Result<T, E> =
 
 By contrast: a `Loan` whose `renewalsRemaining` is `-1`, is an *unexpected* error. No sequence of correct operations can produce it, so if `renewalsRemaining` is `-1`, something else has already gone wrong. 
 
-We detect unexpected errors and signal them to our program using the `assert` function. These calls look like `assert(<condition>, <description>)`. When an **assertion** fails, the program is immediately terminated with the provided description. 
+We detect unexpected errors and signal them to our program using the `assert` function. These calls look like `assert(<condition>, <description>)`. When an **assert** fails, the program is immediately terminated with the provided description. 
 
 <details class="tooltip ts-tips">
 <summary><code>assert</code></summary>
@@ -419,7 +420,9 @@ Calling the `assert` function:
 ```typescript
 assert(<condition>, <description>)
 ```
-evaluates `<condition>`. If `<condition>` is true, the program continues to execution as if `assert` was not there. 
+evaluates `<condition>`. If `<condition>` is true, the program continues to execute as if `assert` was not there. If `<condition>` is false, the program will terminate and print out `<description>`.
+
+A tricky thing about asserts: the `<condition>` describes what _should hold_, while `<description>`, which is only printed out when `<condition>` fails, usually describes what _did not_ hold. 
 
 `assert` is not part of the TypeScript language itself. In this course we use the standard `assert` function provided by the Node runtime:
 
@@ -430,7 +433,7 @@ import assert from "node:assert/strict";
 Many TypeScript/JavaScript frameworks provide their own `assert`-like functions as well, and any of them serves the same role. By the end of Part 2, you'll know how to implement `assert` yourself, so you'll be able to use this concept in whatever code you write. 
 </details>
 
-The presence of assertions in the implementation like this can make the code much easier to write, because your implementation can trust that the invariants are valid for the remainder of the function. This helps reduce defensive checks you might otherwise need to make in your code. `assert` also communicates to other developers that these are checks for valid input, rather than checks part of the core program logic. 
+The presence of assertions in the implementation like this can make the code much easier to write and debug, because your implementation can trust that the invariants are valid for the remainder of the function. This helps reduce defensive checks you might otherwise need to make in your code. `assert` also communicates to other developers that these are checks for valid input, rather than checks part of the core program logic. 
 
 ```typescript
 /**
@@ -465,11 +468,17 @@ function renew(loan: Loan): Result<Loan, string> {
 
 Note where the `assert` calls live: unlike `checkExpect`, which sits in `test/` and probes chosen inputs from the outside, `assert` sits in the source code in `src/` and is evaluated on *every* execution of the function, whoever the caller is. Halting may seem drastic, but it is the right response to an impossible state.
 
-At the start of this chapter, we saw that operations built on a value whose invariant has failed quietly produce nonsense. For instance, `lateFee(5.5)` returns a value, even though late fees are only defined as whole numbers.  An assertion *stops* the program at the *first sign of corruption*, before the nonsense can spread or be written somewhere permanent. This is the behaviour we deferred earlier in the chapter: when a caller *violates* a precondition, an assertion is how the function *refuses to continue*. 
+At the start of this chapter, we saw that operations built on a value whose invariant has failed quietly produce nonsense. For instance, `lateFee(5.5)` returns a value, even though late fees are only defined as whole numbers.  An assertion *stops* the program at the *first sign of corruption*, before the nonsense can spread or be written somewhere permanent. This is the behaviour we deferred earlier in the chapter: when a caller *violates* a precondition, an `assert` is how the function *refuses to continue*. 
 
-One relaxation to this approach is for functions that take *user-specified input*. Rather than crashing, user-specified input is often explicitly validated and rejected as expected errors (because in practice it is useful to expect users to do unreasonable things). For example, when you pass an TypeScript program with invalid syntax to `tsc`, it tells you where an error is, rather than simply 
+<details class="tooltip deep-dive">
+<summary>Failing with User-Specified Inputs: Give More Detail</summary>
 
-Now the tests, and a distinction worth being careful about. The expected error is a *documented outcome*: the postcondition names the exact value the caller receives (an `ok: false` result carrying the reason), so we test it with `checkExpect`, the same way we test every other clause of the contract:
+One relaxation to the `assert` approach is for functions that take *user-specified input*. Rather than crashing, user-specified input is often explicitly validated and rejected as expected errors (because in practice, it is useful to expect users to do unreasonable things). 
+
+For example, when you pass an TypeScript program with invalid syntax to `tsc`, it tells you where an error is, rather than raising an error that says only `SyntaxError`.  
+</details>
+
+To write tests for errors, we must be clear about the difference between unexpected and expected errors. The expected error is a *documented outcome*: the postcondition names the exact value the caller receives (an `ok: false` result carrying the reason), so we test it with `checkExpect`, the same way we test every other clause of the contract:
 
 ```typescript
 test("renewal succeeds while renewals remain", () => {
@@ -505,13 +514,25 @@ checkError(() => functionUnderTest(arg1, arg2), <message>);
 ```
 `checkError` then executes its first function argument and checks whether an error occurs during execution. If it does, `checkError` passes. 
 
-If we were to pass `renew(corrupted)` directly as an argument, `renew(corrupted)` would execute, and fail, before `checkError`, which will check the error, was ever called.
+For example, in the above, 
+```typescript
+checkError(() => renew(corrupted), "Loan invariant violated: negative renewals");
+```
+`checkError` calls `renew(corrupted)` and checks whether and error occurs.
+
+By contrast, if we were to try and write something like: 
+```typescript
+checkExpect(renew(corrupted), "Loan invariant violated: negative renewals")
+```
+`renew(corrupted)` would execute, and fail, before `checkExpect` is called, halting the entire execution of the test suite. 
 </details>
 <details class="tooltip link-110">
 <summary>Higher-Order Functions</summary>
 
 `checkError` is a higher-order function, so called because it takes a function as an argument. You've seen this before, notably in `map`, `filter`, and `fold`.
 </details>
+
+In short:
 
 **Expected errors** should be tested analogously to how a user would interact with a function, which means we should use `checkExpect`: a refused renewal is not a malfunction but a specified result, and the contract tells you exactly what value to expect. 
 
@@ -528,6 +549,8 @@ Documented **invariants** are the bridge between the two. The **preconditions** 
 
 An invariant that is written down can be turned into a test suite and into assertions; an invariant that lives only in someone's head cannot be checked by anything.
 
+
+
 <details class="tooltip exercise">
   <summary>Exercise: Parking Fees</summary>
 
@@ -535,12 +558,12 @@ Practise this chapter's concepts on a new problem: write a contract, derive test
 
 > As a parking garage, I want to compute the parking fee by counting how many whole hours a car is parked, with a free first hour and a daily maximum, so that drivers are charged fairly and predictably.
 
-The policy policy states that parking is free for the first hour; after that, each additional hour costs $4; and the total never exceeds $24. The function will have the signature `parkingFee(hours: number): number`.
+The policy policy states that parking is free for the first hour; after that, each additional hour costs $4; and the total never exceeds $24. The function will have the signature <span class="hint">`parkingFee(hours: number): number`</span>.
 
-1. Write the contract. Document `parkingFee` with a doc comment giving its purpose, a precondition (`hours` is a whole number and `hours >= 0`), a postcondition (the fee is between 0 and 24), and `@param`/`@returns` lines.
+1. Write the contract. Document `parkingFee` with a doc comment giving its purpose, a precondition (<span class="hint">`hours` is a whole number and `hours >= 0`</span>), a postcondition (<span class="hint">the fee is between 0 and 24</span>), and `@param`/`@returns` lines.
 2. Derive the tests first. Use equivalence class partitioning to find the input classes the policy treats alike, and pick one representative of each. Then use boundary value analysis to add the edges: where the free hour ends, and where the cap is reached.
 3. Stub `parkingFee` so it returns a clearly wrong value, run your tests, and confirm they all fail.
 4. Implement `parkingFee`, run the tests again, and confirm they pass.
-5. Guard the precondition. Decide what should happen when the precondition is violated, for example `parkingFee(-1)`. Add an `assert` for it, and write a `checkError` test that confirms the violation is caught.
+5. Guard the precondition. Decide what should happen when the precondition is violated, for example <span class="hint">`parkingFee(-1)`</span>. Add an `assert` for it, and write a `checkError` test that confirms the violation is caught.
 
 </details>
