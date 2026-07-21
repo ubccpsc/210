@@ -104,7 +104,10 @@ export default defineConfig({
         {
             text: "Part 3: Evolution",
             link: "/part3/",
-            items: [],
+            items: [{
+                text: "16: Coupling",
+                link: "/part3/01_coupling"
+            }],
         }, // end part 3
         ],
 
