@@ -492,6 +492,25 @@ A `checkExpect` only does anything when it is executed, which makes it a *dynami
 
 </details>
 
+<details class="tooltip link-110">
+<summary>Exact Numbers in ISL, Inexact Numbers in TypeScript</summary>
+
+In ISL, dividing two integers gives an _exact_ rational number. `(/ 35 50)` is exactly `7/10`, and `(* (/ 35 50) 100)` is exactly `70`. Racket keeps the fraction rather than converting it to a decimal, so arithmetic on whole numbers stays exact however you order the operations.
+
+TypeScript has a single `number` type, and it stores values as a binary approximation of the decimal you wrote. Most decimals cannot be represented exactly in binary, in the same way that `1/3` cannot be written exactly as a decimal:
+
+```typescript
+(11 / 20) * 100;    // 55.00000000000001, not 55
+(29 / 50) * 100;    // 57.99999999999999, not 58
+```
+
+Two consequences follow, and both apply to any language that stores numbers this way:
+
+- Order your arithmetic so that division comes last. `(11 * 100) / 20` gives exactly `55`, because the multiplication happens while the values are still whole numbers.
+- Be careful comparing computed decimal values for exact equality. `checkExpect((11 / 20) * 100, 55)` fails, even though the computed value is not visibly different from `55`.
+
+</details>
+
 Suppose we had a more fine-grained expectation of how letter grades should be computed and wrote the following check:
 
 ```typescript
