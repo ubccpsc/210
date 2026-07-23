@@ -37,7 +37,7 @@ In Part 2, we'll see the same shift, but with more complex constraints than type
  
 </details>
 
-In this module we develop *class-based* abstractions as the mechanism for invariant enforcement. Across eight lectures, we define classes, decompose systems into cohesive units, design how failures are communicated, verify their invariants, hide what is free to change, depend on abstractions through interfaces, organise classes into hierarchies, and write code that continues to apply as new types arrive.
+In this module we develop *class-based* abstractions as the mechanism for invariant enforcement. Across six lectures, we define classes, decompose systems into cohesive units, hide what is free to change, depend on abstractions through interfaces, organise classes into hierarchies, and write code that continues to apply as new types arrive.
 
 ## Intended Learning Objectives
 
@@ -45,33 +45,27 @@ By the end of Part 2, you will be able to:
 
 1. _Design classes that own and protect state_, using constructors, access modifiers, and methods to maintain invariants inside the object.
 2. _Decompose a problem into cohesive classes_, so each unit has a clear responsibility and the relationships among units are explicit.
-3. _Verify class behaviour with tests and errors_, deciding when a failure should be prevented, asserted, or communicated as part of the API.
-4. _Use encapsulation and interfaces to hide change_, exposing only the operations clients need while keeping representations free to evolve.
-5. _Apply polymorphism and extension deliberately_, so new behaviour can be added by introducing new classes rather than reopening code that already works.
+3. _Use encapsulation and interfaces to hide change_, exposing only the operations clients need while keeping representations free to evolve.
+4. _Apply polymorphism and extension deliberately_, so new behaviour can be added by introducing new classes rather than reopening code that already works.
 
 ## Chapter Overview
 
-Part 2 covers four connected themes across eight chapters.
+Part 2 covers three connected themes across six chapters.
 
-**Introducing classes:**
+**Building abstractions:**
 
 1. [Building Abstractions with Classes](./01_abstraction) introduces classes as the direct language support for bundling state with the operations that maintain it.
 2. [Decomposing Systems into Cohesive Classes](./02_decomposition) shows how to split a system into classes and responsibilities that belong together.
 
-**Making class-based code reliable:**
-
-3. [Designing for Failure](./03_errors) asks how class-based APIs should communicate failure when a precondition is violated or a request cannot be completed.
-4. [Verifying Behaviour](./04_verification) develops tests for class behaviour and discusses how to check that an object continues to respect its promises.
-
 **Hiding what can change:**
 
-5. [Encapsulating What Varies](./05_encapsulation) uses access control to keep representations private and preserve class invariants.
-6. [Defining Boundaries with Interfaces](./06_boundaries) establishes narrow contracts that let clients depend on a stable shape rather than on a concrete implementation.
+3. [Encapsulating What Varies](./03_encapsulation) uses access control to keep representations private and preserve class invariants.
+4. [Defining Boundaries with Interfaces](./04_boundaries) establishes narrow contracts that let clients depend on a stable shape rather than on a concrete implementation.
 
 **Designing for growth:**
 
-7. [Extending Behaviour Through Polymorphism](./07_extension) uses inheritance and overriding to let related classes share behaviour while varying the parts that differ.
-8. [Designing for Change with the Open/Closed Principle](./08_ocp) brings the design ideas together and shows how polymorphism lets software grow by adding new code instead of rewriting code that already works.
+5. [Extending Behaviour Through Polymorphism](./05_extension) uses inheritance and overriding to let related classes share behaviour while varying the parts that differ.
+6. [Designing for Change with the Open/Closed Principle](./06_ocp) brings the design ideas together and shows how polymorphism lets software grow by adding new code instead of rewriting code that already works.
 
 ## Toward Part 3: Design for Evolution
 

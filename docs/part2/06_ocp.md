@@ -147,10 +147,10 @@ It is also why no design is open to _every_ change. The notifier system is open 
 
 The Open/Closed Principle is the last piece of a set the design part has been assembling, and the pieces hold one another up:
 
-- **Cohesion** [(Chapter 9)](02_decomposition): each class, and each interface, is responsible for one thing.
-- **Encapsulation** [(Chapter 12)](05_encapsulation): a class hides its representation behind a contract, so its internals can change without its callers changing.
-- **Small contracts** [(Chapter 13)](06_boundaries): callers depend on a narrow, named abstraction rather than on a concrete class.
-- **Substitutability** [(Chapter 14)](07_extension): many implementations stand behind one contract, each honouring it, so one can stand in for another.
+- **Cohesion** [(Chapter 11)](02_decomposition): each class, and each interface, is responsible for one thing.
+- **Encapsulation** [(Chapter 12)](03_encapsulation): a class hides its representation behind a contract, so its internals can change without its callers changing.
+- **Small contracts** [(Chapter 13)](04_boundaries): callers depend on a narrow, named abstraction rather than on a concrete class.
+- **Substitutability** [(Chapter 14)](05_extension): many implementations stand behind one contract, each honouring it, so one can stand in for another.
 - **Open and closed** (this chapter): the above let a system grow by adding implementations rather than by editing existing code.
 
 These are not independent rules to memorise. They are all the same concept viewed from different angles. A small, cohesive interface is easy to implement substitutably; substitutable implementations behind a hidden representation are what let new ones be added without modification; and the discipline of putting a boundary where change is expected is what makes any of it worth doing. Each makes the others reachable.

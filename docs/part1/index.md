@@ -19,7 +19,7 @@ By the end of Part 1, you will be able to:
 
 1. _Model information as precise types_, designing data definitions whose structure drives the code that operates on them.
 2. _Specify behaviour with contracts and invariants, and construct tests_ that target the cases most likely to reveal faults, then judge whether a suite genuinely covers them.
-3. _Decide how each property should be corroborated_, whether by the type system, by tests and assertions, or by controlling how values are created, and design code that enforces the invariants the language cannot.
+3. _Decide how each property should be corroborated_, whether by the type system, by tests and assertions, or by controlling how values are created, design code that enforces the invariants the language cannot, and communicate the failures it cannot prevent.
 4. _Reason about state and time_, tracing how references, scope, and mutation determine what a change affects, and weighing the trade-offs of mutation, side effects, and asynchronous computation.
 5. _Build working programs_ that combine these ideas to process collections and interact with files and web services.
 
@@ -69,7 +69,7 @@ One concern remains. An invariant the language cannot check must still be kept t
 
 ## Chapter Overview
 
-Part 1 covers three broad themes across seven chapters.
+Part 1 covers four broad themes across nine chapters.
 
 **The language and its data:**
 
@@ -86,6 +86,11 @@ Part 1 covers three broad themes across seven chapters.
 5. [Arrays and Iteration](./05_arrays) introduces collections and the operations over them: `map`, `filter`, `reduce`, and `find`, with the `for of` loop beneath them.
 6. [Mutation and Side Effects](./06_state-mutation) adds state that changes over time, along with the references, aliasing, scope, and side effects that come with it.
 7. [Asynchronous Effects and Time](./07_async) reaches outside the program to files and web services, where a result arrives only after a wait, using promises and `async`/`await`.
+
+**Handling and verifying failure:**
+
+8. [Designing for Failure](./08_errors) treats failure as part of a function's contract, choosing between returning a failure the type checker forces callers to confront and throwing an exception that propagates to a handler above.
+9. [Verifying Behaviour](./09_verification) moves from the course toolkit to the assertion vocabulary of a real test framework, partitions inputs and outputs, and uses coverage and regression to judge whether a suite checks enough.
 
 ## Toward Part 2: Designing and Enforcing Abstractions
 

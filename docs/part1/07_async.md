@@ -221,7 +221,7 @@ The expression
 await <expression>
 ```
 
-where `<expression>` evaluates to a value of `Promise<T>` type, suspends execution until the promise resolves. If the promise settles successfully, `await <expression>` evaluates to the value the promise resolves to, and execution resumes from there. If the promise is rejected, execution resumes for the program to _throw an error_: more on that in Chapter 10.
+where `<expression>` evaluates to a value of `Promise<T>` type, suspends execution until the promise resolves. If the promise settles successfully, `await <expression>` evaluates to the value the promise resolves to, and execution resumes from there. If the promise is rejected, execution resumes for the program to _throw an error_: more on that in the next chapter.
 </details>
 
 `async` communicates that a function may contain `await`, and it changes the function's return type: an `async` function always returns a *promise* of its result. `loadReport` is declared to return `Promise<string>`, not `string`, even though its body simply returns a string. This is because `loadReport` cannot hand its caller a `string` immediately: it itself is waiting on `readFile`. And what should the caller of `loadReport` do while `loadReport` is waiting on `readFile`? The caller itself must await on `loadReport`. 
@@ -392,7 +392,7 @@ The compiler's guarantees stop at the program's edge. At the edges, the discipli
 
 Everything in this chapter can fail in ways pure computation cannot: a file may not exist, a network may be down, a service may answer nonsense. This is what the rejected state of a promise is for, and when an `await`ed promise rejects, the error surfaces in your program at the `await`.
 
-Handling these failures well is complex: we will defer this subject to Chapter 10 in Part 2, rather than compressing that complexity into a paragraph in this already-complex chapter. 
+Handling these failures well is complex: we will defer this subject to the next chapter, rather than compressing that complexity into a paragraph in this already-complex chapter. 
 
 For this chapter and its exercises, the policy is simple: we will work with files that exist and services that answer. If your program crashes, read the message it crashed with and fix the bug it points at (the most common error is that a path or URL is not quite right). Crashing immediately with a clear message is acceptable behaviour for a program at this stage; handling failures more gracefully comes later.
 

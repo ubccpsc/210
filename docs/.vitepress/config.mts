@@ -69,6 +69,12 @@ export default defineConfig({
             }, {
                 text: "07: Asynchronousity",
                 link: "/part1/07_async"
+            }, {
+                text: "08: Designing for Failure",
+                link: "/part1/08_errors"
+            }, {
+                text: "09: Verifying Behaviour",
+                link: "/part1/09_verification"
             }]
 
         }, // end part 1
@@ -76,29 +82,23 @@ export default defineConfig({
             text: "Part 2: Abstraction",
             link: "/part2/",
             items: [{
-                text: "08: Building Abstractions",
+                text: "10: Building Abstractions",
                 link: "/part2/01_abstraction"
             }, {
-                text: "09: Decomposing Systems",
+                text: "11: Decomposing Systems",
                 link: "/part2/02_decomposition"
             }, {
-                text: "10: Designing for Failure",
-                link: "/part2/03_errors"
-            }, {
-                text: "11: Verifying Behaviour",
-                link: "/part2/04_verification"
-            }, {
                 text: "12: Encapsulating What Varies",
-                link: "/part2/05_encapsulation"
+                link: "/part2/03_encapsulation"
             }, {
                 text: "13: Defining Boundaries",
-                link: "/part2/06_boundaries"
+                link: "/part2/04_boundaries"
             }, {
                 text: "14: Extending Behaviour",
-                link: "/part2/07_extension"
+                link: "/part2/05_extension"
             }, {
                 text: "15: Designing for Change",
-                link: "/part2/08_ocp"
+                link: "/part2/06_ocp"
             }],
         }, // end part 2
         {

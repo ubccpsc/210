@@ -1,15 +1,15 @@
 # Verifying Behaviour
 
-A function's contract states what it should do; a test demonstrates that it does, for a chosen input. Part 1 began this practice with `checkExpect`: write down an input and the result the contract promises, and let the framework compare the two. That was enough to get started, but it kept two things simple that real test suites do not. Our assertions checked little beyond equality, and we chose our tests one clause of the contract at a time. This chapter develops both: a richer vocabulary for stating what a result must satisfy, and more systematic ways to judge whether a suite checks enough.
+A function's contract states what it should do; a test demonstrates that it does, for a chosen input. The earlier chapters began this practice with `checkExpect`: write down an input and the result the contract promises, and let the framework compare the two. That was enough to get started, but it kept two things simple that real test suites do not. Our assertions checked little beyond equality, and we chose our tests one clause of the contract at a time. This chapter develops both: a richer vocabulary for stating what a result must satisfy, and more systematic ways to judge whether a suite checks enough.
 
 It also changes our tools. The `checkExpect` and `checkError` functions were a deliberately simple stand-in for the assertions used in real test frameworks, and from here on we use those assertions. We write tests with `expect`, the assertion vocabulary provided by the chai library that the vitest test runner is built on. The change is more than spelling. Where `checkExpect` did exactly one thing, compare for equality, `expect` offers a family of assertion operators, each stating a different kind of expectation and, when it fails, reporting a different kind of message. Learning to choose among them is the first half of this chapter.
 
 ## From `checkExpect` to `expect`
 
-A `checkExpect` call paired an actual value with an expected one. A chai assertion reads more like a sentence: name the value under test, then state what must be true of it. The most common assertion is equality, and every `checkExpect` from Part 1 translates into one directly:
+A `checkExpect` call paired an actual value with an expected one. A chai assertion reads more like a sentence: name the value under test, then state what must be true of it. The most common assertion is equality, and every `checkExpect` we have written translates into one directly:
 
 ```typescript
-// Part 1, with the course toolkit's checkExpect
+// previously, with the course toolkit's checkExpect
 test("no fee at the grace boundary", () => {
     checkExpect(lateFee(2), 0);
 });
@@ -231,7 +231,7 @@ This is not a licence to attach five assertions to every test. Most tests need o
 
 ## Partitioning Inputs and Outputs
 
-Choosing what to assert is one half of test design; choosing the inputs is the other. Part 1 divided a function's input space into equivalence classes, groups the specification treats alike, and tested one representative of each, looking hardest at the boundaries between classes. Those techniques carry over unchanged. Two things grow once a function's inputs and outputs are richer than a single number: the input classes are defined over combinations of fields rather than ranges, and the output deserves partitioning of its own.
+Choosing what to assert is one half of test design; choosing the inputs is the other. The invariant checking chapter divided a function's input space into equivalence classes, groups the specification treats alike, and tested one representative of each, looking hardest at the boundaries between classes. Those techniques carry over unchanged. Two things grow once a function's inputs and outputs are richer than a single number: the input classes are defined over combinations of fields rather than ranges, and the output deserves partitioning of its own.
 
 For the rest of the chapter we move to a video streaming service, which gives us a function whose input and output are both worth partitioning.
 
@@ -332,7 +332,7 @@ The catalogue adds further dimensions that the specification treats distinctly: 
 
 ### Partitioning by Output
 
-With a single-number result like `lateFee` from Part 1, partitioning the input was sufficient, because each input class produced its own kind of output. A structured result has classes of its own that do not line up one-to-one with the input. `playableTitles` can return an empty list, when nothing is playable; a single title; or several at once. A suite with a representative of every input class can still miss an output class.
+With a single-number result like `lateFee`, partitioning the input was sufficient, because each input class produced its own kind of output. A structured result has classes of its own that do not line up one-to-one with the input. `playableTitles` can return an empty list, when nothing is playable; a single title; or several at once. A suite with a representative of every input class can still miss an output class.
 
 The mismatch is easy to see. The viewer's plan is the most visible input dimension, but it does not decide whether the result is empty: the *largest* result here comes from the most permissive input, a premium viewer, while the empty result comes from a viewer in a region where nothing is licensed, whatever their plan. Reaching each output class takes a deliberately chosen input, and each test layers its assertions from general to specific, as before, so that a failure names which aspect of the result is wrong:
 
@@ -432,97 +432,6 @@ function canPlay(viewer: Viewer, title: Title): boolean {
 
 This version has four branches. A suite with an unpublished title, a premium title for a premium viewer, a premium title for a free viewer, and a published free title executes all four, for 100% branch coverage, and it is still wrong: a free title that is not licensed in the viewer's region is judged playable, because the rule that would reject it was never written. Coverage could not reveal the fault, because the fault was not an untested branch but a *missing* one. Coverage measures the code you wrote, never the code the specification required. This is why white-box testing supplements black-box testing but never replaces it: reading the code tells you whether your tests reach what is there, while only the specification can tell you what ought to be there.
 
-## Testing Object-Oriented Code
-
-Every example so far has tested a pure function: pass arguments, inspect the return value. A class is different. An object carries _state_ between calls, so a test usually constructs the object, performs a sequence of operations, and then asserts on the state that results. The value under test is the object's observable behaviour, not a single return value.
-
-Recall the `Playlist` class from the abstraction chapter, which tracks a current song as songs are added and removed. A test for it reads as a short story: set up an object, drive it through some calls, and check where it ended up.
-
-```typescript
-const songA: Song = { title: "Aubade", artist: "Dawn Quartet", durationSeconds: 180 };
-const songB: Song = { title: "Bassline", artist: "Low End", durationSeconds: 240 };
-
-test("removing the current song keeps the position valid", () => {
-    const playlist = new Playlist();
-    playlist.add(songA);
-    playlist.add(songB);
-    playlist.next();                                  // current is now songB
-    playlist.remove(songB);                           // remove the current song
-    expect(playlist.current()).to.deep.equal(songA);  // the position stayed valid
-});
-```
-
-The test-design ideas carry over unchanged. Equivalence classes and boundaries now describe _sequences of method calls_ rather than single arguments (an empty playlist, a one-song playlist, removing the current song versus another song), and layered assertions still apply to whatever the object exposes.
-
-### Setup and Teardown
-
-Almost every test of a class starts the same way: build a fresh object to work on. Writing `new Playlist()` at the top of every test is repetitive, and reusing one shared object across tests is worse than repetitive: one test's mutations would leak into the next, and the suite would quietly depend on the order its tests happen to run in. Test runners solve this with **lifecycle hooks**, functions the runner calls around your tests. The most useful is `beforeEach`, which runs before every test, the natural place to create a fresh object:
-
-```typescript
-let playlist: Playlist;
-
-beforeEach(() => {
-    playlist = new Playlist();   // a fresh, empty playlist before each test
-});
-
-test("a new playlist has no current song", () => {
-    expect(playlist.current()).to.equal(null);
-});
-
-test("the first song added becomes current", () => {
-    playlist.add(songA);
-    expect(playlist.current()).to.deep.equal(songA);
-});
-```
-
-Each test now receives its own `playlist`, untouched by any other, so the tests are independent and may run in any order. The hook removed the duplicated construction and, more importantly, the shared state that would have coupled the tests together.
-
-There are four hooks provided by most testing frameworks:
-
-- `beforeEach` runs before each test and `afterEach` runs after each test. These are helpful for per-test setup and teardown.
-- `beforeAll` runs once before the first test and `afterAll` runs once after the last test is complete. These are best for setup too expensive to repeat, such as opening a connection shared, read-only, by every test.
-
-For the in-memory objects in this course, a `beforeEach` that constructs a fresh object is almost always all you need; the teardown hooks matter most when a test touches something outside the program, such as a file or a network connection, that must be released whether the test passed or threw.
-
-The runner wraps each test in the per-test hooks, with the run-once hooks on the outside. The inner `beforeEach`, test, `afterEach` cycle repeats for every test case:
-
-<!-- pikchr playground: https://pikchr.org/home/pikchrshow -->
-```pikchr
-$yOnce = 1.4
-$yEach = 0.7
-$yCase = 0.0
-
-box wid 8.9 ht 0.52 at (4.6,$yOnce) fill 0xf3f3f3 color 0xe6e6e6
-box wid 8.9 ht 0.52 at (4.6,$yEach) fill 0xeaf2fb color 0xe6e6e6
-box wid 8.9 ht 0.52 at (4.6,$yCase) fill 0xeaf7ea color 0xe6e6e6
-
-text "Once per Test File" small rjust at (0.05,$yOnce)
-text "Around Each Test Case" small rjust at (0.05,$yEach)
-text "Test Case(s)" small rjust at (0.05,$yCase)
-
-boxwid = 0.84
-boxht = 0.34
-boxrad = 0.06
-
-BA: box "beforeAll"  at (1.3,$yOnce) fill 0xcccccc
-B1: box "beforeEach" at (2.3,$yEach) fill 0x9ec5e8
-T1: box "test 1"     at (3.3,$yCase) fill 0x9ed29e
-E1: box "afterEach"  at (4.3,$yEach) fill 0x9ec5e8
-B2: box "beforeEach" at (5.3,$yEach) fill 0x9ec5e8
-T2: box "test 2"     at (6.3,$yCase) fill 0x9ed29e
-E2: box "afterEach"  at (7.3,$yEach) fill 0x9ec5e8
-AA: box "afterAll"   at (8.3,$yOnce) fill 0xcccccc
-
-arrow from BA.s to B1.n
-arrow from B1.s to T1.n
-arrow from T1.n to E1.s
-arrow from E1.e to B2.w
-arrow from B2.s to T2.n
-arrow from T2.n to E2.s
-arrow from E2.n to AA.s
-```
-<!-- caption: "beforeEach and afterEach wrap every test; beforeAll and afterAll run once for the file." -->
-
 ## Regression Testing
 
 A program is not finished when it first passes its tests. Code changes over time: bugs are fixed, features are added, and working code is reorganised. Every change is a chance to introduce a **regression**, a change that breaks behaviour that previously worked.
@@ -552,7 +461,7 @@ This is the second job of a test suite, and over the life of a program it is the
 
 Effective verification strategies are layered such that each approach provides additional unique insight into the correctness of a program. The type checker rules out malformed programs before they run. Tests show that the program behaves as its contract promises when it does run. Specific, layered assertions make a failing test explain not merely that something is wrong but what kind of fault occurred. Partitioning the inputs and the outputs makes a passing suite meaningful rather than merely green. Coverage reveals the code the suite still ignores, and re-running the suite on every change keeps a correct program correct. No single one of these is enough on its own. Together they are how we move from claiming that an abstraction honours its contract to having earned the confidence that it does.
 
-Tests confirm how an abstraction behaves. The next chapter examines how to structure a class so that the invariant those tests rely on cannot be broken from the outside.
+Tests confirm that a program behaves as its contracts promise. Part 2 takes up the complementary question: how to structure code so that the invariants those tests rely on cannot be broken from the outside in the first place.
 
 <details class="tooltip exercise">
   <summary>Exercise: Verifying a Shipping Calculator</summary>

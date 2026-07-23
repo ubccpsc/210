@@ -310,11 +310,11 @@ The most direct way to choose test inputs is to divide the input space into **eq
 
 The `lateFee` specification divides its input into three classes:
 
-| Class | Inputs | Behavior |
+| Class | Inputs | Behaviour |
 |---|---|---|
-| Grace period | 0 to 2 | fee is 0 |
-| Accruing | 3 to 21 | fee grows by $0.50 per day |
-| Capped | 22 and up | fee is exactly $10 |
+| Grace period | 0 to 2 | Fee is 0 |
+| Accruing | 3 to 21 | Fee grows by $0.50 per day |
+| Capped | 22 and up | Fee is exactly $10 |
 
 Note where the table begins: at 0, with no negative inputs anywhere. We got starting at 0 directly from `daysLate >= 0` in the precondition. The invariant we wrote in the doc comment defines the input space the suite must cover; without it, we would not know whether `lateFee(-5)` was a missing class or a meaningless input.
 

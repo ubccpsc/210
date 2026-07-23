@@ -485,15 +485,15 @@ const c: Song = { title: "Cadence", artist: "The Meter", durationSeconds: 200 };
 favourites.add(a);
 favourites.add(b);
 favourites.add(c);
-checkExpect(favourites.current(), a);   // first song added is current
+expect(favourites.current()).to.deep.equal(a);   // first song added is current
 
 favourites.next();
-checkExpect(favourites.current(), b);
+expect(favourites.current()).to.deep.equal(b);
 
-favourites.remove(b);                   // removing the current song keeps the index valid
-checkExpect(favourites.current(), c);   // c shifted into b's old position
+favourites.remove(b);                            // removing the current song keeps the index valid
+expect(favourites.current()).to.deep.equal(c);   // c shifted into b's old position
 
-checkExpect(workout.current(), null);   // workout is untouched and still empty
+expect(workout.current()).to.equal(null);        // workout is untouched and still empty
 ```
 
 </CollapsibleCode>
@@ -556,14 +556,14 @@ function addSong(list: Playlist, song: Song): void {
 
 const mix = new Playlist();
 addSong(mix, someSong);
-checkExpect(mix.current() === someSong, true); 
+expect(mix.current()).to.equal(someSong);   // the very same object, not a copy
 
-checkExpect(someSong.durationSeconds === 210, true);
-checkExpect(mix.current().durationSeconds === 210, true);
+expect(someSong.durationSeconds).to.equal(210);
+expect(mix.current().durationSeconds).to.equal(210);
 
 someSong.durationSeconds = 199; // mutate the value
-checkExpect(someSong.durationSeconds === 199, true);
-checkExpect(mix.current().durationSeconds === 199, true);
+expect(someSong.durationSeconds).to.equal(199);
+expect(mix.current().durationSeconds).to.equal(199);
 
 
 // A primitive argument is copied: the function cannot change the caller's value.
@@ -573,14 +573,105 @@ function bumpToZero(value: number): void {
 
 const count = 5;
 bumpToZero(count);
-checkExpect(count === 5, true); // `count` is a value, not a `reference` and does not change
+expect(count).to.equal(5); // `count` is a value, not a `reference` and does not change
 ```
 
 </CollapsibleCode>
 
-The two `checkExpect`s capture the whole difference: `mix` was shared with `addSong`, so the song it added is still there afterward, while `count` was copied into `bumpToZero`, so the caller's value never changed.
+The two assertions capture the whole difference: `mix` was shared with `addSong`, so the song it added is still there afterward, while `count` was copied into `bumpToZero`, so the caller's value never changed.
 
 </details>
+
+## Testing Classes
+
+The verification chapter tested pure functions: pass arguments, inspect the return value. A class is different. An object carries _state_ between calls, so a test usually constructs the object, performs a sequence of operations, and then asserts on the state that results. The value under test is the object's observable behaviour, not a single return value.
+
+The `Playlist` class from this chapter tracks a current song as songs are added and removed. A test for it reads as a short story: set up an object, drive it through some calls, and check where it ended up.
+
+```typescript
+const songA: Song = { title: "Aubade", artist: "Dawn Quartet", durationSeconds: 180 };
+const songB: Song = { title: "Bassline", artist: "Low End", durationSeconds: 240 };
+
+test("removing the current song keeps the position valid", () => {
+    const playlist = new Playlist();
+    playlist.add(songA);
+    playlist.add(songB);
+    playlist.next();                                  // current is now songB
+    playlist.remove(songB);                           // remove the current song
+    expect(playlist.current()).to.deep.equal(songA);  // the position stayed valid
+});
+```
+
+The test-design ideas carry over unchanged. Equivalence classes and boundaries now describe _sequences of method calls_ rather than single arguments (an empty playlist, a one-song playlist, removing the current song versus another song), and layered assertions still apply to whatever the object exposes.
+
+### Setup and Teardown
+
+Almost every test of a class starts the same way: build a fresh object to work on. Writing `new Playlist()` at the top of every test is repetitive, and reusing one shared object across tests is worse than repetitive: one test's mutations would leak into the next, and the suite would quietly depend on the order its tests happen to run in. Test runners solve this with **lifecycle hooks**, functions the runner calls around your tests. The most useful is `beforeEach`, which runs before every test, the natural place to create a fresh object:
+
+```typescript
+let playlist: Playlist;
+
+beforeEach(() => {
+    playlist = new Playlist();   // a fresh, empty playlist before each test
+});
+
+test("a new playlist has no current song", () => {
+    expect(playlist.current()).to.equal(null);
+});
+
+test("the first song added becomes current", () => {
+    playlist.add(songA);
+    expect(playlist.current()).to.deep.equal(songA);
+});
+```
+
+Each test now receives its own `playlist`, untouched by any other, so the tests are independent and may run in any order. The hook removed the duplicated construction and, more importantly, the shared state that would have tied the tests together.
+
+There are four hooks provided by most testing frameworks:
+
+- `beforeEach` runs before each test and `afterEach` runs after each test. These are helpful for per-test setup and teardown.
+- `beforeAll` runs once before the first test and `afterAll` runs once after the last test is complete. These are best for setup too expensive to repeat, such as opening a connection shared, read-only, by every test.
+
+For the in-memory objects in this course, a `beforeEach` that constructs a fresh object is almost always all you need; the teardown hooks matter most when a test touches something outside the program, such as a file or a network connection, that must be released whether the test passed or threw.
+
+The runner wraps each test in the per-test hooks, with the run-once hooks on the outside. The inner `beforeEach`, test, `afterEach` cycle repeats for every test case:
+
+<!-- pikchr playground: https://pikchr.org/home/pikchrshow -->
+```pikchr
+$yOnce = 1.4
+$yEach = 0.7
+$yCase = 0.0
+
+box wid 8.9 ht 0.52 at (4.6,$yOnce) fill 0xf3f3f3 color 0xe6e6e6
+box wid 8.9 ht 0.52 at (4.6,$yEach) fill 0xeaf2fb color 0xe6e6e6
+box wid 8.9 ht 0.52 at (4.6,$yCase) fill 0xeaf7ea color 0xe6e6e6
+
+text "Once per Test File" small rjust at (0.05,$yOnce)
+text "Around Each Test Case" small rjust at (0.05,$yEach)
+text "Test Case(s)" small rjust at (0.05,$yCase)
+
+boxwid = 0.84
+boxht = 0.34
+boxrad = 0.06
+
+BA: box "beforeAll"  at (1.3,$yOnce) fill 0xcccccc
+B1: box "beforeEach" at (2.3,$yEach) fill 0x9ec5e8
+T1: box "test 1"     at (3.3,$yCase) fill 0x9ed29e
+E1: box "afterEach"  at (4.3,$yEach) fill 0x9ec5e8
+B2: box "beforeEach" at (5.3,$yEach) fill 0x9ec5e8
+T2: box "test 2"     at (6.3,$yCase) fill 0x9ed29e
+E2: box "afterEach"  at (7.3,$yEach) fill 0x9ec5e8
+AA: box "afterAll"   at (8.3,$yOnce) fill 0xcccccc
+
+arrow from BA.s to B1.n
+arrow from B1.s to T1.n
+arrow from T1.n to E1.s
+arrow from E1.e to B2.w
+arrow from B2.s to T2.n
+arrow from T2.n to E2.s
+arrow from E2.n to AA.s
+```
+<!-- caption: "beforeEach and afterEach wrap every test; beforeAll and afterAll run once for the file." -->
 
 ## The Value of Class Abstractions
 
@@ -596,7 +687,7 @@ Look back at how we used `favourites`. We called `add(..)`, `next()`, `current()
 This confines each concern to a single place. The class is the one location responsible for its own state, which frees the rest of the program from that responsibility. Because the operations that maintain the invariant live alongside the state they protect, rather than in the calling code, a client cannot accidentally leave an object in an inconsistent configuration by following the intended path.
 
 <!--
-So far this is the class *offering* an interface that a client has no need to look past. It is not yet a guarantee. Nothing in this chapter stops a determined caller from reaching in and writing `favourites.currentIndex = 99` directly, breaking the invariant from outside. Guaranteeing that a client *cannot* reach past the interface, so that an object's state is truly the class's own, is the role of [encapsulation](./05_encapsulation).
+So far this is the class *offering* an interface that a client has no need to look past. It is not yet a guarantee. Nothing in this chapter stops a determined caller from reaching in and writing `favourites.currentIndex = 99` directly, breaking the invariant from outside. Guaranteeing that a client *cannot* reach past the interface, so that an object's state is truly the class's own, is the role of [encapsulation](./03_encapsulation).
 -->
 
 <details class="tooltip exercise">
