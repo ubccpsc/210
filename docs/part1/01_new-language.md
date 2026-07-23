@@ -70,6 +70,31 @@ TypeScript provides several basic types to describe individual values. Three of 
 As the course progresses we will examine a few more basic types, and will spend considerable time describing how to design and construct complex types.
 </details>
 
+<details class="tooltip ts-tips">
+  <summary>Arithmetic on <code>number</code> Values</summary>
+
+TypeScript provides five arithmetic operators, each written in the infix style described above:
+
+```typescript
+2 + 3;    // 5,   addition
+5 - 2;    // 3,   subtraction
+4 * 3;    // 12,  multiplication
+7 / 2;    // 3.5, division
+7 % 2;    // 1,   remainder
+```
+
+Two of them behave differently from their ISL counterparts, and both differences follow from TypeScript having a single `number` type rather than separate integer and rational types.
+
+`/` is _always_ floating-point division, so dividing two whole numbers can produce a fractional result: `7 / 2` is `3.5`, not `3`. Where ISL offered `quotient` for whole-number division, TypeScript has no operator that divides and discards the fraction.
+
+`%` produces the _remainder_ left after division, the role that `remainder` played in ISL: `7 % 2` is `1`, and `6 % 2` is `0`. Its most common use is keeping a value inside a fixed range. To step through a list of `n` items and wrap back to the beginning, write `(i + 1) % n`, which returns to `0` as soon as `i + 1` reaches `n`.
+
+`*`, `/`, and `%` are evaluated before `+` and `-`, as in ordinary arithmetic, so `2 + 3 * 4` is `14`. Use parentheses wherever the grouping would otherwise be easy to misread.
+
+Because a `number` is stored as a binary approximation, arithmetic on decimal values can produce results that are slightly off from the exact answer. We return to that, and to what it means when comparing computed values, later in this chapter.
+
+</details>
+
 
 In TypeScript you annotate each value with its type *directly in the code*, and the language checks those annotations for you when you invoke the compiler. This does two things:
 
