@@ -12,13 +12,13 @@ But the outside world has a property that nothing inside our programs has had so
 
 Inside the processor, work is astonishingly fast: a simple operation takes around a nanosecond, a billionth of a second. Everything outside the processor is slower, and the further away the data lives, the worse it gets. The numbers are hard to feel at nanosecond scale, so the table below also shows each one rescaled, as if a single instruction took one second:
 
-| operation | typical time | scaled: if one instruction took 1 second |
+| Operation | Typical time | Scaled: if one instruction took 1 second |
 |---|---|---|
-| one instruction | 1 ns | 1 second |
-| reading from an SSD | 150 µs | ~2 days |
-| network round trip, same city | 1 ms | ~11 days |
-| reading from a spinning disk | 10 ms | ~4 months |
-| cross-country network round trip | 150 ms | ~5 years |
+| One instruction | 1 ns | 1 second |
+| Reading from an SSD | 150 µs | ~2 days |
+| Network round trip, same city | 1 ms | ~11 days |
+| Reading from a spinning disk | 10 ms | ~4 months |
+| Cross-country network round trip | 150 ms | ~5 years |
 
 The pattern to take away: touching a disk or a network is not a little slower than computing, it is *millions of times* slower. From the processor's point of view, asking a distant web service for the temperature and then waiting for the answer is like mailing a letter and standing motionless at the mailbox for five years.
 
