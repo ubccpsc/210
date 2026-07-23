@@ -473,6 +473,32 @@ function action(light: TrafficLight): string {
 }
 ```
 
+The comparisons above use `===` to test a value against each literal. Because this is the first time we compare values, it is worth being precise about what `===` means.
+
+<details class="tooltip ts-tips">
+<summary>Evaluating Equality with <code>===</code></summary>
+
+There are several ways to evaluate equality with differing amounts of rigour in TypeScript. We will _always_ use `===` (often called _triple equals_) in CPSC 210. Using this operator ensures that two values are ***strictly equal***. Here are some examples.
+
+```typescript
+checkExpect(1 === 1, true);
+checkExpect(true === true, true);
+checkExpect("cpsc210" === "cpsc210", true);
+checkExpect(1 === "1", false);              // number 1 compared to string "1"
+checkExpect(true === "true", false);        // boolean true compared to string "true"
+```
+
+We do this because it is almost always the case that when we want a 2, we want the number 2, not the string "2", or we would have used "2". 
+
+Some examples of why this can be confusing with non-strict equality (`==`) can be seen below. These unexpected values are never visible statically; they only surface when you run the program, which often leads to surprises. Because of this we will encourage you to always use `===` in this course.
+
+```typescript
+checkExpect(1 == 1, true);                  // as expected
+checkExpect(1 == "1", true);                // number 1 is considered the same as string "1"
+checkExpect(true == true, true);            // as expected
+checkExpect(true == 1, true);               // true is considered the same as the number 1
+```
+</details>
 
 The same idea holds for a tagged union, but we branch on `kind`. After the check, the matching case's properties are available and read with dot notation, so `p.first.title` selects the first song, then its title:
 

@@ -288,7 +288,7 @@ References explain the `const` surprise from the previous section: `const` locks
 <details class="tooltip ts-tips">
 <summary>Reference Equality vs Value Equality</summary>
 
-`===` (strict equality, from Chapter 5) means different things for primitives and objects, and the difference is exactly the visibility distinction from this section.
+`===` (strict equality, from Chapter 2) means different things for primitives and objects, and the difference is exactly the visibility distinction from this section.
 
 For *primitives*, `===` compares _values_. Two numbers that happen to be equal are `===`, whether or not they were declared together:
 

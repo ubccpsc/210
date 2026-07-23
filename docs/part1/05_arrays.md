@@ -407,31 +407,6 @@ The `return` inside the loop body exits the whole function the moment a match is
 
 Some questions cannot be answered by any of the named operations. Every operation above examines elements one at a time: the function you hand to `map`, `filter`, or `find` receives a single element and nothing else. Some questions are instead about how elements relate to *each other*. Suppose quality control asks: did the station ever report the same temperature at two different hours?
 
-<details class="tooltip ts-tips">
-<summary>Evaluating Equality with <code>===</code></summary>
-
-There are several ways to evaluate equality with differing amounts of rigour in TypeScript. We will _always_ use `===` (often called _triple equals_) in CPSC 210. Using this operator ensures that two values are ***strictly equal***. Here are some examples.
-
-```typescript
-checkExpect(1 === 1, true);
-checkExpect(true === true, true);
-checkExpect("cpsc210" === "cpsc210", true);
-checkExpect(1 === "1", false);              // number 1 compared to string "1"
-checkExpect(true === "true", false);        // boolean true compared to string "true"
-```
-
-We do this because it is almost always the case that when we want a 2, we want the number 2, not the string "2", or we would have used "2". 
-
-Some examples of why this can be confusing with non-strict equality (`==`) can be seen below. These unexpected values are never visible statically; they only surface when you run the program, which often leads to surprises. Because of this we will encourage you to always use `===` in this course.
-
-```typescript
-checkExpect(1 == 1, true);                  // as expected
-checkExpect(1 == "1", true);                // number 1 is considered the same as string "1"
-checkExpect(true == true, true);            // as expected
-checkExpect(true == 1, true);               // true is considered the same as the number 1
-```
-</details>
-
 ```typescript
 /**
  * Determines whether any two readings taken at different hours
