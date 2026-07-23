@@ -110,12 +110,16 @@ type BankAccount = {
 };
 ```
 
-Intentionally, there is no `balance` field. The type of `BankAccount` no longer describes what an account *stores*; it describes what an account *can do*. A holder of a `BankAccount` can deposit, withdraw, and observe the balance (`getBalance`), and that is all.  Calls use dot notation, with the `.` selecting the function that this particular account carries. 
+Intentionally, there is no `balance` field. The type of `BankAccount` no longer describes what an account *stores*; it describes what an account *can do*. A holder of a `BankAccount` can deposit, withdraw, and observe the balance (`getBalance`), and that is all. These operations are invoked with dot notation:
 
 ```typescript
 // given an initialAccount of type BankAccount ...
 const funded = initialAccount.deposit(5);
 ```
+
+We have seen dot before. In Chapter 2 it read a property: `song1.title` selected the value stored under `title`. `initialAccount.deposit` selects the value stored under `deposit` in the same way, and what differs is only that the value found there is a function rather than a string or a number. The `(5)` that follows then calls it, just as `letterGrade(85)` called a function named directly. The expression composes two steps you have already used: select a property, then call what the selection produced.
+
+What is new is _which_ function you get. A free-standing `deposit(account, 5)` is one function shared by every caller, which is why it has to be told which account to act on. `initialAccount.deposit` is the function belonging to this _specific_ account, so the balance it operates on is chosen by the object the dot selected it from, and a caller cannot point it at a different account.
 
 <details class="tooltip ts-tips">
 <summary>Functions as Properties</summary>
