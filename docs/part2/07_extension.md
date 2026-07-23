@@ -1,4 +1,4 @@
-# Polymorphism Through Class Extension
+# Extending Behaviour Through Polymorphism
 
 This chapter explores the ability for one method call to behave according to its containing object, which is possible due to polymorphism. We also explore a second mechanism for classes to relate to each other. An interface lets unrelated classes commit to the same contract, but it cannot say that one class is a _kind of_ another, nor let a class reuse another's implementation. Class **extension** does both: a class can extend another, inheriting its behaviour and refining it. This allows an instance of the extending class to be used wherever the original is expected. Both mechanisms serve the same broad goals. They cut duplication, by letting many types share one implementation and one body of calling code instead of each carrying its own copy, and they make a system more amenable to change, since a new type can be added behind an existing contract without rewriting the code that uses it. The second of these goals matters enough that the next chapter is devoted to it.
 

@@ -76,28 +76,28 @@ export default defineConfig({
             text: "Part 2: Design",
             link: "/part2/",
             items: [{
-                text: "08: Abstraction",
+                text: "08: Building Abstractions",
                 link: "/part2/01_abstraction"
             }, {
-                text: "09: Decomposition",
+                text: "09: Decomposing Systems",
                 link: "/part2/02_decomposition"
             }, {
-                text: "10: Error Handling",
+                text: "10: Designing for Failure",
                 link: "/part2/03_errors"
             }, {
-                text: "11: Verification",
+                text: "11: Verifying Behaviour",
                 link: "/part2/04_verification"
             }, {
-                text: "12: Encapsulation",
+                text: "12: Encapsulating What Varies",
                 link: "/part2/05_encapsulation"
             }, {
-                text: "13: Boundaries",
+                text: "13: Defining Boundaries",
                 link: "/part2/06_boundaries"
             }, {
-                text: "14: Extension",
+                text: "14: Extending Behaviour",
                 link: "/part2/07_extension"
             }, {
-                text: "15: Open/Closed",
+                text: "15: Designing for Change",
                 link: "/part2/08_ocp"
             }],
         }, // end part 2

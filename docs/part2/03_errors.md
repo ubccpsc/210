@@ -1,4 +1,4 @@
-# Error Handling
+# Designing for Failure
 
 Every function's contract describes what happens when the function works, and when it doesn't. A function that looks up a course section must also handle what happens when no such section exists; a function that enrols a student must handle what happens when a prerequisite is missing. Failures should be designed as deliberately as successes, so that a design offers a consistent, understandable failure model: one that stays out of the way when the system is working, but makes it hard to do the wrong thing when it is not.
 

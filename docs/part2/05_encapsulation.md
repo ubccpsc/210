@@ -1,4 +1,4 @@
-# Encapsulation
+# Encapsulating What Varies
 
 Much of Part 1 was concerned with invariants: the properties a value must satisfy to be meaningful and the preconditions and postconditions that make up a function's contract (an approach sometimes called **design by contract**). Those approaches describe and detect invariant violations, but cannot prevent them. A documented invariant is a promise, and the rest of the program is free to break it: the object `{ renewalsRemaining: -1 }` satisfies the `Loan` type and simultaneously violates the `Loan` invariant, and the compiler will not object. Classes provide a mechanism for starting to close this gap through the constructor, which provides a single, controlled path for building an object. But a constructor only controls how an object begins. If a class's fields are accessible to anywhere else in a program, any code holding the object can read and write to them directly, and the invariant the constructor established can be undone. A careful constructor is not enough on its own.
 

@@ -1,4 +1,4 @@
-# Cohesive Decomposition
+# Decomposing Systems into Cohesive Classes
 
 The previous chapter established the class as the unit of abstraction: a class bundles state with the operations that maintain an invariant, bounds reasoning to one kind of thing at a time, and gives the rest of the program a named type it can depend on. That tells us how to build an abstraction, but it does not tell us how to build a _good_ abstraction. We still have to decide what classes we need, what state they maintain, and what operations they afford.
 

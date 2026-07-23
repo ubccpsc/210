@@ -37,7 +37,7 @@ In Part 2, we'll see the same shift, but with more complex constraints than type
  
 </details>
 
-In this module we develop *class-based* abstractions as the mechanism for invariant enforcement. Across eight lectures, we define classes, decompose systems into cohesive units, verify their invariants, design how failures are communicated, hide what is free to change, depend on abstractions through interfaces, organize classes into hierarchies, and write code that continues to apply as new types arrive.
+In this module we develop *class-based* abstractions as the mechanism for invariant enforcement. Across eight lectures, we define classes, decompose systems into cohesive units, design how failures are communicated, verify their invariants, hide what is free to change, depend on abstractions through interfaces, organise classes into hierarchies, and write code that continues to apply as new types arrive.
 
 ## Intended Learning Objectives
 
@@ -53,25 +53,25 @@ By the end of Part 2, you will be able to:
 
 Part 2 covers four connected themes across eight chapters.
 
-**Building abstractions:**
+**Introducing classes:**
 
-1. [The Class as a Unit of Abstraction](./01_abstraction) introduces classes as the direct language support for bundling state with the operations that maintain it.
-2. [Cohesive Decomposition](./02_decomposition) shows how to split a system into classes and responsibilities that belong together.
+1. [Building Abstractions with Classes](./01_abstraction) introduces classes as the direct language support for bundling state with the operations that maintain it.
+2. [Decomposing Systems into Cohesive Classes](./02_decomposition) shows how to split a system into classes and responsibilities that belong together.
 
 **Making class-based code reliable:**
 
-3. [Verifying Behaviour](./04_verification) develops tests for class behaviour and discusses how to check that an object continues to respect its promises.
-4. [Error Handling](./03_errors) asks how class-based APIs should communicate failure when a precondition is violated or a request cannot be completed.
+3. [Designing for Failure](./03_errors) asks how class-based APIs should communicate failure when a precondition is violated or a request cannot be completed.
+4. [Verifying Behaviour](./04_verification) develops tests for class behaviour and discusses how to check that an object continues to respect its promises.
 
 **Hiding what can change:**
 
-5. [Encapsulation](./05_encapsulation) uses access control to keep representations private and preserve class invariants.
-6. [Interfaces as Explicit Boundaries](./06_boundaries) defines narrow contracts that let clients depend on a stable shape rather than on a concrete implementation.
+5. [Encapsulating What Varies](./05_encapsulation) uses access control to keep representations private and preserve class invariants.
+6. [Defining Boundaries with Interfaces](./06_boundaries) establishes narrow contracts that let clients depend on a stable shape rather than on a concrete implementation.
 
 **Designing for growth:**
 
-7. [Polymorphism Through Class Extension](./07_extension) uses inheritance and overriding to let related classes share behaviour while varying the parts that differ.
-8. [The Open/Closed Principle](./08_ocp) brings the design ideas together and shows how polymorphism lets software grow by adding new code instead of rewriting code that already works.
+7. [Extending Behaviour Through Polymorphism](./07_extension) uses inheritance and overriding to let related classes share behaviour while varying the parts that differ.
+8. [Designing for Change with the Open/Closed Principle](./08_ocp) brings the design ideas together and shows how polymorphism lets software grow by adding new code instead of rewriting code that already works.
 
 ## Toward Part 3: Design for Evolution
 

@@ -1,4 +1,4 @@
-# The Class as a Unit of Abstraction
+# Building Abstractions with Classes
 
 Part 1 ended with invariants maintained by hand: we wrote a constructor function that established an invariant when a value was created, and we hid the value's state inside a closure so that only a fixed set of operations could change it. This chapter introduces object-oriented programming, which provides this same pattern as direct language syntax. The mechanism is the **class**: a named unit that bundles _state_ with the _operations that maintain it_.
 

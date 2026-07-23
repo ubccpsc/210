@@ -1,4 +1,4 @@
-# Interfaces as Explicit Boundaries
+# Defining Boundaries with Interfaces
 
 With encapsulation we hid a class's representation behind its public methods, so callers depend on what a class does, rather than on how it stores its data. Yet the caller still has to name the class: a variable is declared `GuestList`, a parameter is typed `GuestList`, and the code is tied to that one class even though it uses only the class's public methods. The representation is hidden; the class is not.
 
