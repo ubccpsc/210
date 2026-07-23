@@ -245,13 +245,44 @@ Note a syntax difference between object values and object types; property defini
 
 6. _Generalisation:_ A song is a single fixed shape, so there is nothing to generalise.
 
+### Reading an Object's Properties
+
+Creating an object stores its data; reading that data back out uses **dot notation**. To do this, write the object's name, followed by `.`, followed by a property name. This evaluates to the value held under that property:
+
+```typescript
+song1.title;           // evaluates to "Song A"
+song1.durationSeconds; // evaluates to 200
+```
+
+The property name is part of the program text, not a string or a variable, and it is checked against the object's type: `song1.length` does not compile, because `Song` declares no `length`. This is the guarantee the type gave us when building the object, now applied to taking it apart.
+
+When a property holds another object, a second `.` reads a property of that result, so accesses chain from left to right. We rely on this in the next example, where a playlist's `first` property holds a `Song` and the song's title is read with `playlist.first.title`.
+
+<details class="tooltip ts-tips">
+  <summary>Reading Properties with Dot Notation</summary>
+
+A property is read by naming it after a dot:
+
+```typescript
+<object>.<propertyName>
+```
+
+The expression evaluates to the value stored under `<propertyName>`. If that value is itself an object, a further property is read from it in the same way, evaluated left to right:
+
+```typescript
+<object>.<propertyName>.<propertyName>
+```
+
+The name after each dot is fixed in the source and checked against the type of the value on its left, so naming a property the type does not declare is a compile-time error rather than a value that is absent at run time.
+
+</details>
 
 <details class="tooltip link-110">
   <summary>Object Types and <code>define-struct</code></summary>
 
-The object type we used to define `Song` type plays the role of a structure definition. In CPSC 110 you would have defined such a struct with `(define-struct song (title artist duration))`.
+The object type we used to define `Song` plays the role of a structure definition. In CPSC 110 you would have defined such a struct with `(define-struct song (title artist duration))`, made an instance with `(make-song title artist duration)`, and read a field with a generated accessor, `(song-title s)`.
 
-While in CPSC 110 you would have made instances of that struct with `(make-song title artist duration)`, the object construction we've shown above creates the object literal directly.
+TypeScript uses the three notations for these tasks: the object type is the definition, the object literal makes an instance directly, and dot notation reads a field, so `(song-title s)` becomes `s.title`.
 
 </details>
 
@@ -443,7 +474,7 @@ function action(light: TrafficLight): string {
 ```
 
 
-The same idea holds a tagged union, but we branch on `kind`. After the check, the matching case's properties are available:
+The same idea holds for a tagged union, but we branch on `kind`. After the check, the matching case's properties are available and read with dot notation, so `p.first.title` selects the first song, then its title:
 
 ```typescript
 function firstTitle(p: Playlist): string | null {
