@@ -73,7 +73,7 @@ export default defineConfig({
 
         }, // end part 1
         {
-            text: "Part 2: Design",
+            text: "Part 2: Abstraction",
             link: "/part2/",
             items: [{
                 text: "08: Building Abstractions",

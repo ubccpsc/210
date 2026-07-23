@@ -87,6 +87,6 @@ Part 1 covers three broad themes across seven chapters.
 6. [Mutation and Side Effects](./06_state-mutation) adds state that changes over time, along with the references, aliasing, scope, and side effects that come with it.
 7. [Asynchronous Effects and Time](./07_async) reaches outside the program to files and web services, where a result arrives only after a wait, using promises and `async`/`await`.
 
-## Toward Part 2: Designing & Enforcing Abstractions
+## Toward Part 2: Designing and Enforcing Abstractions
 
 Throughout Part 1 our programs stay small, small enough that one person can hold the whole design in their head, and small enough that personal discipline can plausibly maintain every promise the types cannot check. In Part 2 we relax that assumption and ask what happens when programs, teams, and lifetimes grow beyond what any individual can manage. 
