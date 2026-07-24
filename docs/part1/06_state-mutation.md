@@ -117,14 +117,14 @@ test("longest freezing streak spans the early morning", () => {
 
 The counters `current` and `longest` are the loop's state: values that survive from one element to the next and change as the loop runs. To see the state evolve, trace the loop over our `day` of readings, whose temperatures are `-4, -1, 3, 8, 2, -2`:
 
-| reading | freezing? | `current` after | `longest` after |
+| Reading | Freezing? | `current` after | `longest` after |
 |---|---|---|---|
-| hour 6, -4° | yes | 1 | 1 |
-| hour 9, -1° | yes | 2 | 2 |
-| hour 12, 3° | no | 0 | 2 |
-| hour 15, 8° | no | 0 | 2 |
-| hour 18, 2° | no | 0 | 2 |
-| hour 21, -2° | yes | 1 | 2 |
+| Hour 6, -4° | Yes | 1 | 1 |
+| Hour 9, -1° | Yes | 2 | 2 |
+| Hour 12, 3° | No | 0 | 2 |
+| Hour 15, 8° | No | 0 | 2 |
+| Hour 18, 2° | No | 0 | 2 |
+| Hour 21, -2° | Yes | 1 | 2 |
 
 The morning streak of two readings is recorded in `longest`, survives the warm afternoon, and is not beaten by the single freezing reading in the evening. A trace table like this one is a standard tool for understanding stateful code, when programs are small enough. Writing one out by hand is a reliable way to debug: it makes the program's state visible.
 
