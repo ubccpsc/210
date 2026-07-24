@@ -1,16 +1,14 @@
 # Designing for Flexibility
 
-The previous chapter ended by replacing the array inside `GuestList` with a `Set`. Every method body was rewritten, and not one line of calling code changed. That result is worth dwelling on, because the ability to change an implementation without disturbing the code that uses it is among the most valuable properties a design can have. It is what lets a class be improved after it ships, and it is what encapsulation was protecting all along.
+The previous chapter ended by replacing the array inside `GuestList` with a `Set`. Every method body was rewritten, and not one line of calling code changed. That result is important: the ability to change an implementation without disturbing the code that uses it is among the most valuable properties a design can have. It is what lets a class be improved after it has been deployed, and it is what encapsulation was protecting all along.
 
-It is also more fragile than it looks. A class can hand that freedom back without anyone noticing, in a single well-intentioned method, and the loss shows up only later when a change that should have been local turns out not to be. In the other direction, the freedom reaches further than the previous chapter took it: the way a class stores its data is not the only commitment it can decline to make.
+But it is also more fragile than it looks. A class can degrade that freedom without anyone noticing, in a single well-intentioned method, and the loss shows up only later when a change that should have been local turns out not to be. The freedom is also larger than the previous chapter made it appear. How a class stores its data is only one of the commitments it can decline to make, and every commitment it declines is one more thing that stays free to change.
 
-This chapter is about that freedom in three parts: what a safe change rests on, how a class gives the freedom away by accident, and how much further it extends than the representation alone.
+This chapter examines that freedom in three parts: what makes a change safe, how a class can accidentally degrade that freedom, and which commitments beyond the representation a class can also decline to make.
 
 ## What Makes a Change Safe
 
-A class's **representation** is the state it holds. For `GuestList` that is a capacity and a collection of guest ids. Its **abstract value** is what that state stands for to a caller: a set of invited guests, no more than `capacity` of them, with no guest appearing twice.
-
-The two are related, but the relationship runs in one direction. Every legal representation stands for exactly one abstract value. One abstract value can be stored in many different ways:
+A class's **representation** is the state it holds. For `GuestList` that is a capacity and a collection of guest ids. Its **abstract value** is what that state looks like to a caller: a set of invited guests, no more than `capacity` of them, with no guest appearing twice. Representations and abstract values are related, but the relationship is unidirectional. Every representation stands for exactly one abstract value, but one abstract value can be represented in many different ways:
 
 ```typescript
 ["alice", "bob"]              // an array
@@ -18,40 +16,38 @@ The two are related, but the relationship runs in one direction. Every legal rep
 new Set(["alice", "bob"])     // not an array at all
 ```
 
-All three denote the same guest list. The order of the array is a detail of how the guests are stored, and nothing a caller can ask a `GuestList` will reveal it, because a guest list is a _set_ of guests and a set has no order. Once you see that, the representation change from the previous chapter stops being a lucky escape and becomes the expected result: we swapped one storage for another that denotes the same values, so nothing a caller could observe was different.
+All three representations denote the same guest list. The order of the array is a detail of how the guests are stored, and nothing a caller can ask a `GuestList` will reveal it, because a guest list is a _set_ of guests and a set has no order. Once you see that, the representation change from the previous chapter stops being a lucky happenstance and becomes the expected result: we swapped one storage representation for another that captures the same values, so nothing observable changed from a caller's perspective.
 
-This is why an invariant on its own is not a complete description of a class. The invariant says which representations are _legal_. It says nothing about what a legal one _means_. Both belong in the documentation:
+This is why an invariant on its own is not a complete description of a class. The invariant says which representations are _legal_. It doesn't say anything about what a legal representation _means_. Both belong in the documentation:
 
 ```typescript
 /**
  * A guest list for an event with a fixed capacity.
  *
- * Abstract value: the set of guests invited to the event, together with
- * the capacity of the venue.
+ * Abstract value: the set of guests invited to the event,
+ * together with the capacity of the venue.
  *
- * Class invariant: holds no duplicate guests, and never more than
- * `capacity` of them.
+ * Class invariant: holds no duplicate guests, and never 
+ * more than `capacity` of them.
  */
 ```
 
-Writing the abstract value down forces a decision that is easy to leave vague. Is the capacity part of what a guest list _is_, or is it a private detail used to enforce the invariant? The comment above commits to the first: a list of two guests in a room for two is not the same guest list as the same two guests in a room for a hundred. That is a design choice, and the rest of this chapter depends on having made it.
+Writing the abstract value down forces an implicit decision that is otherwise easy to be unclear about. Is the capacity part of what a guest list _is_, or is it a private detail used to enforce the invariant? The documentation above commits the design to the first: a list of two guests in a room for two is not the same guest list as the same two guests in a room for a hundred. That is a design choice, and the rest of this chapter depends on having made it.
 
 This split is what makes a change safe, and it gives a test to apply before making one. A change to the representation is safe exactly when the new representation denotes the same abstract values as the old one. The array and the `Set` both denote the same guest lists, so swapping them could not disturb a caller. Had the `Set` version quietly dropped the capacity, or begun reporting guests in sorted order where the array preserved arrival order, the abstract value would have changed and callers would have been within their rights to notice.
 
 <details class="tooltip deep-dive">
 <summary>Two Descriptions, One Class</summary>
 
-The pairing of these two descriptions is standard, and you will meet it again under names that are worth recognising. The rule about which representations are legal is often called the _representation invariant_, which is the class invariant we have been writing since Part 1. The mapping from a legal representation to the value it denotes is often called the _abstraction function_.
+The pairing of these two descriptions is standard, and you will see this again under different names that are worth recognising. The rule about which representations are legal is often called the _representation invariant_, which is the class invariant we have been writing since Part 1. The mapping from a legal representation to the value it denotes is often called the _abstraction function_.
 
-The word "function" is meaningful. The mapping is many-to-one: many representations map to one abstract value, as the three guest lists above do, and no representation maps to two. This asymmetry explains something that would otherwise be arbitrary. Two objects with different representations may be equal, because equality is a question about the abstract value. Two objects with the same representation are never unequal, because the mapping is a function and cannot send one input to two answers.
+The word "function" is meaningful. The mapping is many-to-one: many representations map to one abstract value, as the three guest lists above do, but no representation maps to two. This asymmetry explains something that would otherwise be arbitrary. Two objects with different representations _may_ be equal, because equality is a question about the abstract value. Two objects with the same representation are _always_ equal, because the mapping is a function and cannot send one input to two answers.
 
 </details>
 
 ## Two Notions of Sameness
 
-The freedom to change a representation is lost in ordinary-looking code, and the most common place to lose it is a method that compares two objects. Before we can see how, we need to be precise about what comparing them should mean.
-
-The distinction between a representation and an abstract value stops being philosophical the moment a program compares two objects:
+The freedom to change a representation is lost in ordinary-looking code, and the most common place to lose it is a method that compares two objects. Before we can see how, we need to be precise about what comparing them should mean. The distinction between a representation and an abstract value stops being philosophical the moment a program compares two objects:
 
 ```typescript
 const a = new GuestList(2);
@@ -61,16 +57,14 @@ const b = new GuestList(2);
 b.add("alice");
 ```
 
-Are `a` and `b` the same? The abstraction chapter answered one version of that question when it observed that two objects are distinct even when their contents match: `a === b` is `false`, because `===` on objects compares identity, asking whether two names refer to the same object in memory. These are two objects, so they are not identical.
-
-But they denote the same abstract value. Both are a guest list for a venue of two holding exactly Alice. Any question a caller can ask gets the same answer from either.
+Are `a` and `b` the same? The abstraction chapter answered one version of that question when it observed that two objects are distinct even when their contents match: `a === b` is `false`, because `===` on objects compares identity, asking whether two names refer to the same object in memory. These are two objects, so they are not identical. But they denote the same abstract value. Both are a guest list for a venue for two holding exactly Alice. Any question a caller can ask of one gets the same answer from the other.
 
 So there are two notions of sameness, and code has to choose between them deliberately:
 
-- _Identity_: are these the same object? The language answers this with `===`.
-- _Equivalence_: do these denote the same abstract value? The language cannot answer this, because only the class knows what its representation means.
+- **Identity**: Are these the same object? TypeScript answers this with `===`.
+- **Equivalence**: Do these denote the same abstract value? The language cannot answer this, because only the class knows what its representation means.
 
-A class expresses the second by providing a method for it, conventionally named `equals`. Nothing calls it automatically; a caller who wants value comparison must ask for it by name.
+A class expresses the second by providing a method for it, conventionally named `equals`. Nothing calls this method automatically; a caller who wants value comparison must ask for it by name.
 
 ### Giving Away the Freedom
 
@@ -90,7 +84,7 @@ equals(other: GuestList): boolean {
 }
 ```
 
-Adding this one method has just cost `GuestList` the freedom the previous chapter earned for it. Change the representation to a `Set` and this code does not survive: there is no `.length` to read, and there are no positions to walk. The array is no longer an internal choice that can be revised, because a public method now depends on it being an array. An equality written against the representation makes the representation part of the class's public behaviour, and behaviour is what callers are entitled to rely on.
+Adding this one method has just cost `GuestList` the freedom the previous chapter was trying to protect. If the list representation changes to a `Set`, this code does not survive: there is no `.length` to read, and there are no array indices to traverse. The array is no longer an internal choice that can be revised, because a public method now depends on it being an array. An equality written against the representation makes the representation part of the class's public behaviour, and behaviour is what callers are entitled to rely on.
 
 The immediate defect points at the same cause. Invite Alice then Bob to one list, and Bob then Alice to another, and this method reports that they are different guest lists. They are not: both denote a venue for two holding exactly Alice and Bob. It compared the _representations_, which differ, when it should have compared the _abstract values_, which do not. Both problems, the wrong answer and the lost freedom, come from writing a method at the level of the storage rather than at the level of the meaning.
 
@@ -124,7 +118,7 @@ equals(other: GuestList): boolean {
 
 Every comparison here is one a caller could have made from outside, using `size`, `guests`, and `isInvited`. That is the test for whether an equality is defined at the right level: if it only asks questions that are part of the class's public meaning, it will keep working through any change to how the class stores its data. This version behaves identically for the array `GuestList` and the `Set` one.
 
-One property is worth guaranteeing deliberately. Equality should be _symmetric_: whenever `a.equals(b)` is true, `b.equals(a)` must be true as well. It is easy to break this by accident, usually by comparing some fields in one direction only, and a caller has no way to defend against equality that disagrees with itself.
+Equality should be _symmetric_: whenever `a.equals(b)` is true, `b.equals(a)` must be true as well. It is easy to break this by accident, usually by comparing some fields in one direction only, and a caller has no way to defend against equality that disagrees with itself.
 
 <details class="tooltip ts-tips">
 <summary>Reaching Into Another Object's Private Fields</summary>
@@ -328,7 +322,7 @@ seats.size();                   // 2, and the no-duplicates invariant is broken
 
 Nothing here is written incorrectly; something is missing. As we saw above, `includes` compares with `===`, and inside `Roster<T>` there is nothing else available to compare with. The class was written without knowing what `T` is, so it has no access to what `T` considers equal. Making the class work for every type cost it every assumption about the type it holds. That is the standing trade of a type parameter, and it applies to more than equality: a generic class cannot order its members, format them, or copy them either, for the same reason.
 
-The remedy is to have the caller supply the knowledge the class cannot have. Equality arrives as a function passed to the constructor:
+The solution is to have the caller supply the knowledge the class cannot have. Equality arrives as a function passed to the constructor:
 
 <CollapsibleCode>
 
