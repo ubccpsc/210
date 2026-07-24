@@ -11,7 +11,7 @@ In response, we move from *programmer discipline* to encoding invariants *in the
 <details class="tooltip link-110"> 
 <summary>Programmer Discipline vs Enforcement</summary>
 
-Recall in CPSC 110, the *signature* encoded type information. But the teaching languages did not enforce this signature. In Part 1, we saw the shift from the uninforced signature in CPSC 110:
+Recall in CPSC 110, the *signature* encoded type information. But the teaching languages did not enforce this signature. In Part 1, we saw the shift from the unenforced signature in CPSC 110:
 
 ```racket
 (@signature Number -> Number)
@@ -69,4 +69,4 @@ Part 2 covers three connected themes across six chapters.
 
 ## Toward Part 3: Design for Evolution
 
-Part 2 ends with a design goal that is crucial for large systems: we need the ability to fix problems and add new features without impacting all of the existing code within the rest of the system. Part 3 extends this further: We examine at how systems are composed from interchangeable pieces, how dependencies are managed so that concrete implementations can be supplied from the outside, and how a codebase can remain open to new extensions while staying manageable across modules and teams.
+Part 2 ends with a design goal that is crucial for large systems: we need the ability to fix problems and add new features without impacting all of the existing code within the rest of the system. Part 3 extends this further: we examine how systems are composed from interchangeable pieces, how dependencies are managed so that concrete implementations can be supplied from the outside, and how a codebase can remain open to new extensions while staying manageable across modules and teams.

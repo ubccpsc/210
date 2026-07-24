@@ -338,7 +338,7 @@ const tickets: { [guestId: string]: number } = {};
 tickets["alice"] = 2;
 ```
 
-A plain-object dictionary and a `Map` overlap, but differ in ways that decide between them. A plain object's keys are always strings; a `Map`'s keys may be of any type. A `Map` iterates its entries in the order they were inserted, and can report its. Use a `Map` when you need keys that are not strings, a reliable iteration order, or a running size; use a dictionary for a small, fixed-shape, string-keyed record.
+A plain-object dictionary and a `Map` overlap, but differ in ways that decide between them. A plain object's keys are always strings; a `Map`'s keys may be of any type. A `Map` iterates its entries in the order they were inserted, and can report its size directly, while a plain object can do neither. Use a `Map` when you need keys that are not strings, a reliable iteration order, or a running size; use a dictionary for a small, fixed-shape, string-keyed record.
 
 </details>
 
