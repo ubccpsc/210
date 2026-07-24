@@ -1,6 +1,6 @@
 # Defining Boundaries with Interfaces
 
-With encapsulation we hid a class's representation behind its public methods, so callers depend on what a class does, rather than on how it stores its data. Yet the caller still has to name the class: a variable is declared `GuestList`, a parameter is typed `GuestList`, and the code is tied to that one class even though it uses only the class's public methods. The representation is hidden; the class is not.
+The last two chapters took two commitments away from a class: how it stores its data, and what type of members it holds. One commitment has survived every design we have written. A variable is declared `GuestList`, a parameter is typed `GuestList`, and the code around it is bound to that one class even though it touches nothing except the public methods. The representation is hidden; the class itself is not.
 
 An **interface** is an abstraction that enables classes to be hidden as well. It is a named type that lists a set of operations and says nothing about which specific class provides them. Code written against an interface depends only on the operations it names, so any class that provides those operations can be used, and the specific class that is used can change without the calling code being modified. This is the abstraction boundary in its purest form: a contract that records what is promised and deliberately omits everything about how the promise is kept.
 
@@ -289,6 +289,53 @@ SmsNotifier : +wasDelivered()
 <!-- caption: "SmsNotifier implementing two interfaces." -->
 
 Keeping interfaces small in this way is the interface-level equivalent of the advice for cohesion: classes should have a single responsibility. A small, focused interface describes one capability; a large interface that bundles several forces implementers to support operations that have nothing to do with one another, and forces callers to depend on more than they use. This guidance, that it is better to have many small interfaces than one large one, is known as the **interface segregation principle**.
+
+## Constraining a Type Parameter
+
+Interfaces have a second use, and it resolves a problem the previous chapter left open. `Roster<T>` could not compare two of its members, because a class that knows nothing about `T` has no operation to compare them with, so we handed it a comparison function when it was built. An interface offers the other route: rather than passing the operation in, require that every member already provides it.
+
+```typescript
+interface Identifiable {
+    /**
+     * Reports whether this object denotes the same thing as another.
+     *
+     * @param {Identifiable} other the object to compare against
+     * @returns {boolean} true when both denote the same thing
+     */
+    sameAs(other: Identifiable): boolean;
+}
+```
+
+A type parameter can then be restricted to types that satisfy that interface, written with `extends`:
+
+```typescript
+class <Name><T extends <Interface>> {
+    // every T is guaranteed to provide the interface's operations
+}
+```
+
+The restriction is what gives the class something to call:
+
+```typescript
+class Roster<T extends Identifiable> {
+    private readonly members: T[];
+
+    isMember(candidate: T): boolean {
+        for (const member of this.members) {
+            if (member.sameAs(candidate)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+```
+
+`member.sameAs(candidate)` compiles because the constraint promises that every member has the method, whatever type it turns out to be. This is the same reasoning as an apparent type, one level up: there the compiler knew a variable's operations from the type written on it, and here it knows a type parameter's operations from the constraint written on it.
+
+The two routes trade against each other. Constraining buys the class knowledge and pays for it in reach: `Roster<Seat>` works only if `Seat` implements `Identifiable`, and `Roster<string>` no longer compiles at all, because a string has no `sameAs` method. Passing a function in keeps the class usable with every type, including ones you did not write and primitives you cannot change, but obliges every caller to supply the comparison. Constrain when the operation is part of what the members fundamentally are and you control those types; pass the operation in when the members are types you do not own, or when different callers need different notions of sameness.
+
+Whichever you choose, the constraint should name the smallest interface that supplies what the class needs, for the reason the previous section gave: a constraint is a demand made of every type that wants to be a member, and a demand for operations the class never calls narrows the class for nothing.
 
 ## Depending on the Contract
 

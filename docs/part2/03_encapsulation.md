@@ -258,7 +258,7 @@ The array returned by `guests()` is now a separate array from the field within `
 
 A variable holding an array or object does not hold the data; it holds a reference to data that lives elsewhere. Assigning or returning that variable copies the reference, not the data, so two names end up pointing at the same array, and a change through one is visible through the other. `slice()` (for arrays) builds a new array, which is why returning `this.invited.slice()` is safe.
 
-There is a depth limit worth knowing. `slice()` makes a **shallow copy**: a new array whose elements are the same references as the original's. For an array of strings that is completely safe, because strings cannot be mutated. For an array of objects it is not: the copy is a new array, but its elements are the same objects, so a caller could still reach through and mutate one of them. When the elements are themselves mutable, you need either a deeper copy or elements that cannot be changed, which is the subject of the next section.
+There is a depth limit worth knowing. `slice()` makes a **shallow copy**: a new array whose elements are the same references as the original's. For an array of strings that is completely safe, because strings cannot be mutated. For an array of objects it is not: the copy is a new array, but its elements are the same objects, so a caller could still reach through and mutate one of them. When the elements are themselves mutable, you need either a deeper copy or elements that cannot be changed, which is the subject of the next chapter.
 
 
 </details>
@@ -320,7 +320,7 @@ class GuestList {
 
 </CollapsibleCode>
 
-Every public method has the same name, the same parameters, and the same return type as before. Code written against the array version keeps working without a single change, because from the outside there *is* no change: the public shape is identical. We replaced the internal data structure and rewrote the method bodies, and all of it stayed inside the boundary that `private` creates. This freedom is the deeper reason to hide a representation. Callers depend on what a `GuestList` does, never on how it stores its guests, so how it stores its guests is ours to change. In addition, the `Set` makes the duplicate invariant *structural*: the representation is now incapable of holding a duplicate at all, rather than relying on `add` to check.
+Every public method has the same name, the same parameters, and the same return type as before. Code written against the array version keeps working without a single change, because from the outside there *is* no change: the public shape is identical. We replaced the internal data structure and rewrote the method bodies, and all of it stayed inside the boundary that `private` creates. In addition, the `Set` makes the duplicate invariant *structural*: the representation is now incapable of holding a duplicate at all, rather than relying on `add` to check.
 
 <details class="tooltip deep-dive">
 <summary>Built-in Encapsulated Types</summary>
@@ -339,44 +339,6 @@ tickets["alice"] = 2;
 ```
 
 A plain-object dictionary and a `Map` overlap, but differ in ways that decide between them. A plain object's keys are always strings; a `Map`'s keys may be of any type. A `Map` iterates its entries in the order they were inserted, and can report its size directly, while a plain object can do neither. Use a `Map` when you need keys that are not strings, a reliable iteration order, or a running size; use a dictionary for a small, fixed-shape, string-keyed record.
-
-</details>
-
-## Mutability and Immutability
-
-`GuestList` is a **mutable object**: `add` and `remove` change it in place. It is worth separating two guarantees that are easily confused, because they guard against different risks:
-
-- `const list = new GuestList(2)` stops the *binding* `list` from being pointed at a different object. It does nothing to stop `list.add("alice")` from changing the object `list` already refers to.
-- `private readonly capacity` stops the *field* from being reassigned after construction.
-
-An **immutable object** carries the second idea to its conclusion: none of its fields ever change, and methods that would modify it instead return a new object. An immutable guest list would establish its invariant once, at construction, and never have any later state to corrupt, so it would be valid for its whole life with no per-method effort. The cost is that every change allocates a new object. A mutable object is more economical and is often the natural choice for a guest list that is edited over time, but it accepts the obligation that *every* method preserve the invariant. Immutability buys safety by removing change; encapsulation buys safety by controlling it.
-
-A minimal immutable guest list shows the pattern:
-
-```typescript
-class ImmutableGuestList {
-    private readonly guests: string[];
-
-    constructor(guests: string[] = []) {
-        this.guests = guests.slice();
-    }
-
-    add(guest: string): ImmutableGuestList {
-        return new ImmutableGuestList(this.guests.concat([guest]));
-    }
-
-    includes(guest: string): boolean {
-        return this.guests.includes(guest);
-    }
-}
-```
-
-`add(..)` returns a new list rather than altering the receiver. The invariant is established once, in the constructor, and cannot be violated thereafter: there is no in-place `add(..)` to misuse and no fields to reassign.
-
-<details class="tooltip ts-tips">
-<summary>Default Parameter Values</summary>
-
-`constructor(guests: string[] = [])` uses a **default parameter value**: when the caller omits `guests`, TypeScript substitutes the default `[]` automatically. Any parameter can have a default, written as `parameter: Type = expression`, and the default is used only when the caller passes nothing (or `undefined`) for that argument. Default parameters must come after all required parameters in a method's signature.
 
 </details>
 
@@ -520,7 +482,7 @@ This results in an object that can only be constructed in a valid state, stays v
 
 This design discipline has many benefits. Because nothing outside the class can break its invariant, you can confirm that invariant by reading a single class. Because callers depend only on the public methods, the representation is free to change, as the move from an `Array` to a `Set` showed, and internal changes stay internal. That stable surface also lets a team build against a class while its internals are still being worked out, as long as the public methods maintain their signatures. And because far less code can put the object into a bad state, there are far fewer places for bugs to hide. Encapsulation is the point where the invariants of Part 1 stop being promises and become guarantees.
 
-The next chapter asks how to take the next step by extracting a class's public surface into a named type of its own, so that the entire class behind the contract can change without impacting any callers.
+Hiding the representation made it free to change, and the move from an `Array` to a `Set` exercised that freedom without disturbing a single caller. The next chapter takes up that freedom directly: what a safe change rests on, how a class can give the freedom away without noticing, and how much further it extends than the representation alone.
 
 <details class="tooltip exercise">
   <summary>Exercise: Encapsulating a Leaderboard</summary>

@@ -91,21 +91,24 @@ export default defineConfig({
                 text: "12: Encapsulating What Varies",
                 link: "/part2/03_encapsulation"
             }, {
-                text: "13: Defining Boundaries",
-                link: "/part2/04_boundaries"
+                text: "13: Designing for Flexibility",
+                link: "/part2/04_flexibility"
             }, {
-                text: "14: Extending Behaviour",
-                link: "/part2/05_extension"
+                text: "14: Defining Boundaries",
+                link: "/part2/05_boundaries"
             }, {
-                text: "15: Designing for Change",
-                link: "/part2/06_ocp"
+                text: "15: Extending Behaviour",
+                link: "/part2/06_extension"
+            }, {
+                text: "16: Designing for Change",
+                link: "/part2/07_ocp"
             }],
         }, // end part 2
         {
             text: "Part 3: Evolution",
             link: "/part3/",
             items: [{
-                text: "16: Coupling",
+                text: "17: Coupling",
                 link: "/part3/01_coupling"
             }],
         }, // end part 3

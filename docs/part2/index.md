@@ -37,7 +37,7 @@ In Part 2, we'll see the same shift, but with more complex constraints than type
  
 </details>
 
-In this module we develop *class-based* abstractions as the mechanism for invariant enforcement. Across six lectures, we define classes, decompose systems into cohesive units, hide what is free to change, depend on abstractions through interfaces, organise classes into hierarchies, and write code that continues to apply as new types arrive.
+In this module we develop *class-based* abstractions as the mechanism for invariant enforcement. Across seven lectures, we define classes, decompose systems into cohesive units, hide what is free to change, separate what a class means from how it stores it, depend on abstractions through interfaces, organise classes into hierarchies, and write code that continues to apply as new types arrive.
 
 ## Intended Learning Objectives
 
@@ -46,11 +46,12 @@ By the end of Part 2, you will be able to:
 1. _Design classes that own and protect state_, using constructors, access modifiers, and methods to maintain invariants inside the object.
 2. _Decompose a problem into cohesive classes_, so each unit has a clear responsibility and the relationships among units are explicit.
 3. _Use encapsulation and interfaces to hide change_, exposing only the operations clients need while keeping representations free to evolve.
-4. _Apply polymorphism and extension deliberately_, so new behaviour can be added by introducing new classes rather than reopening code that already works.
+4. _Keep an implementation free to change_, distinguishing what an abstraction means from how it is represented, and judging what each commitment a class avoids costs it in return.
+5. _Apply polymorphism and extension deliberately_, so new behaviour can be added by introducing new classes rather than reopening code that already works.
 
 ## Chapter Overview
 
-Part 2 covers three connected themes across six chapters.
+Part 2 covers three connected themes across seven chapters.
 
 **Building abstractions:**
 
@@ -59,13 +60,14 @@ Part 2 covers three connected themes across six chapters.
 
 **Hiding what can change:**
 
-3. [Encapsulating What Varies](./03_encapsulation) uses access control to keep representations private and preserve class invariants.
-4. [Defining Boundaries with Interfaces](./04_boundaries) establishes narrow contracts that let clients depend on a stable shape rather than on a concrete implementation.
+3. [Encapsulating What Varies](./03_encapsulation) uses access control to keep a representation private, so the invariant that makes an object meaningful cannot be broken from outside.
+4. [Designing for Flexibility](./04_flexibility) treats the freedom to change an implementation as something a design can lose, showing how a careless comparison gives it away and how far it extends beyond the representation.
+5. [Defining Boundaries with Interfaces](./05_boundaries) establishes narrow contracts that let clients depend on a stable shape rather than on a concrete implementation.
 
 **Designing for growth:**
 
-5. [Extending Behaviour Through Polymorphism](./05_extension) uses inheritance and overriding to let related classes share behaviour while varying the parts that differ.
-6. [Designing for Change with the Open/Closed Principle](./06_ocp) brings the design ideas together and shows how polymorphism lets software grow by adding new code instead of rewriting code that already works.
+6. [Extending Behaviour Through Polymorphism](./06_extension) uses inheritance and overriding to let related classes share behaviour while varying the parts that differ.
+7. [Designing for Change with the Open/Closed Principle](./07_ocp) brings the design ideas together and shows how polymorphism lets software grow by adding new code instead of rewriting code that already works.
 
 ## Toward Part 3: Design for Evolution
 
