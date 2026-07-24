@@ -463,6 +463,13 @@ Effective verification strategies are layered such that each approach provides a
 
 Tests confirm that a program behaves as its contracts promise. Part 2 takes up the complementary question: how to structure code so that the invariants those tests rely on cannot be broken from the outside in the first place.
 
+(TODO: pasted stuff that was at the end fo chap 7 here)
+This also closes Part 1. You are now adept at the mechanics of modelling a problem with types, writing contracts and tests that validate behaviour, maintaining invariants, managing state, and changing data in the the outside world. We have come a long way: TypeScript is a fully-featured, industrial-strength language. 
+
+But so far, every program we have seen has been small enough for one person to hold in their head, and that has let personal discipline carry a lot of weight in ensuring the program works as intended. Part 2 investigates what happens when it cannot: when programs, teams, and lifetimes outgrow any single person, and the discipline has to move into the language itself. This requires a new level of abstraction, and new support from the programming language.
+
+
+
 <details class="tooltip exercise">
   <summary>Exercise: Verifying a Shipping Calculator</summary>
 
