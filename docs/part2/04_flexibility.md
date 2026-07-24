@@ -116,16 +116,16 @@ equals(other: GuestList): boolean {
 }
 ```
 
-Every comparison here is one a caller could have made from outside, using `size`, `guests`, and `isInvited`. That is the test for whether an equality is defined at the right level: if it only asks questions that are part of the class's public meaning, it will keep working through any change to how the class stores its data. This version behaves identically for the array `GuestList` and the `Set` one.
+Every comparison here is one a caller could have made from outside, using `size`, `guests`, and `isInvited`. This gives us a test for whether an equality is defined at the right level: if the method only asks questions that are part of the class's public meaning, it will keep working through any change to how the class stores its data. This version behaves identically for the array `GuestList` and the `Set` version.
 
-Equality should be _symmetric_: whenever `a.equals(b)` is true, `b.equals(a)` must be true as well. It is easy to break this by accident, usually by comparing some fields in one direction only, and a caller has no way to defend against equality that disagrees with itself.
+Equality should also be _symmetric_: whenever `a.equals(b)` is true, `b.equals(a)` must be true as well. Symmetry is easy to break by accident, usually by comparing some fields in one direction only, and a caller has no way to defend against an equality method that disagrees with itself.
 
 <details class="tooltip ts-tips">
 <summary>Reaching Into Another Object's Private Fields</summary>
 
 The `equals` above reads `other.capacity`, a `private` field of a different object. This compiles, which surprises most people the first time they see it. TypeScript's `private` is per _class_, not per _object_: code inside `GuestList` may touch the private members of any `GuestList`, not only its own.
 
-The permission is convenient for exactly this kind of method, since comparing two objects of the same class is difficult otherwise. It is still worth preferring the public methods where they suffice, as the version above does for the guests, because a comparison written against the public surface keeps working when the representation changes.
+This permission is convenient for exactly this kind of method, since comparing two objects of the same class is difficult otherwise. It is still worth preferring the public methods where they suffice, as the version above does for the guests, because a comparison written against the public surface keeps working when the representation changes.
 
 </details>
 
@@ -139,18 +139,18 @@ guests.includes(alice);                 // true: the same object
 guests.includes({ id: "alice" });       // false: an equal-looking, different object
 ```
 
-`indexOf`, `includes`, `Set`, and `Map` keys all behave this way. This has a consequence for a class we have already written. In the abstraction chapter, `Playlist.remove(..)` finds the song to remove with `this.songs.indexOf(song)`, so it removes only the exact `Song` object it was handed. A caller who builds a new `Song` with identical fields and asks for its removal gets no error and no removal, because no element is identical to the one passed in.
+`indexOf`, `includes`, `Set`, and `Map` keys all behave this way. This behaviour has a consequence for a class we have already written. In the abstraction chapter, `Playlist.remove(..)` finds the song to remove with `this.songs.indexOf(song)`, so it removes only the exact `Song` object it was handed. A caller who builds a new `Song` with identical fields and asks for its removal gets no error and no removal, because no element is identical to the one passed in.
 
-That is not automatically a bug, but it is a decision, and the contract must state it. `remove(..)` either takes _this particular song object_, in which case identity is the right comparison and the documentation should say so, or it takes _any song equal to this one_, in which case it must search with the class's own notion of equality rather than with `indexOf`. Leaving the question unanswered is what turns it into a bug later.
+Removing by identity is not automatically a bug, but it is a decision, and the contract must state it. `remove(..)` either takes _this particular song object_, in which case identity is the right comparison and the documentation should say so, or it takes _any song equal to this one_, in which case it must search with the class's own notion of equality rather than with `indexOf`. Leaving the question unanswered is what turns it into a bug later.
 
 ## Values That Do Not Change
 
 `GuestList` is a **mutable object**: `add` and `remove` change it in place. It is worth separating two guarantees that are easily confused, because they guard against different risks:
 
-- `const list = new GuestList(2)` stops the *binding* `list` from being pointed at a different object. It does nothing to stop `list.add("alice")` from changing the object `list` already refers to.
-- `private readonly capacity` stops the *field* from being reassigned after construction.
+- **Binding**: `const list = new GuestList(2)` stops the name `list` from being pointed at a different object. It does nothing to stop `list.add("alice")` from changing the object `list` already refers to.
+- **Field**: `private readonly capacity` stops that field from being reassigned after construction.
 
-An **immutable object** carries the second idea to its conclusion: none of its fields ever change, and methods that would modify it instead return a new object. An immutable guest list would establish its invariant once, at construction, and never have any later state to corrupt, so it would be valid for its whole life with no per-method effort. The cost is that every change allocates a new object. A mutable object is more economical and is often the natural choice for a guest list that is edited over time, but it accepts the obligation that *every* method preserve the invariant. Immutability buys safety by removing change; encapsulation buys safety by controlling it.
+An **immutable object** carries the second idea to its conclusion: none of its fields ever change, and methods that would modify it instead return a new object. An immutable guest list would establish its invariant once, at construction, and never have any later state to corrupt, so it would be valid for its whole life with no per-method effort. The cost is that every change allocates a new object. A mutable object is more economical and is often the natural choice for a guest list that is edited over time, but it accepts the obligation that _every_ method preserve the invariant. Immutability buys safety by removing change; encapsulation buys safety by controlling it.
 
 A minimal immutable guest list shows the pattern:
 
@@ -172,7 +172,7 @@ class ImmutableGuestList {
 }
 ```
 
-`add(..)` returns a new list rather than altering the receiver. The invariant is established once, in the constructor, and cannot be violated thereafter: there is no in-place `add(..)` to misuse and no fields to reassign.
+`add(..)` returns a new list rather than altering the list it was called on. The invariant is established once, in the constructor, and cannot be violated thereafter: there is no in-place `add(..)` to misuse and no fields to reassign.
 
 <details class="tooltip ts-tips">
 <summary>Default Parameter Values</summary>
@@ -181,9 +181,9 @@ class ImmutableGuestList {
 
 </details>
 
-Immutability and equality support each other, which is why they appear in the same chapter. For a mutable object, the abstract value it denotes changes over time, so a statement like "these two are the same" is true only until someone calls a method. That is a hazard whenever an object is stored somewhere that depends on its value staying put: a guest used as a key in a `Map`, or an object placed in a `Set`, can be mutated afterwards into something the collection can no longer find. An immutable object has one abstract value for its whole life, so comparisons made against it stay true. A class whose whole purpose is to _be_ a value, such as a date, a money amount, or a coordinate, is called a **value object**, and such classes are almost always immutable for this reason: an object that exists to represent a value is of little use if the value it represents can change underneath whoever is holding it.
+Immutability and equality support each other, which is why they appear in the same chapter. For a mutable object, the abstract value it denotes changes over time, so a statement like "these two are the same" is true only until someone calls a method. This is a hazard whenever an object is stored somewhere that depends on its value staying put: a guest used as a key in a `Map`, or an object placed in a `Set`, can be mutated afterwards into something the collection can no longer find. An immutable object has one abstract value for its whole life, so comparisons made against it stay true. A class whose whole purpose is to _be_ a value, such as a date, a money amount, or a coordinate, is called a **value object**, and such classes are almost always immutable for this reason: an object that exists to represent a value is of little use if the value it represents can change underneath whoever is holding it.
 
-Immutability also widens the freedom this chapter is about, in a way that is easy to miss. The previous chapter had to return a copy from `guests()`, because handing back the stored array would have let a caller reach into the representation. That obligation exists only because arrays can be changed. When the value being returned cannot be changed by anyone, a class is free to decide, and later to revise, how it produces that value: it may build a fresh one on every call, hand out a single shared instance, or cache one and return it repeatedly, and no caller can tell the difference. Returning something mutable commits you to copying it forever; returning something immutable leaves the choice open.
+Immutability also widens the same freedom, in a way that is easy to miss. The previous chapter had to return a copy from `guests()`, because handing back the stored array would have let a caller reach into the representation. That obligation exists only because arrays can be changed. When the value being returned cannot be changed by anyone, a class is free to decide, and later to revise, how it produces that value: it may build a fresh one on every call, hand out a single shared instance, or cache one and return it repeatedly, and no caller can tell the difference. Returning something mutable commits you to copying it forever; returning something immutable leaves the choice open.
 
 ## Abstracting Over the Member Type
 
@@ -192,11 +192,9 @@ Read the two descriptions of `GuestList` once more:
 > Abstract value: the set of guests invited to the event, together with the capacity of the venue.
 > Class invariant: holds no duplicate guests, and never more than `capacity` of them.
 
-Neither one mentions strings. Nothing about "a bounded set with no duplicates" depends on a member being a guest id rather than an employee record or a seat number.
+Neither description mentions strings. Nothing about "a bounded set with no duplicates" depends on a member being a guest id rather than an employee record or a seat number. So the representation was not the only commitment `GuestList` made without needing to: it also fixed what its members are, and that second commitment has the same cost. The class serves guest lists and nothing else, and a team wanting the identical rule for seats or employees has to copy it. Declining this second commitment is the same move one level up, and TypeScript has a mechanism for it.
 
-So the storage was not the only commitment `GuestList` made without needing to. It also fixed what its members are, and that commitment costs it in the same currency: the class serves guest lists and nothing else, and a team wanting the identical rule for seats or employees must copy it. Declining this second commitment is the same move one level up, and the language has a mechanism for it.
-
-Part 1 introduced **type variables** for naming a type that is not fixed until the type is used, writing `LinkedList<T>` for a list of any element type. A class takes them the same way:
+Part 1 introduced **type variables** for naming a type that is not fixed until the type is used, writing `LinkedList<T>` for a list of any element type. A class declares them the same way:
 
 ```typescript
 class <Name><T> {
@@ -297,7 +295,7 @@ The type is fixed for the life of the object. A `Roster<string>` is a different 
 
 ## What Flexibility Costs
 
-There is a defect in `Roster<T>`, and it is the point of introducing it. Look again at the membership test:
+There is a defect in `Roster<T>`, and exposing that defect is the point of introducing the class. Look again at the membership test:
 
 ```typescript
 isMember(candidate: T): boolean {
@@ -320,7 +318,7 @@ seats.add(new Seat("A", 12));   // added again
 seats.size();                   // 2, and the no-duplicates invariant is broken
 ```
 
-Nothing here is written incorrectly; something is missing. As we saw above, `includes` compares with `===`, and inside `Roster<T>` there is nothing else available to compare with. The class was written without knowing what `T` is, so it has no access to what `T` considers equal. Making the class work for every type cost it every assumption about the type it holds. That is the standing trade of a type parameter, and it applies to more than equality: a generic class cannot order its members, format them, or copy them either, for the same reason.
+Nothing here is written incorrectly; something is missing. As we saw above, `includes` compares with `===`, and inside `Roster<T>` there is nothing else available to compare with. The class was written without knowing what `T` is, so it has no access to what `T` considers equal. Making the class work for every type cost it every assumption about the type it holds. This is the standing trade of a type parameter, and it applies to more than equality: a generic class cannot order its members, format them, or copy them either, for the same reason.
 
 The solution is to have the caller supply the knowledge the class cannot have. Equality arrives as a function passed to the constructor:
 
@@ -378,7 +376,7 @@ There is a second route here. Rather than passing the operation in, we could res
 
 ## Designing for Flexibility
 
-The freedom to change an implementation is not something a design has or lacks by nature. It is bought, it can be spent without noticing, and it can be extended.
+The freedom to change an implementation is not something a design has or lacks by nature. It is bought, it can be degraded without anyone noticing, and it can be extended.
 
 The previous chapter bought it by hiding the representation. This chapter began by asking what that purchase rests on: a class holds a representation, it denotes an abstract value, and a change to the first is safe exactly when the second is unchanged. That is the test to apply before any change to how a class stores its data, and it is why swapping an array for a `Set` disturbed nobody.
 
