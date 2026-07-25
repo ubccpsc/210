@@ -371,6 +371,8 @@ class Playlist {
 
 Removing a song can invalidate the current index: if the removed song was before the current one in the song list, every later index shifts down by one; if the removed song was the last one and it was current, the index now points past the end. Each branch repairs the index so that the invariant still holds when `remove` returns. The caller does not have to think about any of this. That is the point: the work of keeping the index valid lives _with_ the data it constrains, inside the method, not scattered through the calling code.
 
+One decision inside `remove` is worth noticing now and settling later. `indexOf` locates the song by _identity_, so this method removes the exact object it was handed and ignores a separately built song with identical fields. Which of those a caller should expect is a design question we take up in the flexibility chapter.
+
 ```plantuml
 @startuml
 
