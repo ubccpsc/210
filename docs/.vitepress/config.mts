@@ -91,7 +91,7 @@ export default defineConfig({
                 text: "12: Encapsulating What Varies",
                 link: "/part2/03_encapsulation"
             }, {
-                text: "13: Designing for Flexibility",
+                text: "13: Implementation Freedom",
                 link: "/part2/04_flexibility"
             }, {
                 text: "14: Defining Boundaries",
@@ -100,7 +100,7 @@ export default defineConfig({
                 text: "15: Extending Behaviour",
                 link: "/part2/06_extension"
             }, {
-                text: "16: Designing for Change",
+                text: "16: Growing Systems",
                 link: "/part2/07_ocp"
             }],
         }, // end part 2

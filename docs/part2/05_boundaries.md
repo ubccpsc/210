@@ -288,7 +288,7 @@ SmsNotifier : +wasDelivered()
 ```
 <!-- caption: "SmsNotifier implementing two interfaces." -->
 
-Keeping interfaces small in this way is the interface-level equivalent of the advice for cohesion: classes should have a single responsibility. A small, focused interface describes one capability; a large interface that bundles several forces implementers to support operations that have nothing to do with one another, and forces callers to depend on more than they use. This guidance, that it is better to have many small interfaces than one large one, is known as the **interface segregation principle**.
+Keeping interfaces small in this way is the interface-level equivalent of the advice for cohesion: classes should have a single responsibility. A small, focused interface describes one capability; a large interface that bundles several forces implementers to support operations that have nothing to do with one another, and forces callers to depend on more than they use. This guidance, that it is better to have many small interfaces than one large one, is known as the **interface segregation principle**. Small interfaces also preserve implementation freedom: every operation a contract promises becomes behaviour callers may rely on, so a large interface leaks more implementation detail into the public surface, while a small one keeps more of each implementation unobservable, and therefore free to change.
 
 ## Constraining a Type Parameter
 
@@ -339,7 +339,7 @@ Whichever you choose, the constraint should name the smallest interface that sup
 
 ## Depending on the Contract
 
-An interface is the public surface of a class extracted into a named type that any class can implement and any caller can depend on. Depending on the interface rather than on a concrete class is the strongest form of information hiding. The encapsulation chapter let a class change its representation without disturbing callers; an interface lets the _entire class_ behind the contract change without disturbing them. The cost is small and the discipline is simple: name contracts as interfaces, keep them small and well documented, and write the rest of the program against them.
+An interface is the public surface of a class extracted into a named type that any class can implement and any caller can depend on. Depending on the interface rather than on a concrete class is the strongest form of information hiding. The previous two chapters let a class change its representation without disturbing callers; an interface lets the _entire class_ behind the contract change without disturbing them. The cost is small and the discipline is simple: name contracts as interfaces, keep them small and well documented, and write the rest of the program against them.
 
 Now we have a boundary in place, with one contract and several classes implementing it. The next chapter asks what happens when those classes are not merely interchangeable but embody different behaviour, so that one call does different work depending on the object behind the interface. That is polymorphism, and it is what makes interfaces more than a tidy way to organise types.
 

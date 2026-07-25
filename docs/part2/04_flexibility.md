@@ -1,4 +1,4 @@
-# Designing for Flexibility
+# Preserving Implementation Freedom with Abstract Values
 
 The previous chapter ended by replacing the array inside `GuestList` with a `Set`. Every method body was rewritten, and not one line of calling code changed. That result is important: the ability to change an implementation without disturbing the code that uses it is among the most valuable properties a design can have. It is what lets a class be improved after it has been deployed, and it is what encapsulation was protecting all along.
 
@@ -374,7 +374,7 @@ This is the general shape of the trade, and it is worth stating plainly because 
 
 There is a second route here. Rather than passing the operation in, we could restrict `T` to types that are guaranteed to provide it, so that every member is known to have an `equals` method of its own. That requires a way to name "the types that offer these operations" as a type in its own right, which is the subject of the next chapter.
 
-## Designing for Flexibility
+## Implementation Freedom
 
 The freedom to change an implementation is not something a design has or lacks by nature. It is bought, it can be degraded without anyone noticing, and it can be extended.
 

@@ -1,4 +1,4 @@
-# Designing for Change with the Open/Closed Principle
+# Growing Systems with the Open/Closed Principle
 
 Successful software systems are constantly evolving. A new kind of user, a new delivery channel, a new pricing rule: new requirements are added throughout the life of a system, and a codebase that cannot absorb them without breaking what already works becomes harder to change. Polymorphism offers one way to make a system extensible by enabling the **Open/Closed Principle**. Code that follows this principle is open for extension, so new behaviour can be added, and closed for modification, so adding that new behaviour requires no changes to existing code that already works.
 
