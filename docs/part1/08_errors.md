@@ -4,7 +4,9 @@ Every function's contract describes what happens when the function works, and wh
 
 We previously differentiated two kinds of failure: an **unexpected error** is one that should be impossible: an invariant has been violated, which means the program has a bug. We proactively detect these with `assert`, which stops the program the moment an impossible state appears, because no sensible computation can continue from corrupt data. These are often triggered only during development, because an implementation is typically strengthened to prevent precondition violations in deployed systems. 
 
-An **expected error** is a foreseeable, unsuccessful outcome that is not a bug at all: a section is full, a prerequisite is missing, a file is absent. Expected errors belong in the contract, and the caller is expected to deal with them. This chapter focuses on expected errors: how a function communicates errors to its caller, and how the caller responds. There are two mechanisms in wide use. A function can *return* its failure as an ordinary value, or it can *throw* an exception that travels up the call stack until something handles it. Each mechanism has strengths and weaknesses. 
+An **expected error** is a foreseeable, unsuccessful outcome that is not a bug at all: a section is full, a prerequisite is missing, a file is absent. Expected errors belong in the contract, and the caller is expected to deal with them. 
+
+This chapter focuses on expected errors: how a function communicates errors to its caller, and how the caller responds. There are two mechanisms in wide use. A function can *return* its failure as an ordinary value, or it can *throw* an exception that travels up the call stack until something handles it. Each mechanism has strengths and weaknesses. 
 
 ## A Student Enrolling in Sections
 

@@ -110,6 +110,26 @@ export default defineConfig({
             items: [{
                 text: "17: Coupling",
                 link: "/part3/01_coupling"
+            }, 
+	    {
+                text: "18: Consuming Data",
+		link: "/part3/02_consuming_data"
+            },
+	    {
+                text: "19: Designing APIs",
+		link: "/part3/03_api_design"
+            },
+	    {
+                text: "20: Code Quality, Refactoring",
+		link: "/part3/04_refactoring"
+            },
+	    {
+                text: "21: Debugging",
+		link: "/part3/05_debugging"
+            },
+	    {
+                text: "22: Adding New Features",
+		link: "/part3/06_new_features"
             }],
         }, // end part 3
         ],
