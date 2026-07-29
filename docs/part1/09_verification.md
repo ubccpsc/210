@@ -178,11 +178,11 @@ function hasAllPrerequisites(student: Student, section: Section): boolean {
 function eligibleSections(catalogue: Section[], student: Student): Section[] {
     const result: Section[] = [];
     for (const section of catalogue) {
-        if (student.completed.includes(section.id)) {
-            continue; // already completed, so not on offer again
-        }
-        if (hasAllPrerequisites(student, section)) {
-            result.push(section);
+        // a section the student has completed is not on offer again
+        if (student.completed.includes(section.id) === false) {
+            if (hasAllPrerequisites(student, section)) {
+                result.push(section);
+            }
         }
     }
     return result;
