@@ -157,7 +157,7 @@ Song : durationSeconds: number
 ```
 <!-- caption: "Playlist and its operations." -->
 
-## The Solution: Classes
+## Declaring and Creating Classes
 
 A class is the primary unit of abstraction in object-oriented programs. It can be read as a _template_ for a kind of value: it describes the state every value of that kind holds, and the operations every such value provides. All major object-oriented languages, including C++, Java, Rust, and TypeScript, provide classes for this purpose.
 
@@ -298,8 +298,6 @@ This sets the default value of `myField` to whatever value `<default value>` hol
 
 </details>
 
-### When should I make a field?
-
 Declaring a field is relatively straightforward: identify what state you need to track and give it a name that describes it clearly, identify its type, and decide whether it has a default value or must be supplied through the constructor. The harder question is _what should be state at all_, as opposed to a local variable inside a method. As a rule of thumb, data belongs in a field if its value must survive after a method returns, or must be visible to other methods.
 
 The contents of a field are unique to each object. After:
@@ -431,8 +429,6 @@ class T {
 
 In all languages, methods have a name, take zero or more parameters, and return either a value or `void`. When a method returns nothing, declaring its return type as `void` signals to a reader that the absence of a return value is intentional.
 
-### When should I make a method?
-
 Declaring a method involves a few decisions: what the method is for and a name that captures that intent; what parameters it takes, with their names and types; and what it returns, with its type. It can help to think from a testing perspective. If you know what you want to check about a method, the parameters encode the data you would pass it and the return value the result you would inspect. Unlike a free function, a method can also read and change the object's _fields_, so part of its input and part of its result may live in the object rather than in the parameters and return value.
 
 
@@ -454,8 +450,6 @@ function longest(playlists: Playlist[]): Playlist | null {
 
 The compiler checks these annotations exactly as it did for the types in Part 1. A function that expects a `Playlist` cannot be handed a `Song`, and the result of `longest` is known to be a `Playlist` or `null`, so a caller must consider the empty case. 
 
-### Object Identity and References
-
 A field of one object can hold another object, and a variable that "holds" an object actually holds a _reference_ to it, exactly as in the Part 1 mutation chapter. Two consequences follow.
 
 First, two objects are distinct even when their contents match. Each `new` produces a separate object with its own identity:
@@ -468,7 +462,7 @@ const b = new Playlist();
 
 Second, when an object is passed to a function or stored in a field, it is the reference that is copied, not the object. The caller and the callee then share that single object, and a method call that changes one is visible to both. This is the aliasing from Part 1, now the normal way objects are used; primitives behave differently, as the deep dive below explains.
 
-### Working with Objects
+## Working with Objects
 
 A class declaration only describes what its objects look like. To do work, we instantiate objects and call their methods, using **dot notation**: in `playlist.next()`, the `.` separates the object from the method called on it. Because every object holds its own fields, a method call on one object never affects another.
 
@@ -605,8 +599,6 @@ test("removing the current song keeps the position valid", () => {
 ```
 
 The test-design ideas carry over unchanged. Equivalence classes and boundaries now describe _sequences of method calls_ rather than single arguments (an empty playlist, a one-song playlist, removing the current song versus another song), and layered assertions still apply to whatever the object exposes.
-
-### Setup and Teardown
 
 Almost every test of a class starts the same way: build a fresh object to work on. Writing `new Playlist()` at the top of every test is repetitive, and reusing one shared object across tests is worse than repetitive: one test's mutations would leak into the next, and the suite would quietly depend on the order its tests happen to run in. Test runners solve this with **lifecycle hooks**, functions the runner calls around your tests. The most useful is `beforeEach`, which runs before every test, the natural place to create a fresh object:
 

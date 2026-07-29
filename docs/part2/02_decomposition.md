@@ -4,7 +4,7 @@ The previous chapter established the class as the unit of abstraction: a class b
 
 This chapter is about those decisions. Classes only improve the design of a system when they make sense on their own: a class that maintains several unrelated invariants stops being an idea a reader can hold in their head. When we think about what state and operations belong in a class, we think about **cohesion**, and the principle that follows from it is one invariant per class.
 
-## The Problem
+## How Classes Lose Cohesion
 
 Classes rarely start out doing too much: they gain responsibilities one reasonable change at a time. Our `Playlist` from the previous chapter contained a single invariant: the current index is always a valid position in the song list. 
 
@@ -50,8 +50,6 @@ class Playlist {
 </CollapsibleCode>
 
 The class now maintains two unrelated invariants at once: the original navigation invariant says the current index is valid, and a new history invariant says the recently played list holds each song at most once, most-recently-played first. The two have nothing to do with each other, yet they now live in one class, and `play()` straddles both: it observes the navigation state through `current()` and maintains the history state directly. To understand or safely change either invariant, an engineer now has to consider multiple invariants.
-
-## God Classes
 
 Left unchecked, a class that keeps absorbing responsibilities becomes a **god class**: one type that knows about and does everything. Each addition seemed reasonable on its own, but the result is a class with many fields and methods that collaborate on multiple invariants. This happens because adding one more method to an existing class is easier than creating a new class and keeping its contents cohesive.
 
@@ -99,18 +97,15 @@ Consider where you would look in a class like this to change how recently played
 
 </details>
 
-## Cohesion as the Design Criterion
+## Cohesion and the Single Responsibility Principle
 
 A class is cohesive when everything it contains works toward a single purpose. We make "single purpose" precise by anchoring it to one invariant: a cohesive class enforces exactly one invariant, and every field and method exists to establish, preserve, or observe it. Such a class can be understood from its invariant alone and changed without reaching into the rest of the system. These are the properties of an abstraction: it bounds reasoning to one kind of thing and offers a named type the rest of the program can depend on. Evaluating cohesion is how we judge whether a decomposition keeps those properties true.
+
+This is the **Single Responsibility Principle** at the class level: one class, one invariant. A class should have exactly one reason to change, and that reason is the invariant it protects. Deciding where one class ends and another begins is the core activity of **decomposition**, the act of breaking a problem into smaller pieces that have well-defined roles. We use cohesion to reason about the quality of a decomposition to differentiate a good split from a bad one.
 
 Some classes are not built around an explicit invariant. A pure value object or a stateless helper holds no invariant, and is cohesive around a single concept or operation instead. The underlying principle, one purpose per class, is unchanged, and a class that serves several purposes fails regardless of how its purpose is expressed.
 
 Cohesion also shapes how a system behaves when it needs to change. When each invariant lives in exactly one class, a bug fix or a new feature for that invariant stays inside the class that owns it, instead of spreading across the system. The change stays local, which makes it easier to make and less likely to cause the cascading edits that follow when one change forces matching changes in many other places.
-
-## One Class, One Invariant
-
-This is the **Single Responsibility Principle** at the class level: one class, one invariant. A class should have exactly one reason to change, and that reason is the invariant it protects. Deciding where one class ends and another begins is the core activity of **decomposition**, the act of breaking a problem into smaller pieces that have well-defined roles. We use cohesion to reason about the quality of a decomposition to differentiate a good split from a bad one.
-
 
 There is rarely a single correct decomposition. The same system can usually be split in several reasonable ways, and competent engineers will sometimes disagree about which is best. What cohesion gives us is not the one _right_ split but a reliable way to recognise _poor_ splits. A poorly decomposed class leaves clues in the code itself: it enforces more than one invariant, it has fields the invariant never mentions, it has methods that maintain some other invariant, or its name is disconnected from the fields and methods it contains. These are easy to spot once you know to look, so the goal is less about finding the perfect decomposition than about steering clear of bad ones.
 
@@ -121,23 +116,11 @@ The Single Responsibility Principle reads as one invariant per class, but a more
 
 </details>
 
-## Designing a Decomposition
+## Diagnosing a Class
 
-The previous sections diagnose an existing class. It is just as useful to work top-down, from a high-level problem to a lower-level set of classes, the way the Part 1 modelling chapter moved from a problem to a data definition. A workable process:
-
-1. Identify the invariants the system must maintain.
-2. For each invariant, identify the state it constrains.
-3. Give each invariant its own class, owning the state and the operations on it.
-4. Where one responsibility needs another, have one class hold the other and delegate to it.
-5. Name each class for its single responsibility. When it is hard to come up with a name, it is often a signal the split was poor.
-
-Applied to the music app, step 1 finds two invariants: the current position is valid, and the recently played list is deduplicated and ordered. Step 2 assigns the songs and the index to the first, and the recent list to the second. Step 3 gives us two classes, `Playlist` and `PlayHistory`. Steps 4 and 5 are the subject of the rest of this chapter.
-
-## Field Cohesion
+The clues listed above share a single test. Name the invariant the class claims to protect, then take its parts one at a time, the fields first and then the methods, and ask of each whether it serves that invariant.
 
 Every field should participate in the invariant the class protects. Once the class invariant is known, each field can be checked against it: a field the invariant refers to belongs in the class, and a field the invariant never mentions is the clearest signal that a second responsibility has crept in. The usual exception is a field that holds the object's identity, such as a name or id; it names the thing the invariant is about rather than taking part in the invariant. For a value object or a stateless helper, the same test reads against the single concept the class represents, and a field that has nothing to do with that concept exhibits the same smell.
-
-## Method Cohesion
 
 The Single Responsibility Principle applies at the method level too: one method, one operation on the invariant. Every method should act in maintenance of the class invariant, and nothing else. A method that maintains a different invariant is the method-level version of the same smell, and it points to the same fix: the invariant it serves, and the method with it, belongs in another class.
 
@@ -156,9 +139,23 @@ Everything that does not mention the current index is exactly the play-history m
 
 </details>
 
+## Designing a Decomposition
+
+The previous section diagnosed an existing class. It is just as useful to work top-down, from a high-level problem to a lower-level set of classes, the way the Part 1 modelling chapter moved from a problem to a data definition. A common way to do this, which will feel second nature once you have done it a few times, is to:
+
+1. Identify the invariants the system must maintain.
+2. For each invariant, identify the state it constrains.
+3. Give each invariant its own class, owning the state and the operations on it.
+4. Where one responsibility needs another, have one class hold the other and delegate to it.
+5. Name each class for its single responsibility. When it is hard to come up with a name, it is often a signal the split was poor.
+
+Applied to the music app, step 1 finds two invariants: the current position is valid, and the recently played list is deduplicated and ordered. Step 2 assigns the songs and the index to the first, and the recent list to the second. Step 3 gives us two classes, `Playlist` and `PlayHistory`. Step 4 is taken up in the rest of this chapter; step 5 deserves a word of its own.
+
+Naming is a core design concern, not a cosmetic one. A cohesive class is easy to name because it does one thing. The name is the most compact signal of a class's intent, and it is what lets an engineer find the class they need. This is the direct answer to the god class: cohesive classes can be named for their single responsibility, and those names are exactly what an engineer reads when deciding where a feature should live. A class that is hard to name is usually a class that does too much, and a vague name helps no one find their way around it.
+
 ## Decomposing the Playlist
 
-The fix is to give the second invariant its own class. We move the play-history material into a `PlayHistory` class that owns the history invariant, and leave `Playlist` responsible for navigation alone.
+Applying that process to the bloated `Playlist`, we move the play-history material into a `PlayHistory` class that owns the history invariant, and leave `Playlist` responsible for navigation alone.
 
 <CollapsibleCode>
 
@@ -216,11 +213,13 @@ class Playlist {
 
 Each class is now understandable from a single invariant. `PlayHistory` can change how it orders or deduplicates songs without `Playlist` knowing, and `Playlist` owns the navigation invariant by itself. `play` shrank to two ideas a reader can hold at once: get the current song, and tell the history it was played.
 
-### Composition and Delegation
+Being cohesive pays dividends when we verify the system. Because `PlayHistory` owns its invariant and holds its own state, it can be tested entirely on its own, without constructing a `Playlist`: record a few songs and check that the result is deduplicated and ordered. `Playlist` can likewise be tested against the navigation invariant alone. When the two were tangled in one class, no test could exercise one invariant without dragging in the other. The verification chapter develops how to write these tests; the point here is that a cohesive decomposition is what makes each invariant testable in isolation in the first place.
 
-The relationship we just created has a name. When one object holds a reference to another, we call it **composition**: a `Playlist` _has a_ `PlayHistory`. When the holding object forwards work to the held one rather than doing it itself, we call it **delegation**: `play` does not implement the deduplication-and-ordering rule, it _delegates_ that to `playHistory.record`.
+## Composition and Delegation
 
-`Playlist` _has a_ `PlayHistory` and forwards the recording work to it:
+The relationship between `Playlist` and `PlayHistory` has a name. When one object holds a reference to another, we call it **composition**: a `Playlist` _has a_ `PlayHistory`. When the holding object forwards work to the held one rather than doing it itself, we call it **delegation**: `play` does not implement the deduplication-and-ordering rule, it _delegates_ that to `playHistory.record`.
+
+Drawn out, the two classes and the direction of the delegation look like this:
 
 ```plantuml
 @startuml
@@ -260,10 +259,6 @@ The navigation invariant does not range over `playHistory`, so at first glance t
 
 </details>
 
-### Each Class Is Independently Testable
-
-Cohesion pays off again when we verify the system. Because `PlayHistory` owns its invariant and holds its own state, it can be tested entirely on its own, without constructing a `Playlist`: record a few songs and check that the result is deduplicated and ordered. `Playlist` can likewise be tested against the navigation invariant alone. When the two were tangled in one class, no test could exercise one invariant without dragging in the other. The verification chapter develops how to write these tests; the point here is that a cohesive decomposition is what makes each invariant testable in isolation in the first place.
-
 ## When a Split Is a Judgment Call
 
 The `Playlist` and `PlayHistory` split is clear-cut, because the two invariants share no state. Most real decisions are less obvious, and here we examine a more judgment-based decomposition.
@@ -278,15 +273,11 @@ Where the tags should live is more of a judgment call. "No duplicate tags" is a 
 
 This is the balance decomposition involves. Splitting is the cure for a class that owns more than one invariant, but it is not free: every new class is another name to learn and another small unit of code to navigate and manage. Extracting a class for a rule that will never grow beyond one line causes design fragmentation without improving the clarity that cohesion is supposed to provide. Our goal is clarity and understandability, not the largest possible number of classes.
 
-## Naming and Cohesive Intent
-
-Naming is a core design concern, not a cosmetic one. A cohesive class is easy to name because it does one thing. The name is the most compact signal of a class's intent, and it is what lets an engineer find the class they need. This is the direct answer to the god class: cohesive classes can be named for their single responsibility, and those names are exactly what an engineer reads when deciding where a feature should live. A class that is hard to name is usually a class that does too much, and a vague name helps no one find their way around it.
-
 ## A Cohesive Decomposition
 
 A cohesive decomposition gives every invariant exactly one home. Each class can be understood from its own invariant, tested against that invariant, and changed in isolation, so a fix or a feature stays local. Because each class is named for its single responsibility, an engineer can easily find the class they need. Composition and delegation then reassemble these small, single-purpose classes into a working system, each still owning its own state and rule. This is what lets a design scale as it grows from one class into many: not only is state bundled with the behaviour that maintains it, but each bundle stays small enough to reason about and clear enough to locate. Cohesion is what keeps our abstractions effective and durable as the system grows.
 
-A well-decomposed system of cohesive classes still has to handle operations that cannot always succeed. The next chapter examines how a class communicates those failures to its callers as deliberately as it communicates its successes.
+Giving each invariant a single home settles which class is _responsible_ for it. It does not yet give that class the means to _defend_ it. Every class we have written keeps its state in fields that any code holding the object can read and write, so the class that owns an invariant is not yet the only code able to break it. The next chapter closes that gap, hiding a class's representation so that the invariant it owns cannot be violated by other parts of the system.
 
 <details class="tooltip exercise">
   <summary>Exercise: Finding the Classes</summary>

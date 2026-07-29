@@ -6,7 +6,7 @@ It is worth being explicit about why this question dominates Part 3. A design pr
 
 This chapter examines the connection between coupling and cohesion. When we ask how tightly one class is bound to another, we are asking about **coupling**, and the principle that follows from it is that a class should _depend on as little as possible, as loosely as possible_. Cohesion and coupling are the two dimensions on which a decomposition is judged, and neither is meaningful on its own.
 
-## The Problem
+## The Ripple Effect
 
 We return to the music app from the decomposition chapter. `Playlist` still owns the navigation invariant, `PlayHistory` still owns the history invariant, and each class is as cohesive as when they were designed. But the rest of the system changed around them.
 
@@ -51,8 +51,6 @@ Nothing here is obviously wrong. `WeeklyRecap` is cohesive: it has one job, and 
 
 None of those facts is part of the `PlayHistory` contract. They are _implementation details_ of how `PlayHistory` happens to store its data, and `WeeklyRecap` now depends on all of them.
 
-## The Ripple Effect
-
 A dependency is invisible until something changes. The new user story asks for what was played _this week_, which the current design cannot answer: a list of songs carries no times. `PlayHistory` needs to record when each play happened.
 
 ```typescript
@@ -93,8 +91,6 @@ This sits exactly opposite cohesion, and the two are best read together:
 - _Coupling_ is judged **between** boundaries: How much does this class depend on that one?
 
 Both are about the same underlying goal, which is keeping change local. Cohesion keeps a change local by co-locating everything one invariant needs, so there is a single site to edit. Coupling keeps a change local by limiting how far the consequences of that edit can travel. A design needs both: high cohesion so that a change has one home, and low coupling so any change does not impact the rest of the system.
-
-## Making Dependencies Visible
 
 Coupling is easier to reason about when the dependencies are drawn rather than inferred. A **dependency** exists from A to B when A needs B in order to compile or run: A constructs a B, holds one as a field, takes one as a parameter, calls one of its methods, or reads its data. Drawn as a graph, the classes are nodes and the dependencies are arrows, each pointing from the dependent class to the class it relies on.
 
@@ -233,9 +229,9 @@ Every period is now supported, including ones nobody has asked for yet, and no b
 
 ## Diagnosing Coupling
 
-The decomposition chapter suggested ways to check for a badly split class: looking for fields the invariant never mentions or methods that maintain some other invariant. Coupling has its own diagnostic signs that are visible in the code once you know to look for them.
+The decomposition chapter suggested ways to check for a badly split class: looking for fields the invariant never mentions or methods that maintain some other invariant. Coupling has its own diagnostic signs that are visible in the code once you know to look for them. A third sign, a dependency that points both ways, is structural enough to need a section of its own, and follows this one.
 
-### Reaching Through Objects
+### Reaching Past a Neighbour
 
 The clearest sign is a chain of calls that traverses through one object to another to a third:
 
@@ -262,8 +258,6 @@ The question to ask is not "how many dots?" but "how many classes must be correc
 
 </details>
 
-### Asking for Data Instead of Behaviour
-
 A related sign is code that extracts an object's data in order to make a decision the object was in a better position to make:
 
 ```typescript
@@ -280,19 +274,17 @@ account.withdraw(amount);
 
 The guideline is **Tell, Don't Ask**: tell an object what you need done and let it decide how, rather than asking for its state and deciding on its behalf. It is the same instinct behind the `PlayLog` design later in this chapter, where `PlayHistory` answers a question about the history instead of handing over its list for someone else to interpret. A method whose body is mostly other objects' getters is usually a method living in the wrong class.
 
-### Depending on Concrete Types
+### Depending on More Than You Need
 
 A dependency on a concrete class commits the dependent to everything that class encodes, and any way it might be changed in the future. `WeeklyRecap` declared its field as `Playlist`, so it inherited the whole of `Playlist`'s public surface as its potential exposure, when the operation it wanted was a single query.
 
-The interfaces chapter gave us the tool for this, and its guidance applies directly: name the contract, not the class. A dependency on an interface only exposes your code to the operations that interface declares, which is a smaller and far more stable thing to depend on. The size of that contract matters for the same reason, which is what makes the interface segregation principle a coupling rule: an interface bundling operations a client never calls couples that client to changes it has no interest in.
-
-### Inheriting Instead of Holding
+The interfaces chapter gave us the tool for this: name the contract, not the class. A dependency on an interface only exposes your code to the operations that interface declares, which is a smaller and far more stable thing to depend on. The size of that contract matters for the same reason, which is what makes the interface segregation principle a coupling rule: an interface bundling operations a client never calls couples that client to changes it has no interest in.
 
 Class extension is the tightest coupling the language offers, and it does not appear in the table above because it works at a different level. A subclass depends not on another class's public contract but on its _implementation_: its protected members, and the order in which the base calls its own methods. The extension chapter named the consequence the fragile base class problem, where a change inside a base class alters the behaviour of subclasses that were never edited.
 
-Read through the lens of this chapter, that is the reason composition is the default and extension is reserved for true is-a relationships. A collaborator held as a field is reached only through its public methods, so its internals stay free to change; a base class is reached through inheritance, so its internals are part of what every subclass depends on.
+That is the reason composition is the default and extension is reserved for true _is-a_ relationships. A collaborator held as a field is reached only through its public methods, so its internals stay free to change; a base class is reached through inheritance, so its internals are part of what every subclass depends on.
 
-### Dependencies That Point Both Ways
+## Breaking Dependency Cycles
 
 When A depends on B and B depends on A, neither class can be read, tested, or changed without the other, and the pair has become one unit, but with two names. The decomposition chapter made this point about ownership: `Playlist` holds `PlayHistory` because it needs to delegate recording, and giving `PlayHistory` a back-reference to `Playlist` would have bound the two together in both directions.
 
@@ -523,8 +515,6 @@ Compare the two designs against the change that started this chapter. Adding tim
 
 Notice also which class the dependency now points to. `WeeklyRecap` does not depend on `PlayHistory`, and `PlayHistory` does not depend on `WeeklyRecap`; both depend on `PlayLog`, which has no implementation to change. Arranging dependencies so they point at abstractions rather than at concrete classes is the **Dependency Inversion Principle**, named at the end of Part 2, and it is the structural habit that most reliably keeps coupling low.
 
-## Loosely Coupled Classes Are Independently Testable
-
 Coupling shows up in the test suite before it shows up anywhere else, and a test that is hard to write is usually reporting a design problem rather than a testing problem. To test the original `WeeklyRecap`, you needed a real `Playlist`, which needed a real `PlayHistory`, which needed songs recorded through the playlist in the right order. The test dragged in three classes to check one string.
 
 The rewritten class needs none of that, because anything satisfying `PlayLog` will do:
@@ -557,21 +547,19 @@ There is also a trap in treating low coupling as a target on its own. Coupling b
 
 The same judgment applies as with decomposition. Adding an interface for every collaboration produces a system where every call passes through an abstraction and no reader can find the code that runs. An interface is worth defining when the dependency is likely to change, when a second implementation is plausible, or when a test needs a stand-in. When a class collaborates with one stable neighbour that no one expects to replace, depending on it directly is often the clearer choice.
 
-## Separation of Concerns
+## Cohesion and Coupling Together
 
-Both criteria serve one higher-level idea. A **concern** is a single thing the system must address: a rule, a responsibility, a reason the code might one day have to change. **Separation of concerns** is the principle that each concern should have exactly one home in the design, and the two ways a design can violate it are precisely the two failures these chapters have been describing.
+Both criteria aim to support a single higher-level idea. A **concern** is a single thing the system must address: a rule, a responsibility, a reason the code might one day have to change. **Separation of concerns** is the principle that each concern should have exactly one home in the design. The two ways a design can violate separation of concerns are exactly the two failures these chapters have been describing.
 
-**Tangling** is many concerns sharing one place. The god class of the decomposition chapter is tangled: navigation, history, ratings, and sharing interleaved in a single `Playlist`, so that no one concern can be read or changed by itself. Tangling is what poor cohesion looks like from the inside of a class.
+**Tangling** occurs when many concerns share one place in the design. The god class of the decomposition chapter is tangled: navigation, history, ratings, and sharing interleaved in a single `Playlist`, so that no one concern can be read or changed by itself. Tangling is what poor cohesion looks like from the inside of a class.
 
-**Scattering** is one concern spread across many places. The original `WeeklyRecap` is scattered: the knowledge of how play history is represented was not confined to `PlayHistory` but distributed among every class that had asked for the list, which is why a single change to that representation reached all of them. Scattering is what tight coupling looks like from outside a class.
+**Scattering** happens when one concern is spread across a design. The original `WeeklyRecap` is scattered: the knowledge of how play history is represented was not confined to `PlayHistory` but distributed among every class that had asked for the list, which is why a single change to that representation reached all of them. Scattering is what tight coupling looks like from outside a class.
 
 The symmetry is important, because the two are detected and resolved differently. You find tangling by looking inside one class and noticing several unrelated reasons to change it, and you fix it by splitting. You find scattering by making one change and counting the files it touched, and you resolve it by giving the concern a single owner and a contract. High cohesion is the absence of tangling, low coupling is the absence of scattering, and separation of concerns is the goal they are both supporting.
 
-## Cohesion and Coupling Together
+The two criteria are usually stated as a single goal, high cohesion and low coupling, because neither survives being pursued alone. They also interact, and the interaction is what makes a decomposition succeed or fail. Cohesion tends to produce low coupling. When a class owns one invariant and all the state that invariant constrains, it can answer questions about that state by itself, and neighbours have no reason to reach past it. `PlayHistory` could offer `songsSince` precisely because it owned the play history.
 
-These two criteria are usually stated as one goal, high cohesion and low coupling, because neither survives being pursued alone. They also interact, and the interaction is what makes a decomposition succeed or fail. Cohesion tends to produce low coupling. When a class owns one invariant and all the state that invariant constrains, it can answer questions about that state by itself, and neighbours have no reason to reach past it. `PlayHistory` could offer `songsSince` precisely because it owned the play history.
-
-Poor cohesion tends to produce high coupling, and this is the more common failure. A class holding two invariants has to be consulted by two sets of collaborators, so its fan-in is inflated by an accident of decomposition. Worse, splitting a class along the wrong dimension separates state from the logic that maintains it, and the two parts have to talk constantly to stay consistent. Two classes that call each other on every operation are a decomposition that has increased coupling without buying any cohesion.
+Of the two design failures, poor cohesion is the more common, and it tends to produce high coupling. A class holding two invariants has to be consulted by two sets of collaborators, so its fan-in is inflated by an accident of decomposition. Worse, splitting a class along the wrong dimension separates state from the logic that maintains it, and the two parts have to talk constantly to stay consistent. Two classes that call each other on every operation are a decomposition that has increased coupling without buying any cohesion.
 
 This is why coupling and cohesion are considered concurrently. The decomposition chapter asked where the boundaries should fall; this chapter asks how much traffic crosses them. A good boundary is one where both answers are favourable: everything on the inside serves one invariant, and everything crossing it is a small, stable contract. When you find yourself choosing between the two, the traffic across the boundary is the better guide, because it is what will inhibit you on future changes.
 
