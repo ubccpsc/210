@@ -7,4 +7,6 @@ pnpm-workspace.yaml
 docs/.vitepress/dist
 docs/.vitepress/cache
 
-docs/public/diagrams
+# docs/public/diagrams is deliberately committed: the build fetches each
+# diagram from kroki.io only when its source changes, so keeping the
+# generated SVGs in the repo means CI does not depend on that service.

@@ -1,0 +1,39 @@
+<svg xmlns='http://www.w3.org/2000/svg' style='font-size:initial;' class="pikchr" viewBox="0 0 1457.18 280.8">
+<path d="M173.416,77.04L1455.02,77.04L1455.02,2.16L173.416,2.16Z"  style="fill:rgb(243,243,243);stroke-width:2.16;stroke:rgb(230,230,230);" />
+<path d="M173.416,177.84L1455.02,177.84L1455.02,102.96L173.416,102.96Z"  style="fill:rgb(234,242,251);stroke-width:2.16;stroke:rgb(230,230,230);" />
+<path d="M173.416,278.64L1455.02,278.64L1455.02,203.76L173.416,203.76Z"  style="fill:rgb(234,247,234);stroke-width:2.16;stroke:rgb(230,230,230);" />
+<text x="159.016" y="39.6" text-anchor="end" fill="rgb(0,0,0)" font-size="80%" dominant-baseline="central">Once per Test File</text>
+<text x="159.016" y="140.4" text-anchor="end" fill="rgb(0,0,0)" font-size="80%" dominant-baseline="central">Around Each Test Case</text>
+<text x="159.016" y="241.2" text-anchor="end" fill="rgb(0,0,0)" font-size="80%" dominant-baseline="central">Test Case(s)</text>
+<path d="M287.176,64.08L390.856,64.08A8.64 8.64 0 0 0 399.496 55.44L399.496,23.76A8.64 8.64 0 0 0 390.856 15.12L287.176,15.12A8.64 8.64 0 0 0 278.536 23.76L278.536,55.44A8.64 8.64 0 0 0 287.176 64.08Z"  style="fill:rgb(204,204,204);stroke-width:2.16;stroke:rgb(0,0,0);" />
+<text x="339.016" y="39.6" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central">beforeAll</text>
+<path d="M431.176,164.88L534.856,164.88A8.64 8.64 0 0 0 543.496 156.24L543.496,124.56A8.64 8.64 0 0 0 534.856 115.92L431.176,115.92A8.64 8.64 0 0 0 422.536 124.56L422.536,156.24A8.64 8.64 0 0 0 431.176 164.88Z"  style="fill:rgb(158,197,232);stroke-width:2.16;stroke:rgb(0,0,0);" />
+<text x="483.016" y="140.4" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central">beforeEach</text>
+<path d="M575.176,265.68L678.856,265.68A8.64 8.64 0 0 0 687.496 257.04L687.496,225.36A8.64 8.64 0 0 0 678.856 216.72L575.176,216.72A8.64 8.64 0 0 0 566.536 225.36L566.536,257.04A8.64 8.64 0 0 0 575.176 265.68Z"  style="fill:rgb(158,210,158);stroke-width:2.16;stroke:rgb(0,0,0);" />
+<text x="627.016" y="241.2" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central">test 1</text>
+<path d="M719.176,164.88L822.856,164.88A8.64 8.64 0 0 0 831.496 156.24L831.496,124.56A8.64 8.64 0 0 0 822.856 115.92L719.176,115.92A8.64 8.64 0 0 0 710.536 124.56L710.536,156.24A8.64 8.64 0 0 0 719.176 164.88Z"  style="fill:rgb(158,197,232);stroke-width:2.16;stroke:rgb(0,0,0);" />
+<text x="771.016" y="140.4" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central">afterEach</text>
+<path d="M863.176,164.88L966.856,164.88A8.64 8.64 0 0 0 975.496 156.24L975.496,124.56A8.64 8.64 0 0 0 966.856 115.92L863.176,115.92A8.64 8.64 0 0 0 854.536 124.56L854.536,156.24A8.64 8.64 0 0 0 863.176 164.88Z"  style="fill:rgb(158,197,232);stroke-width:2.16;stroke:rgb(0,0,0);" />
+<text x="915.016" y="140.4" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central">beforeEach</text>
+<path d="M1007.18,265.68L1110.86,265.68A8.64 8.64 0 0 0 1119.5 257.04L1119.5,225.36A8.64 8.64 0 0 0 1110.86 216.72L1007.18,216.72A8.64 8.64 0 0 0 998.536 225.36L998.536,257.04A8.64 8.64 0 0 0 1007.18 265.68Z"  style="fill:rgb(158,210,158);stroke-width:2.16;stroke:rgb(0,0,0);" />
+<text x="1059.02" y="241.2" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central">test 2</text>
+<path d="M1151.18,164.88L1254.86,164.88A8.64 8.64 0 0 0 1263.5 156.24L1263.5,124.56A8.64 8.64 0 0 0 1254.86 115.92L1151.18,115.92A8.64 8.64 0 0 0 1142.54 124.56L1142.54,156.24A8.64 8.64 0 0 0 1151.18 164.88Z"  style="fill:rgb(158,197,232);stroke-width:2.16;stroke:rgb(0,0,0);" />
+<text x="1203.02" y="140.4" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central">afterEach</text>
+<path d="M1295.18,64.08L1398.86,64.08A8.64 8.64 0 0 0 1407.5 55.44L1407.5,23.76A8.64 8.64 0 0 0 1398.86 15.12L1295.18,15.12A8.64 8.64 0 0 0 1286.54 23.76L1286.54,55.44A8.64 8.64 0 0 0 1295.18 64.08Z"  style="fill:rgb(204,204,204);stroke-width:2.16;stroke:rgb(0,0,0);" />
+<text x="1347.02" y="39.6" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central">afterAll</text>
+<polygon points="483.016,115.92 470.714,116.083 473.641,107.953" style="fill:rgb(0,0,0)"/>
+<path d="M339.016,64.08L477.597,113.969"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<polygon points="627.016,216.72 614.714,216.883 617.641,208.753" style="fill:rgb(0,0,0)"/>
+<path d="M483.016,164.88L621.597,214.769"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<polygon points="771.016,164.88 761.641,172.847 758.714,164.717" style="fill:rgb(0,0,0)"/>
+<path d="M627.016,216.72L765.597,166.831"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<polygon points="854.536,140.4 843.016,144.72 843.016,136.08" style="fill:rgb(0,0,0)"/>
+<path d="M831.496,140.4L848.776,140.4"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<polygon points="1059.02,216.72 1046.71,216.883 1049.64,208.753" style="fill:rgb(0,0,0)"/>
+<path d="M915.016,164.88L1053.6,214.769"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<polygon points="1203.02,164.88 1193.64,172.847 1190.71,164.717" style="fill:rgb(0,0,0)"/>
+<path d="M1059.02,216.72L1197.6,166.831"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<polygon points="1347.02,64.08 1337.64,72.0467 1334.71,63.9174" style="fill:rgb(0,0,0)"/>
+<path d="M1203.02,115.92L1341.6,66.031"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+</svg>
+
