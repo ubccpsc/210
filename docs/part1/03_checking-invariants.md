@@ -138,22 +138,22 @@ was an invariant statement: the type is Number, and the meaningful subset is 0 t
 
 Tests are commonly kept separate from the code they validate. In all of the code we look at in this course, in line with common best practice, production code is stored in the `src/` directory and all tests are stored in the `test/` directory. The `test/` directory can contain any number of test files, often in 1:1 correspondence with the files being tested in `src/`. 
 
-Within each test file is a number of individual test cases. Each test case has a name and a body. The name describes what the test is checking; the body contains one or more **assertions**. The `checkExpect` call we have been using in this course is an example of an **assertion**. 
+Within each test file is a number of individual test cases. Each test case has a name and a body. The name describes what the test is checking; the body is a single **assertion**. The `checkExpect` call we have been using in this course is an example of an **assertion**. 
 
 In the contract above, the late fee grace period is two days long. A concrete test case that checks this, by ensuring that `lateFee(2)` returns `0`, looks like:
 
 ```typescript
-test("no fee at the grace period boundary", () => {
-    checkExpect(lateFee(2), 0);
-});
+test("no fee at the grace period boundary", checkExpect(() => lateFee(2), 0));
 ```
 
-Assertions are the core of any test case: they validate that a dynamic behaviour emits the expected output for a given input. The `checkExpect` assertion takes two arguments: an expression to evaluate, and the expected result. If the two values are equal, the test passes silently. If they differ, the framework reports what was expected and what was actually produced, pointing you to the failing test by name.
+Assertions are the core of any test case: they validate that a dynamic behaviour emits the expected output for a given input. The `checkExpect` assertion takes two arguments: a no-argument function wrapping the expression to evaluate, and the expected result. If the two values are equal, the test passes silently. If they differ, the framework reports what was expected and what was actually produced, pointing you to the failing test by name.
+
+Each test case holds exactly one check. This keeps the name of the case an accurate description of the one behaviour it validates, and it means a failing suite tells you how many distinct expectations are broken rather than stopping at the first one inside a case.
 
 <details class="tooltip link-110">
 <summary>Tests vs <code>check-expect</code></summary>
 
-ISL used `check-expect` as a standalone expression at the top level of a file. TypeScript's `test` wrapper is a small change in form: it names the test and groups related checks together. The underlying idea is the same: write down what you expect and let the framework compare.
+ISL used `check-expect` as a standalone expression at the top level of a file. TypeScript's `test` wrapper is a small change in form: it names the check so the framework can report it. The underlying idea is the same: write down what you expect and let the framework compare.
 
 ```racket
 (check-expect (late-fee 2) 0)
@@ -166,7 +166,7 @@ ISL used `check-expect` as a standalone expression at the top level of a file. T
 
 `test`, `checkExpect`, and `checkError` are provided by the course toolkit; each test file imports them at the top of the file with: 
 ```typescript
-import { test, checkExpect, checkError } from "@ubccpsc/210-toolkit";
+import { test, checkExpect, checkError } from "@ubccpsc/210-toolkit/testing";
 ```
 
 To run the tests, you can either open the testing feature within your IDE (we will demo this in class), or open the terminal view within your IDE (also an in-class demo) and execute `pnpm test`. The **terminal** is a text-based interface where you type commands to direct your computer to perform tasks for you, where the input and output are textual. 
@@ -183,19 +183,15 @@ Having a precise set of input/output pairs is extremely helpful when you are imp
 For `lateFee` we are already in a position to do this. We have not written a line of the implementation, but the contract we documented above gives us everything we need: each clause from the function documentation becomes a test.
 
 ```typescript
-test("no fee during the grace period", () => {
-    checkExpect(lateFee(0), 0);
-    checkExpect(lateFee(2), 0);
-});
+test("no fee on the day a book comes due", checkExpect(() => lateFee(0), 0));
 
-test("fee accrues for each day after the grace period", () => {
-    checkExpect(lateFee(3), 0.50);
-    checkExpect(lateFee(12), 5.00);
-});
+test("no fee at the end of the grace period", checkExpect(() => lateFee(2), 0));
 
-test("fee never exceeds the maximum", () => {
-    checkExpect(lateFee(30), 10.00);
-});
+test("fee accrues on the first day after the grace period", checkExpect(() => lateFee(3), 0.50));
+
+test("fee accrues for each further day", checkExpect(() => lateFee(12), 5.00));
+
+test("fee never exceeds the maximum", checkExpect(() => lateFee(30), 10.00));
 ```
 
 The precondition also guides us towards situations that may not result in a valid output. Since the precondition says `daysLate >= 0`, what happens if we pass `-5` is undefined: the caller has broken their half of the bargain, and the function promises nothing in return. We'll return to what should happen when a precondition is violated anyway, and how to test for such erroneous behaviours, at the end of this chapter.
@@ -208,14 +204,20 @@ function lateFee(daysLate: number): number {
 }
 ```
 
-We chose `-1` deliberately. A fee is never negative, so every test is guaranteed to fail against the stub. (Had the stub returned `0`, the grace-period test would have passed before we wrote any real code.) Running the suite now shows three failing tests. This step is important: a test that cannot fail checks nothing, and we have just confirmed that all of ours can fail when they are expected to. Running these tests results in:
+We chose `-1` deliberately. A fee is never negative, so every test is guaranteed to fail against the stub. (Had the stub returned `0`, the grace-period tests would have passed before we wrote any real code.) Running the suite now shows five failing tests. This step is important: a test that cannot fail checks nothing, and we have just confirmed that all of ours can fail when they are expected to. Running these tests results in:
 
 ```
-✗ no fee during the grace period
+✗ no fee on the day a book comes due
       Expected: 0
       Received: -1
-✗ fee accrues for each day after the grace period
+✗ no fee at the end of the grace period
+      Expected: 0
+      Received: -1
+✗ fee accrues on the first day after the grace period
       Expected: 0.5
+      Received: -1
+✗ fee accrues for each further day
+      Expected: 5
       Received: -1
 ✗ fee never exceeds the maximum
       Expected: 10
@@ -240,15 +242,17 @@ function lateFee(daysLate: number): number {
 ```
 And if we run the tests again:
 ```
-✓ no fee during the grace period
-✓ fee accrues for each day after the grace period
+✓ no fee on the day a book comes due
+✓ no fee at the end of the grace period
+✓ fee accrues on the first day after the grace period
+✓ fee accrues for each further day
 ✗ fee never exceeds the maximum
       Expected: 10
       Received: 14
 ```
 
 
-Two tests pass, but the third fails. The failure report tells us exactly where to look: `lateFee(30)` produced `14`. Re-reading the specification reveals the problem: our implementation handles the grace period and the per-day charge, but we forgot the maximum entirely. The fix adds the missing behaviour:
+Four tests pass, but the last fails. The failure report tells us exactly where to look: `lateFee(30)` produced `14`. Re-reading the specification reveals the problem: our implementation handles the grace period and the per-day charge, but we forgot the maximum entirely. The fix adds the missing behaviour:
 
 ```typescript
 function lateFee(daysLate: number): number {
@@ -268,10 +272,12 @@ function lateFee(daysLate: number): number {
 `lateFee` is written with no `else` cases, but this is not the only way to write the function. Rewrite `lateFee` such that all statements are nested within an `if` or `else`. You'll need more than one statement in some of the blocks.
 </details>
 
-All three tests now pass:
+All five tests now pass:
 ```
-✓ no fee during the grace period
-✓ fee accrues for each day after the grace period
+✓ no fee on the day a book comes due
+✓ no fee at the end of the grace period
+✓ fee accrues on the first day after the grace period
+✓ fee accrues for each further day
 ✓ fee never exceeds the maximum
 ```
 
@@ -334,15 +340,13 @@ Two inputs belong to the same class when the *specification* says they should be
 
 Equivalence class partitioning identifies the regions to test. **Boundary value analysis** identifies *where* within those regions to look most carefully: at the edges, where one class meets the next.
 
-Bugs cluster at boundaries, because boundaries are implemented with comparisons, and comparisons are easy to get wrong by one. `lateFee` has two boundaries: between days 2 and 3 (grace ends, accrual begins) and between days 21 and 22 (accrual reaches the maximum). A boundary-focused test checks the last input on each side:
+Bugs cluster at boundaries, because boundaries are implemented with comparisons, and comparisons are easy to get wrong by one. `lateFee` has two boundaries: between days 2 and 3 (grace ends, accrual begins) and between days 21 and 22 (accrual reaches the maximum). A boundary-focused suite checks the last input on each side:
 
 ```typescript
-test("fee changes exactly at the class boundaries", () => {
-    checkExpect(lateFee(2), 0);      // last free day
-    checkExpect(lateFee(3), 0.50);   // first charged day
-    checkExpect(lateFee(21), 9.50);  // last accruing day
-    checkExpect(lateFee(22), 10.00); // first day at the maximum
-});
+test("last free day", checkExpect(() => lateFee(2), 0));
+test("first charged day", checkExpect(() => lateFee(3), 0.50));
+test("last accruing day", checkExpect(() => lateFee(21), 9.50));
+test("first day at the maximum", checkExpect(() => lateFee(22), 10.00));
 ```
 
 Consider a near-miss implementation in which the grace check was written `daysLate <= 3` instead of `daysLate <= 2`. 
@@ -481,24 +485,31 @@ For example, when you pass an TypeScript program with invalid syntax to `tsc`, i
 To write tests for errors, we must be clear about the difference between unexpected and expected errors. The expected error is a *documented outcome*: the postcondition names the exact value the caller receives (an `ok: false` result carrying the reason), so we test it with `checkExpect`, the same way we test every other clause of the contract:
 
 ```typescript
-test("renewal succeeds while renewals remain", () => {
-    const fresh: Loan = { title: "Clean Code", renewalsRemaining: 2 };
-    checkExpect(renew(fresh), { ok: true, value: { title: "Clean Code", renewalsRemaining: 1 } });
-});
+const fresh: Loan = { title: "Clean Code", renewalsRemaining: 2 };
+const exhausted: Loan = { title: "Clean Code", renewalsRemaining: 0 };
 
-test("renewal is refused when no renewals remain", () => {
-    const exhausted: Loan = { title: "Clean Code", renewalsRemaining: 0 };
-    checkExpect(renew(exhausted), { ok: false, error: "No further loan renewals available" });
-});
+test(
+    "renewal succeeds while renewals remain",
+    checkExpect(() => renew(fresh), { ok: true, value: { title: "Clean Code", renewalsRemaining: 1 } }),
+);
+
+test(
+    "renewal is refused when no renewals remain",
+    checkExpect(() => renew(exhausted), { ok: false, error: "No further loan renewals available" }),
+);
 ```
 
-The unexpected error has no value to compare against, because the correct behaviour is to not produce a value at all. For this we use `checkError`, which runs the function it is given and passes only if an error occurs; if the call completes normally, the test *fails*. An optional second argument states the error message we expect the failure to carry:
+The values each check needs are named above the tests rather than inside them, because the body of a test case is a single check.
+
+The unexpected error has no value to compare against, because the correct behaviour is to not produce a value at all. For this we use `checkError`, which runs the function it is given and passes only if an error occurs; if the call completes normally, the test *fails*:
 
 ```typescript
-test("renew halts on a loan that violates the non-negative invariant", () => {
-    const corrupted: Loan = { title: "Clean Code", renewalsRemaining: -1 };
-    checkError(() => renew(corrupted), "Loan invariant violated: negative renewals");
-});
+const corrupted: Loan = { title: "Clean Code", renewalsRemaining: -1 };
+
+test(
+    "renew halts on a loan that violates the non-negative invariant",
+    checkError(() => renew(corrupted)),
+);
 ```
 
 <details class="tooltip ts-tips">
@@ -506,30 +517,25 @@ test("renew halts on a loan that violates the non-negative invariant", () => {
 
 In 
 ```typescript
-checkError(() => <expression>, <message>);
+checkError(() => <expression>);
 ```
-the `() => <expression>` is an *anonymous function*. It serves as a wrapper, the same one `test` itself uses.  This is because `checkError` takes a function as its first argument. It is convenient to write this simply with an anonymous function:
+the `() => <expression>` is an *anonymous function*, the same thunk `checkExpect` uses around the expression under test, written as a single expression with no braces so its value is returned implicitly. `checkError` executes that function and checks whether an error occurs during execution. If one does, `checkError` passes; if the call completes normally, `checkError` fails. The usual form is:
 ```typescript
-checkError(() => functionUnderTest(arg1, arg2), <message>);
+checkError(() => functionUnderTest(arg1, arg2));
 ```
-`checkError` then executes its first function argument and checks whether an error occurs during execution. If it does, `checkError` passes. 
 
 For example, in the above, 
 ```typescript
-checkError(() => renew(corrupted), "Loan invariant violated: negative renewals");
+checkError(() => renew(corrupted));
 ```
-`checkError` calls `renew(corrupted)` and checks whether and error occurs.
+`checkError` calls `renew(corrupted)` and checks whether an error occurs. Note that it checks only *that* an error occurred, not which one: in this course a `checkError` states that the call must fail, and the test's description records why.
 
-By contrast, if we were to try and write something like: 
-```typescript
-checkExpect(renew(corrupted), "Loan invariant violated: negative renewals")
-```
-`renew(corrupted)` would execute, and fail, before `checkExpect` is called, halting the entire execution of the test suite. 
+The wrapper is what makes this work. Were the call written directly as an argument, as in `checkError(renew(corrupted))`, `renew(corrupted)` would execute, and fail, while the arguments were being evaluated, before `checkError` was ever called, halting the entire execution of the test suite. Delaying the call until the check decides to run it is why both `checkExpect` and `checkError` take a function rather than a value.
 </details>
 <details class="tooltip link-110">
 <summary>Higher-Order Functions</summary>
 
-`checkError` is a higher-order function, so called because it takes a function as an argument. You've seen this before, notably in `map`, `filter`, and `fold`.
+`checkExpect` and `checkError` are higher-order functions, so called because they take a function as an argument. You've seen this before, notably in `map`, `filter`, and `fold`.
 </details>
 
 In short:

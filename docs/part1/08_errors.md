@@ -91,18 +91,31 @@ The strength of this approach is that the failure is captured by the type. A cal
 Since the returned failure is an ordinary value, it is tested like any other value: 
 
 ```typescript
-test("a known section is found", () => {
-    checkExpect(findSection(catalogue, "CPSC210"), { ok: true, value: { id: "CPSC210", prerequisite: ["CPSC110"] } });
-});
+const cpsc213: Section = { id: "CPSC213", prerequisite: ["CPSC210"] };
 
-test("an unknown section returns a failure value", () => {
-    checkExpect(findSection(catalogue, "NOPE"), { ok: false, error: "no section with id NOPE" });
-});
+test(
+    "a known section is found",
+    checkExpect(() => findSection(catalogue, "CPSC210"), {
+        ok: true,
+        value: { id: "CPSC210", prerequisite: ["CPSC110"] },
+    }),
+);
 
-test("a missing prerequisite returns a failure value", () => {
-    const cpsc213: Section = { id: "CPSC213", prerequisite: ["CPSC210"] };
-    checkExpect(checkPrerequisite(student, cpsc213), { ok: false, error: "CPSC213 requires CPSC210" });
-});
+test(
+    "an unknown section returns a failure value",
+    checkExpect(() => findSection(catalogue, "NOPE"), {
+        ok: false,
+        error: "no section with id NOPE",
+    }),
+);
+
+test(
+    "a missing prerequisite returns a failure value",
+    checkExpect(() => checkPrerequisite(student, cpsc213), {
+        ok: false,
+        error: "CPSC213 requires CPSC210",
+    }),
+);
 ```
 
 ### The Cost of Interleaving Results
@@ -314,18 +327,20 @@ TypeScript gives the caught value the type `unknown`, because in principle any v
 A thrown failure interrupts the call rather than coming back as a value, so we cannot inspect it with `checkExpect`. This is what `checkError` is for: it runs the code you give it and passes only if that code throws.
 
 ```typescript
-test("an unknown section throws", () => {
-    checkError(() => enrolAll(catalogue, student, ["NOPE"]), "no section with id NOPE");
-});
+test(
+    "an unknown section throws",
+    checkError(() => enrolAll(catalogue, student, ["NOPE"])),
+);
 
-test("a missing prerequisite throws", () => {
-    checkError(() => enrolAll(catalogue, student, ["CPSC213"]), "CPSC213 requires CPSC210");
-});
+test(
+    "a missing prerequisite throws",
+    checkError(() => enrolAll(catalogue, student, ["CPSC213"])),
+);
 
-test("a valid request enrols in every section", () => {
-    const sections = enrolAll(catalogue, student, ["CPSC110", "CPSC210"]);
-    checkExpect(sections.length, 2);
-});
+test(
+    "a valid request enrols in every section",
+    checkExpect(() => enrolAll(catalogue, student, ["CPSC110", "CPSC210"]).length, 2),
+);
 ```
 
 Note the contrast with the earlier `Result` tests. A returned error is a value, so we asserted on it with `checkExpect`; a thrown error escapes the call, so we need `checkError`, which runs the call and observes that it threw.
@@ -336,19 +351,19 @@ Note the contrast with the earlier `Result` tests. A returned error is a value, 
 `checkError` is an ordinary function built from `try`/`catch`. Roughly:
 
 ```typescript
-function checkError(thunk: () => void, expected: string): void {
-    try {
-        thunk();
-    } catch (error) {
-        // the call threw, as expected; a full implementation also
-        // checks the thrown error's message against `expected`
-        return;
-    }
-    throw new Error("expected an error, but none was thrown");
+function checkError(thunk: () => void): () => void {
+    return () => {
+        try {
+            thunk();
+        } catch (error) {
+            return;     // the call threw, as expected
+        }
+        throw new Error("expected an error, but none was thrown");
+    };
 }
 ```
 
-This is why `checkError` takes a function, the `() =>` thunk, rather than a value. It must run your code *inside its own* `try`/`catch` so it can observe whether an exception is thrown. Handing it `enrolAll(...)` directly would run that call first, and the exception would escape before `checkError` ever got control.
+Two things follow from this shape. First, `checkError` takes a function, the `() =>` thunk, rather than a value, exactly as `checkExpect` does. It must run your code *inside its own* `try`/`catch` so it can observe whether an exception is thrown. Handing it `enrolAll(...)` directly would run that call first, and the exception would escape before `checkError` ever got control. Second, `checkError` does not perform the check itself; it *returns* the function that will, which is the function we hand to `test` as the body of the case.
 
 The word _thunk_ is old programming jargon for a small, parameterless function that wraps up a computation to be run later. The name dates to the Algol-60 community of the 1960s and is sometimes glossed as the past tense of "think", since a thunk is an expression already thought about and set aside to evaluate when it is needed.
 

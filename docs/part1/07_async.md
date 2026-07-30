@@ -52,12 +52,13 @@ JavaScript, the language TypeScript is built on, was designed for web browsers, 
 You have been handing functions to other code to run later since the first chapter. Every test does it:
 
 ```typescript
-test("longest freezing streak spans the early morning", () => {
-    checkExpect(longestFreezingStreak(day), 2);
-});
+test(
+    "longest freezing streak spans the early morning",
+    checkExpect(() => longestFreezingStreak(day), 2),
+);
 ```
 
-The anonymous function is not executed where it is written. It is handed to `test`, which stores it and runs it later, when the test framework decides. A function passed somewhere else to be called later is a **callback**. Callbacks are how TypeScript expresses deferred computation.
+The anonymous function `() => longestFreezingStreak(day)` is not executed where it is written. It is handed to `checkExpect`, which stores it and runs it later, when the test framework decides. A function passed somewhere else to be called later is a **callback**. Callbacks are how TypeScript expresses deferred computation.
 
 The clearest way to *feel* deferral is to slow it down to human speed. The built-in function `setTimeout` takes a callback and a duration in milliseconds, and arranges for the callback to run after that much time has passed:
 
@@ -308,16 +309,32 @@ Because the receipt is so easy to mistake for the value, one mistake dominates a
 <details class="tooltip ts-tips">
 <summary>Testing <code>async</code> Functions</summary>
 
-A test body can be marked `async` too, and then it can await the functions it is testing:
+The function you hand to `checkExpect` can be marked `async` too, and then it can await the functions it is testing:
 
 ```typescript
-test("the report loads", async () => {
-    const report: string = await loadReport();
-    checkExpect(report.length > 0, true);
-});
+test(
+    "the report loads",
+    checkExpect(async () => {
+        const report: string = await loadReport();
+        return report.length > 0;
+    }, true),
+);
 ```
 
-The test framework awaits the test body itself, so the test does not finish until every `await` inside it has delivered. Forgetting the `await` before an async call is the classic mistake: the test then checks a `Promise` object rather than the value it delivers, and fails confusingly.
+This is the first check we have written whose thunk has a body in braces. Until now every thunk has been a single expression, `() => <actual>`, which _implicitly returns_ its value. Here the check needs two steps, awaiting the report and then measuring it, and two statements cannot be written as one expression, so the thunk takes the block form instead.
+
+The braces change the rules, exactly as the arrow function tooltip in Chapter 1 described. A block body returns nothing implicitly, so the value the check compares must be handed back with an explicit `return`. Written without it:
+
+```typescript
+checkExpect(async () => {
+    const report: string = await loadReport();
+    report.length > 0;          // computed, then discarded
+}, true);
+```
+
+the thunk computes the answer and throws it away, so `checkExpect` receives `undefined` and the test fails against `true`. Whenever you find you need braces, check that a `return` goes with them; whenever a check fits in a single expression, prefer the brace-free form, which cannot make this mistake.
+
+`checkExpect` awaits whatever its function produces, so the test does not finish until every `await` inside it has delivered. Forgetting the `await` before an async call is the classic mistake: the check then compares a `Promise` object rather than the value it delivers, and fails confusingly.
 
 </details>
 
@@ -409,7 +426,7 @@ Practise using `async` and `await` for reading and writing files on a new kind o
 
 The journal is a plain text file, one entry per line.
 
-1. Write `async function lineCount(path: string): Promise<number>` that reads the file at `path` as text (pass `"utf8"` to `readFile`) and returns how many lines it has. (Hint: <span class="hint">`text.split("\n")` gives an array of the lines.</span>) Test it with an async test, of the form <span class="hint">`test("...", async () => { checkExpect(await lineCount("entries.txt"), ...); })`</span>. 
+1. Write `async function lineCount(path: string): Promise<number>` that reads the file at `path` as text (pass `"utf8"` to `readFile`) and returns how many lines it has. (Hint: <span class="hint">`text.split("\n")` gives an array of the lines.</span>) Test it with an async check, of the form <span class="hint">`test("...", checkExpect(async () => lineCount("entries.txt"), ...))`</span>. 
 2. Write `async function backUp(path: string): Promise<void>` that reads the journal and writes its contents to a new file at `path + ".bak"`. Write the doc comment: <span class="hint">record that the function modifies the file system, as the mutation chapter required.</span> Note that <span class="hint">the two `await`s must run in order: the backup cannot be written before the contents have been read</span>.
 3. Write `async function restore(path: string): Promise<void>` that reads the backup <span class="hint">at `path + ".bak"`</span> and writes its contents back to `path`, replacing the journal with the backed-up copy. Write the doc comment: <span class="hint"> document the file-system change,</span> and,  <span class="hint">as in `backUp`, make sure the read finishes before the write begins</span>.
 

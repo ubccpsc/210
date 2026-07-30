@@ -80,9 +80,10 @@ function makeAccount(balance: number): BankAccount {
 A function like this is called a **constructor function**: it constructs values of a type, and it is the gatekeeper where the invariant is established. Every account it returns is valid, and an attempt to create an invalid one halts immediately:
 
 ```typescript
-test("accounts cannot be created with a negative balance", () => {
-    checkError(() => makeAccount(-100), "Account balance must not be negative");
-});
+test(
+    "accounts cannot be created with a negative balance",
+    checkError(() => makeAccount(-100)),
+);
 ```
 
 This is progress: accounts created with `makeAccount` protect the invariant. 
@@ -265,21 +266,23 @@ This code both _establishes_ and _preserves_ the fire-safety invariant. The cons
 Let's write tests for `increment`:
 
 ```typescript
-test("each click is counted", () => {
-    const empty = makeCounter(0);
-    const one = empty.increment();
-    const two = one.increment();
-    checkExpect(two.getCount(), 2);
-    checkExpect(empty.getCount(), 0); // the original counter is unchanged
-});
+const empty = makeCounter(0);
+const one = empty.increment();
+const two = one.increment();
 
-test("the counter refuses to count past capacity", () => {
-    const full = makeCounter(1000); // the venue is exactly at capacity
-    checkError(() => full.increment(), "Invariant violation: Venue is full!");
-});
+test("each click is counted", checkExpect(() => two.getCount(), 2));
+
+test("the original counter is unchanged", checkExpect(() => empty.getCount(), 0));
+
+const full = makeCounter(1000); // the venue is exactly at capacity
+
+test(
+    "the counter refuses to count past capacity",
+    checkError(() => full.increment()),
+);
 ```
 
-Connecting back to the previous chapter, the second test treats a click at full capacity as an *unexpected* error and halts. If turning people away at the door were a normal outcome the program should handle, `increment` would instead return a `Result`. Which treatment is right is a design decision, not a coding one.
+Connecting back to the previous chapter, the last test treats a click at full capacity as an *unexpected* error and halts. If turning people away at the door were a normal outcome the program should handle, `increment` would instead return a `Result`. Which treatment is right is a design decision, not a coding one.
 
 <details class="tooltip exercise">
   <summary>Exercise: Reflect on Closures</summary>
@@ -391,14 +394,18 @@ The structural change  ensures that the invariant is _enforced by the programmin
 
 
 ```typescript
-test("deposits and withdrawals preserve the balance invariant", () => {
-    const account = makeAccount(0);
-    const funded = account.deposit(5);
-    checkExpect(funded.getBalance(), 5);
+const account = makeAccount(0);
+const funded = account.deposit(5);
 
-    const overdrawn = funded.withdraw(8);
-    checkExpect(overdrawn, { ok: false, error: "Amount must not be greater than the current account balance" });
-});
+test("a deposit is reflected in the balance", checkExpect(() => funded.getBalance(), 5));
+
+test(
+    "a withdrawal beyond the balance is refused",
+    checkExpect(() => funded.withdraw(8), {
+        ok: false,
+        error: "Amount must not be greater than the current account balance",
+    }),
+);
 ```
 
 In short, the invariant is no longer protected by _programmer discipline_; it is protected because the state cannot be reached any other way. The operations and the balance live together inside the closure, and only the operations are handed back, so nothing outside can reach the balance:

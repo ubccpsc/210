@@ -481,11 +481,15 @@ The comparisons above use `===` to test a value against each literal. Because th
 There are several ways to evaluate equality with differing amounts of rigour in TypeScript. We will _always_ use `===` (often called _triple equals_) in CPSC 210. Using this operator ensures that two values are ***strictly equal***. Here are some examples.
 
 ```typescript
-checkExpect(1 === 1, true);
-checkExpect(true === true, true);
-checkExpect("cpsc210" === "cpsc210", true);
-checkExpect(1 === "1", false);              // number 1 compared to string "1"
-checkExpect(true === "true", false);        // boolean true compared to string "true"
+test("a number is strictly equal to itself", checkExpect(() => 1 === 1, true));
+
+test("a boolean is strictly equal to itself", checkExpect(() => true === true, true));
+
+test("a string is strictly equal to an identical string", checkExpect(() => "cpsc210" === "cpsc210", true));
+
+test("the number 1 is not strictly equal to the string '1'", checkExpect(() => 1 === "1", false));
+
+test("the boolean true is not strictly equal to the string 'true'", checkExpect(() => true === "true", false));
 ```
 
 We do this because it is almost always the case that when we want a 2, we want the number 2, not the string "2", or we would have used "2". 
@@ -493,10 +497,13 @@ We do this because it is almost always the case that when we want a 2, we want t
 Some examples of why this can be confusing with non-strict equality (`==`) can be seen below. These unexpected values are never visible statically; they only surface when you run the program, which often leads to surprises. Because of this we will encourage you to always use `===` in this course.
 
 ```typescript
-checkExpect(1 == 1, true);                  // as expected
-checkExpect(1 == "1", true);                // number 1 is considered the same as string "1"
-checkExpect(true == true, true);            // as expected
-checkExpect(true == 1, true);               // true is considered the same as the number 1
+test("a number loosely equals itself, as expected", checkExpect(() => 1 == 1, true));
+
+test("the number 1 loosely equals the string '1'", checkExpect(() => 1 == "1", true));
+
+test("a boolean loosely equals itself, as expected", checkExpect(() => true == true, true));
+
+test("the boolean true loosely equals the number 1", checkExpect(() => true == 1, true));
 ```
 </details>
 
@@ -625,9 +632,9 @@ The types rule out whole categories of mistakes statically, but they cannot chec
 Using the example playlists from above:
 
 ```typescript
-checkExpect(countSongs(empty), 0);
-checkExpect(countSongs(twoTracks), 2);
-checkExpect(totalDuration(twoTracks), 380);
+test("an empty playlist has no songs", checkExpect(() => countSongs(empty), 0));
+test("a two-track playlist has two songs", checkExpect(() => countSongs(twoTracks), 2));
+test("a two-track playlist totals both durations", checkExpect(() => totalDuration(twoTracks), 380));
 ```
 
 These run the functions and confirm they produce the expected values. The compiler guarantees the shapes line up; `checkExpect` guarantees the answers are right.
@@ -653,7 +660,7 @@ A journey is either _arrived_ (there are no more legs) or a _leg_: a single mode
 2. Write two example journeys: one that is simply _arrived_, and one with at least two legs.
 3. Following the shape of the data, write `totalMinutes(journey: Journey): number`, <span class="hint">using case analysis on `kind` and recursion on the rest.</span>
 4. Write `usesTransit(journey: Journey): boolean`, <span class="hint">which is `true` when any leg travels by `"bus"` or `"train"`.</span>
-5. Write a `checkExpect` for each function against your example journeys. Predict each result before you run them.
+5. Write a `test` holding a single `checkExpect` for each function against your example journeys. Predict each result before you run them.
 
 Bonus task: which step of the modelling process suggests turning `Journey` into a generic type, and what would it become?
 

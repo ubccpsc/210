@@ -2,17 +2,17 @@
 
 A function's contract states what it should do; a test demonstrates that it does, for a chosen input. The earlier chapters began this practice with `checkExpect`: write down an input and the result the contract promises, and let the framework compare the two. That was enough to get started, but it kept two things simple that real test suites do not. Our assertions checked little beyond equality, and we chose our tests one clause of the contract at a time. This chapter develops both: a richer vocabulary for stating what a result must satisfy, and more systematic ways to judge whether a suite checks enough.
 
-It also changes our tools. The `checkExpect` and `checkError` functions were a deliberately simple stand-in for the assertions used in real test frameworks, and from here on we use those assertions. We write tests with `expect`, the assertion vocabulary provided by the chai library that the vitest test runner is built on. The change is more than spelling. Where `checkExpect` did exactly one thing, compare for equality, `expect` offers a family of assertion operators, each stating a different kind of expectation and, when it fails, reporting a different kind of message. Learning to choose among them is the first half of this chapter.
+It also changes our tools. The `checkExpect` and `checkError` functions were a deliberately simple stand-in for the assertions used in real test frameworks, and from here on we use those assertions. We write tests with `expect`, the assertion vocabulary provided by the chai library that the vitest test runner is built on.
+
+The change is more than spelling, and every part of it is a gain. `checkExpect` did exactly one thing, compare for equality, and could report a failure only in those terms; `expect` offers a family of assertion operators, each stating a different kind of expectation and, when it fails, reporting a message that names the actual problem. The shape of a test case changes along with it: a case is now a function body that you write, so it can hold several assertions, build the values it needs privately, and drive code that takes more than one step to configure. Nothing we could say before becomes harder to say; the earlier form turns out to have been a restricted version of this one. Learning to choose among the assertion operators is the first half of this chapter.
 
 ## From `checkExpect` to `expect`
 
-A `checkExpect` call paired an actual value with an expected one. A chai assertion reads more like a sentence: name the value under test, then state what must be true of it. The most common assertion is equality, and every `checkExpect` we have written translates into one directly:
+A `checkExpect` call paired the expression under test, wrapped in `() =>`, with an expected value. A chai assertion reads more like a sentence: name the value under test, then state what must be true of it. The most common assertion is equality, and every `checkExpect` we have written translates into one directly:
 
 ```typescript
 // previously, with the course toolkit's checkExpect
-test("no fee at the grace boundary", () => {
-    checkExpect(lateFee(2), 0);
-});
+test("no fee at the grace boundary", checkExpect(() => lateFee(2), 0));
 
 // from here on, with chai's expect
 test("no fee at the grace boundary", () => {
@@ -37,13 +37,15 @@ Errors translate just as directly. Recall `requireSection` from the previous cha
 
 ```typescript
 // previously
-checkError(() => requireSection(catalogue, "NOPE"), "no section with id NOPE");
+test("an unknown section throws", checkError(() => requireSection(catalogue, "NOPE")));
 
 // now
-expect(() => requireSection(catalogue, "NOPE")).to.throw("no section with id NOPE");
+test("an unknown section throws", () => {
+    expect(() => requireSection(catalogue, "NOPE")).to.throw("no section with id NOPE");
+});
 ```
 
-As with `checkError`, the call under test is wrapped in `() =>` so that `expect` can run it and observe the throw, rather than receiving an error that has already escaped. The string is matched against the thrown error's message; the assertion passes when the message contains it.
+As with `checkExpect` and `checkError`, the call under test is wrapped in `() =>` so that `expect` can run it and observe the throw, rather than receiving an error that has already escaped. The translation also gains something: `checkError` could say only that the call failed, leaving the reason to the test's description, while `to.throw` takes the message we expect the failure to carry. The string is matched against the thrown error's message; the assertion passes when the message contains it. A test that expected the wrong failure used to pass; now it does not.
 
 <!--
 <details class="tooltip ts-tips">
@@ -52,7 +54,7 @@ As with `checkError`, the call under test is wrapped in `() =>` so that `expect`
 From here on, test files import `expect` in place of `checkExpect` and `checkError`:
 
 ```typescript
-import { test, expect } from "@ubccpsc/210-toolkit";
+import { test, expect } from "@ubccpsc/210-toolkit/testing";
 ```
 
 `test` groups and names cases exactly as before. `expect` is the assertion function from the chai library, which the vitest runner uses to evaluate your tests; the course toolkit re-exports it so the import stays in one place.
@@ -80,6 +82,26 @@ expect({ id: "CPSC210" }).to.deep.equal({ id: "CPSC210" }); // passes: same cont
 CPSC 110 already provided more than one kind of check. Alongside `check-expect` you used `check-within` for numbers that need only be close, `check-member-of` for a value that must be one of several, `check-range` for a number in an interval, and `check-error` for an expression that must signal an error. The idea that an assertion can say something more precise than "these are equal" is not new; chai simply offers a larger vocabulary of it. `check-within` becomes `to.be.closeTo`, `check-member-of` becomes `to.be.oneOf`, and `check-error` becomes `to.throw`.
 
 </details>
+
+## What a Test Case Can Now Hold
+
+Both translations above change something beyond just syntax. Look at the second argument to `test`. Previously that argument *was* the check: `checkExpect(...)` built the body of the case and handed it over, and `test` simply named it. For the rest of the course we write that function ourselves:
+
+```typescript
+test(<description>, () => {
+    <statements>
+});
+```
+
+The description is unchanged, and it is still what the runner prints. What is new is that the body is an ordinary arrow function with a block body, so it can hold any number of statements. (As Chapter 1 described, a block body returns nothing implicitly. A test body has no value to return in any case: the runner judges the case by whether an assertion inside it failed, not by what the body produced.) This erases the three restrictions of the earlier form:
+
+*A case can hold as many assertions as the behaviour needs.* One check per case was a consequence of the check *being* the body, not a judgement about what makes a good test. A block body can state several expectations about a single result, which is the technique the _Layering Assertions for Clearer Failures_ section develops below: ordering assertions from general to specific so that the first failure names the kind of fault rather than merely reporting that one exists. One assertion per case is still possible, but it is now a choice you make rather than a limit you write around.
+
+*Setup belongs inside the case.* The earlier chapters had to declare a check's values above the tests, at the top level of the file, because a check had nowhere to put them. Everything declared there is visible to every later test, and, once mutation entered was introduced in the state chapter, changeable by every later test: a suite built that way can pass or fail depending on the order its cases happen to run in. A block body holds its own `const` declarations, so each case builds exactly the values it needs and no case can disturb another's. The tests later in this chapter all begin this way, constructing a `student` or a `viewer` before calling the function under test.
+
+*Code under test can be driven through several steps.* A `checkExpect` thunk could hold more than one statement, as the async example in the previous chapter showed, but everything it did had to funnel into one value that was then compared for equality. A test body has no such funnel. It can construct a value, configure it, exercise it, and assert at any point along the way, choosing a different operator for each assertion. Most real testing needs exactly that: behaviour that is not reachable until the value under test has been built up through several steps. Test runners extend this further with **lifecycle hooks**, `beforeEach` and `afterEach`, which run around every case so that setup common to a group of tests is written once while each case still receives its own fresh copy of it. 
+
+Better failure reporting is the fourth improvement, and it is the subject of the next two sections.
 
 ## A Vocabulary of Assertions
 
@@ -122,7 +144,7 @@ These categories are not arbitrary. A study of 33,873 assertions drawn from 105 
 
 ## Layering Assertions for Clearer Failures
 
-A specific operator improves a single check. When the value under test is structured, a second technique improves the test as a whole. Consider a function that lists the sections a student can currently enrol in: those they have not already completed and whose prerequisites they have all met. We reuse the `Section` and `Student` types from the previous chapter, with a catalogue that now offers two first-year courses:
+A specific operator improves a single assertion. When the value under test is structured, a second technique improves the test as a whole, and it is the first real use we make of a case that can hold more than one assertion. Consider a function that lists the sections a student can currently enrol in: those they have not already completed and whose prerequisites they have all met. We reuse the `Section` and `Student` types from the previous chapter, with a catalogue that now offers two first-year courses:
 
 <CollapsibleCode>
 
@@ -227,7 +249,7 @@ expected [ 'CPSC213' ] to include 'CPSC210'       // returned the wrong section
 
 Only a result that exists, is an array of the right length, and contains the expected id, yet still differs somewhere in its contents, survives to the final `deep.equal`. Ordering matters: with the general checks first, the earliest failure is always the most fundamental one, and you learn the *kind* of mistake before its details.
 
-This is not a licence to attach five assertions to every test. Most tests need only one, and the study above found that most have exactly one; redundant checks clutter a test without adding meaning. Layering is worthwhile when a value is structured enough that a bare equality failure would be hard to read, or when a function makes several independent guarantees worth confirming separately. The aim is not more assertions but more *informative* ones. Specifically for this example, it would be easy to skip the assertion checking that the value existed, and the one performing the `map` operation.
+This is not a licence to attach five assertions to every test. A case holding exactly one assertion remains the common shape, and redundant checks clutter a test without adding meaning; what changed is that the count is now yours to choose rather than fixed at one. Layering is worthwhile when a value is structured enough that a bare equality failure would be hard to read, or when a function makes several independent guarantees worth confirming separately. The aim is not more assertions but more *informative* ones. Specifically for this example, it would be easy to skip the assertion checking that the value existed, and the one performing the `map` operation.
 
 ## Partitioning Inputs and Outputs
 
@@ -397,14 +419,16 @@ function canPlay(viewer: Viewer, title: Title): boolean {
 Each branch needs a `(viewer, title)` pair that reaches it:
 
 ```typescript
-const free: Viewer = { id: "v1", plan: "free", region: "CA" };
-const premium: Viewer = { id: "v2", plan: "premium", region: "CA" };
+test("every branch of canPlay is exercised", () => {
+    const free: Viewer = { id: "v1", plan: "free", region: "CA" };
+    const premium: Viewer = { id: "v2", plan: "premium", region: "CA" };
 
-expect(canPlay(free, { id: "x", published: false, tier: "free", regions: ["CA"] })).to.be.false;     // branch 1
-expect(canPlay(free, { id: "x", published: true, tier: "free", regions: ["US"] })).to.be.false;      // branch 2
-expect(canPlay(premium, { id: "x", published: true, tier: "premium", regions: ["CA"] })).to.be.true; // branch 3
-expect(canPlay(free, { id: "x", published: true, tier: "premium", regions: ["CA"] })).to.be.false;   // branch 4
-expect(canPlay(free, { id: "x", published: true, tier: "free", regions: ["CA"] })).to.be.true;       // branch 5
+    expect(canPlay(free, { id: "x", published: false, tier: "free", regions: ["CA"] })).to.be.false;     // branch 1
+    expect(canPlay(free, { id: "x", published: true, tier: "free", regions: ["US"] })).to.be.false;      // branch 2
+    expect(canPlay(premium, { id: "x", published: true, tier: "premium", regions: ["CA"] })).to.be.true; // branch 3
+    expect(canPlay(free, { id: "x", published: true, tier: "premium", regions: ["CA"] })).to.be.false;   // branch 4
+    expect(canPlay(free, { id: "x", published: true, tier: "free", regions: ["CA"] })).to.be.true;       // branch 5
+});
 ```
 
 With those five cases every branch runs at least once, so no part of `canPlay` executes only when no test is watching.

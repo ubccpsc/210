@@ -491,14 +491,16 @@ Keeping these two views apart is useful because different kinds of problems appe
 
 While the TypeScript compiler checks the static view of the program, we need to check the dynamic view ourselves. We do this through a process called *testing*. 
 
-In Part 1 of this course, we will use a `checkExpect`, a function call that can validate whether the actual output of a function aligns with its expected output when it is executed. For example, to ensure that `letterGrade(88)` evaluates to `"A"`, we can write the following check:
+In Part 1 of this course, we will use a `checkExpect`, a function call that can validate whether the actual output of a function aligns with its expected output when it is executed. A check is always given a name and handed to `test`, which registers it with the testing framework. For example, to ensure that `letterGrade(88)` evaluates to `"A"`, we can write the following test:
 
 
 ```typescript
-checkExpect(letterGrade(88), "A");
+test("Return an A for a score of 88", checkExpect(() => letterGrade(88), "A"));
 ```
 
-This cannot be checked statically; we must execute the `checkExpect` statement to verify the program behaviour. If the the two arguments to `checkExpect` evaluate to the same value the program will execute successfully; if it does not, the program will crash with an error that describes the expected behaviour that was violated.
+This cannot be checked statically; we must execute the test to verify the program behaviour. If the call and the expected value evaluate to the same value the check passes; if they differ, the check fails with an error that describes the expected behaviour that was violated.
+
+TypeScript does not natively have a `checkExpect`, we have built the utility to better align with 110 and require less syntax than most test approaches.
 
 <details class="tooltip ts-tips">
 <summary>Anatomy of a <code>checkExpect</code></summary>
@@ -506,14 +508,33 @@ This cannot be checked statically; we must execute the `checkExpect` statement t
 A `checkExpect` takes two arguments:
 
 ```typescript
-checkExpect(<actual>, <expected>);
+checkExpect(() => <actual>, <expected>);
 ```
 
-`<actual>` is an expression whose value you want to verify. This is usually a call to the function under test, such as `letterGrade(88)`, although sometimes the value being returned by the function will be assigned to a variable and passed in as `<actual>`. `<expected>` is the value you are claiming that expression should produce, such as `"A"`.
+`<actual>` is an expression whose value you want to verify. This is usually a call to the function under test, such as `letterGrade(88)`. It is wrapped in `() =>`, an _anonymous_ **arrow function** (a syntax we explain below), so that the expression is not evaluated where you write it: `checkExpect` decides when to run it. A parameterless function that wraps up a computation this way is called a **thunk**. `<expected>` is the value you are claiming that expression should produce, such as `"A"`.
 
-When the check runs, it evaluates both arguments and compares the resulting values. If they are equal, the check passes and execution continues. If they differ, the check fails: the program stops at that check and reports a message describing the expected behaviour that was violated, so you can see which expectation failed and what was produced instead.
+Note that there are no braces around `<actual>`, and no `return` in front of it. This is deliberate. An arrow function written as `() => <expression>`, with no `{ }`, _implicitly returns_ the value of that single expression, so `() => letterGrade(88)` is a function that returns `"A"` when it is called. Adding braces would change the meaning: `() => { letterGrade(88) }` calls `letterGrade` and then returns nothing, so the check would compare `undefined` against `"A"` and fail. Write the thunk as a single expression with no braces, and the value flows to `checkExpect` on its own.
 
-A `checkExpect` only does anything when it is executed, which makes it a *dynamic* check: it reports nothing about the program until the program runs, unlike the type checker, which works on the static text. Each `checkExpect` is usually placed inside a named test case, which we introduce next.
+When the check runs, it calls the thunk and compares the value it returns against `<expected>`. If they are equal, the check passes. If they differ, the check fails and reports a message describing the expected behaviour that was violated, so you can see which expectation failed and what was produced instead.
+
+A `checkExpect` only does anything when it is executed, which makes it a *dynamic* check: it reports nothing about the program until the program runs, unlike the type checker, which works on the static text. A check never runs on its own, either: it must be placed inside a named test case, which the testing framework runs for us.
+
+</details>
+
+<details class="tooltip ts-tips">
+<summary>Anatomy of a Test Case</summary>
+
+A test case gives a check a name and registers it with the testing framework by passing it to `test`. Both `test` and `checkExpect` are provided by the course toolkit, imported once at the top of a test file:
+
+```typescript
+import { test, checkExpect } from "@ubccpsc/210-toolkit/testing";
+
+test(<description>, checkExpect(() => <actual>, <expected>));
+```
+
+`test` takes two arguments. `<description>` is a string that names the case, such as `"Return an A for a score of 88"`; it is printed in the test output, so it should state what the case verifies. The second argument is the check that forms the body of the test. Each test case holds exactly one `checkExpect`, so a test that fails always names the single expectation that was violated.
+
+When the test suite is executed, each test file is executed top-to-bottom running each test in turn. If the check passes, the case passes; if it fails, the case fails, and the framework reports the case's description along with the message from the check that failed.
 
 </details>
 
@@ -532,44 +553,17 @@ TypeScript has a single `number` type, and it stores values as a binary approxim
 Two consequences follow, and both apply to any language that stores numbers this way:
 
 - Order your arithmetic so that division comes last. `(11 * 100) / 20` gives exactly `55`, because the multiplication happens while the values are still whole numbers.
-- Be careful comparing computed decimal values for exact equality. `checkExpect((11 / 20) * 100, 55)` fails, even though the computed value is not visibly different from `55`.
+- Be careful comparing computed decimal values for exact equality. A test whose check is `checkExpect(() => (11 / 20) * 100, 55)` fails, even though the computed value is not visibly different from `55`.
 
 </details>
 
-Suppose we had a more fine-grained expectation of how letter grades should be computed and wrote the following check:
+Suppose we had a more fine-grained expectation of how letter grades should be computed and wrote the following test:
 
 ```typescript
-checkExpect(letterGrade(95), "A+");
+test("Return an A+ for a score of 95", checkExpect(() => letterGrade(95), "A+"));
 ```
 
-In this case the program would crash, because `letterGrade(95)` evaluates to `"A"` in our current implementation. The type system cannot detect this failure statically; we rely on tests written and executed dynamically to detect this fault. 
-
-TypeScript does not natively have a `checkExpect`, we have built the utility to better align with 110 and require less syntax than most test approaches. To use it, we must put it in a full test case, like this:
-
-```typescript
-test("Return an A for a score of 88", () => {
-    checkExpect(letterGrade(88), "A");
-});
-```
-
-<details class="tooltip ts-tips">
-<summary>Anatomy of a Test Case</summary>
-
-A test case wraps one or more checks in a call to `test`, which registers it with the testing framework. Both `test` and `checkExpect` are provided by the course toolkit, imported once at the top of a test file:
-
-```typescript
-import { test, checkExpect } from "@ubccpsc/210-toolkit";
-
-test(<description>, () => {
-    <checks>
-});
-```
-
-`test` takes two arguments. `<description>` is a string that names the case, such as `"Return an A for a score of 88"`; it is printed in the test output, so it should state what the case verifies. The second argument is the body of the test, wrapped in an _anonymous_ **arrow function** (the `() => { ... }` syntax we explain below). The `<checks>` block should hold one or more `checkExpect` calls.
-
-When the test suite is executed, each test file is executed top-to-bottom running each test in turn. If every `checkExpect` inside passes, the case passes; if any one fails, the case fails, and the framework reports the case's description along with the message from the check that failed.
-
-</details>
+In this case the test would fail, because `letterGrade(95)` evaluates to `"A"` in our current implementation. The type system cannot detect this failure statically; we rely on tests written and executed dynamically to detect this fault. 
 
 <details class="tooltip ts-tips">
 <summary>Arrow Functions</summary>
@@ -578,7 +572,7 @@ Arrow functions have two forms. The first has a single expression in its body:
 ```typescript
 (x: X, y: Y, b: Z) => <return-exp>
 ```
-this defines an anonymous function with  3 parameters (`x`, `y`, `b` of types `X`, `Y`, `Z`), which, when called, evaluates the expression `<return-exp>` with the given argument values, and return the resulting value.
+this defines an anonymous function with  3 parameters (`x`, `y`, `b` of types `X`, `Y`, `Z`), which, when called, evaluates the expression `<return-exp>` with the given argument values, and returns the resulting value. There is no `return` keyword here, and there are no braces: a single-expression arrow function _implicitly returns_ the value of its expression. This is the form the thunks we pass to `checkExpect` always take.
 
 The second form has a block expression as its body:
 
@@ -590,7 +584,7 @@ The second form has a block expression as its body:
 }
 ```
 
-which can contain any number of statements. To return a value in this case, the `return` statement must be used.  
+which can contain any number of statements. The braces mark the difference: once a body is a block, nothing is returned implicitly, so to return a value the `return` statement must be used. Writing `() => { letterGrade(88) }` therefore returns nothing at all, which is why the checks in this course are written without braces.  
 
 
 </details>
@@ -605,7 +599,7 @@ You have seen anonymous functions before: in CPSC 110 they were called **lambda 
 (filter (lambda (n) (> n 5)) (list 3 6 9))
 ```
 
-TypeScript's arrow syntax does the same job: `(n) => n > 5` means the same thing as `(lambda (n) (> n 5))`. The `() =>` in the test above is simply a lambda that takes no parameters, like `(lambda () ...)`. The body of the test is wrapped in an anonymous function so that it can be handed to `test` and executed later, just as `filter` decided when to call your lambda.
+TypeScript's arrow syntax does the same job: `(n) => n > 5` means the same thing as `(lambda (n) (> n 5))`. The `() =>` in the check above is a lambda that takes no parameters, like `(lambda () ...)`. The expression under test is wrapped in an anonymous function so that it can be handed to `checkExpect` and executed later, just as `filter` decided when to call your lambda.
 </details>
 
 ## Learning New Languages
@@ -630,7 +624,7 @@ Write a function called `batteryStatus` that turns a battery percentage number i
 
 1. Write the function signature, <span class="hint">naming the parameter `percent` with the type `number`; the function should specify `string` for the return type.</span>
 2. Implement the body <span class="hint">with a chain of `if` / `else if` / `else` statements,</span> <span class="hint">each branch `return`ing the right status.</span> The order of the statements will matter here!
-3. Write a `test` with a `checkExpect` for each status, choosing one representative percentage per case. Predict each result before running the tests, then run them.
+3. Write one `test` per status, each holding a single `checkExpect`, choosing one representative percentage per case. Predict each result before running the tests, then run them.
 4. What does the compiler report if you call `batteryStatus("low")`? Decide before you try it, then confirm.
 
 </details>

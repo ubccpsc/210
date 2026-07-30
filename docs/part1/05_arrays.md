@@ -221,7 +221,7 @@ An **arrow function** is a compact way to write a function as a value. The param
 (reading) => reading.tempCelsius > 0
 ```
 
-This is a function that takes one parameter and returns a `boolean`. You have already seen the zero-parameter form: the `() =>` wrapper used by `test` and `checkError`. The parameter has no type annotation because TypeScript infers it: when an arrow function is passed to an array operation, the compiler already knows the element type of the array, so it knows `reading` is a `Reading`.
+This is a function that takes one parameter and returns a `boolean`. You have already seen the zero-parameter form: the `() =>` wrapper used by `checkExpect` and `checkError`. The parameter has no type annotation because TypeScript infers it: when an arrow function is passed to an array operation, the compiler already knows the element type of the array, so it knows `reading` is a `Reading`.
 
 </details>
 ---->
@@ -307,9 +307,7 @@ function meanTemp(day: Reading[]): number {
 ```
 
 ```typescript
-test("mean temperature over the day", () => {
-    checkExpect(meanTemp(day), 1);
-});
+test("mean temperature over the day", checkExpect(() => meanTemp(day), 1));
 ```
 
 The precondition matters here in exactly the way the previous chapter described: `meanTemp` of an empty array would divide by zero, so the contract excludes that input.
@@ -328,9 +326,10 @@ If no element matches, `find` returns `undefined`, and its return type says so: 
 This is a deliberate language design choice. Recall the two absence values from the modelling chapter: `null` is a deliberate "no value here" that we choose when designing our own types, while `undefined` is the language's own value for "nothing was provided". TypeScript's built-in operations consistently use `undefined` for their "not found" results, and `find` follows that convention. Either way the protection is the same: the union type forces every caller to consider the case where nothing matched.
 
 ```typescript
-test("find returns undefined when nothing matches", () => {
-    checkExpect(day.find((reading: Reading) => reading.tempCelsius > 30), undefined);
-});
+test(
+    "find returns undefined when nothing matches",
+    checkExpect(() => day.find((reading: Reading) => reading.tempCelsius > 30), undefined),
+);
 ```
 
 ### Chaining Operations
@@ -432,18 +431,15 @@ function hasRepeatedTemperature(day: Reading[]): boolean {
 In this example, loops nest: for each `first` reading, the inner loop walks the whole array looking for a *different* hour (as expressed by the if) reporting the *same* temperature. The comparison involves two elements at once: the named operations cannot express this, because the functions they take see one element at a time. _(It is technically possible to contort `find` into answering this, with one search nested inside another, but the result is much harder to read than the loop that says what it means.)_
 
 ```typescript
-test("no temperature repeats in our day", () => {
-    checkExpect(hasRepeatedTemperature(day), false);
-});
+const repeats: Reading[] = [
+    { hour: 3, tempCelsius: 5 },
+    { hour: 6, tempCelsius: 9 },
+    { hour: 9, tempCelsius: 5 }
+];
 
-test("a repeated temperature is detected", () => {
-    const repeats: Reading[] = [
-        { hour: 3, tempCelsius: 5 },
-        { hour: 6, tempCelsius: 9 },
-        { hour: 9, tempCelsius: 5 }
-    ];
-    checkExpect(hasRepeatedTemperature(repeats), true);
-});
+test("no temperature repeats in our day", checkExpect(() => hasRepeatedTemperature(day), false));
+
+test("a repeated temperature is detected", checkExpect(() => hasRepeatedTemperature(repeats), true));
 ```
 
 Loops have a second strength we are not ready to use yet: values that change as the loop runs, allowing a running tally to be carried from one element to the next. Doing that requires changing existing values, which is the subject of the next chapter.
@@ -486,6 +482,6 @@ Write a small example `order` of three or four items to test against, then write
 4. `firstOutOfStock(order: Item[]): Item | undefined`; return the first item with a `quantity` of 0, <span class="hint">using `find` (remember what `find` returns when nothing matches).</span>
 5. `hasDuplicateName(order: Item[]): boolean`; return `true` if any two items share the same `name`. <span class="hint">This one compares items to one another, which the named operations cannot express, so you will want to use a `for of` loop for this task.</span>
 
-Write a `checkExpect` for each function against your example order, <span class="hint">including a case for `firstOutOfStock` where nothing is out of stock</span>.
+Write a `test` holding a single `checkExpect` for each function against your example order, <span class="hint">including a case for `firstOutOfStock` where nothing is out of stock</span>.
 
 </details>

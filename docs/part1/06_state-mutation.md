@@ -110,9 +110,10 @@ function longestFreezingStreak(day: Reading[]): number {
 ```
 
 ```typescript
-test("longest freezing streak spans the early morning", () => {
-    checkExpect(longestFreezingStreak(day), 2);
-});
+test(
+    "longest freezing streak spans the early morning",
+    checkExpect(() => longestFreezingStreak(day), 2),
+);
 ```
 
 The counters `current` and `longest` are the loop's state: values that survive from one element to the next and change as the loop runs. To see the state evolve, trace the loop over our `day` of readings, whose temperatures are `-4, -1, 3, 8, 2, -2`:
@@ -228,7 +229,8 @@ To predict which changes are visible where, we need a precise picture of what a 
 let a: number = 5;
 let b: number = a;          // b receives its own copy of 5
 b = 6;
-checkExpect(a, 5);  // a is unaffected
+
+test("reassigning b leaves a unaffected", checkExpect(() => a, 5));
 ```
 
 In the second case, a variable holding an object or array does *not* hold the object itself. It holds a **reference**: a value that says where the object is. (You can think of a reference as holding the _address_ of the actual object value.)
@@ -244,7 +246,8 @@ const r: Reading = { hour: 6, tempCelsius: -4 };
 const t: Reading = { hour: 6, tempCelsius: -4 };
 const s: Reading = r;                     // s receives r's reference
 s.tempCelsius = 0;
-checkExpect(r.tempCelsius, 0);   // change visible to r and s
+
+test("a change made through s is visible through r", checkExpect(() => r.tempCelsius, 0));
 ```
 
 ```graphviz
@@ -295,7 +298,8 @@ For *primitives*, `===` compares _values_. Two numbers that happen to be equal a
 ```typescript
 let x: number = 5;
 let y: number = 5;
-checkExpect(x === y, true);   // equal values
+
+test("two separately declared numbers with equal values are ===", checkExpect(() => x === y, true));
 ```
 
 For *objects*, `===` compares _identity_: it asks whether two variables refer to the same object in memory, _not_ whether their contents match (value).
@@ -305,16 +309,19 @@ const r: Reading = { hour: 6, tempCelsius: -4 };
 const s: Reading = r;                              // s refers to r's object
 const t: Reading = { hour: 6, tempCelsius: -4 };   // a separate object with equal contents
 
-checkExpect(r === s, true);    // the same object
-checkExpect(r === t, false);   // different objects, even though their contents are identical
+test("r and s are the same object", checkExpect(() => r === s, true));
+
+test("r and t are different objects, even though their contents are identical", checkExpect(() => r === t, false));
 ```
 
 This is the visibility rule restated as a comparison. Because `r` and `s` are the same object, a mutation through one is seen through the other; because `t` is a different object, it is untouched:
 
 ```typescript
 s.tempCelsius = 0; // mutate s
-checkExpect(r.tempCelsius === 0, true);    // r sees the change made through s
-checkExpect(t.tempCelsius === -4, true);   // t, a separate object, does not
+
+test("r sees the change made through s", checkExpect(() => r.tempCelsius === 0, true));
+
+test("t, a separate object, does not see the change", checkExpect(() => t.tempCelsius === -4, true));
 ```
 
 So `r === t` being `false` is not a technicality. It is the runtime telling you that `r` and `t` are independent, and that changing one will never change the other.
@@ -338,7 +345,8 @@ function bump(n: number): void {
 
 let hour: number = 6;
 bump(hour);
-checkExpect(hour, 6);   // unchanged: bump accomplished nothing observable
+
+test("bump leaves the caller's number unchanged", checkExpect(() => hour, 6));
 ```
 
 This behaviour is called **pass-by-value**: the function receives the value, not the variable. `bump` compiles and runs without complaint, and does nothing at all.
@@ -357,7 +365,8 @@ function calibrate(reading: Reading, offset: number): void {
 
 const morning: Reading = { hour: 6, tempCelsius: -4 };
 calibrate(morning, 1);                  // the sensor reads one degree low
-checkExpect(morning.tempCelsius, -3);   // the caller's object changed
+
+test("calibrate changes the caller's object", checkExpect(() => morning.tempCelsius, -3));
 ```
 
 This behaviour is commonly called **pass-by-reference**: the function is operating on the caller's object, not a private copy. The change `calibrate` makes is externally visible, and it outlives the call.
@@ -378,7 +387,8 @@ function reset(reading: Reading): void {
 
 const evening: Reading = { hour: 21, tempCelsius: -2 };
 reset(evening);
-checkExpect(evening.tempCelsius, -2);   // unchanged
+
+test("reset leaves the caller's object unchanged", checkExpect(() => evening.tempCelsius, -2));
 ```
 
 Compare `calibrate` and `reset` carefully: one writes `reading.tempCelsius = ...`, the other writes `reading = ...`. Mutating *through* a reference (`reading.tempCelsius`) changes the shared object and is visible to the caller. Reassigning *the reference itself* (`reading`) merely rebinds the function's local name and is invisible. The dot is the difference.
@@ -518,15 +528,15 @@ Side effects change what we must do as readers, as documenters, and as testers o
 - **Testing.** A pure function is tested by checking its return value. A mutating function is tested by checking *state*: call it, then assert on the object afterwards.
 
 ```typescript
-test("calibrateDay shifts every reading by the offset", () => {
-    const readings: Reading[] = [
-        { hour: 6, tempCelsius: -4 },
-        { hour: 9, tempCelsius: -1 }
-    ];
-    calibrateDay(readings, 1);
-    checkExpect(readings[0].tempCelsius, -3);
-    checkExpect(readings[1].tempCelsius, 0);
-});
+const readings: Reading[] = [
+    { hour: 6, tempCelsius: -4 },
+    { hour: 9, tempCelsius: -1 }
+];
+calibrateDay(readings, 1);
+
+test("the first reading is shifted by the offset", checkExpect(() => readings[0].tempCelsius, -3));
+
+test("the second reading is shifted by the offset", checkExpect(() => readings[1].tempCelsius, 0));
 ```
 
 (TODO: I'm a bit confused by this paragraph... doesn't the closure thing save us from these nasty side effects of mutation? Again, too late in the day to be totally sure.)
@@ -564,7 +574,7 @@ A robot is just a position:
 type Robot = { x: number; y: number };
 ```
 
-1. Write `step(robot: Robot, dx: number, dy: number): void` that moves the robot by adding `dx` to its `x` and `dy` to its `y`, changing the robot in place. Create a robot at `{ x: 0, y: 0 }`, call `step(robot, 1, 2)`, and use `checkExpect` to confirm the caller's robot now has an `x` of 1 and a `y` of 2.
+1. Write `step(robot: Robot, dx: number, dy: number): void` that moves the robot by adding `dx` to its `x` and `dy` to its `y`, changing the robot in place. Create a robot at `{ x: 0, y: 0 }`, call `step(robot, 1, 2)`, and write one test per coordinate, each with a single `checkExpect`, confirming the caller's robot now has an `x` of 1 and a `y` of 2.
 2. Write `teleport(robot: Robot, x: number, y: number): void` that instead _reassigns the parameter_, with `robot = { x: x, y: y }`. Predict what the caller's robot looks like after `teleport(robot, 9, 9)`, then confirm it with `checkExpect`. Why does `step` change the caller's robot while `teleport` does not?
 3. Give a robot a second name with `const other = robot`. Call `step(other, 3, 0)`, and use `checkExpect` to show that `robot` sees the move, because `other` is an alias for the same object. Then build a separate robot `twin` with the same coordinates, and use `===` to confirm that `robot === other` is `true` but `robot === twin` is `false`.
 4. Write `walk(robot: Robot, steps: number[]): void` that uses a `for of` loop to apply each number in `steps` as an eastward move (one `step(robot, s, 0)` per element), so the position carries forward from one iteration to the next. Check the robot's final `x` against the sum of `steps`.
