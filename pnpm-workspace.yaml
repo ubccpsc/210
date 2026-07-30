@@ -1,0 +1,4 @@
+allowBuilds:
+  # esbuild ships a platform-specific binary that its install script links.
+  # Vite (and therefore VitePress) cannot build without it.
+  esbuild: true
