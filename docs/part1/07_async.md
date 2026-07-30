@@ -52,9 +52,8 @@ JavaScript, the language TypeScript is built on, was designed for web browsers, 
 You have been handing functions to other code to run later since the first chapter. Every test does it:
 
 ```typescript
-test(
-    "longest freezing streak spans the early morning",
-    checkExpect(() => longestFreezingStreak(day), 2),
+test("longest freezing streak spans the early morning",
+    checkExpect(() => longestFreezingStreak(day), 2)
 );
 ```
 
@@ -312,12 +311,11 @@ Because the receipt is so easy to mistake for the value, one mistake dominates a
 The function you hand to `checkExpect` can be marked `async` too, and then it can await the functions it is testing:
 
 ```typescript
-test(
-    "the report loads",
+test("the report loads",
     checkExpect(async () => {
         const report: string = await loadReport();
         return report.length > 0;
-    }, true),
+    }, true)
 );
 ```
 

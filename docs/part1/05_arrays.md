@@ -326,9 +326,11 @@ If no element matches, `find` returns `undefined`, and its return type says so: 
 This is a deliberate language design choice. Recall the two absence values from the modelling chapter: `null` is a deliberate "no value here" that we choose when designing our own types, while `undefined` is the language's own value for "nothing was provided". TypeScript's built-in operations consistently use `undefined` for their "not found" results, and `find` follows that convention. Either way the protection is the same: the union type forces every caller to consider the case where nothing matched.
 
 ```typescript
-test(
-    "find returns undefined when nothing matches",
-    checkExpect(() => day.find((reading: Reading) => reading.tempCelsius > 30), undefined),
+test("find returns undefined when nothing matches",
+    checkExpect(
+        () => day.find((reading: Reading) => reading.tempCelsius > 30),
+        undefined
+    )
 );
 ```
 
@@ -437,9 +439,13 @@ const repeats: Reading[] = [
     { hour: 9, tempCelsius: 5 }
 ];
 
-test("no temperature repeats in our day", checkExpect(() => hasRepeatedTemperature(day), false));
+test("no temperature repeats in our day",
+    checkExpect(() => hasRepeatedTemperature(day), false)
+);
 
-test("a repeated temperature is detected", checkExpect(() => hasRepeatedTemperature(repeats), true));
+test("a repeated temperature is detected",
+    checkExpect(() => hasRepeatedTemperature(repeats), true)
+);
 ```
 
 Loops have a second strength we are not ready to use yet: values that change as the loop runs, allowing a running tally to be carried from one element to the next. Doing that requires changing existing values, which is the subject of the next chapter.

@@ -110,9 +110,8 @@ function longestFreezingStreak(day: Reading[]): number {
 ```
 
 ```typescript
-test(
-    "longest freezing streak spans the early morning",
-    checkExpect(() => longestFreezingStreak(day), 2),
+test("longest freezing streak spans the early morning",
+    checkExpect(() => longestFreezingStreak(day), 2)
 );
 ```
 
@@ -247,7 +246,9 @@ const t: Reading = { hour: 6, tempCelsius: -4 };
 const s: Reading = r;                     // s receives r's reference
 s.tempCelsius = 0;
 
-test("a change made through s is visible through r", checkExpect(() => r.tempCelsius, 0));
+test("s and r see the same change",
+    checkExpect(() => r.tempCelsius, 0)
+);
 ```
 
 ```graphviz
@@ -299,7 +300,9 @@ For *primitives*, `===` compares _values_. Two numbers that happen to be equal a
 let x: number = 5;
 let y: number = 5;
 
-test("two separately declared numbers with equal values are ===", checkExpect(() => x === y, true));
+test("separately declared numbers with equal values are ===",
+    checkExpect(() => x === y, true)
+);
 ```
 
 For *objects*, `===` compares _identity_: it asks whether two variables refer to the same object in memory, _not_ whether their contents match (value).
@@ -311,7 +314,9 @@ const t: Reading = { hour: 6, tempCelsius: -4 };   // a separate object with equ
 
 test("r and s are the same object", checkExpect(() => r === s, true));
 
-test("r and t are different objects, even though their contents are identical", checkExpect(() => r === t, false));
+test("r and t are different objects, despite identical contents",
+    checkExpect(() => r === t, false)
+);
 ```
 
 This is the visibility rule restated as a comparison. Because `r` and `s` are the same object, a mutation through one is seen through the other; because `t` is a different object, it is untouched:
@@ -319,9 +324,13 @@ This is the visibility rule restated as a comparison. Because `r` and `s` are th
 ```typescript
 s.tempCelsius = 0; // mutate s
 
-test("r sees the change made through s", checkExpect(() => r.tempCelsius === 0, true));
+test("r sees the change made through s",
+    checkExpect(() => r.tempCelsius === 0, true)
+);
 
-test("t, a separate object, does not see the change", checkExpect(() => t.tempCelsius === -4, true));
+test("t, a separate object, does not see the change",
+    checkExpect(() => t.tempCelsius === -4, true)
+);
 ```
 
 So `r === t` being `false` is not a technicality. It is the runtime telling you that `r` and `t` are independent, and that changing one will never change the other.
@@ -346,7 +355,9 @@ function bump(n: number): void {
 let hour: number = 6;
 bump(hour);
 
-test("bump leaves the caller's number unchanged", checkExpect(() => hour, 6));
+test("bump leaves the caller's number unchanged",
+    checkExpect(() => hour, 6)
+);
 ```
 
 This behaviour is called **pass-by-value**: the function receives the value, not the variable. `bump` compiles and runs without complaint, and does nothing at all.
@@ -366,7 +377,9 @@ function calibrate(reading: Reading, offset: number): void {
 const morning: Reading = { hour: 6, tempCelsius: -4 };
 calibrate(morning, 1);                  // the sensor reads one degree low
 
-test("calibrate changes the caller's object", checkExpect(() => morning.tempCelsius, -3));
+test("calibrate changes the caller's object",
+    checkExpect(() => morning.tempCelsius, -3)
+);
 ```
 
 This behaviour is commonly called **pass-by-reference**: the function is operating on the caller's object, not a private copy. The change `calibrate` makes is externally visible, and it outlives the call.
@@ -388,7 +401,9 @@ function reset(reading: Reading): void {
 const evening: Reading = { hour: 21, tempCelsius: -2 };
 reset(evening);
 
-test("reset leaves the caller's object unchanged", checkExpect(() => evening.tempCelsius, -2));
+test("reset leaves the caller's object unchanged",
+    checkExpect(() => evening.tempCelsius, -2)
+);
 ```
 
 Compare `calibrate` and `reset` carefully: one writes `reading.tempCelsius = ...`, the other writes `reading = ...`. Mutating *through* a reference (`reading.tempCelsius`) changes the shared object and is visible to the caller. Reassigning *the reference itself* (`reading`) merely rebinds the function's local name and is invisible. The dot is the difference.
@@ -534,9 +549,13 @@ const readings: Reading[] = [
 ];
 calibrateDay(readings, 1);
 
-test("the first reading is shifted by the offset", checkExpect(() => readings[0].tempCelsius, -3));
+test("the first reading is shifted by the offset",
+    checkExpect(() => readings[0].tempCelsius, -3)
+);
 
-test("the second reading is shifted by the offset", checkExpect(() => readings[1].tempCelsius, 0));
+test("the second reading is shifted by the offset",
+    checkExpect(() => readings[1].tempCelsius, 0)
+);
 ```
 
 (TODO: I'm a bit confused by this paragraph... doesn't the closure thing save us from these nasty side effects of mutation? Again, too late in the day to be totally sure.)

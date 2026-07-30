@@ -143,7 +143,7 @@ Within each test file is a number of individual test cases. Each test case has a
 In the contract above, the late fee grace period is two days long. A concrete test case that checks this, by ensuring that `lateFee(2)` returns `0`, looks like:
 
 ```typescript
-test("no fee at the grace period boundary", checkExpect(() => lateFee(2), 0));
+test("no fee at the grace boundary", checkExpect(() => lateFee(2), 0));
 ```
 
 Assertions are the core of any test case: they validate that a dynamic behaviour emits the expected output for a given input. The `checkExpect` assertion takes two arguments: a no-argument function wrapping the expression to evaluate, and the expected result. If the two values are equal, the test passes silently. If they differ, the framework reports what was expected and what was actually produced, pointing you to the failing test by name.
@@ -166,7 +166,11 @@ ISL used `check-expect` as a standalone expression at the top level of a file. T
 
 `test`, `checkExpect`, and `checkError` are provided by the course toolkit; each test file imports them at the top of the file with: 
 ```typescript
-import { test, checkExpect, checkError } from "@ubccpsc/210-toolkit/testing";
+import {
+    test,
+    checkExpect,
+    checkError
+} from "@ubccpsc/210-toolkit/testing";
 ```
 
 To run the tests, you can either open the testing feature within your IDE (we will demo this in class), or open the terminal view within your IDE (also an in-class demo) and execute `pnpm test`. The **terminal** is a text-based interface where you type commands to direct your computer to perform tasks for you, where the input and output are textual. 
@@ -183,15 +187,25 @@ Having a precise set of input/output pairs is extremely helpful when you are imp
 For `lateFee` we are already in a position to do this. We have not written a line of the implementation, but the contract we documented above gives us everything we need: each clause from the function documentation becomes a test.
 
 ```typescript
-test("no fee on the day a book comes due", checkExpect(() => lateFee(0), 0));
+test("no fee on the day a book comes due",
+    checkExpect(() => lateFee(0), 0)
+);
 
-test("no fee at the end of the grace period", checkExpect(() => lateFee(2), 0));
+test("no fee at the end of the grace period",
+    checkExpect(() => lateFee(2), 0)
+);
 
-test("fee accrues on the first day after the grace period", checkExpect(() => lateFee(3), 0.50));
+test("fee accrues on the first charged day",
+    checkExpect(() => lateFee(3), 0.50)
+);
 
-test("fee accrues for each further day", checkExpect(() => lateFee(12), 5.00));
+test("fee accrues for each further day",
+    checkExpect(() => lateFee(12), 5.00)
+);
 
-test("fee never exceeds the maximum", checkExpect(() => lateFee(30), 10.00));
+test("fee never exceeds the maximum",
+    checkExpect(() => lateFee(30), 10.00)
+);
 ```
 
 The precondition also guides us towards situations that may not result in a valid output. Since the precondition says `daysLate >= 0`, what happens if we pass `-5` is undefined: the caller has broken their half of the bargain, and the function promises nothing in return. We'll return to what should happen when a precondition is violated anyway, and how to test for such erroneous behaviours, at the end of this chapter.
@@ -213,7 +227,7 @@ We chose `-1` deliberately. A fee is never negative, so every test is guaranteed
 ✗ no fee at the end of the grace period
       Expected: 0
       Received: -1
-✗ fee accrues on the first day after the grace period
+✗ fee accrues on the first charged day
       Expected: 0.5
       Received: -1
 ✗ fee accrues for each further day
@@ -244,7 +258,7 @@ And if we run the tests again:
 ```
 ✓ no fee on the day a book comes due
 ✓ no fee at the end of the grace period
-✓ fee accrues on the first day after the grace period
+✓ fee accrues on the first charged day
 ✓ fee accrues for each further day
 ✗ fee never exceeds the maximum
       Expected: 10
@@ -276,7 +290,7 @@ All five tests now pass:
 ```
 ✓ no fee on the day a book comes due
 ✓ no fee at the end of the grace period
-✓ fee accrues on the first day after the grace period
+✓ fee accrues on the first charged day
 ✓ fee accrues for each further day
 ✓ fee never exceeds the maximum
 ```
@@ -488,14 +502,18 @@ To write tests for errors, we must be clear about the difference between unexpec
 const fresh: Loan = { title: "Clean Code", renewalsRemaining: 2 };
 const exhausted: Loan = { title: "Clean Code", renewalsRemaining: 0 };
 
-test(
-    "renewal succeeds while renewals remain",
-    checkExpect(() => renew(fresh), { ok: true, value: { title: "Clean Code", renewalsRemaining: 1 } }),
+test("renewal succeeds while renewals remain",
+    checkExpect(() => renew(fresh), {
+        ok: true,
+        value: { title: "Clean Code", renewalsRemaining: 1 }
+    })
 );
 
-test(
-    "renewal is refused when no renewals remain",
-    checkExpect(() => renew(exhausted), { ok: false, error: "No further loan renewals available" }),
+test("renewal is refused when no renewals remain",
+    checkExpect(() => renew(exhausted), {
+        ok: false,
+        error: "No further loan renewals available"
+    })
 );
 ```
 
@@ -506,9 +524,8 @@ The unexpected error has no value to compare against, because the correct behavi
 ```typescript
 const corrupted: Loan = { title: "Clean Code", renewalsRemaining: -1 };
 
-test(
-    "renew halts on a loan that violates the non-negative invariant",
-    checkError(() => renew(corrupted)),
+test("renew halts on a loan that violates the non-negative invariant",
+    checkError(() => renew(corrupted))
 );
 ```
 

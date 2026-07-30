@@ -93,28 +93,25 @@ Since the returned failure is an ordinary value, it is tested like any other val
 ```typescript
 const cpsc213: Section = { id: "CPSC213", prerequisite: ["CPSC210"] };
 
-test(
-    "a known section is found",
+test("a known section is found",
     checkExpect(() => findSection(catalogue, "CPSC210"), {
         ok: true,
-        value: { id: "CPSC210", prerequisite: ["CPSC110"] },
-    }),
+        value: { id: "CPSC210", prerequisite: ["CPSC110"] }
+    })
 );
 
-test(
-    "an unknown section returns a failure value",
+test("an unknown section returns a failure value",
     checkExpect(() => findSection(catalogue, "NOPE"), {
         ok: false,
-        error: "no section with id NOPE",
-    }),
+        error: "no section with id NOPE"
+    })
 );
 
-test(
-    "a missing prerequisite returns a failure value",
+test("a missing prerequisite returns a failure value",
     checkExpect(() => checkPrerequisite(student, cpsc213), {
         ok: false,
-        error: "CPSC213 requires CPSC210",
-    }),
+        error: "CPSC213 requires CPSC210"
+    })
 );
 ```
 
@@ -327,19 +324,19 @@ TypeScript gives the caught value the type `unknown`, because in principle any v
 A thrown failure interrupts the call rather than coming back as a value, so we cannot inspect it with `checkExpect`. This is what `checkError` is for: it runs the code you give it and passes only if that code throws.
 
 ```typescript
-test(
-    "an unknown section throws",
-    checkError(() => enrolAll(catalogue, student, ["NOPE"])),
+test("an unknown section throws",
+    checkError(() => enrolAll(catalogue, student, ["NOPE"]))
 );
 
-test(
-    "a missing prerequisite throws",
-    checkError(() => enrolAll(catalogue, student, ["CPSC213"])),
+test("a missing prerequisite throws",
+    checkError(() => enrolAll(catalogue, student, ["CPSC213"]))
 );
 
-test(
-    "a valid request enrols in every section",
-    checkExpect(() => enrolAll(catalogue, student, ["CPSC110", "CPSC210"]).length, 2),
+test("a valid request enrols in every section",
+    checkExpect(
+        () => enrolAll(catalogue, student, ["CPSC110", "CPSC210"]).length,
+        2
+    )
 );
 ```
 

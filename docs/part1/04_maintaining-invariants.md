@@ -80,9 +80,8 @@ function makeAccount(balance: number): BankAccount {
 A function like this is called a **constructor function**: it constructs values of a type, and it is the gatekeeper where the invariant is established. Every account it returns is valid, and an attempt to create an invalid one halts immediately:
 
 ```typescript
-test(
-    "accounts cannot be created with a negative balance",
-    checkError(() => makeAccount(-100)),
+test("accounts cannot be created with a negative balance",
+    checkError(() => makeAccount(-100))
 );
 ```
 
@@ -272,13 +271,14 @@ const two = one.increment();
 
 test("each click is counted", checkExpect(() => two.getCount(), 2));
 
-test("the original counter is unchanged", checkExpect(() => empty.getCount(), 0));
+test("the original counter is unchanged",
+    checkExpect(() => empty.getCount(), 0)
+);
 
 const full = makeCounter(1000); // the venue is exactly at capacity
 
-test(
-    "the counter refuses to count past capacity",
-    checkError(() => full.increment()),
+test("the counter refuses to count past capacity",
+    checkError(() => full.increment())
 );
 ```
 
@@ -397,14 +397,15 @@ The structural change  ensures that the invariant is _enforced by the programmin
 const account = makeAccount(0);
 const funded = account.deposit(5);
 
-test("a deposit is reflected in the balance", checkExpect(() => funded.getBalance(), 5));
+test("a deposit is reflected in the balance",
+    checkExpect(() => funded.getBalance(), 5)
+);
 
-test(
-    "a withdrawal beyond the balance is refused",
+test("a withdrawal beyond the balance is refused",
     checkExpect(() => funded.withdraw(8), {
         ok: false,
-        error: "Amount must not be greater than the current account balance",
-    }),
+        error: "Amount must not be greater than the current account balance"
+    })
 );
 ```
 

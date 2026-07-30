@@ -495,7 +495,7 @@ In Part 1 of this course, we will use a `checkExpect`, a function call that can 
 
 
 ```typescript
-test("Return an A for a score of 88", checkExpect(() => letterGrade(88), "A"));
+test("Score of 88 returns an A", checkExpect(() => letterGrade(88), "A"));
 ```
 
 This cannot be checked statically; we must execute the test to verify the program behaviour. If the call and the expected value evaluate to the same value the check passes; if they differ, the check fails with an error that describes the expected behaviour that was violated.
@@ -532,7 +532,7 @@ import { test, checkExpect } from "@ubccpsc/210-toolkit/testing";
 test(<description>, checkExpect(() => <actual>, <expected>));
 ```
 
-`test` takes two arguments. `<description>` is a string that names the case, such as `"Return an A for a score of 88"`; it is printed in the test output, so it should state what the case verifies. The second argument is the check that forms the body of the test. Each test case holds exactly one `checkExpect`, so a test that fails always names the single expectation that was violated.
+`test` takes two arguments. `<description>` is a string that names the case, such as `"Score of 88 returns an A"`; it is printed in the test output, so it should state what the case verifies. The second argument is the check that forms the body of the test. Each test case holds exactly one `checkExpect`, so a test that fails always names the single expectation that was violated.
 
 When the test suite is executed, each test file is executed top-to-bottom running each test in turn. If the check passes, the case passes; if it fails, the case fails, and the framework reports the case's description along with the message from the check that failed.
 
@@ -560,7 +560,7 @@ Two consequences follow, and both apply to any language that stores numbers this
 Suppose we had a more fine-grained expectation of how letter grades should be computed and wrote the following test:
 
 ```typescript
-test("Return an A+ for a score of 95", checkExpect(() => letterGrade(95), "A+"));
+test("Score of 95 returns an A+", checkExpect(() => letterGrade(95), "A+"));
 ```
 
 In this case the test would fail, because `letterGrade(95)` evaluates to `"A"` in our current implementation. The type system cannot detect this failure statically; we rely on tests written and executed dynamically to detect this fault. 

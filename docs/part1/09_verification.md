@@ -37,7 +37,9 @@ Errors translate just as directly. Recall `requireSection` from the previous cha
 
 ```typescript
 // previously
-test("an unknown section throws", checkError(() => requireSection(catalogue, "NOPE")));
+test("an unknown section throws",
+    checkError(() => requireSection(catalogue, "NOPE"))
+);
 
 // now
 test("an unknown section throws", () => {
@@ -361,7 +363,7 @@ The mismatch is easy to see. The viewer's plan is the most visible input dimensi
 <CollapsibleCode>
 
 ```typescript
-test("a free viewer sees only published, licensed, non-premium titles", () => {
+test("a free viewer sees published, licensed, non-premium titles", () => {
     const viewer: Viewer = { id: "v1", plan: "free", region: "CA" };
     const result = playableTitles(catalogue, viewer);
 
@@ -421,13 +423,22 @@ Each branch needs a `(viewer, title)` pair that reaches it:
 ```typescript
 test("every branch of canPlay is exercised", () => {
     const free: Viewer = { id: "v1", plan: "free", region: "CA" };
-    const premium: Viewer = { id: "v2", plan: "premium", region: "CA" };
+    const prem: Viewer = { id: "v2", plan: "premium", region: "CA" };
 
-    expect(canPlay(free, { id: "x", published: false, tier: "free", regions: ["CA"] })).to.be.false;     // branch 1
-    expect(canPlay(free, { id: "x", published: true, tier: "free", regions: ["US"] })).to.be.false;      // branch 2
-    expect(canPlay(premium, { id: "x", published: true, tier: "premium", regions: ["CA"] })).to.be.true; // branch 3
-    expect(canPlay(free, { id: "x", published: true, tier: "premium", regions: ["CA"] })).to.be.false;   // branch 4
-    expect(canPlay(free, { id: "x", published: true, tier: "free", regions: ["CA"] })).to.be.true;       // branch 5
+    const unpublished: Title =
+        { id: "x", published: false, tier: "free", regions: ["CA"] };
+    const elsewhere: Title =
+        { id: "x", published: true, tier: "free", regions: ["US"] };
+    const premiumHere: Title =
+        { id: "x", published: true, tier: "premium", regions: ["CA"] };
+    const freeHere: Title =
+        { id: "x", published: true, tier: "free", regions: ["CA"] };
+
+    expect(canPlay(free, unpublished)).to.be.false;  // branch 1
+    expect(canPlay(free, elsewhere)).to.be.false;    // branch 2
+    expect(canPlay(prem, premiumHere)).to.be.true;   // branch 3
+    expect(canPlay(free, premiumHere)).to.be.false;  // branch 4
+    expect(canPlay(free, freeHere)).to.be.true;      // branch 5
 });
 ```
 
@@ -477,7 +488,7 @@ function canPlay(viewer: Viewer, title: Title): boolean {
 }
 ```
 
-The assumption is wrong: `t2` is not published, yet it is now judged playable. The change looks harmless, and a quick manual check on a live title would pass. The suite catches it at once, because the test `"a free viewer sees only published, licensed, non-premium titles"` still expects the result to have members `["t1"]`, and the broken version returns `["t1", "t2"]`. The suite knew something the manual check missed.
+The assumption is wrong: `t2` is not published, yet it is now judged playable. The change looks harmless, and a quick manual check on a live title would pass. The suite catches it at once, because the test `"a free viewer sees published, licensed, non-premium titles"` still expects the result to have members `["t1"]`, and the broken version returns `["t1", "t2"]`. The suite knew something the manual check missed.
 
 This is the second job of a test suite, and over the life of a program it is the more important one. Tests do not only help you get code right the first time; they keep it right as it changes. Re-running the whole suite after every change, even one that looks unable to break anything, is what makes it safe to keep improving a program. The effort of writing tests is repaid each time the code is touched.
 
