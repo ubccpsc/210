@@ -334,6 +334,18 @@ the thunk computes the answer and throws it away, so `checkExpect` receives `und
 
 `checkExpect` awaits whatever its function produces, so the test does not finish until every `await` inside it has delivered. Forgetting the `await` before an async call is the classic mistake: the check then compares a `Promise` object rather than the value it delivers, and fails confusingly.
 
+`checkError` works the same way, and the slow operations in this chapter give it plenty to do: a file may not exist, and a service may not answer. An `async` function does not reject the promise at the point you call it; it returns a promise that _later_ rejects. The thunk's job is to hand that promise back to the check, which it does by awaiting it:
+
+```typescript
+test("reading a missing file reports an error",
+    checkError(async () => {
+        return await readFile("no-such-file.txt", "utf8");
+    })
+);
+```
+
+In this case, `checkError` is able to verify that the promise has rejected rather than fulfilled.
+
 </details>
 
 <details class="tooltip exercise">
