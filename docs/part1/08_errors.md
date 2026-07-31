@@ -362,8 +362,6 @@ function checkError(thunk: () => void): () => void {
 
 Two things follow from this shape. First, `checkError` takes a function, the `() =>` thunk, rather than a value, exactly as `checkExpect` does. It must run your code *inside its own* `try`/`catch` so it can observe whether an exception is thrown. Handing it `enrolAll(...)` directly would run that call first, and the exception would escape before `checkError` ever got control. Second, `checkError` does not perform the check itself; it *returns* the function that will, which is the function we hand to `test` as the body of the case.
 
-The word _thunk_ is old programming jargon for a small, parameterless function that wraps up a computation to be run later. The name dates to the Algol-60 community of the 1960s and is sometimes glossed as the past tense of "think", since a thunk is an expression already thought about and set aside to evaluate when it is needed.
-
 </details>
 
 ### The `finally` Block

@@ -57,7 +57,7 @@ test("longest freezing streak spans the early morning",
 );
 ```
 
-The anonymous function `() => longestFreezingStreak(day)` is not executed where it is written. It is handed to `checkExpect`, which stores it and runs it later, when the test framework decides. A function passed somewhere else to be called later is a **callback**. Callbacks are how TypeScript expresses deferred computation.
+The anonymous function `() => longestFreezingStreak(day)` is not executed where it is written. It is handed to `checkExpect`, which stores it and runs it later, when the test framework decides. A function passed somewhere else to be called later is a **callback**. The thunks we have been handing to `checkExpect` since the first chapter are callbacks of exactly this kind; a thunk is the special case that takes no parameters. Callbacks are how TypeScript expresses deferred computation.
 
 The clearest way to *feel* deferral is to slow it down to human speed. The built-in function `setTimeout` takes a callback and a duration in milliseconds, and arranges for the callback to run after that much time has passed:
 
