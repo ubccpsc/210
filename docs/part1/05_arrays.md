@@ -455,6 +455,50 @@ Prefer the named operation whenever the task is exactly a transform (`map`), a s
 
 Write a loop when the computation does not fit a named pattern: when it relates elements to one another, like the repeated-temperature check, or when one pass must answer a question no single named operation can. The named operations say *what*; the loop is for when you must control *how*.
 
+## Reading and Writing JSON
+
+The tooltip earlier in this chapter described JSON as a notation: four kinds of primitive value, the object, and the array, written as text. Text is all it is, so a program cannot work with a JSON document directly. Two built-in functions convert between the notation and real TypeScript values.
+
+`JSON.stringify` goes from a value to text. Give it any array, object, or primitive and it returns a string in JSON notation:
+
+```typescript
+const day: Reading[] = [
+    { hour: 6, tempCelsius: -4 },
+    { hour: 12, tempCelsius: 3 }
+];
+
+const text: string = JSON.stringify(day);
+// '[{"hour":6,"tempCelsius":-4},{"hour":12,"tempCelsius":3}]'
+```
+
+The output is compact and awkward to read. When a person has to look at the result, as with a configuration file, a third argument asks for indentation:
+
+```typescript
+JSON.stringify(day, null, 4);   // the same data, indented by four spaces
+```
+
+`JSON.parse` goes the other way, from text back to a value:
+
+```typescript
+const restored = JSON.parse(text);
+```
+
+After that call, `restored` holds a real array of real objects. The elements are ordinary values, and every operation in this chapter works on them as usual.
+
+Two cautions are worth carrying forward, and both follow from JSON being nothing but text.
+
+The first is that _the conversion is lossy in one direction_. JSON has no notation for a date, for `undefined`, or for a function, so `JSON.stringify` has no way to record them. It does not complain; it drops them. A value that goes out and comes back is equal to the original only when everything in it was one of the kinds JSON can express.
+
+The second is that _`JSON.parse` cannot know what the text contains_. The text is not available until the program runs, so there is nothing for the compiler to inspect, and it cannot give the result a meaningful type. Writing an annotation does not fix this:
+
+```typescript
+const readings: Reading[] = JSON.parse(text);   // hoped for, not checked
+```
+
+The compiler accepts that line and will then check every later use of `readings` against a promise nobody verified. If the text came from a file somebody edited by hand, or from a program written by another team, or from a version of the format that has since changed, the values may be nothing like `Reading`. Nothing here will notice.
+
+For the moment, work with JSON you produced yourself, where the shapes are known because your own code wrote them. Data arriving from somewhere you do not control needs to be checked before it is trusted, and that is a large enough topic to have a chapter of its own in Part 3.
+
 ## On Iteration
 
 Arrays give sequences built-in support in the language, and their operations package the traversals we used to write by hand: `map` to transform, `filter` to select, `reduce` to summarise, `find` to search, with `for of` underneath them all for the computations that fit no named pattern. 
