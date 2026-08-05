@@ -66,7 +66,7 @@ So there are two notions of sameness, and code has to choose between them delibe
 
 A class expresses the second by providing a method for it, conventionally named `equals`. Nothing calls this method automatically; a caller who wants value comparison must ask for it by name.
 
-### Giving Away the Freedom
+### Degrading Implementation Freedom
 
 The obvious implementation compares the representations, position by position. With the array version of `GuestList` it would read:
 
@@ -380,7 +380,7 @@ The freedom to change an implementation is not something a design has or lacks b
 
 The previous chapter bought it by hiding the representation. This chapter began by asking what that purchase rests on: a class holds a representation, it denotes an abstract value, and a change to the first is safe exactly when the second is unchanged. That is the test to apply before any change to how a class stores its data, and it is why swapping an array for a `Set` disturbed nobody.
 
-The rest of the chapter followed that freedom in both directions. It can be given away, and an equality method written against the stored fields is the most common way to give it away, since it makes the representation into public behaviour that callers may rely on. It can be kept, by writing such methods at the level of the abstract value, using only what the class already promises. It can be extended to what a class returns, because a value nobody can change frees the class to build, share, or cache it as it sees fit. And it can be extended to what a class holds, because the type of its members is one more commitment it need not make.
+The rest of the chapter followed that freedom in both directions. It can be degraded, and an equality method written against the stored fields is the most common way to degrade it, since it makes the representation into public behaviour that callers may rely on. It can be kept, by writing such methods at the level of the abstract value, using only what the class already promises. It can be extended to what a class returns, because a value nobody can change frees the class to build, share, or cache it as it sees fit. And it can be extended to what a class holds, because the type of its members is one more commitment it need not make.
 
 Each step outward costs the class something it used to know, which is the thread into the next chapter. `Roster<T>` had to be handed a comparison function because it had no way to _require_ that its members provide one. There is one more commitment in every design we have written: a caller still has to name the class it wants. Declining that commitment, so that code depends on a set of promised operations rather than on any particular class, is what interfaces are for.
 
