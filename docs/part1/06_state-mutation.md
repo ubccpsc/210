@@ -345,7 +345,7 @@ The copy-versus-reference distinction matters because calling a function perform
 
 There are three cases. We will walk through them slowly, because mutation through function parameter passing is where mutation most often defies expectations. Note that these rules _differ_ in different programming languages---when encountering a new language, you should learn how exactly it passes parameters.
 
-**1. Passing a primitive: the function gets a copy.** The parameter is a new box holding a copy of the value, so nothing the function does to it can affect the caller:
+_1. Passing a primitive: the function gets a copy._ The parameter is a new box holding a copy of the value, so nothing the function does to it can affect the caller:
 
 ```typescript
 function bump(n: number): void {
@@ -362,7 +362,7 @@ test("bump leaves the caller's number unchanged",
 
 This behaviour is called **pass-by-value**: the function receives the value, not the variable. `bump` compiles and runs without complaint, and does nothing at all.
 
-**2. Passing an object: the function gets a copy of the reference.** The parameter is a new box, but it holds a copy of the *arrow*, and the arrow points at the caller's object. Mutation through the parameter changes the one object both arrows share, and the caller sees it:
+_2. Passing an object: the function gets a copy of the reference._ The parameter is a new box, but it holds a copy of the *arrow*, and the arrow points at the caller's object. Mutation through the parameter changes the one object both arrows share, and the caller sees it:
 
 ```typescript
 /**
@@ -391,7 +391,7 @@ The functions above are our first whose signatures declare a return type of **`v
 
 </details>
 
-**3. Reassigning an object parameter: still invisible.**  One tricky aspect of pass-by-reference comes up when we reassign a method's parameters. The only parameter holds a *copy* of the arrow. Re-assigning that arrow points the function's own box somewhere new, but leaves the original arrow unchanged. It is worth ensuring you fully understand this example, as many languages have these kinds of tricky semantics:
+_3. Reassigning an object parameter: still invisible._  One tricky aspect of pass-by-reference comes up when we reassign a method's parameters. The only parameter holds a *copy* of the arrow. Re-assigning that arrow points the function's own box somewhere new, but leaves the original arrow unchanged. It is worth ensuring you fully understand this example, as many languages have these kinds of tricky semantics:
 
 ```typescript
 function reset(reading: Reading): void {
@@ -422,7 +422,7 @@ The three cases, summarised:
 | Argument passed | The parameter receives | Reassigning the parameter | Mutating the object it refers to |
 |---|---|---|---|
 | `number`, `string`, `boolean` | a copy of the value | invisible to the caller | n/a (primitives have no parts to change) |
-| object or array | a copy of the reference | invisible to the caller | **visible to the caller** |
+| object or array | a copy of the reference | invisible to the caller | _visible to the caller_ |
 
 The same distinction, drawn out:
 
@@ -492,9 +492,9 @@ Choosing where to declare a variable is thus important: it is choosing _how long
 
 So, values do not escape their blocks. There are three exceptions, and we have already met all three:
 
-1. **The value is returned.** `longest` the *name* dies when `longestFreezingStreak` ends, but its final *value* escapes through `return` into the caller's hands.
-2. **The value is assigned to a variable declared outside.** The loop body's assignments to `current` and `longest` outlive each iteration precisely because those variables live in the enclosing block.
-3. **The block mutates an object that is visible outside.** This one is the easiest to miss. Consider calibrating an entire day:
+1. _The value is returned._ `longest` the *name* dies when `longestFreezingStreak` ends, but its final *value* escapes through `return` into the caller's hands.
+2. _The value is assigned to a variable declared outside._ The loop body's assignments to `current` and `longest` outlive each iteration precisely because those variables live in the enclosing block.
+3. _The block mutates an object that is visible outside._ This one is the easiest to miss. Consider calibrating an entire day:
 
 ```typescript
 function calibrateDay(day: Reading[], offset: number): void {
@@ -538,9 +538,9 @@ We now have a name for what `calibrate` and `calibrateDay` do. A **side effect**
 
 Side effects change what we must do as readers, as documenters, and as testers of code:
 
-- **Reading.** A pure function can be understood from its signature: `Reading[]` in, `number` out. A signature like `calibrateDay`'s (`void` out!) says nothing about what the function is *for*; its entire purpose is the effect. You must read the body, or trust the documentation.
-- **Documenting.** Because the signature is silent, the documentation has to say what the function changes: notice the line `Modifies the given reading in place` in `calibrate`'s comment. A mutating function whose documentation does not mention the mutation is a trap for every caller who reasonably assumes their arguments come back untouched.
-- **Testing.** A pure function is tested by checking its return value. A mutating function is tested by checking *state*: call it, then assert on the object afterwards.
+- _Reading._ A pure function can be understood from its signature: `Reading[]` in, `number` out. A signature like `calibrateDay`'s (`void` out!) says nothing about what the function is *for*; its entire purpose is the effect. You must read the body, or trust the documentation.
+- _Documenting._ Because the signature is silent, the documentation has to say what the function changes: notice the line `Modifies the given reading in place` in `calibrate`'s comment. A mutating function whose documentation does not mention the mutation is a trap for every caller who reasonably assumes their arguments come back untouched.
+- _Testing._ A pure function is tested by checking its return value. A mutating function is tested by checking *state*: call it, then assert on the object afterwards.
 
 ```typescript
 const readings: Reading[] = [

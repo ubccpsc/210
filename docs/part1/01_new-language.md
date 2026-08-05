@@ -34,7 +34,7 @@ More precisely, we would call any syntax where the operator appears before the o
 In ISL, *all* syntax was prefix. In TypeScript, most basic operations (e.g., addition, comparison) are written in infix syntax.
 </details>
 
-A more important way languages differ though is in the **mechanisms the language enforces for you**. A language can check things about your program before it ever runs, or it can leave those checks to you. 
+A more important way languages differ though is in the _mechanisms the language enforces for you_. A language can check things about your program before it ever runs, or it can leave those checks to you. 
 
 Enforcement mechanisms are where TypeScript differs most from ISL. TypeScript makes **types** an explicit, checked part of the program, and it analyses and transforms your source code with a **compiler** before the program executes. The compiler catches many common programming mistakes and makes it easier to build large systems. 
 
