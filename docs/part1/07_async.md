@@ -326,25 +326,31 @@ The braces change the rules, exactly as the arrow function tooltip in Chapter 1 
 ```typescript
 checkExpect(async () => {
     const report: string = await loadReport();
-    report.length > 0;          // computed, then discarded
+    report.length > 0; // computed, then discarded
 }, true);
 ```
 
-the thunk computes the answer and throws it away, so `checkExpect` receives `undefined` and the test fails against `true`. Whenever you find you need braces, check that a `return` goes with them; whenever a check fits in a single expression, prefer the brace-free form, which cannot make this mistake.
+the thunk computes the answer but does not return it, so `checkExpect` receives `undefined` and the test fails against `true`. Whenever you find you need braces, double check whether a `return` is needed; whenever a check fits in a single expression, prefer the brace-free form.
 
 `checkExpect` awaits whatever its function produces, so the test does not finish until every `await` inside it has delivered. Forgetting the `await` before an async call is the classic mistake: the check then compares a `Promise` object rather than the value it delivers, and fails confusingly.
 
 `checkError` works the same way, and the slow operations in this chapter give it plenty to do: a file may not exist, and a service may not answer. An `async` function does not reject the promise at the point you call it; it returns a promise that _later_ rejects. The thunk's job is to hand that promise back to the check, which it does by awaiting it:
 
 ```typescript
-test("reading a missing file reports an error",
+test("reading a missing file rejects the promise",
     checkError(async () => {
         return await readFile("no-such-file.txt", "utf8");
     })
 );
 ```
 
-In this case, `checkError` is able to verify that the promise has rejected rather than fulfilled.
+In this case, `checkError` is able to verify that the promise has rejected rather than fulfilled. `checkError` also knows if a function returns a promise, allowing the compact version from `checkExpect` to also be used:
+
+```typescript
+test("reading a missing file rejects the promise",
+    checkError(async () => await readFile("no-such-file.txt", "utf8"))
+);
+```
 
 </details>
 
@@ -436,7 +442,7 @@ Practise using `async` and `await` for reading and writing files on a new kind o
 
 The journal is a plain text file, one entry per line.
 
-1. Write `async function lineCount(path: string): Promise<number>` that reads the file at `path` as text (pass `"utf8"` to `readFile`) and returns how many lines it has. (Hint: <span class="hint">`text.split("\n")` gives an array of the lines.</span>) Test it with an async check, of the form <span class="hint">`test("...", checkExpect(async () => lineCount("entries.txt"), ...))`</span>. 
+1. Write `async function lineCount(path: string): Promise<number>` that reads the file at `path` as text (pass `"utf8"` to `readFile`) and returns how many lines it has. (Hint: <span class="hint">`text.split("\n")` gives an array of the lines.</span>) Test it with an async check, of the form <span class="hint">`test("...", checkExpect(async () => await lineCount("entries.txt"), ...))`</span>. 
 2. Write `async function backUp(path: string): Promise<void>` that reads the journal and writes its contents to a new file at `path + ".bak"`. Write the doc comment: <span class="hint">record that the function modifies the file system, as the mutation chapter required.</span> Note that <span class="hint">the two `await`s must run in order: the backup cannot be written before the contents have been read</span>.
 3. Write `async function restore(path: string): Promise<void>` that reads the backup <span class="hint">at `path + ".bak"`</span> and writes its contents back to `path`, replacing the journal with the backed-up copy. Write the doc comment: <span class="hint"> document the file-system change,</span> and,  <span class="hint">as in `backUp`, make sure the read finishes before the write begins</span>.
 
