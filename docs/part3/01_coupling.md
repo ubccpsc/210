@@ -571,7 +571,7 @@ The habits that produce it are the ones this chapter has worked through. Ask a n
 
 None of this makes a system immune to change, and that was never the goal. The requirements will still arrive, the dependencies will still publish new versions, and the environment will still shift underneath a design that was correct when it was written. What low coupling buys is that those changes stay the size they inherently are, rather than the size the dependency graph makes them.
 
-One question is left open, and it is the same one Part 2 finished on. `WeeklyRecap` now takes a `PlayLog` in its constructor rather than constructing its own, which is what made it loosely coupled and testable. Somebody, somewhere, must still decide that the `PlayLog` it receives is a `PlayHistory` and hand one over. The next chapter takes up that responsibility directly: where construction and wiring belong in a system, and how concentrating them at the boundary makes the interchangeable parts of a design interchangeable in practice.
+One question is left open, and it is the same one Part 2 finished on. `WeeklyRecap` now takes a `PlayLog` in its constructor rather than constructing its own, which is what made it loosely coupled and testable. Somebody, somewhere, must still decide that the `PlayLog` it receives is a `PlayHistory` and hand one over. The next chapter answers that question in the setting where it matters most: dependencies on code we did not write and cannot change, where an interface of our own is the only thing standing between a provider's decisions and our own codebase.
 
 <details class="tooltip exercise">
   <summary>Exercise: A Bike-Share Maintenance Report</summary>
