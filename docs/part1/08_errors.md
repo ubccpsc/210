@@ -383,16 +383,33 @@ While `finally` blocks are often not needed, you will likely encounter them when
 
 `finally` runs on every path out of the `try`, whether the body finished or threw, and an uncaught exception keeps travelling afterward:
 
-```mermaid
-flowchart TD
-    A[Enter try] --> B{Throws?}
-    B -- No --> C[Finish try body]
-    B -- Yes --> D[Run catch, if present]
-    C --> E[Run finally, if present]
-    D --> E
-    E --> F{Caught?}
-    F -- Yes --> G[Execute next statement]
-    F -- No --> H[Exception propagates up call stack]
+```plantuml
+@startuml
+
+skinparam defaultTextAlignment center
+
+start
+
+:Enter try;
+
+if (throws?) then (yes)
+  :Run catch, if present;
+else (no)
+  :Finish try body;
+endif
+
+:Run finally, if present;
+
+if (caught?) then (yes)
+  :Execute the next statement;
+  stop
+else (no)
+  :Exception propagates
+  up the call stack;
+  stop
+endif
+
+@enduml
 ```
 <!-- caption: "Control flow through try, catch, and finally." -->
 
@@ -465,14 +482,28 @@ This is the deeper reason the success path stayed focused. The intermediate laye
 
 `requireSection` throws, and the exception rises back through `enrolAll`, which does nothing, to the `try` in `enrolStudent`:
 
-```mermaid
-sequenceDiagram
-    enrolStudent->>enrolAll: call
-    enrolAll->>requireSection: call
-    rect rgb(255, 235, 235)
-    requireSection-->>enrolAll: throw
-    enrolAll-->>enrolStudent: propagates (caught here)
-    end
+```plantuml
+@startuml
+
+hide footbox
+
+participant enrolStudent
+participant enrolAll
+participant requireSection
+
+enrolStudent -> enrolAll : call
+enrolAll -> requireSection : call
+
+group exception propagation
+  requireSection --> enrolAll : throw
+  enrolAll --> enrolStudent : passes straight through;\nenrolAll does nothing
+end
+
+note over enrolStudent
+  caught by the try here
+end note
+
+@enduml
 ```
 <!-- caption="An exception rising from requireSection to the handler in enrolStudent." -->
 
