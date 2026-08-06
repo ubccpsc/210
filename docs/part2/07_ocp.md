@@ -132,7 +132,7 @@ Adding a new channel means writing one new class and adding it to the configurat
 
 Openness comes at a cost. Depending on an abstraction adds indirection: the interface, the dispatch, the extra class. You spend that indirection to buy flexibility along _one_ axis of change, and the skill is in choosing the right axis. For the notifier system the axis was clear from the start: new channels are exactly the kind of thing added over time, so the `Notifier` interface is drawn across that axis and the indirection is justified. While there is a small runtime overhead for this indirection, the primary risk is one of conceptual overhead for engineers.
 
-This reiterates the encapsulation chapter's advice to hide what is most likely to change, now applied to whole behaviours: put the abstraction boundary where new variants will appear. This also means we should not put abstraction boundaries where new variants are unlikely. Building an elaborate extension point for variation that never arrives adds conceptual indirection without any value.
+This reiterates the encapsulation chapter's advice to hide what is most likely to change, now applied to whole behaviours: put the abstraction boundary where new variants will appear. A boundary placed this way is an **extension point**, a place where behaviour can be varied by adding code rather than by editing code that already works, and it is what "open for extension" means in practice. This also means we should not put extension points where new variants are unlikely. Building an elaborate one for variation that never arrives adds conceptual indirection without any value.
 
 <details class="tooltip deep-dive">
 <summary>Speculative Generality</summary>

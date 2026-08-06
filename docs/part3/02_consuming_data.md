@@ -28,7 +28,7 @@ The last two rows are worth extra reflection. A library changes when _we_ upgrad
 
 ## A Tracker Across Several Carriers
 
-We use one running example for this chapter and the next.
+We use one running example for this chapter and the rest of Part 3, following the same system as it is published, cleaned up, debugged, and extended.
 
 > As an online shopper, I want to see where all of my parcels are in one place, so that I do not have to visit a different website for every carrier.
 
@@ -216,7 +216,7 @@ The schema reads much like the `Shipment` type declaration, which raises an obvi
 type Shipment = z.infer<typeof ShipmentSchema>;
 ```
 
-This matters more than it first appears. A hand-written type and a hand-written validator are two descriptions of one thing, and two descriptions drift. Someone adds a field to `Shipment`, forgets the converter, and the validator quietly stops checking a field the type still promises: a type hole reopened by ordinary maintenance, in code that looks fine. Deriving the type from the schema makes the drift impossible, because there is only one description and the other is computed from it. This is the same argument the flexibility chapter made for a single source of truth, applied to validation.
+This matters more than it first appears. A hand-written type and a hand-written validator are two descriptions of one thing, and two descriptions drift. Someone adds a field to `Shipment`, forgets the converter, and the validator quietly stops checking a field the type still promises: a type hole reopened by ordinary maintenance, in code that looks fine. Deriving the type from the schema makes the drift impossible, because there is only one description and the other is computed from it. This is the same argument the implementation freedom chapter made for a single source of truth, applied to validation.
 
 Validating is one call:
 
@@ -323,7 +323,7 @@ function track(trackingNumber: string, includeHistory?: boolean): void {
 }
 ```
 
-A **default parameter value**, met in the flexibility chapter when `ImmutableGuestList` declared `guests: string[] = []`, is usually clearer when there is a sensible default: `includeHistory: boolean = false`.
+A **default parameter value**, met in the implementation freedom chapter when `ImmutableGuestList` declared `guests: string[] = []`, is usually clearer when there is a sensible default: `includeHistory: boolean = false`.
 
 Past two or three settings, both forms become hard to read at the call site, because `track("9K4T", true, false, 30)` tells a reader nothing. The convention is to collect them into a single **options object**:
 

@@ -87,10 +87,16 @@ The useful thing about the standard catalogue of smells is that you already know
 | Message chains: `a.b().c().d()` | The Law of Demeter, in the coupling chapter. |
 | Shotgun surgery: one change, many files | Scattering, in the coupling chapter. |
 | Divergent change: one file, many unrelated reasons to change | Tangling, in the coupling chapter. |
-| Primitive obsession: strings and numbers where a type belongs | Value objects, in the flexibility chapter. |
+| Primitive obsession: strings and numbers where a type belongs | Value objects, in the implementation freedom chapter. |
 | Conditional on a type tag | Replace conditional with polymorphism, in the Open/Closed chapter. |
 
-The `normaliseStatus` function above is the last row. A conditional branching on a tag, with one arm per carrier, is exactly the shape the Open/Closed chapter argued against, and it has reappeared in a system that was originally designed to avoid it. That is worth noticing on its own: a design does not stay correct because it was correct once.
+Two rows in particular exemplify the others. The coupling chapter described separation of concerns as the goal of giving every concern exactly one home, and named the two ways a design fails it: _tangling_, where many concerns share one place, and _scattering_, where one concern is spread across many places.
+
+Read the table again with those two in hand and most smells collapses into them. A large class is tangled. Duplicated code is scattered. Divergent change is what tangling feels like when you arrive to make an edit, and shotgun surgery is what scattering feels like. A conditional on a type tag is every variant's behaviour tangled into a single function. Primitive obsession is a rule with no home of its own, which leaves it scattered across every place that has to enforce it.
+
+The distinction is worth making because the two are cured by opposite moves. Tangling is relieved by _splitting_: extract a function, extract a class, replace a conditional with polymorphism, so that each concern is given somewhere to live. Scattering is relieved by _consolidating_: move a method to the data it works on, introduce a parameter object, replace a primitive with a type, so that something spread thin is gathered into one place. Diagnosing which one you have is therefore not an academic exercise, because the treatments run in opposite directions: splitting something already scattered leaves more fragments to keep in step, and consolidating something already tangled produces a larger tangle.
+
+The `normaliseStatus` function above is the last row of the table, and in these terms it is tangling: five carriers' status vocabularies sharing one function, when each belongs with the adapter that knows the carrier. A conditional branching on a tag is exactly the shape the Open/Closed chapter argued against, and it has reappeared in a system that was originally designed to avoid it. That is worth noticing on its own: a design does not stay correct because it was correct once.
 
 Smells are heuristics, and treating them as rules produces its own damage. A long function that reads top to bottom as a sequence of clearly named steps may be easier to follow than the six small functions it could be split into. The smell raises a question; the answer is sometimes that the code is fine.
 
@@ -189,7 +195,7 @@ class CarrierAClient implements CarrierClient {
 }
 ```
 
-`normaliseStatus` is then deleted, along with the `carrierId` parameter that existed only to feed it. The sixth carrier is now a class implementing an interface, which is what the design promised in the first place, and no existing adapter is touched when it arrives.
+`normaliseStatus` is then deleted, along with the `carrierId` parameter that existed only to feed it. The sixth carrier is now a class implementing an interface, which is what the design promised in the first place, and no existing adapter is touched when it arrives. Put in the vocabulary of the Open/Closed chapter, the refactoring did not invent an extension point; it restored one that had been there all along and had quietly stopped working, which is the most common thing a refactoring does.
 
 Notice what the refactoring did not do. It added no feature, fixed no bug, and changed no behaviour: every shipment that resolved to `delivered` before resolves to `delivered` now, which is what the existing suite confirms. All that changed is where the knowledge lives, and therefore what the next change will cost.
 

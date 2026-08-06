@@ -1,8 +1,8 @@
 # Designing APIs to Provide Data and Services
 
-The previous chapter left us wanting four things from the carrier API: a small surface, documentation that explains the API correctly, errors we could act on, and unexpected API changes. This chapter turns the system around. We are now the ones creating, publishing, and evolving the API, and those properties become the things our clients want from us.
+The previous chapter left us wanting four things from the carrier API: a small surface, documentation that explains the API correctly, errors we could act on, and changes that did not arrive without warning. This chapter turns the system around. We are now the ones creating, publishing, and evolving the API, and those properties become the things our clients want from us.
 
-The change is not a technical one. Every design decision in Part 2 could be revised the next morning, because we owned every caller: if a method name was wrong we renamed it, and the compiler listed the places to fix. A published API cannot be revised that way. The clients are people we cannot see, cannot contact, and cannot coordinate with, and they will depend on whatever we ship, including the parts we exposed unintentionally. Two consequences of this sitation follow, and this chapter elaborates on both of them.
+The change is not a technical one. Every design decision in Part 2 could be revised the next morning, because we owned every caller: if a method name was wrong we renamed it, and the compiler listed the places to fix. A published API cannot be revised that way. The clients are people we cannot see, cannot contact, and cannot coordinate with, and they will depend on whatever we ship, including the parts we exposed unintentionally. Two consequences of this situation follow, and this chapter elaborates on both of them.
 
 The first is that _a published API is close to permanent_. Anything a client can reach, a client will eventually depend on, and from that moment removing it breaks working code belonging to somebody who did nothing wrong. The cost of a design mistake is no longer an afternoon of refactoring; it is the correctness of other people's systems.
 
@@ -132,7 +132,7 @@ track(request: { carrierId: string; trackingNumber: string }): Promise<Shipment>
 tracker.track({ carrierId: "carrier-a", trackingNumber: "9K4T" });
 ```
 
-The value-object approach from the flexibility chapter further strengthens the API, by giving the two arguments different types so that swapping them stops compiling. Either way the principle is the one worth applying: when a mistake is possible, prefer a design in which the compiler catches it over documentation that warns against it.
+The value-object approach from the implementation freedom chapter further strengthens the API, by giving the two arguments different types so that swapping them stops compiling. Either way the principle is the one worth applying: when a mistake is possible, prefer a design in which the compiler catches it over documentation that warns against it.
 
 _Be consistent across the surface._ Argument order, naming, and error handling should be the same everywhere, because a client learns an API from its first few calls and then generalises. A surface where `findShipment` returns `null` and `findCarrier` throws an exception makes it so every subsequent operation has to be looked up individually because the design is not predictable.
 
@@ -237,7 +237,7 @@ Removing something is a process rather than an event, and the steps are the same
  */
 ```
 
-Then leave it in place long enough for clients to move, and only then remove it. Skipping the waiting period turns a manageable migration into an outage. While this might sound like we can just make breaking changes anyways and add a `@deprecated` annotation, note that these tags are mainly used to steer clients to new API and often persist for years, sometimes for decades, before they are actually removed.
+Then leave it in place long enough for clients to move, and only then remove it. Skipping the waiting period turns a manageable migration into an outage. While this might sound like we can just make breaking changes anyways and add a `@deprecated` annotation, note that these tags are mainly used to steer clients to new API and often persist for years, sometimes for decades, before they are finally removed.
 
 The sharpest difference between the two kinds of API is who decides when to upgrade. A library client upgrades when they choose to, so old versions stay in use for years and a deprecation can be generous. A web service client is upgraded when _we_ deploy, whether they are ready or not, which is why services keep old versions running in parallel: it is the only way to give a client the choice that a library client has by default.
 
