@@ -6,7 +6,7 @@ An **interface** is an abstraction that enables classes to be hidden as well. It
 
 <!-- RTH: I like this setup paragraph as it justifies the chapter organization a bit; I wonder if I should back-port this to past chapter? -->
 
-This chapter introduces interfaces: the `interface` keyword and what belongs in one, how a class commits to an interface with `implements`, the difference between the type a variable is declared with and the type of the object actually behind it, and why depending on an interface rather than a concrete class is one of the most useful decisions in a design. It is also the foundation for the two chapters that follow, on polymorphism and on extending a system without modifying it.
+This chapter introduces interfaces: the `interface` keyword and what belongs in one, how a class commits to an interface with `implements`, the difference between the type a variable is declared with and the type of the object that is behind it at run time, and why depending on an interface rather than a concrete class is one of the most useful decisions in a design. It is also the foundation for the two chapters that follow, on polymorphism and on extending a system without modifying it.
 
 #### A Channel as a Contract
 
@@ -183,7 +183,7 @@ function alertAll(channels: Notifier[], message: string): void {
 
 `alertAll` works for an `EmailNotifier`, for an `SmsNotifier`, for a list mixing the two, and for any channel written in the future, with no change to its body. The interface is a boundary, with the alerting logic on one side and the delivery mechanisms on the other; each side can be read, changed, and tested with only the contract in view, never the other side's code.
 
-Notice what `alertAll` cannot do: it cannot tell, and cannot act on, which kind of channel each element is. Every element is, as far as the code can see, simply a `Notifier`. In this chapter that uniformity is the goal. <!-- In the next chapter it becomes something more powerful: when the same call, `channel.send(message)`, runs different code depending on the actual type behind the apparent one, we have polymorphism.-->
+Notice what `alertAll` cannot do: it cannot tell, and cannot act on, which kind of channel each element is. Every element is, as far as the code can see, no more than a `Notifier`. In this chapter that uniformity is the goal. <!-- In the next chapter it becomes something more powerful: when the same call, `channel.send(message)`, runs different code depending on the actual type behind the apparent one, we have polymorphism.-->
 
 ## Testing Across the Boundary
 
@@ -209,7 +209,7 @@ test("alertAll delivers the message over every channel", () => {
 });
 ```
 
-`RecordingNotifier` is a third implementation of `Notifier`, written only for tests. A stand-in like this is called a **test double**, or a **mock object**: it satisfies the same contract as the real thing but is simpler and observable, so the code under test can be exercised in isolation. This is the black-box testing of the verification chapter, now made easy by an interface: the test depends on the contract, the code under test depends on the contract, and the real delivery mechanism is simply not present. Designing against interfaces is, among other things, what makes code testable.
+`RecordingNotifier` is a third implementation of `Notifier`, written only for tests. A stand-in like this is called a **test double**, or a **mock object**: it satisfies the same contract as the real thing but is simpler and observable, so the code under test can be exercised in isolation. This is the black-box testing of the verification chapter, now made easy by an interface: the test depends on the contract, the code under test depends on the contract, and the real delivery mechanism is not present at all. Designing against interfaces is, among other things, what makes code testable.
 
 ```plantuml
 @startuml

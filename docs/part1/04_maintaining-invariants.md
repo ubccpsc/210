@@ -1,8 +1,8 @@
 # Maintaining Invariants
 
-The previous chapter placed invariants in documentation, tests, and assertions. These mechanisms *detect* problems: tests probe chosen inputs, and assertions terminate the program when an impossible state is observed. 
+The previous chapter placed invariants in documentation, tests, and assertions. These mechanisms _detect_ problems: tests probe chosen inputs, and assertions terminate the program when an impossible state is observed. 
 
-A shortcoming of these mechanisms though is that they cannot *prevent* invalid values from being created in the first place. This chapter is about closing that gap: designing code that wholly prevents invalid values from being created, rather than writing code that checks for violations.
+A shortcoming of these mechanisms though is that they cannot _prevent_ invalid values from being created in the first place. This chapter is about closing that gap: designing code that wholly prevents invalid values from being created, rather than writing code that checks for violations.
 
 In this chapter, we will show how this can be done _solely with programming constructs_ you know from CPSC 110. The solution we'll get to is not standard TypeScript; you may, in fact, find it unwieldy. This is expected. In fact, it will motivate the object-oriented programming we'll get to in Part 2.
 
@@ -47,16 +47,16 @@ The design above allows invalid values to pass the type checker:
 const account: BankAccount = { balance: -100 }; // passes the type checker
 ```
 
-This is the same issue we encountered with the `Song` whose duration was `-30`: the object has the right *shape*, so the static check passes, but its *meaning* is wrong. 
+This is the same issue we encountered with the `Song` whose duration was `-30`: the object has the right _shape_, so the static check passes, but its _meaning_ is wrong. 
 
 However, nothing about the `BankAccount` type connects it to `deposit` and `withdraw`. We can build any object literal with a `balance` property and the language will call it a `BankAccount`, whether or not the invariant holds. 
 
 To ensure an invariant holds for the life of a program, we must ensure two things: 
 
-1. when the value is created, the invariant must be *established*; and 
-2. every operation that produces a new value from an old one must *preserve* the invariant. 
+1. when the value is created, the invariant must be _established_; and 
+2. every operation that produces a new value from an old one must _preserve_ the invariant. 
 
-If both are true, then every value that ever exists is valid: the first one was checked, and every later one came from an operation that kept the promise. In the initial design, creation---by writing an object literal---is open to everyone, so we cannot ensure the invariant is *established* on account creation.
+If both are true, then every value that ever exists is valid: the first one was checked, and every later one came from an operation that kept the promise. In the initial design, creation---by writing an object literal---is open to everyone, so we cannot ensure the invariant is _established_ on account creation.
 
 ## Controlling Creation with a Constructor Function
 
@@ -87,13 +87,13 @@ test("accounts cannot be created with a negative balance",
 
 This is progress: accounts created with `makeAccount` protect the invariant. 
 
-But, the protection remains a convention. Nothing *forces* a client to call `makeAccount`: the literal `{ balance: -100 }` still type checks, exactly as before. The same is true of `deposit` and `withdraw`; a client can skip them and write `{ balance: account.balance - 200 }` by hand. The constructor function and the operations exist alongside data that remains open to everyone. 
+But, the protection remains a convention. Nothing _forces_ a client to call `makeAccount`: the literal `{ balance: -100 }` still type checks, exactly as before. The same is true of `deposit` and `withdraw`; a client can skip them and write `{ balance: account.balance - 200 }` by hand. The constructor function and the operations exist alongside data that remains open to everyone. 
 
 Making the invariant safe depends on every engineer choosing to go through the right functions---the exact _programmer discipline_ we have been trying to avoid relying on.
 
 ## True Safety by Binding Operations to the Data
 
-The root of the problem is that the data and its operations are disconnected: the `balance` field is reachable by anyone, and `deposit` and `withdraw` are free-standing functions that anyone may bypass. To solve the problem, we must connect the two, so that the operations *belong to* the account and the data is reachable *only* through them.
+The root of the problem is that the data and its operations are disconnected: the `balance` field is reachable by anyone, and `deposit` and `withdraw` are free-standing functions that anyone may bypass. To solve the problem, we must connect the two, so that the operations _belong to_ the account and the data is reachable _only_ through them.
 
 To do this, we need a language feature we've not yet mentioned: an object property can hold a function. We can define a `BankAccount` type whose properties are not data at all, but operations:
 
@@ -110,7 +110,7 @@ type BankAccount = {
 };
 ```
 
-Intentionally, there is no `balance` field. The type of `BankAccount` no longer describes what an account *stores*; it describes what an account *can do*. A holder of a `BankAccount` can deposit, withdraw, and observe the balance (`getBalance`), and that is all. These operations are invoked with dot notation:
+Intentionally, there is no `balance` field. The type of `BankAccount` no longer describes what an account _stores_; it describes what an account _can do_. A holder of a `BankAccount` can deposit, withdraw, and observe the balance (`getBalance`), and that is all. These operations are invoked with dot notation:
 
 ```typescript
 // given an initialAccount of type BankAccount ...
@@ -126,7 +126,7 @@ What is new is _which_ function you get. A free-standing `deposit(account, 5)` i
 
 So far, every object property we have used has held a data value: `song.title` held a string, and `account.balance` held a number. 
 
-A property can also hold a *function*. In particular:
+A property can also hold a _function_. In particular:
 ```typescript
 type T = {
   foo(x: X, b: Y): Z;
@@ -282,7 +282,7 @@ test("the counter refuses to count past capacity",
 );
 ```
 
-Connecting back to the previous chapter, the last test treats a click at full capacity as an *unexpected* error and halts. If turning people away at the door were a normal outcome the program should handle, `increment` would instead return a `Result`. Which treatment is right is a design decision, not a coding one.
+Connecting back to the previous chapter, the last test treats a click at full capacity as an _unexpected_ error and halts. If turning people away at the door were a normal outcome the program should handle, `increment` would instead return a `Result`. Which treatment is right is a design decision, not a coding one.
 
 <details class="tooltip exercise">
   <summary>Exercise: Reflect on Closures</summary>
@@ -436,7 +436,7 @@ In short, the invariant is no longer protected by _programmer discipline_; it is
 
 This chapter has focused on how we can ensure that invariants are enforced in code. The examples we have are small, but even in this small example we see a real-world safety implication (that venues not be filled over fire-code limits!). Code nowadays runs on so many platforms and has access to so much of our data. How do we ensure that only code we expect to run runs on our machines, and how do we ensure that that code doesn't leak our information to people who shouldn't have it?
 
-The answer is: much code in the wild *doesn't* manage to enforce such invariants, leading to many security and privacy issues in the wild. If this is interesting to you from a technical standpoint, you may be interested in learning more about *computer security*, either through courses (CPSC 337, CPSC 541), or cyber-securtity competitions ([Maple Bacon Team](https://maplebacon.org/)). If you're interested in the societal implications, you may be interested in CPSC 430.
+The answer is: much code in the wild _doesn't_ manage to enforce such invariants, leading to many security and privacy issues in the wild. If this is interesting to you from a technical standpoint, you may be interested in learning more about _computer security_, either through courses (CPSC 337, CPSC 541), or cyber-securtity competitions ([Maple Bacon Team](https://maplebacon.org/)). If you're interested in the societal implications, you may be interested in CPSC 430.
 
 </details>
 

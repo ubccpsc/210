@@ -18,7 +18,7 @@ Our programs in Part 1 stay small enough that one person can hold the whole desi
 By the end of Part 1, you will be able to:
 
 1. _Model information as precise types_, designing data definitions whose structure drives the code that operates on them.
-2. _Specify behaviour with contracts and invariants, and construct tests_ that target the cases most likely to reveal faults, then judge whether a suite genuinely covers them.
+2. _Specify behaviour with contracts and invariants, and construct tests_ that target the cases most likely to reveal faults, then judge whether a suite adequately covers them.
 3. _Decide how each property should be corroborated_, whether by the type system, by tests and assertions, or by controlling how values are created, design code that enforces the invariants the language cannot, and communicate the failures it cannot prevent.
 4. _Reason about state and time_, tracing how references, scope, and mutation determine what a change affects, and weighing the trade-offs of mutation, side effects, and asynchronous computation.
 5. _Build working programs_ that combine these ideas to process collections and interact with files and web services.
@@ -37,14 +37,14 @@ The ideas of correctness are not new; the enforcement is. In CPSC 110, a data de
 
 ## Layered Correctness
 
-A type communicates *intent*: a well-designed type tells the next reader exactly which values are valid, and the compiler enforces that intent before the program runs. But types describe *structure*, and many correctness properties are about *meaning*. A balance must stay non-negative, a course grade must sit between 0 and 100, and a binary search tree must keep its keys in order. A value can have exactly the right shape and still be meaningless. The properties that must hold beyond the types are called **invariants**, and the assumptions and guarantees a function documents, its preconditions and postconditions, are its **contract**.
+A type communicates _intent_: a well-designed type tells the next reader exactly which values are valid, and the compiler enforces that intent before the program runs. But types describe _structure_, and many correctness properties are about _meaning_. A balance must stay non-negative, a course grade must sit between 0 and 100, and a binary search tree must keep its keys in order. A value can have exactly the right shape and still be meaningless. The properties that must hold beyond the types are called **invariants**, and the assumptions and guarantees a function documents, its preconditions and postconditions, are its **contract**.
 
-Identifying these properties and confirming them are separate tasks. The separation follows the boundary between the **static** and **dynamic** views of a program. The static view is the source text, which the compiler can analyse without running it. That is where types are checked. The dynamic view is the program as it runs, taking on actual values and following particular paths. Whether it computes the *right* answer is a dynamic question, and can only be answered by running the code. These mechanisms form layers, and each guards against a failure the others cannot see:
+Identifying these properties and confirming them are separate tasks. The separation follows the boundary between the **static** and **dynamic** views of a program. The static view is the source text, which the compiler can analyse without running it. That is where types are checked. The dynamic view is the program as it runs, taking on actual values and following particular paths. Whether it computes the _right_ answer is a dynamic question, and can only be answered by running the code. These mechanisms form layers, and each guards against a failure the others cannot see:
 
 - **Types** establish what shapes of data are allowed.
 - **Contracts** state what behaviour each function assumes and promises.
 - **Invariants** state what must remain true of the data at all times.
-- **Tests and assertions** check that those promises actually hold when the program runs.
+- **Tests and assertions** check that those promises hold when the program runs.
 
 
 

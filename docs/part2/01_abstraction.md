@@ -4,7 +4,7 @@ Part 1 ended with invariants maintained by hand: we wrote a constructor function
 
 > As a listener, I want a playlist that always knows which song is current, so that pressing "next" moves through my music predictably as I add and remove songs.
 
-Consider the running example for this chapter. A playlist holds a list of songs and remembers which one is _current_, so that an interface can show what is playing and advance to the next song. The current position is a number, an index into the list of songs. The type of that field is `number`, but not every number is meaningful: only an index that actually points at a song makes sense, and when the playlist is empty there is no current song at all. This rule, that the current index is always a valid position in the list (or a sentinel when the list is empty), is an _invariant_. As in Part 1, the type system cannot express it: `number` permits `-4` and `9999` just as readily as a valid playlist index.
+Consider the running example for this chapter. A playlist holds a list of songs and remembers which one is _current_, so that an interface can show what is playing and advance to the next song. The current position is a number, an index into the list of songs. The type of that field is `number`, but not every number is meaningful: only an index that points at a real song makes sense, and when the playlist is empty there is no current song at all. This rule, that the current index is always a valid position in the list (or a sentinel when the list is empty), is an _invariant_. As in Part 1, the type system cannot express it: `number` permits `-4` and `9999` just as readily as a valid playlist index.
 
 ## The Problem: Keeping State Consistent
 
@@ -52,7 +52,7 @@ In the Part 1 modelling chapter you described a playlist as a _tagged union_, `E
 
 ## From Closures to Classes
 
-The closure pattern from Part 1 provides the bridge into classes, because it already bundles state with operations; it simply does so without language support. Here is a playlist built with closures, as a constructor function whose returned operations close over the hidden state:
+The closure pattern from Part 1 provides the bridge into classes, because it already bundles state with operations, but does so without language support. Here is a playlist built with closures, as a constructor function whose returned operations close over the hidden state:
 
 
 <CollapsibleCode>
@@ -181,7 +181,7 @@ class X {
    // ...
 }
 ```
-is a *statement* that declares the name `X` as a type.
+is a _statement_ that declares the name `X` as a type.
 
 </details>
 
@@ -240,7 +240,7 @@ Adding a song to `favourites` does nothing to `workout`. This independence is on
 
 <!-- ## Class Bodies: Storing State and Functionality -->
 
-A class binds together *state* and *functionality*. We look at each in turn.
+A class binds together _state_ and _functionality_. We look at each in turn.
 
 ## Class State
 
@@ -272,7 +272,7 @@ class T {
 }
 ```
 
-The `this` keyword refers to the *current instance* of the class; it only makes sense within a class body. Within the constructor, `this.myField` refers to `myField` in the object being constructed. 
+The `this` keyword refers to the _current instance_ of the class; it only makes sense within a class body. Within the constructor, `this.myField` refers to `myField` in the object being constructed. 
 
 </details>
 
@@ -450,7 +450,7 @@ function longest(playlists: Playlist[]): Playlist | null {
 
 The compiler checks these annotations exactly as it did for the types in Part 1. A function that expects a `Playlist` cannot be handed a `Song`, and the result of `longest` is known to be a `Playlist` or `null`, so a caller must consider the empty case. 
 
-A field of one object can hold another object, and a variable that "holds" an object actually holds a _reference_ to it, exactly as in the Part 1 mutation chapter. Two consequences follow.
+A field of one object can hold another object, and a variable that "holds" an object in fact holds a _reference_ to it, exactly as in the Part 1 mutation chapter. Two consequences follow.
 
 First, two objects are distinct even when their contents match. Each `new` produces a separate object with its own identity:
 
@@ -464,7 +464,7 @@ Second, when an object is passed to a function or stored in a field, it is the r
 
 ## Working with Objects
 
-A class declaration only describes what its objects look like. To do work, we instantiate objects and call their methods, using **dot notation**: in `playlist.next()`, the `.` separates the object from the method called on it. Because every object holds its own fields, a method call on one object never affects another.
+A class declaration only describes what its objects look like. To do work, we instantiate objects and call their methods, using dot notation: in `playlist.next()`, the `.` separates the object from the method called on it. Because every object holds its own fields, a method call on one object never affects another.
 
 The following walks a small program through two independent playlists:
 
@@ -681,7 +681,7 @@ Look back at how we used `favourites`. We called `add(..)`, `next()`, `current()
 This confines each concern to a single place. The class is the one location responsible for its own state, which frees the rest of the program from that responsibility. Because the operations that maintain the invariant live alongside the state they protect, rather than in the calling code, a client cannot accidentally leave an object in an inconsistent configuration by following the intended path.
 
 <!--
-So far this is the class *offering* an interface that a client has no need to look past. It is not yet a guarantee. Nothing in this chapter stops a determined caller from reaching in and writing `favourites.currentIndex = 99` directly, breaking the invariant from outside. Guaranteeing that a client *cannot* reach past the interface, so that an object's state is truly the class's own, is the role of [encapsulation](./03_encapsulation).
+So far this is the class _offering_ an interface that a client has no need to look past. It is not yet a guarantee. Nothing in this chapter stops a determined caller from reaching in and writing `favourites.currentIndex = 99` directly, breaking the invariant from outside. Guaranteeing that a client _cannot_ reach past the interface, so that an object's state is truly the class's own, is the role of [encapsulation](./03_encapsulation).
 -->
 
 <details class="tooltip exercise">

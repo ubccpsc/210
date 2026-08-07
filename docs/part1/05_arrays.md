@@ -1,6 +1,6 @@
 # Arrays and Iteration
 
-Much of the data programs work with arrives as a *sequence*: the messages in an inbox, the transactions on an account, the students in a course, the readings from a sensor. Because sequences are so common, most programming languages provides a built-in data structure for them: the **array**, an ordered collection of elements that can be accessed by position and that knows its own size. C, Java, Rust, Python, and TypeScript all provide arrays (Python calls them lists), and an engineer moving between languages can rely on them being there.
+Much of the data programs work with arrives as a _sequence_: the messages in an inbox, the transactions on an account, the students in a course, the readings from a sensor. Because sequences are so common, most programming languages provides a built-in data structure for them: the **array**, an ordered collection of elements that can be accessed by position and that knows its own size. C, Java, Rust, Python, and TypeScript all provide arrays (Python calls them lists), and an engineer moving between languages can rely on them being there.
 
 We have already built a sequence by hand. In [Using Types to Model Problems](./02_model-types) we defined a recursive `Playlist` and wrote a recursive function every time we wanted to count, total, or search it. That worked, but we had to re-write the same traversal pattern in every function. Patterns this common are exactly what languages provide explicit support for to make work easier. 
 
@@ -66,7 +66,7 @@ The array literal plays the role of `list` from CPSC 110: `[ -4, -1, 3 ]` is the
 </details>
 
 
-Every element of an array has the same type, and the compiler enforces it: trying to put a `string` into a `Reading[]` is a type error, and anything you take *out* of a `Reading[]` is known to be a `Reading`.
+Every element of an array has the same type, and the compiler enforces it: trying to put a `string` into a `Reading[]` is a type error, and anything you take _out_ of a `Reading[]` is known to be a `Reading`.
 
 Elements are accessed by their **index**, their position counting from zero, and the number of elements is available in the `length` property:
 
@@ -82,7 +82,7 @@ const count = day.length;    // 6
 Given an array `a`, the expression `a[i]` returns the `i`-th element in `a`, starting counting at 0.
 </details>
 
-In memory, `day` is a row of six cells, one per index. The cells do not contain the `Reading` objects themselves; each cell holds a *reference* to a separate `Reading` that lives elsewhere. An index like `day[0]` names a cell and follows its reference to the object. (We will introduce _references_ in detail in Chapter 6.)
+In memory, `day` is a row of six cells, one per index. The cells do not contain the `Reading` objects themselves; each cell holds a _reference_ to a separate `Reading` that lives elsewhere. An index like `day[0]` names a cell and follows its reference to the object. (We will introduce _references_ in detail in Chapter 6.)
 
 <!-- graph playground:
 hhttps://dreampuf.github.io/GraphvizOnline/?engine=dot
@@ -150,7 +150,7 @@ The other two kinds are containers that hold other values, which is what lets JS
 }
 ```
 
-Each entry has two parts separated by a colon. The name on the left, such as `"hour"`, is the **key**, and the value on the right is what is filed under that key. A key is always a string in double quotes. Within a single object each key is _unique_: a key is a label, and each label names exactly one value, so asking an object for the value under `"hour"` always has one unambiguous answer. (This pattern, a collection of unique keys that each map to a value, returns later under its own name; here it is simply how an object is put together.)
+Each entry has two parts separated by a colon. The name on the left, such as `"hour"`, is the **key**, and the value on the right is what is filed under that key. A key is always a string in double quotes. Within a single object each key is _unique_: a key is a label, and each label names exactly one value, so asking an object for the value under `"hour"` always has one unambiguous answer. (This pattern, a collection of unique keys that each map to a value, returns later under its own name; here it is just how an object is put together.)
 
 **A JSON array** is an ordered list of values inside `[ ]`, just as in this chapter:
 
@@ -190,7 +190,7 @@ JSON is flexible because of its ability to nest data. The value filed under a ke
 
 The whole document is one object. The value under `"location"` is a second object, nested inside the first. The value under `"readings"` is an array of objects, and inside one of those, `"note"` is `null` for the reading with no note and a string for the one that has it. The value under `"tags"` is an array of strings. Every value, at every depth, is one of the kinds above. That is the entirety of JSON: four primitive values, the object, and the array, combined without limit.
 
-JSON itself is text, and only text. A JSON document is a sequence of characters, whether it sits in a file or arrives over a network. It carries data and nothing else: no functions, no computation, no variables, and no way for one part to refer to another. The restriction is deliberate, and it is the reason JSON is so widely used. Because a JSON value is inert data in a notation that no single language owns, a program written in Python can produce it, a file can store it, and your TypeScript program can consume it, with the two sides needing to agree only on the shape of the data and not on a shared programming language. That independence, together with the fact that a person can open the text and simply read it, is why JSON has become the common format for configuration files and for web services.
+JSON itself is text, and only text. A JSON document is a sequence of characters, whether it sits in a file or arrives over a network. It carries data and nothing else: no functions, no computation, no variables, and no way for one part to refer to another. The restriction is deliberate, and it is the reason JSON is so widely used. Because a JSON value is inert data in a notation that no single language owns, a program written in Python can produce it, a file can store it, and your TypeScript program can consume it, with the two sides needing to agree only on the shape of the data and not on a shared programming language. That independence, together with the fact that a person can open the text and read it, is why JSON has become the common format for configuration files and for web services.
 
 A few differences from a TypeScript literal can be tricky: In JSON, keys must be wrapped in double quotes (`"hour"`, never a bare `hour`), and strings must use double quotes, never single. JSON permits no trailing comma after the final entry, and no comments anywhere. And the only values allowed are the kinds above: there is no `undefined`, and no special form for dates or anything else, only the primitives, objects, and arrays.
 
@@ -200,7 +200,7 @@ Because JSON is text, a program cannot work with it as values directly. The text
 
 ## The Built-In Array Operations
 
-Arrays come with _operations_ that cover the most common things a program does with a sequence. Each operation is a higher-order function that takes a function as its input. The input function describes what should happen to *one element*, and the operation applies that across the whole array for you.  We will often use arrow functions (lambdas), which we saw in Chapter 1, to specify those input functions.
+Arrays come with _operations_ that cover the most common things a program does with a sequence. Each operation is a higher-order function that takes a function as its input. The input function describes what should happen to _one element_, and the operation applies that across the whole array for you.  We will often use arrow functions (lambdas), which we saw in Chapter 1, to specify those input functions.
 
 The four operations we use most are `map`, `filter`, `reduce`, and `find`. These four operations capture some of the most common tasks we perform on arrays. `map` is used to uniformly transform every element of an array into a new array. `filter` returns a subset of an array. `find` locates one element in an array. `reduce` summarizes an array. 
 
@@ -314,7 +314,7 @@ The precondition matters here in exactly the way the previous chapter described:
 
 ### Searching with `find`
 
-`find` returns the *first* element for which the given function returns `true`. The report wants the first hour the temperature rose above freezing:
+`find` returns the _first_ element for which the given function returns `true`. The report wants the first hour the temperature rose above freezing:
 
 ```typescript
 const thaw: Reading = day.find((reading: Reading) => reading.tempCelsius > 0);
@@ -406,7 +406,7 @@ function firstAbove(day: Reading[], threshold: number): Reading | undefined {
 
 The `return` inside the loop body exits the whole function the moment a match is found, so later elements are never visited. This is exactly what `find` does for you: `find` is a loop someone else already wrote. The same is true of `map`, `filter`, and `reduce`. The built-in operations are not magic; they are packaged loops, and knowing how to write the loop means you can build the patterns the language did not provide.
 
-Some questions cannot be answered by any of the named operations. Every operation above examines elements one at a time: the function you hand to `map`, `filter`, or `find` receives a single element and nothing else. Some questions are instead about how elements relate to *each other*. Suppose quality control asks: did the station ever report the same temperature at two different hours?
+Some questions cannot be answered by any of the named operations. Every operation above examines elements one at a time: the function you hand to `map`, `filter`, or `find` receives a single element and nothing else. Some questions are instead about how elements relate to _each other_. Suppose quality control asks: did the station ever report the same temperature at two different hours?
 
 ```typescript
 /**
@@ -430,7 +430,7 @@ function hasRepeatedTemperature(day: Reading[]): boolean {
 }
 ```
 
-In this example, loops nest: for each `first` reading, the inner loop walks the whole array looking for a *different* hour (as expressed by the if) reporting the *same* temperature. The comparison involves two elements at once: the named operations cannot express this, because the functions they take see one element at a time. _(It is technically possible to contort `find` into answering this, with one search nested inside another, but the result is much harder to read than the loop that says what it means.)_
+In this example, loops nest: for each `first` reading, the inner loop walks the whole array looking for a _different_ hour (as expressed by the if) reporting the _same_ temperature. The comparison involves two elements at once: the named operations cannot express this, because the functions they take see one element at a time. _(It is technically possible to contort `find` into answering this, with one search nested inside another, but the result is much harder to read than the loop that says what it means.)_
 
 ```typescript
 const repeats: Reading[] = [
@@ -453,7 +453,7 @@ Loops have a second strength we are not ready to use yet: values that change as 
 Should you use loops or built-in array operations?
 Prefer the named operation whenever the task is exactly a transform (`map`), a selection (`filter`), a summary (`reduce`), or a first-match search (`find`). The operation name tells every future reader what the computation does at a glance, and the traversal it performs has no room for the small mistakes a hand-written loop can contain. 
 
-Write a loop when the computation does not fit a named pattern: when it relates elements to one another, like the repeated-temperature check, or when one pass must answer a question no single named operation can. The named operations say *what*; the loop is for when you must control *how*.
+Write a loop when the computation does not fit a named pattern: when it relates elements to one another, like the repeated-temperature check, or when one pass must answer a question no single named operation can. The named operations say _what_; the loop is for when you must control _how_.
 
 ## Reading and Writing JSON
 
@@ -503,9 +503,9 @@ For the moment, work with JSON you produced yourself, where the shapes are known
 
 Arrays give sequences built-in support in the language, and their operations package the traversals we used to write by hand: `map` to transform, `filter` to select, `reduce` to summarise, `find` to search, with `for of` underneath them all for the computations that fit no named pattern. 
 
-Notice one property everything in this chapter shared: none of these operations changed `day`, our array of daily temperatures. Every `map` and `filter` produced a new array, every `reduce` produced a new value, and even our hand-written loops only read the elements they visited; the original readings were never touched. This reflects a general principle of program design that runs through this course: once a pattern is understood and reliable, it is packaged up so it never needs to be re-derived, and we get to focus on *what* to compute instead of *how* to traverse. 
+Notice one property everything in this chapter shared: none of these operations changed `day`, our array of daily temperatures. Every `map` and `filter` produced a new array, every `reduce` produced a new value, and even our hand-written loops only read the elements they visited; the original readings were never touched. This reflects a general principle of program design that runs through this course: once a pattern is understood and reliable, it is packaged up so it never needs to be re-derived, and we get to focus on _what_ to compute instead of _how_ to traverse. 
 
-What happens when programs *do* change existing values, and why that calls for so much care, is the subject of the next chapter.
+What happens when programs _do_ change existing values, and why that calls for so much care, is the subject of the next chapter.
 
 <details class="tooltip exercise">
   <summary>Exercise: Summarising an Order</summary>

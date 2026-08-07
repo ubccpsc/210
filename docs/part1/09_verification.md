@@ -67,7 +67,7 @@ import { test, expect } from "@ubccpsc/210-toolkit/testing";
 <details class="tooltip ts-tips">
 <summary><code>equal</code> Versus <code>deep.equal</code></summary>
 
-`to.equal` compares with `===`. For numbers, strings, and booleans that is exactly right. For objects and arrays it is not: `===` asks whether two values are *the same object in memory*, not whether they hold the same contents, so two separately built objects with identical fields are not equal.
+`to.equal` compares with `===`. For numbers, strings, and booleans that is exactly right. For objects and arrays it is not: `===` asks whether two values are _the same object in memory_, not whether they hold the same contents, so two separately built objects with identical fields are not equal.
 
 ```typescript
 expect({ id: "CPSC210" }).to.equal({ id: "CPSC210" });      // fails: different objects
@@ -81,13 +81,13 @@ expect({ id: "CPSC210" }).to.deep.equal({ id: "CPSC210" }); // passes: same cont
 <details class="tooltip link-110">
 <summary>A Family of Checks</summary>
 
-CPSC 110 already provided more than one kind of check. Alongside `check-expect` you used `check-within` for numbers that need only be close, `check-member-of` for a value that must be one of several, `check-range` for a number in an interval, and `check-error` for an expression that must signal an error. The idea that an assertion can say something more precise than "these are equal" is not new; chai simply offers a larger vocabulary of it. `check-within` becomes `to.be.closeTo`, `check-member-of` becomes `to.be.oneOf`, and `check-error` becomes `to.throw`.
+CPSC 110 already provided more than one kind of check. Alongside `check-expect` you used `check-within` for numbers that need only be close, `check-member-of` for a value that must be one of several, `check-range` for a number in an interval, and `check-error` for an expression that must signal an error. The idea that an assertion can say something more precise than "these are equal" is not new; chai offers a larger vocabulary of it. `check-within` becomes `to.be.closeTo`, `check-member-of` becomes `to.be.oneOf`, and `check-error` becomes `to.throw`.
 
 </details>
 
 ## What a Test Case Can Now Hold
 
-Both translations above change something beyond just syntax. Look at the second argument to `test`. Previously that argument *was* the check: `checkExpect(...)` built the body of the case and handed it over, and `test` simply named it. For the rest of the course we write that function ourselves:
+Both translations above change something beyond just syntax. Look at the second argument to `test`. Previously that argument _was_ the check: `checkExpect(...)` built the body of the case and handed it over, and `test` named it. For the rest of the course we write that function ourselves:
 
 ```typescript
 test(<description>, () => {
@@ -97,11 +97,11 @@ test(<description>, () => {
 
 The description is unchanged, and it is still what the runner prints. What is new is that the body is an ordinary arrow function with a block body, so it can hold any number of statements. (As Chapter 1 described, a block body returns nothing implicitly. A test body has no value to return in any case: the runner judges the case by whether an assertion inside it failed, not by what the body produced.) This erases the three restrictions of the earlier form:
 
-*A case can hold as many assertions as the behaviour needs.* One check per case was a consequence of the check *being* the body, not a judgement about what makes a good test. A block body can state several expectations about a single result, which is the technique the _Layering Assertions for Clearer Failures_ section develops below: ordering assertions from general to specific so that the first failure names the kind of fault rather than merely reporting that one exists. One assertion per case is still possible, but it is now a choice you make rather than a limit you write around.
+_A case can hold as many assertions as the behaviour needs._ One check per case was a consequence of the check _being_ the body, not a judgement about what makes a good test. A block body can state several expectations about a single result, which is the technique the _Layering Assertions for Clearer Failures_ section develops below: ordering assertions from general to specific so that the first failure names the kind of fault rather than merely reporting that one exists. One assertion per case is still possible, but it is now a choice you make rather than a limit you write around.
 
-*Setup belongs inside the case.* The earlier chapters had to declare a check's values above the tests, at the top level of the file. A check is a single call, `checkExpect(() => <actual>, <expected>)`, and a `const` declared inside the thunk is invisible to the `<expected>` argument written beside it, so any value the two sides shared had to be declared outside the check altogether. Everything declared there is visible to every later test, and, once mutation was introduced in the state chapter, changeable by every later test: a suite built that way can pass or fail depending on the order its cases happen to run in. A block body holds its own `const` declarations, so each case builds exactly the values it needs and no case can disturb another's. The tests later in this chapter all begin this way, constructing a `student` or a `viewer` before calling the function under test.
+_Setup belongs inside the case._ The earlier chapters had to declare a check's values above the tests, at the top level of the file. A check is a single call, `checkExpect(() => <actual>, <expected>)`, and a `const` declared inside the thunk is invisible to the `<expected>` argument written beside it, so any value the two sides shared had to be declared outside the check altogether. Everything declared there is visible to every later test, and, once mutation was introduced in the state chapter, changeable by every later test: a suite built that way can pass or fail depending on the order its cases happen to run in. A block body holds its own `const` declarations, so each case builds exactly the values it needs and no case can disturb another's. The tests later in this chapter all begin this way, constructing a `student` or a `viewer` before calling the function under test.
 
-*Code under test can be driven through several steps.* A `checkExpect` thunk could hold more than one statement, as the async example in the previous chapter showed, but everything it did had to funnel into one value that was then compared for equality. A test body has no such funnel. It can construct a value, configure it, exercise it, and assert at any point along the way, choosing a different operator for each assertion. Most real testing needs exactly that: behaviour that is not reachable until the value under test has been built up through several steps. Test runners extend this further with **lifecycle hooks**, `beforeEach` and `afterEach`, which run around every case so that setup common to a group of tests is written once while each case still receives its own fresh copy of it. 
+_Code under test can be driven through several steps._ A `checkExpect` thunk could hold more than one statement, as the async example in the previous chapter showed, but everything it did had to funnel into one value that was then compared for equality. A test body has no such funnel. It can construct a value, configure it, exercise it, and assert at any point along the way, choosing a different operator for each assertion. Most real testing needs exactly that: behaviour that is not reachable until the value under test has been built up through several steps. Test runners extend this further with **lifecycle hooks**, `beforeEach` and `afterEach`, which run around every case so that setup common to a group of tests is written once while each case still receives its own fresh copy of it. 
 
 Better failure reporting is the fourth improvement, and it is the subject of the next two sections.
 
@@ -122,7 +122,7 @@ Beyond equality, chai groups its assertions by the kind of property they check. 
 | Numeric | `expect(fee).to.be.at.most(10)` | A numeric comparison holds |
 | Throws | `expect(() => f()).to.throw("...")` | The call raises an error |
 
-None of these is strictly necessary. Each could be rewritten as an equality or boolean check: `expect(ids.includes("CPSC210")).to.equal(true)` does the same work as `expect(ids).to.include("CPSC210")`. The specific operator is better for two reasons. It states intent at a glance, so a reader of the test sees *what* is being checked rather than a hand-written expression that happens to reduce to a boolean. And when it fails, it reports the actual problem. The generic form can only say:
+None of these is strictly necessary. Each could be rewritten as an equality or boolean check: `expect(ids.includes("CPSC210")).to.equal(true)` does the same work as `expect(ids).to.include("CPSC210")`. The specific operator is better for two reasons. It states intent at a glance, so a reader of the test sees _what_ is being checked rather than a hand-written expression that happens to reduce to a boolean. And when it fails, it reports the actual problem. The generic form can only say:
 
 ```text
 AssertionError: expected false to equal true
@@ -138,9 +138,9 @@ The first tells you only that a boolean was not as expected; the second tells yo
 
 <!--
 <details class="tooltip deep-dive">
-<summary>What Developers Actually Write</summary>
+<summary>What Developers Write in Practice</summary>
 
-These categories are not arbitrary. A study of 33,873 assertions drawn from 105 open-source JavaScript and TypeScript projects ([Zamprogno et al., 2022](https://www.cs.ubc.ca/~rtholmes/papers/tse_2022_zamprogno.pdf)) found that developer-written assertions, although numerous, are simple: the median test case contains a single assertion, and most assertions use a single operator. Almost all fell into twelve categories, with equality the most common at roughly 39%, followed by boolean, inclusion, length, and existence checks like the ones above. The same study found that nearly a quarter of the equality checks could have been written with a more specific operator that would read more clearly and fail more informatively. Two lessons carry over to your own tests: keep individual assertions simple, and prefer the operator that names what you actually mean.
+These categories are not arbitrary. A study of 33,873 assertions drawn from 105 open-source JavaScript and TypeScript projects ([Zamprogno et al., 2022](https://www.cs.ubc.ca/~rtholmes/papers/tse_2022_zamprogno.pdf)) found that developer-written assertions, although numerous, are simple: the median test case contains a single assertion, and most assertions use a single operator. Almost all fell into twelve categories, with equality the most common at roughly 39%, followed by boolean, inclusion, length, and existence checks like the ones above. The same study found that nearly a quarter of the equality checks could have been written with a more specific operator that would read more clearly and fail more informatively. Two lessons carry over to your own tests: keep individual assertions simple, and prefer the operator that names what you mean.
 </details>
 -->
 
@@ -241,7 +241,7 @@ test("a student who finished first year can take CPSC210", () => {
 });
 ```
 
-Only the last assertion is strictly necessary: if it passes, every assertion above it must have passed too. Their value is in what they report when something is wrong. Each kind of fault now trips a different, earlier assertion, and the *first* failure names the problem:
+Only the last assertion is strictly necessary: if it passes, every assertion above it must have passed too. Their value is in what they report when something is wrong. Each kind of fault now trips a different, earlier assertion, and the _first_ failure names the problem:
 
 ```text
 expected undefined to exist                       // returned nothing
@@ -249,9 +249,9 @@ expected [ … ] to have a length of 1 but got 2    // returned too many section
 expected [ 'CPSC213' ] to include 'CPSC210'       // returned the wrong section
 ```
 
-Only a result that exists, is an array of the right length, and contains the expected id, yet still differs somewhere in its contents, survives to the final `deep.equal`. Ordering matters: with the general checks first, the earliest failure is always the most fundamental one, and you learn the *kind* of mistake before its details.
+Only a result that exists, is an array of the right length, and contains the expected id, yet still differs somewhere in its contents, survives to the final `deep.equal`. Ordering matters: with the general checks first, the earliest failure is always the most fundamental one, and you learn the _kind_ of mistake before its details.
 
-This is not a licence to attach five assertions to every test. A case holding exactly one assertion remains the common shape, and redundant checks clutter a test without adding meaning; what changed is that the count is now yours to choose rather than fixed at one. Layering is worthwhile when a value is structured enough that a bare equality failure would be hard to read, or when a function makes several independent guarantees worth confirming separately. The aim is not more assertions but more *informative* ones. Specifically for this example, it would be easy to skip the assertion checking that the value existed, and the one performing the `map` operation.
+This is not a licence to attach five assertions to every test. A case holding exactly one assertion remains the common shape, and redundant checks clutter a test without adding meaning; what changed is that the count is now yours to choose rather than fixed at one. Layering is worthwhile when a value is structured enough that a bare equality failure would be hard to read, or when a function makes several independent guarantees worth confirming separately. The aim is not more assertions but more _informative_ ones. Specifically for this example, it would be easy to skip the assertion checking that the value existed, and the one performing the `map` operation.
 
 ## Partitioning Inputs and Outputs
 
@@ -344,7 +344,7 @@ const catalogue: Title[] = [
 
 ### Partitioning a Composite Input
 
-`playableTitles` does not take a number; it takes a whole `Viewer` and a `catalogue`. Its meaningful classes are not numeric ranges but *relationships* between fields: between a viewer's plan and a title's tier, and between a viewer's region and the regions a title is licensed in. The viewer input divides into classes such as:
+`playableTitles` does not take a number; it takes a whole `Viewer` and a `catalogue`. Its meaningful classes are not numeric ranges but _relationships_ between fields: between a viewer's plan and a title's tier, and between a viewer's region and the regions a title is licensed in. The viewer input divides into classes such as:
 
 | Class | Representative viewer |
 |---|---|
@@ -352,13 +352,13 @@ const catalogue: Title[] = [
 | Premium plan, in a licensed region | `{ plan: "premium", region: "CA" }` |
 | In a region nothing is licensed for | `{ plan: "free", region: "EU" }` |
 
-The catalogue adds further dimensions that the specification treats distinctly: a published title versus an unpublished one, and a free title versus a premium one. The classes are the meaningful *combinations* of these, so a thorough suite needs more than one viewer paired with one title. As with a numeric input, the classes come from the specification rather than the code; the only difference is that a representative is now a constructed `Viewer` and `catalogue`, not a single value.
+The catalogue adds further dimensions that the specification treats distinctly: a published title versus an unpublished one, and a free title versus a premium one. The classes are the meaningful _combinations_ of these, so a thorough suite needs more than one viewer paired with one title. As with a numeric input, the classes come from the specification rather than the code; the only difference is that a representative is now a constructed `Viewer` and `catalogue`, not a single value.
 
 ### Partitioning by Output
 
 With a single-number result like `lateFee`, partitioning the input was sufficient, because each input class produced its own kind of output. A structured result has classes of its own that do not line up one-to-one with the input. `playableTitles` can return an empty list, when nothing is playable; a single title; or several at once. A suite with a representative of every input class can still miss an output class.
 
-The mismatch is easy to see. The viewer's plan is the most visible input dimension, but it does not decide whether the result is empty: the *largest* result here comes from the most permissive input, a premium viewer, while the empty result comes from a viewer in a region where nothing is licensed, whatever their plan. Reaching each output class takes a deliberately chosen input, and each test layers its assertions from general to specific, as before, so that a failure names which aspect of the result is wrong:
+The mismatch is easy to see. The viewer's plan is the most visible input dimension, but it does not decide whether the result is empty: the _largest_ result here comes from the most permissive input, a premium viewer, while the empty result comes from a viewer in a region where nothing is licensed, whatever their plan. Reaching each output class takes a deliberately chosen input, and each test layers its assertions from general to specific, as before, so that a failure names which aspect of the result is wrong:
 
 <CollapsibleCode>
 
@@ -398,7 +398,7 @@ Partitioning the input tells you which situations to feed a function; partitioni
 
 The techniques so far are all forms of **black-box testing**: every test was derived from the specification, with the implementation treated as a box we cannot see into. Black-box tests check that a function does what it promises. Once an implementation exists, we can also open the box.
 
-**White-box testing** takes this complementary view. We read the code and ask a different question: do our tests *exercise* what was written? Reading reveals the code's branches, and each branch is a place a fault can hide untested. The decisions in `playableTitles` all live in its helper, `canPlay`, so that is where we look:
+**White-box testing** takes this complementary view. We read the code and ask a different question: do our tests _exercise_ what was written? Reading reveals the code's branches, and each branch is a place a fault can hide untested. The decisions in `playableTitles` all live in its helper, `canPlay`, so that is where we look:
 
 ```typescript
 function canPlay(viewer: Viewer, title: Title): boolean {
@@ -465,7 +465,7 @@ function canPlay(viewer: Viewer, title: Title): boolean {
 }
 ```
 
-This version has four branches. A suite with an unpublished title, a premium title for a premium viewer, a premium title for a free viewer, and a published free title executes all four, for 100% branch coverage, and it is still wrong: a free title that is not licensed in the viewer's region is judged playable, because the rule that would reject it was never written. Coverage could not reveal the fault, because the fault was not an untested branch but a *missing* one. Coverage measures the code you wrote, never the code the specification required. This is why white-box testing supplements black-box testing but never replaces it: reading the code tells you whether your tests reach what is there, while only the specification can tell you what ought to be there.
+This version has four branches. A suite with an unpublished title, a premium title for a premium viewer, a premium title for a free viewer, and a published free title executes all four, for 100% branch coverage, and it is still wrong: a free title that is not licensed in the viewer's region is judged playable, because the rule that would reject it was never written. Coverage could not reveal the fault, because the fault was not an untested branch but a _missing_ one. Coverage measures the code you wrote, never the code the specification required. This is why white-box testing supplements black-box testing but never replaces it: reading the code tells you whether your tests reach what is there, while only the specification can tell you what ought to be there.
 
 ## Regression Testing
 
