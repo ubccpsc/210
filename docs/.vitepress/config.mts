@@ -17,10 +17,38 @@ const { configureMarkdown, vitePlugin } = createBuildTimeDiagramsPlugin({
   diagramsDistDir: "diagrams",
 });
 
+const SITE_NAME = "UBC CPSC 210 Textbook";
+const SITE_URL = "https://ubccpsc.github.io/210/";
+
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
     title: "CPSC 210 Handbook",
+    description: "The course textbook for CPSC 210: Software Construction at UBC.",
     base: "/210/",
+    head: [
+        ["meta", { property: "og:site_name", content: SITE_NAME }],
+        ["meta", { property: "og:type", content: "website" }],
+        ["meta", { name: "twitter:card", content: "summary" }],
+    ],
+    // Give each chapter its own link-preview title/description/url, so sharing a
+    // chapter shows that chapter rather than the site defaults.
+    transformPageData(pageData, { siteConfig }) {
+        const { title, description } = siteConfig.site;
+        const pageTitle = pageData.title ? `${pageData.title} | ${title}` : title;
+        const pageDescription = pageData.description || description;
+        const pagePath = pageData.relativePath
+            .replace(/index\.md$/, "")
+            .replace(/\.md$/, ".html");
+
+        const head = (pageData.frontmatter.head ??= []);
+        head.push(
+            ["meta", { property: "og:title", content: pageTitle }],
+            ["meta", { property: "og:description", content: pageDescription }],
+            ["meta", { property: "og:url", content: SITE_URL + pagePath }],
+            ["meta", { name: "twitter:title", content: pageTitle }],
+            ["meta", { name: "twitter:description", content: pageDescription }],
+        );
+    },
     themeConfig: {
         search: {
             provider: 'local'
