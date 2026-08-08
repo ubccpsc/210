@@ -28,7 +28,14 @@ export default defineConfig({
     head: [
         ["meta", { property: "og:site_name", content: SITE_NAME }],
         ["meta", { property: "og:type", content: "website" }],
-        ["meta", { name: "twitter:card", content: "summary" }],
+        // Placeholder card art; swap docs/public/logo.png and keep the 1200x630
+        // dimensions below in sync with whatever replaces it.
+        ["meta", { property: "og:image", content: SITE_URL + "logo.png" }],
+        ["meta", { property: "og:image:width", content: "1200" }],
+        ["meta", { property: "og:image:height", content: "630" }],
+        ["meta", { property: "og:image:alt", content: "CPSC 210: Software Construction" }],
+        ["meta", { name: "twitter:card", content: "summary_large_image" }],
+        ["meta", { name: "twitter:image", content: SITE_URL + "logo.png" }],
     ],
     // Give each chapter its own link-preview title/description/url, so sharing a
     // chapter shows that chapter rather than the site defaults.
