@@ -27,11 +27,11 @@ In TypeScript we write:
 2 + 3
 ```
 
-While the characters are different (syntax), both have exactly the same meaning. In programming languages, we call that meaning *semantics*.
+While the characters are different (syntax), both have exactly the same meaning. In programming languages, we call that meaning _semantics_.
 
-More precisely, we would call any syntax where the operator appears before the operands `(+ 2 3)` or `+ 2 3` *prefix* syntax. When the operator appears between the operands, such as `2 + 3`, we call this *infix* syntax. 
+More precisely, we would call any syntax where the operator appears before the operands `(+ 2 3)` or `+ 2 3` _prefix_ syntax. When the operator appears between the operands, such as `2 + 3`, we call this _infix_ syntax. 
 
-In ISL, *all* syntax was prefix. In TypeScript, most basic operations (e.g., addition, comparison) are written in infix syntax.
+In ISL, _all_ syntax was prefix. In TypeScript, most basic operations (e.g., addition, comparison) are written in infix syntax.
 </details>
 
 A more important way languages differ though is in the _mechanisms the language enforces for you_. A language can check things about your program before it ever runs, or it can leave those checks to you. 
@@ -60,7 +60,7 @@ We will expand on function declarations later in this chapter.
 
 ## Types as a Language Mechanism
 
-In ISL you documented type information as comments. A function's signature, like `(@signature Number -> String)`, told the reader what the function expected (a value representing a `Number`) and produced (a value representing a `String`). However, the language *did not check* that those types were honoured. If you passed a string where a number was expected, the language did not object; the mistake surfaced later, when you ran the program and it did not do what you expected.
+In ISL you documented type information as comments. A function's signature, like `(@signature Number -> String)`, told the reader what the function expected (a value representing a `Number`) and produced (a value representing a `String`). However, the language _did not check_ that those types were honoured. If you passed a string where a number was expected, the language did not object; the mistake surfaced later, when you ran the program and it did not do what you expected.
 
 <details class="tooltip ts-tips">
   <summary>Basic Types: <code>number</code>, <code>string</code>, and <code>boolean</code></summary>
@@ -89,17 +89,17 @@ Two of them behave differently from their ISL counterparts, and both differences
 
 `%` produces the _remainder_ left after division, the role that `remainder` played in ISL: `7 % 2` is `1`, and `6 % 2` is `0`. Its most common use is keeping a value inside a fixed range. To step through a list of `n` items and wrap back to the beginning, write `(i + 1) % n`, which returns to `0` as soon as `i + 1` reaches `n`.
 
-`*`, `/`, and `%` are evaluated before `+` and `-`, as in ordinary arithmetic, so `2 + 3 * 4` is `14`. Use parentheses wherever the grouping would otherwise be easy to misread.
+`_`, `/`, and `%` are evaluated before `+` and `-`, as in ordinary arithmetic, so `2 + 3 _ 4` is `14`. Use parentheses wherever the grouping would otherwise be easy to misread.
 
 Because a `number` is stored as a binary approximation, arithmetic on decimal values can produce results that are slightly off from the exact answer. We return to that, and to what it means when comparing computed values, later in this chapter.
 
 </details>
 
 
-In TypeScript you annotate each value with its type *directly in the code*, and the language checks those annotations for you when you invoke the compiler. This does two things:
+In TypeScript you annotate each value with its type _directly in the code_, and the language checks those annotations for you when you invoke the compiler. This does two things:
 
-- First, the type communicates *intent*: a well-chosen type tells the next reader exactly which kinds of values are valid. 
-- Second, the type is *enforced* by a **type checker** within the compiler. The compiler will report a wrong type of value as an error, rather than leaving it for you to discover the bug when you run the program. A whole category of mistakes is caught before the program runs.
+- First, the type communicates _intent_: a well-chosen type tells the next reader exactly which kinds of values are valid. 
+- Second, the type is _enforced_ by a **type checker** within the compiler. The compiler will report a wrong type of value as an error, rather than leaving it for you to discover the bug when you run the program. A whole category of mistakes is caught before the program runs.
 
 <!--- NOTE arguments and parameters are covered in 110: https://cs110.students.cs.ubc.ca/reference/glossary.html --->
 
@@ -123,7 +123,7 @@ defines a function with the name `fn`, with parameters: `x` of type `X`, `y` of 
 Parameter types come after the parameter they type, separated by a `:`. The return type is placed after the parameter list, following a second `:`.
 </details>
 
-Note that the type checker *only* helps where types are *written down*. In TypeScript we type the inputs and output of every function: each parameter gets a type, and so does the return value. These are the same places you would have written type comments in ISL.
+Note that the type checker _only_ helps where types are _written down_. In TypeScript we type the inputs and output of every function: each parameter gets a type, and so does the return value. These are the same places you would have written type comments in ISL.
 
 <details class="tooltip link-110">
 <summary>Signatures in ISL</summary>
@@ -158,7 +158,7 @@ In CPSC 110, DrRacket executed your program the moment you pressed `Run`. TypeSc
 
 <!--- : that (1) checks your source code and ensures that the types are used consistently, then (2) transforms your input code into executable output code. --->
 
-In particular, at the start of compilation, `tsc` invokes a **type checker**, whose job is to check whether your program is consistent with the declared types (i.e., has no **type errors**). If `tsc` finds a type error, it reports an error that you _must_ fix before your code can be executed.
+In particular, at the start of compilation, `tsc` invokes a type checker, whose job is to check whether your program is consistent with the declared types (i.e., has no **type errors**). If `tsc` finds a type error, it reports an error that you _must_ fix before your code can be executed.
 
 <details class="tooltip ts-tips">
   <summary>Anatomy of a Type Error</summary>
@@ -182,9 +182,9 @@ The compiler will tell you both where the error is and what is wrong with your c
 The computer will not be able to execute the program until the invalid calls to `letterGrade` are fixed.
 </details>
 
-This changes when errors in your program are surfaced to you. In ISL and other dynamically-typed languages (e.g. Python), a type mistake surfaces *while the program runs*, and only if you happened to execute code that hits that type mistake. These are **runtime** errors, because they happen at the *time* the program *runs*. Sometimes you'll see the term **dynamic**: this means the same thing as **runtime**. 
+This changes when errors in your program are surfaced to you. In ISL and other dynamically-typed languages (e.g. Python), a type mistake surfaces _while the program runs_, and only if you happened to execute code that hits that type mistake. These are **runtime** errors, because they happen at the _time_ the program _runs_. Sometimes you'll see the term **dynamic**: this means the same thing as **runtime**. 
 
-In TypeScript, the `tsc` compiler checks your types *first*, before execution. Any type errors in your *entire program* are flagged to you to fix before your code can execute.  This is what is meant when we say that types help catch bugs "before runtime": the compiler is the thing doing the catching, before you execute (i.e., run) your program. We call these errors, and any other errors that are flagged *before running* the program, **static** errors. 
+In TypeScript, the `tsc` compiler checks your types _first_, before execution. Any type errors in your _entire program_ are flagged to you to fix before your code can execute.  This is what is meant when we say that types help catch bugs "before runtime": the compiler is the thing doing the catching, before you execute (i.e., run) your program. We call these errors, and any other errors that are flagged _before running_ the program, **static** errors. 
 
 The compiler sits between the source you write and the program that runs, and it is where static errors are caught before anything executes:
 
@@ -223,7 +223,7 @@ An IDE runs the language's type checker continuously in the background as you ty
 
 There are two main kinds of syntax in all programming languages: expressions and statements. ISL is built almost entirely from **expressions**. Every chunk of ISL code is evaluated to produce a value, and that value is passed into the expression that contains it. 
 
-TypeScript has expressions too, but it adds a second kind of construct: the **statement**. A statement's purpose is not to evaluate to a single value; it performs an action, such as making a decision or returning from a function. Often this action can change program **state**: *state* includes the names that are defined (e.g., variable or function names), and the values those names take on. A TypeScript program is written as a sequence of statements that run in order.
+TypeScript has expressions too, but it adds a second kind of construct: the **statement**. A statement's purpose is not to evaluate to a single value; it performs an action, such as making a decision or returning from a function. Often this action can change program **state**: _state_ includes the names that are defined (e.g., variable or function names), and the values those names take on. A TypeScript program is written as a sequence of statements that run in order.
 
 We saw one type of statement already: the function definition. Today we will introduce two more kinds of statements. 
 
@@ -349,7 +349,7 @@ if (<condition-1>) {
 }
 ```
 
-Again, this is only a difference in *syntax*.
+Again, this is only a difference in _syntax_.
 
 </details>
 
@@ -440,7 +440,7 @@ An equivalent ISL function to `letterGrade` looks like:
 
 the TypeScript version says the same thing with statements: each `cond` clause becomes an `if` whose body returns that clause's value, and `else` becomes the final `return`. The behaviour is identical; what changed is that you spell out the control flow step-by-step rather than as a single expression.
 
-The core difference between `if` and `cond` is that `cond` is an expression: `cond` evaluates to one value. The bodies of the functions you defined in ISL contained a single expression `e` (above,`e` is the `cond` expression) and `(letter-grade 87)` simply evaluates `e` with `87` in the place of `score`. 
+The core difference between `if` and `cond` is that `cond` is an expression: `cond` evaluates to one value. The bodies of the functions you defined in ISL contained a single expression `e` (above,`e` is the `cond` expression) and `(letter-grade 87)` evaluates `e` with `87` in the place of `score`. 
 
 In TypeScript, a function body is not a single expression: it is a list of statements which will be run in order. TypeScript functions will not return a value unless they are told to by a `return` statement. Later, we'll see that we might want to write functions that have no `return` statements at all. 
 
@@ -480,16 +480,16 @@ function toPassFail(s: number): string {
 
 ## Static and Dynamic Views of a Program
 
-There are two natural perspectives through which you can view any program. The **static** view is what you see when you look at your source code. It is fixed text sitting in a file, and it can be read and analysed *without being executed*. Types you write down in a function signature are static, as is the overall structure of your code. The compiler works entirely in this static world, and it can check your types before the program runs.
+There are two natural perspectives through which you can view any program. The **static** view is what you see when you look at your source code. It is fixed text sitting in a file, and it can be read and analysed _without being executed_. Types you write down in a function signature are static, as is the overall structure of your code. The compiler works entirely in this static world, and it can check your types before the program runs.
 
-But we do not just write programs for them to sit as text on a filesystem. We write programs to do things, which gives rise to the **dynamic** view of the program. When the code *executes*, it is run on some actual *inputs*, which cause variables in the code to take on different values, and control flow statements to follow different branches. Which branch an `if` takes, what a variable holds at a given moment, and how many times a piece of code runs are dynamic facts, decided as the program runs and often different from one run to the next.
+But we do not just write programs for them to sit as text on a filesystem. We write programs to do things, which gives rise to the **dynamic** view of the program. When the code _executes_, it is run on some actual _inputs_, which cause variables in the code to take on different values, and control flow statements to follow different branches. Which branch an `if` takes, what a variable holds at a given moment, and how many times a piece of code runs are dynamic facts, decided as the program runs and often different from one run to the next.
 
 Keeping these two views apart is useful because different kinds of problems appear in each. The compiler can rule out a whole class of mistakes statically, just by reading the text, but it cannot know what will happen once the program runs on a given input. That is why static checking, however good, never removes the need to run and test a program, a theme we will return to throughout the course.
 
 ## Validating the Dynamic View With Testing
 
 
-While the TypeScript compiler checks the static view of the program, we need to check the dynamic view ourselves. We do this through a process called *testing*. 
+While the TypeScript compiler checks the static view of the program, we need to check the dynamic view ourselves. We do this through a process called _testing_. 
 
 In Part 1 of this course, we will use a `checkExpect`, a function call that can validate whether the actual output of a function aligns with its expected output when it is executed. A check is always given a name and handed to `test`, which registers it with the testing framework. For example, to ensure that `letterGrade(88)` evaluates to `"A"`, we can write the following test:
 
@@ -517,7 +517,7 @@ Note that there are no braces around `<actual>`, and no `return` in front of it.
 
 When the check runs, it calls the thunk and compares the value it returns against `<expected>`. If they are equal, the check passes. If they differ, the check fails and reports a message describing the expected behaviour that was violated, so you can see which expectation failed and what was produced instead.
 
-A `checkExpect` only does anything when it is executed, which makes it a *dynamic* check: it reports nothing about the program until the program runs, unlike the type checker, which works on the static text. A check never runs on its own, either: it must be placed inside a named test case, which the testing framework runs for us.
+A `checkExpect` only does anything when it is executed, which makes it a _dynamic_ check: it reports nothing about the program until the program runs, unlike the type checker, which works on the static text. A check never runs on its own, either: it must be placed inside a named test case, which the testing framework runs for us.
 
 </details>
 
@@ -606,7 +606,7 @@ TypeScript's arrow syntax does the same job: `(n) => n > 5` means the same thing
 
 Learning TypeScript is not starting over. The way you design data, break a problem into functions, and reason about behaviour is the same as in CPSC 110. 
 
-What is new is mostly *enforcement* and *form*. In terms of *enforcement*, we write types into the program and `tsc` checks them, rather than leaving them in an unchecked comment. In terms of *form*, we write conditional control flow  with statements like `if` and `return`, rather than as a single `cond` expression. 
+What is new is mostly _enforcement_ and _form_. In terms of _enforcement_, we write types into the program and `tsc` checks them, rather than leaving them in an unchecked comment. In terms of _form_, we write conditional control flow  with statements like `if` and `return`, rather than as a single `cond` expression. 
 
 Mapping constructs in a new language back to the ideas you already know from prior languages is what makes new programming languages quick to pick up. While this transition can be tricky this first time, with each subsequent language you learn, it will be easier and easier.
 
@@ -614,7 +614,7 @@ Mapping constructs in a new language back to the ideas you already know from pri
 <details class="tooltip exercise">
   <summary>Exercise: Battery Status</summary>
 
-_Note: End-of-chapter exercises will contain hints hidden like so: <span class="hint">hello I'm a hint!</span>. In general, these hints hide *design decisions* which, by the end of the course, we expect you to be able to make on your own. However, if you are going through the exercise for the first time and simply want coding practice, you can reveal the hints._ 
+_Note: End-of-chapter exercises will contain hints hidden like so: <span class="hint">hello I'm a hint!</span>. In general, these hints hide _design decisions_ which, by the end of the course, we expect you to be able to make on your own. However, if you are going through the exercise for the first time and want coding practice, you can reveal the hints._ 
 
 Put this chapter's pieces together on a new problem: a typed function, an `if`/`return` chain, and a test.
 

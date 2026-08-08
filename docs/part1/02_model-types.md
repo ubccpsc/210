@@ -7,16 +7,16 @@ Consider a song. A song is not one value; it has its musical contents, as well a
 <details class="tooltip exercise">
 <summary> Exercise: What's in a song? </summary>
 
-Take a minute to think about what a song *is*. What core data and metadata might you associate with a song? Does this change based on the application that consumes the song? (e.g., what if the song-playing application is individual vs. multiple users can interact with the same song?) 
+Take a minute to think about what a song _is_. What core data and metadata might you associate with a song? Does this change based on the application that consumes the song? (e.g., what if the song-playing application is individual vs. multiple users can interact with the same song?) 
 
-The data we choose to associate with a song below is *one example* of how we might represent a song, but it's not the *only correct* representation of a song. 
+The data we choose to associate with a song below is _one example_ of how we might represent a song, but it's not the _only correct_ representation of a song. 
 
 </details>
 
 
-For instance, a song has _at least_ a title, an artist, and a duration. This data only means something when associated to the *same* song. With only primitive types we would carry these as three separate values and have to remember, everywhere, that they belong to the same song. Nothing would stop us from pairing one song's title with another's duration, or forgetting the duration entirely, or passing an *artist* where a *title* was expected (both are strings, so the compiler would stay silent). The information has a *shape*, and primitive annotations cannot capture it.
+For instance, a song has _at least_ a title, an artist, and a duration. This data only means something when associated to the _same_ song. With only primitive types we would carry these as three separate values and have to remember, everywhere, that they belong to the same song. Nothing would stop us from pairing one song's title with another's duration, or forgetting the duration entirely, or passing an _artist_ where a _title_ was expected (both are strings, so the compiler would stay silent). The information has a _shape_, and primitive annotations cannot capture it.
 
-Other information cannot be expressed with primitives at all. A playlist is either *empty* or *a song followed by another playlist*. This spells out two distinct cases, and the playlist can be any length. No single `number` or `string` means "either nothing, or a song and then more songs."
+Other information cannot be expressed with primitives at all. A playlist is either _empty_ or _a song followed by another playlist_. This spells out two distinct cases, and the playlist can be any length. No single `number` or `string` means "either nothing, or a song and then more songs."
 
 This chapter introduces the tools to describe information like this: **compound types** that group related values into one, model alternatives as distinct cases, and capture self-referential structure. Writing such a description down as a **data definition** does two things at once: it gives the program a shape to follow, and it lets the compiler hold us to that shape, catching whole classes of mistakes before the program runs. 
 
@@ -46,7 +46,7 @@ As with other one-line statements, we will put a semicolon `;` after it when wri
 </details>
 
 
-Two values are worth knowing from the start because they stand for the *absence* of a value: `null` and `undefined`. `null` represents a deliberate "no value here", such as the result of a lookup that finds nothing. `undefined` is the value a name has when nothing has been assigned to it yet. Each is its own type, and both become useful in combination with other types, as we will see when a function may or may not find a result.
+Two values are worth knowing from the start because they stand for the _absence_ of a value: `null` and `undefined`. `null` represents a deliberate "no value here", such as the result of a lookup that finds nothing. `undefined` is the value a name has when nothing has been assigned to it yet. Each is its own type, and both become useful in combination with other types, as we will see when a function may or may not find a result.
 
 ```typescript
 const noMatch: null = null;
@@ -86,7 +86,7 @@ To get you started in this course, we propose a systematic process to turn a nat
 5. Write concrete examples to check your model.
 6. Look for generalisation.
 
-The rest of this chapter works through this process on the examples below, from the simplest to the most involved. As we go we will meet the building blocks TypeScript provides for specifying types: *primitive values* for atomic facts, *literal union* for fixed choices, types that *group* related values together, and *self-reference* for recursive structure.
+The rest of this chapter works through this process on the examples below, from the simplest to the most involved. As we go we will meet the building blocks TypeScript provides for specifying types: _primitive values_ for atomic facts, _literal union_ for fixed choices, types that _group_ related values together, and _self-reference_ for recursive structure.
 
 <details class="tooltip link-110">
   <summary>Types and Data Definitions</summary>
@@ -130,7 +130,7 @@ const broken: TrafficLight = "blue"; // error: "blue" is not a TrafficLight
 <details class="tooltip ts-tips">
   <summary>Union of Literals</summary>
 
-A union of literal values restricts expresses that variables of that type can take on *exactly* the specified literal values. The following, where `|` is read as "or":
+A union of literal values restricts expresses that variables of that type can take on _exactly_ the specified literal values. The following, where `|` is read as "or":
 
 ```typescript
 type TypeName = v_1 | v_2 | v_3;
@@ -175,7 +175,7 @@ Let's move on to applying our systematic process to the song example we started 
 2. _Cases:_ A song has just one case: every song has the same shape, so there are no alternatives to distinguish.
 3. _Information per Case:_ for the natural language description above, what is relevant is that a song carries three facts: a `title`, an `artist`, and a duration in seconds.
 4. _Translate:_
-A song's facts belong together, so we describe their shape with a **type**, which lists named properties and their types. It helps to keep two words apart: a *type* describes a shape, but it is not itself a value. `Song` is the shape. 
+A song's facts belong together, so we describe their shape with a **type**, which lists named properties and their types. It helps to keep two words apart: a _type_ describes a shape, but it is not itself a value. `Song` is the shape. 
 
 <!--- , listing the properties directly between braces; there is no `makeSong` function to call.--->
 ```typescript
@@ -191,7 +191,7 @@ The type cannot express that a duration must be positive, so we record that cons
 <details class="tooltip ts-tips">
   <summary>Grouping Values Together with Object Types</summary>
 
-To express a type that groups multiple pieces of data together, we use *object type* syntax. In particular, the following: 
+To express a type that groups multiple pieces of data together, we use _object type_ syntax. In particular, the following: 
 ```typescript
 type TypeName = {
   prop_1: Type1;
@@ -342,7 +342,7 @@ digraph Playlist {
 <details class="tooltip ts-tips">
   <summary>Tagged Unions</summary>
 
-Previously we saw *unions of literals*. **Tagged unions** have similar syntax, but bind together various type names, rather than literal values:
+Previously we saw _unions of literals_. **Tagged unions** have similar syntax, but bind together various type names, rather than literal values:
 
 ```typescript
 type UnionType = Type1 | Type2 | Type3;
@@ -358,7 +358,7 @@ type Type1 = {
 };
 ```
 
-`kind` should map to a specific primitive value `v_1`, while the other properties should map to types. The `kind` is the "tag" in *tagged union*.
+`kind` should map to a specific primitive value `v_1`, while the other properties should map to types. The `kind` is the "tag" in _tagged union_.
 
 To relate to a prior concept, you can understand the type of the `kind` property of any value of `UnionType` to be a union of literals. However, we know more than that: we know that `kind` is a specific one of those literals for each option in the tagged union.  
 </details>
@@ -368,7 +368,7 @@ To relate to a prior concept, you can understand the type of the `kind` property
 
 Reading a `kind` back to recover which case you are looking at can feel indirect, since the case is something the value already is. `EmptyPlaylist` and `NonEmptyPlaylist` are different: why do we need to specify they have different kinds?
 
-*Object-oriented programming* offers a solution to this inelegance: we will get a more elegant design once we cover *classes*, in Part 2. In particular, we will return to this when we cover *polymorphism*.
+_Object-oriented programming_ offers a solution to this inelegance: we will get a more elegant design once we cover _classes_, in Part 2. In particular, we will return to this when we cover _polymorphism_.
 
 </details>
 
@@ -394,7 +394,7 @@ const twoTracks: Playlist = {
 
 Because an object is a value like any other, `oneTrack` reuses the `empty` object we already named rather than building a fresh one; only the new node in `twoTracks` has to be written out.
 
-6. _Generalisation:_ A playlist is one instance of a more general shape: a list of any element type. If a program needed lists of several different things, we would write that shape once and let it take the element type as a *type parameter*, written in angle brackets. A type parameter lets one definition serve many content types:
+6. _Generalisation:_ A playlist is one instance of a more general shape: a list of any element type. If a program needed lists of several different things, we would write that shape once and let it take the element type as a _type parameter_, written in angle brackets. A type parameter lets one definition serve many content types:
 
 ```typescript
 type LinkedList<T> =
@@ -407,7 +407,7 @@ A playlist would then be a `LinkedList<Song>` and a leaderboard a `LinkedList<nu
 <details class="tooltip ts-tips">
   <summary>Generic Types</summary>
 
-In a type definition, `type TypeName<T,S,R> = ...`, the names in angle brackets (i.e., `T`, `S`, `R`) are **type variables**. While regular program variables take on concrete *values*, type variables take on *types*.  These can then be used in the definition of `TypeName` as stand-in for a particular type. A type definition can have any number of type variables (`LinkedList` above has only 1)
+In a type definition, `type TypeName<T,S,R> = ...`, the names in angle brackets (i.e., `T`, `S`, `R`) are **type variables**. While regular program variables take on concrete _values_, type variables take on _types_.  These can then be used in the definition of `TypeName` as stand-in for a particular type. A type definition can have any number of type variables (`LinkedList` above has only 1)
  
 We call `TypeName<T,S,R>` a **generic type** when it has any type variable in its definition. 
 
@@ -457,7 +457,7 @@ We won't strictly enforce a template step in CPSC 210. But, if you find yourself
 
 ### Branching on the Case
 
-When data has multiple cases, a function analyses which case it has and responds to each. We do this with a compound `if`/`else` chain: one branch per case, testing the value itself for a *union of literals*, and the value of the *discriminator* for a *tagged union*.
+When data has multiple cases, a function analyses which case it has and responds to each. We do this with a compound `if`/`else` chain: one branch per case, testing the value itself for a _union of literals_, and the value of the _discriminator_ for a _tagged union_.
 
 An `if`/`else` chain over a union of literals, has one branch per value:
 
@@ -632,7 +632,7 @@ Without the types, none of these would be caught until the program ran, if they 
 
 <!---- </details> --->
 
-The types rule out whole categories of mistakes statically, but they cannot check that a function computes the *right* answer. For that we still write tests. As in CPSC 110, we use `checkExpect` to state what a call should produce and have it verified when the program runs.
+The types rule out whole categories of mistakes statically, but they cannot check that a function computes the _right_ answer. For that we still write tests. As in CPSC 110, we use `checkExpect` to state what a call should produce and have it verified when the program runs.
 
 <!---- <details class="tooltip ts-tips">
   <summary>Testing behaviour with `checkExpect`</summary> --->
@@ -673,7 +673,7 @@ Let's apply the process from this chapter to a new problem, then write functions
 A journey is either _arrived_ (there are no more legs) or a _leg_: a single mode of travel, a duration in minutes, and the rest of the journey after it. The mode of travel is one of `"walk"`, `"bus"`, `"train"`, or `"bike"`.
 
 1. Model the data. Following the process, write a `Mode` type <span class="hint">as a restricted value (a union of the four literals),</span> and a `Journey` type <span class="hint">as a tagged union with a `kind` discriminator, one case for _arrived_ and one for a _leg_.</span> <span class="hint">Notice that `Journey` has the same shape as `Playlist`: an empty case, and a "first thing plus the rest" case.</span>
-2. Write two example journeys: one that is simply _arrived_, and one with at least two legs.
+2. Write two example journeys: one that is only _arrived_, and one with at least two legs.
 3. Following the shape of the data, write `totalMinutes(journey: Journey): number`, <span class="hint">using case analysis on `kind` and recursion on the rest.</span>
 4. Write `usesTransit(journey: Journey): boolean`, <span class="hint">which is `true` when any leg travels by `"bus"` or `"train"`.</span>
 5. Write a `test` holding a single `checkExpect` for each function against your example journeys. Predict each result before you run them.

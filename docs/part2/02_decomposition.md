@@ -182,7 +182,7 @@ class PlayHistory {
 
 </CollapsibleCode>
 
-`Playlist` no longer implements history. Instead it *holds* a `PlayHistory` and asks it to do the recording:
+`Playlist` no longer implements history. Instead it _holds_ a `PlayHistory` and asks it to do the recording:
 
 <CollapsibleCode>
 

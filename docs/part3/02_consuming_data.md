@@ -323,7 +323,7 @@ function track(trackingNumber: string, includeHistory?: boolean): void {
 }
 ```
 
-A **default parameter value**, met in the implementation freedom chapter when `ImmutableGuestList` declared `guests: string[] = []`, is usually clearer when there is a sensible default: `includeHistory: boolean = false`.
+A default parameter value, first encountered in the implementation freedom chapter when `ImmutableGuestList` declared `guests: string[] = []`, is usually clearer when there is a sensible default: `includeHistory: boolean = false`.
 
 Past two or three settings, both forms become hard to read at the call site, because `track("9K4T", true, false, 30)` tells a reader nothing. The convention is to collect them into a single **options object**:
 

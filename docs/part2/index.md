@@ -2,16 +2,16 @@
 
 > When a system grows beyond one person's attention, the question is no longer whether a design works, but whether it can keep working as it changes.
 
-In Part 1, we saw programs small enough for one person to keep the whole design in their mental model. We maintained invariants by careful factory function design and by personal *programmer discipline* about how objects were constructed and modified.
+In Part 1, we saw programs small enough for one person to keep the whole design in their mental model. We maintained invariants by careful factory function design and by personal _programmer discipline_ about how objects were constructed and modified.
 
 In Part 2, we expand our scope. Real software is built by teams, is maintained for years, and solves problems too large for any one person to tackle alone. In real software systems, the contributor count exceeds what an individual can manage, the longevity of the codebase exceeds what an individual can remember, and the code volume exceeds what an individual can audit. All of this means we cannot trust that other programmers will use the code we write correctly, or that every invariant will survive by discipline alone.
 
-In response, we move from *programmer discipline* to encoding invariants *in the language* itself. By encoding invariants into classes and their associated abstractions, we shift the burden of consistency from individual care to *language enforcement* and from ad hoc coordination to explicit design.
+In response, we move from _programmer discipline_ to encoding invariants _in the language_ itself. By encoding invariants into classes and their associated abstractions, we shift the burden of consistency from individual care to _language enforcement_ and from ad hoc coordination to explicit design.
 
 <details class="tooltip link-110"> 
 <summary>Programmer Discipline vs Enforcement</summary>
 
-Recall in CPSC 110, the *signature* encoded type information. But the teaching languages did not enforce this signature. In Part 1, we saw the shift from the unenforced signature in CPSC 110:
+Recall in CPSC 110, the _signature_ encoded type information. But the teaching languages did not enforce this signature. In Part 1, we saw the shift from the unenforced signature in CPSC 110:
 
 ```racket
 (@signature Number -> Number)
@@ -20,7 +20,7 @@ Recall in CPSC 110, the *signature* encoded type information. But the teaching l
 (double "Clearly not a number") 
 ```
 
-To the *typed* signature in TypeScript, which is enforced by the typechecker.
+To the _typed_ signature in TypeScript, which is enforced by the typechecker.
 
 ```typescript
 function double(n: number): number {
@@ -31,13 +31,13 @@ double("Clearly not a number")
 
 ```
 
-This is a shift from programmer discipline (in CPSC 110, *assuming* callers of the function would respect the signature) to enforcement by the language. In addition to the type checker giving us a static error, so the code will not fail at runtime, we see that the error is more accurate: the issue was not in passing a number to the `*` operator, but in passing a string as parameter `n`.  
+This is a shift from programmer discipline (in CPSC 110, _assuming_ callers of the function would respect the signature) to enforcement by the language. In addition to the type checker giving us a static error, so the code will not fail at runtime, we see that the error is more accurate: the issue was not in passing a number to the `*` operator, but in passing a string as parameter `n`.  
 
 In Part 2, we'll see the same shift, but with more complex constraints than type signatures. 
  
 </details>
 
-In this module we develop *class-based* abstractions as the mechanism for invariant enforcement. Across seven lectures, we define classes, decompose systems into cohesive units, hide what is free to change, separate what a class means from how it stores it, depend on abstractions through interfaces, organise classes into hierarchies, and write code that continues to apply as new types arrive.
+In this module we develop _class-based_ abstractions as the mechanism for invariant enforcement. Across seven lectures, we define classes, decompose systems into cohesive units, hide what is free to change, separate what a class means from how it stores it, depend on abstractions through interfaces, organise classes into hierarchies, and write code that continues to apply as new types arrive.
 
 ## Intended Learning Objectives
 

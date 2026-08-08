@@ -98,7 +98,7 @@ Both fields _and_ methods can be marked with a visibility modifier:
 private readonly capacity: number;
 ```
 
-`readonly` and `private` provide different constraints: `private` controls *who* can touch a field, `readonly` controls *when* it can change. A field can be both.
+`readonly` and `private` provide different constraints: `private` controls _who_ can touch a field, `readonly` controls _when_ it can change. A field can be both.
 
 </details>
 
@@ -144,7 +144,7 @@ class GuestList {
 
 </CollapsibleCode>
 
-A validating constructor guarantees the object *starts* valid. Keeping it valid as it changes is the job of the methods, and it is a rule with no exceptions: every method that touches the representation must leave the invariant true. Adding a guest is the case that puts both invariants at risk:
+A validating constructor guarantees the object _starts_ valid. Keeping it valid as it changes is the job of the methods, and it is a rule with no exceptions: every method that touches the representation must leave the invariant true. Adding a guest is the case that puts both invariants at risk:
 
 ```typescript
 /**
@@ -179,7 +179,7 @@ size(): number {
 }
 ```
 
-This captures the essence of encapsulation. In Part 1 an invariant was documented and checked after the fact. Here, the constructor establishes it and every method preserves it, while the private representation guarantees that no other path exists. The invariant has gone from a property we *hoped held* to one that *always holds*.
+This captures the essence of encapsulation. In Part 1 an invariant was documented and checked after the fact. Here, the constructor establishes it and every method preserves it, while the private representation guarantees that no other path exists. The invariant has gone from a property we _hoped held_ to one that _always holds_.
 
 
 ```graphviz
@@ -224,7 +224,7 @@ The structures you built with `define-struct` in CPSC 110 were immutable: once m
 
 ### When References Escape
 
-A caller often needs to *see* the guests, to print them at the door or count them by hand. An accessor that hands the list back looks harmless:
+A caller often needs to _see_ the guests, to print them at the door or count them by hand. An accessor that hands the list back looks harmless:
 
 ```typescript
 guests(): string[] {
@@ -320,7 +320,7 @@ class GuestList {
 
 </CollapsibleCode>
 
-Every public method has the same name, the same parameters, and the same return type as before. Code written against the array version keeps working without a single change, because from the outside there *is* no change: the public shape is identical. We replaced the internal data structure and rewrote the method bodies, and all of it stayed inside the boundary that `private` creates. In addition, the `Set` makes the duplicate invariant *structural*: the representation is now incapable of holding a duplicate at all, rather than relying on `add` to check.
+Every public method has the same name, the same parameters, and the same return type as before. Code written against the array version keeps working without a single change, because from the outside there _is_ no change: the public shape is identical. We replaced the internal data structure and rewrote the method bodies, and all of it stayed inside the boundary that `private` creates. In addition, the `Set` makes the duplicate invariant _structural_: the representation is now incapable of holding a duplicate at all, rather than relying on `add` to check.
 
 <details class="tooltip deep-dive">
 <summary>Built-in Encapsulated Types</summary>
@@ -346,7 +346,7 @@ A plain-object dictionary and a `Map` overlap, but differ in ways that decide be
 
 Information hiding is not only about marking fields `private`; it is about keeping the public side of a class small and behavioural. Every public member is a promise to callers, so the fewer and the more stable they are, the more freedom the class keeps for itself. Three habits help:
 
-- _Expose behaviour, not data._ `add`, `remove`, `isInvited`, and `size` say what a guest list *does*. We never exposed `invited`, so the data is reachable only in the controlled ways those methods allow.
+- _Expose behaviour, not data._ `add`, `remove`, `isInvited`, and `size` say what a guest list _does_. We never exposed `invited`, so the data is reachable only in the controlled ways those methods allow.
 - _Hide likely change._ The choice between an array and a `Set` was precisely such a decision, and hiding it is what made the change painless. Anything you expose, you may later have to keep working.
 - _Minimal public exposure._ Add a public method when a caller needs the behaviour, not in anticipation of one that might.
 
@@ -400,7 +400,7 @@ Encapsulation and testing are often in tension. Encapsulation hides the represen
 
 A test needs two things of the object under test. **Controllability** is the ability to configure an object into the state a test wants to examine: can the test construct the object and call the methods needed to reach that state? **Observability** is the ability to see enough of the outcome to judge whether it was successful: can the test read back what it needs to tell success from failure? Encapsulation can weaken both. If the only way to reach an interesting state is a long and awkward sequence of calls, the object is hard to control; if a method changes internal state but exposes nothing about it, the object is hard to observe.
 
-When a test cannot control or observe what it needs, the fix is almost always a change to the design, not to blindly break the encapsulation. Small, behavioural additions to the public surface are usually effective: an observation method that reports a meaningful, derived fact about the state, or a constructor that builds the object directly in a useful starting configuration. `size()` and `isInvited()` already play this role for `GuestList`; they are what made the duplicate-invariant test possible without exposing `invited`. The constraint is that these additions expose behaviour through _derived facts_, never the raw representation. A getter that simply returned the private array would restore observability and destroy encapsulation at the same time, handing back the very reference the class works to protect.
+When a test cannot control or observe what it needs, the fix is almost always a change to the design, not to blindly break the encapsulation. Small, behavioural additions to the public surface are usually effective: an observation method that reports a meaningful, derived fact about the state, or a constructor that builds the object directly in a useful starting configuration. `size()` and `isInvited()` already play this role for `GuestList`; they are what made the duplicate-invariant test possible without exposing `invited`. The constraint is that these additions expose behaviour through _derived facts_, never the raw representation. A getter that returned the private array would restore observability and destroy encapsulation at the same time, handing back the very reference the class works to protect.
 
 So testability is not at odds with encapsulation when the two are designed together. A class that is hard to test is often telling you something useful: either it maintains an invariant with no observable consequence, which is worth questioning, or its public surface has a genuine gap that real callers will feel too. Designing for controllability and observability, through a minimal behavioural interface rather than exposed fields, is part of encapsulation done well.
 

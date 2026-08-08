@@ -137,7 +137,7 @@ This reiterates the encapsulation chapter's advice to hide what is most likely t
 <details class="tooltip deep-dive">
 <summary>Speculative Generality</summary>
 
-The opposite mistake to a rigid design is an over-flexible one. Adding interfaces, base classes, and extension points for variation you only imagine you might need is a recognised design smell, sometimes called _speculative generality_: the indirection is real while the flexibility is hypothetical. The guidance from the testing chapters applies here too, build for the variation you have evidence for, not the variation you can imagine. It is straightforward to open a concrete design along a new axis once that axis actually appears, and costly to carry a dozen speculative ones that never do.
+The opposite mistake to a rigid design is an over-flexible one. Adding interfaces, base classes, and extension points for variation you only imagine you might need is a recognised design smell, sometimes called _speculative generality_: the indirection is real while the flexibility is hypothetical. The guidance from the testing chapters applies here too, build for the variation you have evidence for, not the variation you can imagine. It is straightforward to open a concrete design along a new axis once that axis does appear, and costly to carry a dozen speculative ones that never do.
 
 </details>
 
@@ -154,7 +154,72 @@ The Open/Closed Principle is the last piece of a set the design part has been as
 - **Substitutability** [(Chapter 15)](06_extension): many implementations stand behind one contract, each honouring it, so one can stand in for another.
 - **Open and closed** (this chapter): the above let a system grow by adding implementations rather than by editing existing code.
 
-These are not independent rules to memorise. They are all the same concept viewed from different angles. A small, cohesive interface is easy to implement substitutably; substitutable implementations behind a hidden representation are what let new ones be added without modification; and the discipline of putting a boundary where change is expected is what makes any of it worth doing. Each makes the others reachable.
+These are not independent rules to memorise, and the list understates how tightly they are bound together. Each chapter introduced one of them on its own, with its own example and its own argument, which makes them look like six pieces of advice that happen to appear in the same course. They are closer to a single mechanism, and the way to see that is to reexamine something we have already designed.
+
+### One Addition, Taken Apart
+
+Adding `PushNotifier` earlier in this chapter cost one class and one line at the point of assembly. That is the outcome the principle promises, and it is worth asking what had to be true for it to happen, because every part of that small change was enabled by a decision made in an earlier chapter.
+
+```typescript
+class PushNotifier extends BaseNotifier {
+    private readonly deviceId: string;
+
+    constructor(deviceId: string) {
+        super();
+        this.deviceId = deviceId;
+    }
+
+    protected deliver(text: string): void {
+        // deliver `text` to this.deviceId as a push notification
+    }
+}
+```
+
+_That the change is one class at all_ is because of a cohesive design. Delivering an alert over a channel is a single responsibility, held by a single kind of unit, so "support one more channel" corresponds to "write one more class". Had delivery been spread across several classes, or bundled together with formatting and retry policy, a new channel would have been a change in several places at once, and no amount of polymorphism could have collapsed it back into one single location.
+
+_That it may store a `deviceId` at all_ is encapsulation enabling implementation freedom. A push channel needs to remember something entirely unlike an email address or a phone number, and it can, because no code outside the class has ever been able to see what a channel stores. Each channel's representation was private from the beginning, so the new channel was free to store whatever internal representation it needed.
+
+_That it had to write only `deliver(..)`_ is the small contract, together with the shared base from the extension chapter. `Notifier` requires one operation, so conforming to it is cheap; `BaseNotifier` already holds the steps every channel performs identically, so the new class supplies only the step that differs.
+
+_That `alertAll(..)` accepts it_ is because of substitutability. `PushNotifier` doesn't demand anything of its callers beyond what `Notifier` promises, so code written against the interface is correct for an implementation that did not exist when the code was written.
+
+_That `alertAll(..)` did not have to change_ is the last piece: `alertAll(..)` was written against the abstraction rather than against any channel, so nothing in it could become out of date when a channel was added.
+
+The Open/Closed Principle is not a seventh item alongside those five. It is what you observe from outside when a design encompasses all five simultaneously. This is why it reads as a property of a system rather than as a technique: designers do not apply open/closed directly, by intentionally reasoning about the other principles and judiciously integrating them with their systems they indirectly support the open/closed principle, and all of the benenfits this enables.
+
+### What We Lose When A Principle is Missing
+
+The clearest way to see that these principles depend on one another is to remove them one at a time and watch the same change become more and more difficult. For each case below, assume the other five principles are still supported.
+
+_Without cohesion._ Suppose `EmailNotifier` had also owned message formatting and the system's retry policy, because those were added to it when email was the only channel. Adding push now means adding push delivery, push formatting, and push retry, in each of the classes those responsibilities ended up in. The interface is still there and is still polymorphic, but now the change (and it's potential to impact existing code) is spread across three locations.
+
+_Without encapsulation._ Suppose `address` had been public, and an audit log had come to read `channel.address` to record who was notified. `PushNotifier` has no address; it has a device id. The new channel compiles, satisfies `Notifier`, and breaks the audit log, because a caller depended on a field rather than on behaviour.
+
+_Without implementation freedom._ Suppose `send(..)` had been declared to return the provider's raw response object, so that callers could inspect delivery details. But the response object will differe between providers. This means that either `PushNotifier` cannot conform to the contract, or it fabricates a response in a foreign shape that does not make sense for each provider. The interface leaked a representation, and representations are not interchangeable even though the behaviour is.
+
+_Without small contracts._ Suppose `Notifier` had grown to nine methods over time: `send`, `confirmDelivery`, `formatAsHtml`, `setPriority`, `remainingQuota`, and so on. Push supports some of these and not others, so the new class must throw errors from the behaviours that does not make sense for its needs. Now no caller can rely on any method being available, and the interface has stopped being a contract.
+
+_Without substitutability._ Suppose `PushNotifier.deliver(..)` quietly discarded messages longer than the push service accepts. It compiles, it implements the interface, and every existing test still passes. `alertAll(..)` promises its callers that every channel is told, and that promise is now false, broken by a class the system never had to be modified to accept. 
+
+_Without dependence on the abstraction._ Suppose `alertAll(..)` had been written to check what kind of channel it was holding before deciding how to send. Adding push means editing the existing code, and the entire arrangement collapses back into the tag-switching design this chapter opened by rejecting.
+
+Each principle contributes meaningfully to the overall design, and the value of each principle depends on the others. That is what makes design a chain of careful decision making rather than a checklist: the addition was easy only because every link in the existing design held.
+
+### Where the Principles Pull Apart
+
+It would be dishonest to leave the impression that the principles always agree. Applied without judgement, several of them pull against each other.
+
+Cohesion says to split a class that owns two invariants, but the decomposition chapter also warned that every split adds a name an engineer needs to learn and a file to navigate, and that extracting a class for a rule that will never grow fragments a design without clarifying it. Interface segregation says to prefer many small interfaces, but a system with twenty single-method interfaces can be harder to learn than one with five coherent ones. This chapter says to put an extension point where change is expected, and the speculative generality tooltip says that building an abstraction where change never occurs is a recognised smell.
+
+These are not contradictions, and noticing what they have in common is the most useful thing to take from this part of the course. Every design decision is an answer to the same question: _what is likely to change?_ Split a class along the axis where its reasons to change differ. Draw an interface where new variants will appear. Hide what will vary and expose what will not. When you have a confident answer to that question, the principles agree with each other completely, because they are all consequences of it. When they seem to conflict, the disagreement is almost never about design at all: it is a disagreement about a prediction, and it is better argued in those terms than by citing principles at one another. 
+
+That reframes what the judgement in this part has been. It is not judgement about how much abstraction is tasteful. It is a prediction about which parts of a system will be asked to change, made with incomplete information, and revisited as the system teaches you where you were wrong.
+
+Predicting the future is hard. Nobody can see which requirements will arrive in two years, and a design decision made today is a claim about a future that has not yet happened. There are two ways to get this wrong, and over a long enough career you will make both mistakes. You will build an abstraction to absorb a kind of change that never arrives, leaving an unnecessary abstraction in the design. You will also leave code concrete in the one place a change eventually lands, leaving a missing abstraction that the new requirement now has to work around. What makes this tolerable is that the two errors are not equally expensive. An unnecessary abstraction costs indirection, which is a permanent but small tax on every reader. A missing abstraction costs a modification to working code, which is a larger cost paid once. The speculative generality tooltip earlier made the same point from the other perspective: opening a concrete design along a new axis when that axis appears is ordinary work, while carrying a dozen speculative axes that never appear incurs costs the design never justifies.
+
+But prediction is also not a coin toss: it draws on evidence that is available if you leverage your experience and judgement to look for it. Some parts of a system have already changed more than once, and things that have changed in the past tend to change again. Some variation is inherent in the domain rather than incidental to this release: there will be another payment provider, another export format, another delivery channel, and some of the users who work in the domain the system supports can usually point those out. Some of it is visible in the requirements themselves, in the shape of a request that says "for now" or names one case out of an obvious family. Reading those signals is what improves with exposure to real systems over time. Experienced engineers' designs often look prescient. Mostly they are not seeing further into the future than anyone else; they have seen this shape of system before and remember where the last design turned out to be rigid and made their lives more difficult than an alternative design would have allowed.
+
+This is the reason design is a skill in software development rather than a procedure. A procedure can be applied without understanding the system it is applied to, which is exactly why the checklist reading of these principles is so appealing and also equivalently unhelpful. A prediction cannot be made blindly: it depends on this system, this domain, and what this team has reason to expect. That makes design something you get better at by _doing_ it, by _being_ wrong, and by _noticing_ why, rather than being a topic just read and move on from. It is also why the judgement stays with the engineer no matter how much of the typing is done for you: deciding which axis of change a system should be open along is not a question about syntax, and there is no tool that can do it without knowing what the system is for.
 
 What the list captures as individual principles is, in practice, one experience: the difference between a codebase that grows by addition and one that grows by disturbance. In a codebase without these properties, a new requirement lands as a question of which working files must be changed, which passing tests might break, and how much existing code must be reread before the new code can be written. In one with them, a new requirement of the anticipated kind is a new file: it is written, tested, and the rest of the system accommodates it without being disturbed. The principles are not valuable as rules to memorise; they are valuable because they produce that second kind of codebase.
 
@@ -162,7 +227,7 @@ What the list captures as individual principles is, in practice, one experience:
 
 The Open/Closed Principle is where we move fully into design. A system organised around contracts and polymorphic implementations grows by accretion: a new requirement of an anticipated kind is a new class, and the working system around it is left alone. That is the property that lets software keep changing without becoming impossible to change, which is what the next part of the course is about.
 
-One question this chapter has left open points the way there. The notifier system depends on `Notifier` everywhere except in a single place: wherever the list of channels is actually assembled, some code must still name `EmailNotifier`, `SmsNotifier`, and now `PushNotifier` in order to create them. Concentrating and controlling that one place, so that a new channel can be wired in without editing the code that assembles the system, is the start of Part 3. From there it takes up the larger questions of evolution and scale: how a program is composed from interchangeable parts, how it admits extensions it was not shipped with, and how change is managed across many modules and the teams that own them.
+One question this chapter has left open points the way there. The notifier system depends on `Notifier` everywhere except in a single place: wherever the list of channels is assembled, some code must still name `EmailNotifier`, `SmsNotifier`, and now `PushNotifier` in order to create them. Concentrating and controlling that one place, so that a new channel can be wired in without editing the code that assembles the system, is the start of Part 3. From there it takes up the larger questions of evolution and scale: how a program is composed from interchangeable parts, how it admits extensions it was not shipped with, and how change is managed across many modules and the teams that own them.
 
 The principle underlying this arrangement already has a name. Code at every layer should depend on abstractions rather than on concrete classes: `alertAll(..)` depends on `Notifier`, never on `EmailNotifier` or `SmsNotifier`, so the policy of "alert all channels" is decoupled from the delivery of any one. That inversion, where high-level policy reaches down to an abstraction rather than directly to a concrete implementation, is called the **Dependency Inversion Principle**, and Part 3 develops it into the question of who constructs the concrete objects and how they are wired together at the program's boundary.
 
