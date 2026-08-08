@@ -34,7 +34,15 @@ export default defineConfig({
     // chapter shows that chapter rather than the site defaults.
     transformPageData(pageData, { siteConfig }) {
         const { title, description } = siteConfig.site;
-        const pageTitle = pageData.title ? `${pageData.title} | ${title}` : title;
+
+        // The landing page's own H1 already names the course, so appending the
+        // site title just repeats it ("CPSC 210: ... | CPSC 210 Handbook").
+        if (pageData.relativePath === "index.md") {
+            pageData.titleTemplate = false;
+        }
+
+        const suffixed = pageData.title && pageData.titleTemplate !== false;
+        const pageTitle = suffixed ? `${pageData.title} | ${title}` : pageData.title || title;
         const pageDescription = pageData.description || description;
         const pagePath = pageData.relativePath
             .replace(/index\.md$/, "")
