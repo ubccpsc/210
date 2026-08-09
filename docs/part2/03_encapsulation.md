@@ -262,6 +262,22 @@ There is a depth limit worth knowing. `slice()` makes a **shallow copy**: a new 
 
 Conversely, a **deep copy** duplicates the structure all the way down: a new array whose elements are themselves new copies, and so on through any objects those elements contain, so that the copy shares nothing with the original. Nothing a caller does to a deep copy can be seen through the original, which is exactly the guarantee a shallow copy fails to provide. The cost is that the computational time and memory required for a deep copy grows with the size of the structure rather than with the length of the outer array. Also, what exactly a deep copy is is not always well defined: a structure that refers back to itself has no terminal condition, so a deep copy of it needs special handling to terminate.
 
+Both kinds have a standard form. For an array, `slice()` makes the shallow copy, and the built-in `structuredClone` makes the deep one:
+
+```typescript
+const original = [{ id: "alice", seat: 1 }];
+
+const shallow = original.slice();
+const deep = structuredClone(original);
+
+shallow[0].seat = 99; // original[0].seat is now 99 too
+deep[0].seat = 42;    // original is unaffected
+```
+
+For a plain object rather than an array, `Object.assign({}, original)` is the shallow copy; `structuredClone` is the deep copy either way.
+
+`structuredClone` walks the structure itself, and it tracks what it has already visited, so the self-referencing case above copies correctly. It copies data, not behaviour: it will refuse to clone a function, and an object built from a class comes back as a plain object with the same fields but none of its methods. 
+
 When the elements are themselves mutable, you therefore need either a deep copy or elements that cannot be changed, which is the subject of the next chapter.
 
 
