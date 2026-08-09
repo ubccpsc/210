@@ -100,7 +100,7 @@ This is the first time we have needed `as`, which tells the compiler that a valu
 
 It is worth being precise about what it does, because it does far less than it appears to. `as` performs no conversion and runs no check. It produces no code at all: once compiled, the expression is exactly what it was, and the only thing that changed is that the compiler stopped objecting. Whatever the value was at run time, correctly shaped or not, it still is.
 
-TypeScript's own name for this operator is a _type assertion_. This chapter calls it a **claim** instead, to keep it clear of the `assert` checks from Part 1, which do the opposite: an `assert` tests a condition while the program runs and halts when it fails, whereas `as` tests nothing and cannot fail.
+TypeScript's own name for this operator is a _type assertion_. This chapter calls it a _claim_ instead, to keep it clear of the `assert` checks from Part 1, which do the opposite: an `assert` tests a condition while the program runs and halts when it fails, whereas `as` tests nothing and cannot fail.
 
 There is one narrow legitimate use, described later in this section, where the surrounding code has already established the fact being claimed. Everywhere else, using `as` to make a type error go away trades a complaint from the compiler for a fault at run time.
 

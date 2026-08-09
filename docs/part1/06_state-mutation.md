@@ -9,7 +9,7 @@ Mutation introduces the dimension of _time_ into our programs: the answer to "wh
 
 ## Reassignment
 
-So far, every variable we have declared has been using the `const` keyword. `const` guarantees that the value associated with the name will remain unchanged for the duration of a program. TypeScript provides a second way to declare a variable: `let`, which allows variables to be **reassigned** zero or more times as the program runs.
+So far, every variable we have declared has been using the `const` keyword. `const` guarantees that the value associated with the name will remain unchanged for the duration of a program. TypeScript provides a second way to declare a variable: `let`, which allows variables to be _reassigned_ zero or more times as the program runs.
 
 ```typescript
 const absZero: number = -273;
@@ -133,7 +133,7 @@ The morning streak of two readings is recorded in `longest`, survives the warm a
 
 A trace table is something you fill in by hand, which is practical only for short programs. Your IDE includes a **debugger** that does the same work automatically and at any scale. You set a **breakpoint** on a line, run the program, and execution pauses when it reaches that line. While it is paused, a panel shows the current value of every variable in scope, so you can read the program's state directly instead of reconstructing it on paper.
 
-From a breakpoint you can **step** through the code one statement at a time and watch the values change. This is the trace table built for you as the program runs. You can also modify a variable while execution is paused and then continue, which lets you test what would happen for a different value without editing the code and running it again.
+From a breakpoint you can step through the code one statement at a time and watch the values change. This is the trace table built for you as the program runs. You can also modify a variable while execution is paused and then continue, which lets you test what would happen for a different value without editing the code and running it again.
 
 The debugger should be the main tool you think of whenever a program runs to more than a screen of code and you need to understand how it is operating at runtime.
 
@@ -189,7 +189,7 @@ reading = { hour: 6, tempCelsius: -3 };    // compile error: reading is a const
 
 That this is allowed can feel surprising. `const` froze the _variable_ (the name `reading` will refer to this object forever) but it says nothing about the _object_ itself. In TypeScript, a raw object value's properties remain assignable. The distinction between a name and the thing it refers to is the subject of the next section; for now, notice that the two lines above do different things, and the compiler treats them differently.
 
-Arrays are objects, and they mutate the same ways. Elements can be replaced through their index, and the classic array mutations are the pair that grow and shrink the array itself: **`push`** adds an element to the end, and **`pop`** removes the last element and returns it.
+Arrays are objects, and they mutate the same ways. Elements can be replaced through their index, and the classic array mutations are the pair that grow and shrink the array itself: _`push`_ adds an element to the end, and _`pop`_ removes the last element and returns it.
 
 ```typescript
 day.push({ hour: 22, tempCelsius: -3 });   // adds a seventh reading to the end
@@ -238,7 +238,7 @@ Storing references is the performance decision we referenced at the top of this 
 
 A primitive has a small, fixed size, so copying one is essentially free. An object has no size limit: a single `Reading` is small, but an array holding a year of readings, or an object whose properties are themselves objects, can occupy enormous amounts of memory, and the language cannot know at a given `=` sign whether the copy would be cheap or extremely expensive. 
 
-So, objects are never copied on assignment. What is copied instead is the reference, which stays the same small size no matter how large the object it leads to. This efficiency has a consequence: assigning an object to another variable copies _the reference_, not the object, so both variables now refer to the **same object**:
+So, objects are never copied on assignment. What is copied instead is the reference, which stays the same small size no matter how large the object it leads to. This efficiency has a consequence: assigning an object to another variable copies _the reference_, not the object, so both variables now refer to the _same object_:
 
 ```typescript
 const r: Reading = { hour: 6, tempCelsius: -4 };

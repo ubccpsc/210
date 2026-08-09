@@ -87,8 +87,8 @@ The practical test is a question about knowledge: _how much must you know about 
 
 This sits exactly opposite cohesion, and the two are best read together:
 
-- _Cohesion_ is judged **within** a boundary: Do the parts of this class belong together?
-- _Coupling_ is judged **between** boundaries: How much does this class depend on that one?
+- _Cohesion_ is judged _within_ a boundary: Do the parts of this class belong together?
+- _Coupling_ is judged _between_ boundaries: How much does this class depend on that one?
 
 Both are about the same underlying goal, which is keeping change local. Cohesion keeps a change local by co-locating everything one invariant needs, so there is a single site to edit. Coupling keeps a change local by limiting how far the consequences of that edit can travel. A design needs both: high cohesion so that a change has one home, and low coupling so any change does not impact the rest of the system.
 

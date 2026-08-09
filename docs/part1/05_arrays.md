@@ -241,7 +241,7 @@ Built-in sequence abstractions are not new to you: CPSC 110 introduced `map`, `f
 
 ### Transforming Every Element with `map`
 
-`map` applies a function to every element and returns a **new array** of the results, in the same order. The original array is not changed. Our forecasters publish in Fahrenheit, so we convert every reading:
+`map` applies a function to every element and returns a _new array_ of the results, in the same order. The original array is not changed. Our forecasters publish in Fahrenheit, so we convert every reading:
 
 ```typescript
 const fahrenheit: number[] = day.map((reading: Reading) => reading.tempCelsius * 9 / 5 + 32);
