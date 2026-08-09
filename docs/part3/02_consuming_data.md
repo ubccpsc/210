@@ -198,7 +198,7 @@ That is the distinction worth holding on to. A claim used _instead of_ a check i
 
 Look at `toShipment` again and notice how little of it is about shipments. Confirming that a value is an object, that a field is present, that it holds a string rather than a number, that the string is one of a permitted set: none of that knowledge belongs to parcel tracking. Write a second converter for a different type and almost every line will be the same shape with different names.
 
-Repetitive, mechanical, and consequential when done wrong is a precise description of work worth taking from a library, and this is the job **Zod** does. A Zod **schema** is a value that describes the shape data must have:
+Repetitive, mechanical, and consequential when done wrong is a precise description of work worth taking from a library, and this is the job Zod does. A Zod **schema** is a value that describes the shape data must have:
 
 ```typescript
 import { z } from "zod";
