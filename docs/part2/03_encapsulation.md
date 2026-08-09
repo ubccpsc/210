@@ -258,7 +258,11 @@ The array returned by `guests()` is now a separate array from the field within `
 
 A variable holding an array or object does not hold the data; it holds a reference to data that lives elsewhere. Assigning or returning that variable copies the reference, not the data, so two names end up pointing at the same array, and a change through one is visible through the other. `slice()` (for arrays) builds a new array, which is why returning `this.invited.slice()` is safe.
 
-There is a depth limit worth knowing. `slice()` makes a **shallow copy**: a new array whose elements are the same references as the original's. For an array of strings that is completely safe, because strings cannot be mutated. For an array of objects it is not: the copy is a new array, but its elements are the same objects, so a caller could still reach through and mutate one of them. When the elements are themselves mutable, you need either a deeper copy or elements that cannot be changed, which is the subject of the next chapter.
+There is a depth limit worth knowing. `slice()` makes a **shallow copy**: a new array whose elements are the same references as the original's. For an array of strings that is completely safe, because strings cannot be mutated. For an array of objects it is not: the copy is a new array, but its elements are the same objects, so a caller could still reach through and mutate one of them.
+
+Conversely, a **deep copy** duplicates the structure all the way down: a new array whose elements are themselves new copies, and so on through any objects those elements contain, so that the copy shares nothing with the original. Nothing a caller does to a deep copy can be seen through the original, which is exactly the guarantee a shallow copy fails to provide. The cost is that the computational time and memory required for a deep copy grows with the size of the structure rather than with the length of the outer array. Also, what exactly a deep copy is is not always well defined: a structure that refers back to itself has no terminal condition, so a deep copy of it needs special handling to terminate.
+
+When the elements are themselves mutable, you therefore need either a deep copy or elements that cannot be changed, which is the subject of the next chapter.
 
 
 </details>
