@@ -158,7 +158,7 @@ range.lowest;                // error: property 'lowest' does not exist
 
 This is the same argument the modelling chapter made for grouping related values into a compound type rather than passing them separately: the shape of the data should say what each part means. Tuples do earn their place when the positions are genuinely symmetric and conventional, a coordinate pair being the usual example, but a named type is rarely the worse choice.
 
-## `...`
+## Spread and Rest (`...`)
 
 The `...` notation copies the contents of one array or object into another, or gathers a variable number of arguments into an array:
 
@@ -209,7 +209,7 @@ A reading of `0` is a real temperature, and this function reports it as missing.
 
 Finally, the habit is consistent with most other languages. Many languages, Java and C# among them, require a condition to be a boolean and reject `if (count)` outright, so writing the comparison is what they would have demanded of you anyway.
 
-## `??`
+## Nullish Coalescing (`??`)
 
 The nullish coalescing operator evaluates to its left operand unless that operand is `null` or `undefined`, in which case it evaluates to its right:
 

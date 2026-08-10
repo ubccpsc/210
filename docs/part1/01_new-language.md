@@ -292,7 +292,7 @@ if (<condition>)
    <then-statement>
 ```
 
-where `<condition>` is an expression that evaluates to a boolean, and `<then-statement>` is another statement. If `<condition>` is true, `<then-statement>` will be run, otherwise, it will be skipped. The parentheses around `<condition>` are **necessary**.
+where `<condition>` is an expression that evaluates to a boolean, and `<then-statement>` is another statement. If `<condition>` is true, `<then-statement>` will be run, otherwise, it will be skipped. The parentheses around `<condition>` are _necessary_.
 
 While technically `<then-statement>` need not be a block, in this class we will always make it a block statement, as this improves clarity:
 
@@ -376,7 +376,7 @@ In the code above once a true branch of one of the `if` statements is taken, no 
 
 #### <code>return</code> statements
 
-The `return` keyword is necessary to make functions in TypeScript return values.  The `return` statement hands a value back to whoever called the function and stops the function there. 
+The **`return`** keyword is necessary to make functions in TypeScript return values.  The `return` statement hands a value back to whoever called the function and stops the function there. 
 
 <details class="tooltip ts-tips">
 <summary><code>return</code> Statements</summary>

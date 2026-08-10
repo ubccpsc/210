@@ -258,7 +258,27 @@ The array returned by `guests()` is now a separate array from the field within `
 
 A variable holding an array or object does not hold the data; it holds a reference to data that lives elsewhere. Assigning or returning that variable copies the reference, not the data, so two names end up pointing at the same array, and a change through one is visible through the other. `slice()` (for arrays) builds a new array, which is why returning `this.invited.slice()` is safe.
 
-There is a depth limit worth knowing. `slice()` makes a **shallow copy**: a new array whose elements are the same references as the original's. For an array of strings that is completely safe, because strings cannot be mutated. For an array of objects it is not: the copy is a new array, but its elements are the same objects, so a caller could still reach through and mutate one of them. When the elements are themselves mutable, you need either a deeper copy or elements that cannot be changed, which is the subject of the next chapter.
+There is a depth limit worth knowing. `slice()` makes a **shallow copy**: a new array whose elements are the same references as the original's. For an array of strings that is completely safe, because strings cannot be mutated. For an array of objects it is not: the copy is a new array, but its elements are the same objects, so a caller could still reach through and mutate one of them.
+
+Conversely, a **deep copy** duplicates the structure all the way down: a new array whose elements are themselves new copies, and so on through any objects those elements contain, so that the copy shares nothing with the original. Nothing a caller does to a deep copy can be seen through the original, which is exactly the guarantee a shallow copy fails to provide. The cost is that the computational time and memory required for a deep copy grows with the size of the structure rather than with the length of the outer array. Also, what exactly a deep copy is is not always well defined: a structure that refers back to itself has no terminal condition, so a deep copy of it needs special handling to terminate.
+
+Both kinds have a standard form. For an array, `slice()` makes the shallow copy, and the built-in `structuredClone` makes the deep one:
+
+```typescript
+const original = [{ id: "alice", seat: 1 }];
+
+const shallow = original.slice();
+const deep = structuredClone(original);
+
+shallow[0].seat = 99; // original[0].seat is now 99 too
+deep[0].seat = 42;    // original is unaffected
+```
+
+For a plain object rather than an array, `Object.assign({}, original)` is the shallow copy; `structuredClone` is the deep copy either way.
+
+`structuredClone` walks the structure itself, and it tracks what it has already visited, so the self-referencing case above copies correctly. It copies data, not behaviour: it will refuse to clone a function, and an object built from a class comes back as a plain object with the same fields but none of its methods. 
+
+When the elements are themselves mutable, you therefore need either a deep copy or elements that cannot be changed, which is the subject of the next chapter.
 
 
 </details>
@@ -327,9 +347,9 @@ Every public method has the same name, the same parameters, and the same return 
 
 The `Set` we used is itself an encapsulated type: you use it through methods like `add`, `has`, `delete`, and `size`, never touching how it stores its elements. The standard collections are worth knowing precisely because they are the representations you will most often hide inside your own classes, and they are examples of an internal choice you can change without leaking.
 
-- **Array.** An `Array` holds a linear sequence of elements. You have written arrays with the syntactic sugar `string[]`. They can also be constructed explicitly with `new Array<string>()`, which produces the same kind of value as `[]` typed as `string[]`. An array keeps its elements in insertion order and allows access by position, but testing whether it contains a value scans the whole sequence, and it can hold duplicates.
-- **Set.** A `Set` holds each value at most once. Build one with `new Set<string>()`; adding a value it already contains does nothing. There is no literal shorthand, so a `Set` must be created with `new`. A set tests membership and enforces uniqueness quickly, which is why we used it above, but it offers no access by position: you can ask whether a value is present, never for the element at a given index.
-- **Map.** A `Map` associates keys with values, for example `new Map<string, number>()` to count tickets per guest. Its core methods are `set`, `get`, `has`, and `delete`, and it reports its entry count through `.size`. Like `Set`, it has no literal form and requires `new`. A map looks a value up by its key quickly and accepts keys of any type, but it carries more overhead than a plain array or object and is the wrong choice when you need only an ordered list or a set of bare values.
+- `Array`. An `Array` holds a linear sequence of elements. You have written arrays with the syntactic sugar `string[]`. They can also be constructed explicitly with `new Array<string>()`, which produces the same kind of value as `[]` typed as `string[]`. An array keeps its elements in insertion order and allows access by position, but testing whether it contains a value scans the whole sequence, and it can hold duplicates.
+- `Set`. A `Set` holds each value at most once. Build one with `new Set<string>()`; adding a value it already contains does nothing. There is no literal shorthand, so a `Set` must be created with `new`. A set tests membership and enforces uniqueness quickly, which is why we used it above, but it offers no access by position: you can ask whether a value is present, never for the element at a given index.
+- `Map`. A `Map` associates keys with values, for example `new Map<string, number>()` to count tickets per guest. Its core methods are `set`, `get`, `has`, and `delete`, and it reports its entry count through `.size`. Like `Set`, it has no literal form and requires `new`. A map looks a value up by its key quickly and accepts keys of any type, but it carries more overhead than a plain array or object and is the wrong choice when you need only an ordered list or a set of bare values.
 
 A plain object can also serve as a key-to-value table, what is often called a dictionary. Using an _index signature_, the type `{ [guestId: string]: number }` reads as "any string key maps to a number":
 

@@ -313,7 +313,7 @@ party.add(fastSong);
 
 ## Class Functionality
 
-Functionality is provided by **methods**: callable properties that act on the object's state. Most methods exist to establish, preserve, or observe class invariants. Here is the `Playlist` class with its methods, including the `remove` operation that makes the invariant interesting:
+Functionality is provided by methods. A **method** is a callable property that acts on the object's state. Most methods exist to establish, preserve, or observe class invariants. Here is the `Playlist` class with its methods, including the `remove` operation that makes the invariant interesting:
 
 <CollapsibleCode>
 

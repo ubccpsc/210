@@ -153,7 +153,7 @@ This is the strongest practical argument the book makes for tests. Without them,
 
 The advice above has an obvious gap. Code most in need of restructuring is often the code least likely to have a suite, and "write tests first" is unhelpful when the code is hard to test precisely because of the structure you are trying to fix.
 
-The way in is a **characterisation test**: a test that records what the code does now, rather than what it should do. You call the existing code, observe the result, and write that result into the test as the expectation, even when it looks wrong. The point is not to establish correctness. It is to detect change, so that a restructuring which alters behaviour is caught.
+The way in is a _characterisation test_: a test that records what the code does now, rather than what it should do. You call the existing code, observe the result, and write that result into the test as the expectation, even when it looks wrong. The point is not to establish correctness. It is to detect change, so that a restructuring which alters behaviour is caught.
 
 If the observed behaviour is in fact a bug, the characterisation test documents it and the bug gets fixed separately, afterwards, as its own change with its own test. Mixing the fix into the restructuring is the error the previous section warned against.
 
