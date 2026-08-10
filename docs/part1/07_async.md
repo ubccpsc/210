@@ -421,6 +421,114 @@ The type annotation on `report` is a statement of _our expectation_, not somethi
 
 The compiler's guarantees stop at the program's edge. At the edges, the discipline from the invariants chapters takes over: data arriving from outside should be _checked_ before the rest of the program relies on it. We will not build that checking today, but you should notice the boundary it belongs on.
 
+## Waiting for Several Things at Once
+
+Everything so far has waited for one slow thing at a time. Real programs rarely want that. A weather station keeps a log per instrument, and a report needs all of them; a service answers one question per request, and a page needs several answers before it can draw anything. The obvious way to read three files is a loop:
+
+```typescript
+/**
+ * Reads every file named in paths.
+ */
+async function readAllInTurn(paths: string[]): Promise<string[]> {
+    const contents: string[] = [];
+    for (const path of paths) {
+        const text: string = await readFile(path, "utf8");
+        contents.push(text);
+    }
+    return contents;
+}
+```
+
+This produces the right answer, but goes about it inefficiently. The `await` sits _inside_ the loop. This means the second read cannot begin until the first has finished, and the third waits on the second. At the SSD figure from the table at the start of this chapter, three reads take 450 µs instead of 150 µs, and nineteen station files take nineteen times the wait. Nothing about the files demanded this; they have nothing to do with one another.
+
+This is the earlier lesson going unused. The disk does the waiting, not our thread, and the operating system is perfectly capable of having several requests outstanding at once. The loop above declines to use that: it waits for each answer to come back before it will even ask the next question.
+
+The mistake is easier to see once you separate two things that `await` glues together:
+
+* _Calling_ a promise-returning function _starts_ the work.
+* _Awaiting_ the promise _collects_ the result.
+
+`await readFile(...)` does both on one line. That is exactly what you want when the next step depends on the last, which is why `archiveReport` was written that way: the write genuinely could not start before the read finished. It is exactly what you do not want when the operations are independent, because it starts each one only after collecting the one before.
+
+So start them all first, then collect them all:
+
+```typescript
+/**
+ * Reads every file named in paths, all at once.
+ */
+async function readAll(paths: string[]): Promise<string[]> {
+    const pending: Promise<string>[] = paths.map((path: string) => readFile(path, "utf8"));
+    return await Promise.all(pending);
+}
+```
+
+There is no `await` inside the `map`, and that is the whole trick. Each call to `readFile` starts a read and hands back its receipt immediately, so by the time `map` has finished walking the array, every read is already in flight and the disk is working on them together. `Promise.all` then takes that array of receipts and returns a single promise that delivers once the last of them has arrived.
+
+```text
+readAllInTurn   |--A--|--B--|--C--|     450 µs
+readAll         |--A--|                 150 µs
+                |--B--|
+                |--C--|
+```
+
+The total wait becomes the _slowest_ of the operations rather than the _sum_ of them, and the gap widens with every file added.
+
+Two properties of `Promise.all` are worth committing to memory. The first is that it turns an array of promises into a promise of an array, `Promise<T>[]` into `Promise<T[]>`, and the results come back in the order you supplied them, not the order they finished. If `humidity.txt` is tiny and arrives first, it is still second in the returned array because it was second going in. You never have to sort answers back into place.
+
+The second is that a fixed set of operations can be destructured, and the type checker tracks each position separately:
+
+```typescript
+const [current, history, calibration]: [string, string, string] = await Promise.all([
+    readFile("current.json", "utf8"),
+    readFile("history.csv", "utf8"),
+    readFile("calibration.json", "utf8"),
+]);
+```
+
+This approach is recommended whenever a function needs several particular files, or several particular service calls, before it can do anything at all: name them, start them together, and examine what comes back.
+
+_When one of them fails._ `Promise.all` rejects as soon as _any_ one of its promises rejects, reporting that rejection's reason and not waiting for the rest. The other operations are not cancelled; they continue, and their results are discarded. For this chapter's policy of files that exist and services that answer, this is the behaviour you want: if one required file is missing, the whole operation cannot proceed, and failing at once with the reason is more useful than pressing on. The next chapter takes up what to do about such failures. If you ever need every outcome rather than the first failure, `Promise.allSettled` waits for all of them and reports each one separately, but usually `Promise.all` is the default suggestion.
+
+_When a loop is right after all._ Concurrency is the right default only because these operations are independent. When each step actually depends on the one before, a sequential loop is correct and `Promise.all` would be wrong: you cannot start a request that needs the previous request's answer. Writing files one after another to the same place, or walking a service's pages where each reply names the next page, are both genuinely sequential. 
+
+<details class="tooltip ts-tips">
+<summary>The <code>noAwaitInLoops</code> lint rule</summary>
+
+The lint configuration used in this course reports `await` in a loop body as an error. The rule exists because the loop shape is almost always accidental: it is what you get by writing the synchronous version and then adding `await` where the compiler asked for it, and the resulting code is correct but needlessly slow in a way no test is likely to detect. Treat the error as a question rather than an instruction: ask whether iteration _n_ needs anything from iteration _n − 1_. If it does not, the loop wants to be `map` plus `Promise.all`. 
+
+</details>
+
+<details class="tooltip exercise">
+<summary>Check your Understanding of <code>Promise.all</code></summary>
+
+Consider these two functions, both reading the same three files:
+
+```typescript
+async function versionOne(): Promise<number> {
+    const a: string = await readFile("a.txt", "utf8");
+    const b: string = await readFile("b.txt", "utf8");
+    const c: string = await readFile("c.txt", "utf8");
+    return a.length + b.length + c.length;
+}
+
+async function versionTwo(): Promise<number> {
+    const reads: Promise<string>[] = [
+        readFile("a.txt", "utf8"),
+        readFile("b.txt", "utf8"),
+        readFile("c.txt", "utf8"),
+    ];
+    const [a, b, c]: string[] = await Promise.all(reads);
+    return a.length + b.length + c.length;
+}
+```
+
+1. Both return the same number. Which finishes sooner, and roughly by how much, if each read takes 150 µs?
+2. `versionTwo` has no loop, so the lint rule is silent about `versionOne` too. Is `versionOne` nevertheless the same mistake? Explain what makes the two equivalent.
+3. In `versionTwo`, the three reads all start before the `await` on the line below them. What line does the first read actually start on?
+4. Suppose `b.txt` does not exist. In each version, does `a.txt` get read? Does `c.txt`?
+
+</details>
+
 ## When Slow Things Fail
 
 Everything in this chapter can fail in ways pure computation cannot: a file may not exist, a network may be down, a service may answer nonsense. This is what the rejected state of a promise is for, and when an `await`ed promise rejects, the error surfaces in your program at the `await`.
