@@ -98,7 +98,7 @@ Terms introduced in **bold** throughout the book, linked to the section where ea
 
 ## E
 
-- **Encapsulation** — [Part 1: Foundations of Software Construction § Layered Correctness](/part1/index#layered-correctness)
+- **Encapsulation** — [Encapsulating What Varies](/part2/03_encapsulation#encapsulating-what-varies)
 - **Equivalence** — [Preserving Implementation Freedom with Abstract Values § Two Notions of Sameness](/part2/04_flexibility#two-notions-of-sameness)
 - **Equivalence Class Partitioning** — [Checking Invariants § Deriving Tests from the Specification](/part1/03_checking-invariants#deriving-tests-from-the-specification)
 - **Equivalence Classes** — [Checking Invariants § Equivalence Class Partitioning](/part1/03_checking-invariants#equivalence-class-partitioning)
@@ -311,7 +311,6 @@ Terms introduced in **bold** throughout the book, linked to the section where ea
 ## V
 
 - **Value Object** — [Preserving Implementation Freedom with Abstract Values § Values That Do Not Change](/part2/04_flexibility#values-that-do-not-change)
-- **`void`** — [Mutation and Side Effects § What a Function Can and Cannot Change](/part1/06_state-mutation#what-a-function-can-and-cannot-change)
 
 ## W
 
