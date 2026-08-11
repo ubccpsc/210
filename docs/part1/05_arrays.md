@@ -77,7 +77,7 @@ const count = day.length;    // 6
 ```
 
 <details class="tooltip ts-tips">
-<summary>Acessing array elements with <code>[]</code></summary>
+<summary>Accessing array elements with <code>[]</code></summary>
 
 Given an array `a`, the expression `a[i]` returns the `i`-th element in `a`, starting counting at 0.
 </details>

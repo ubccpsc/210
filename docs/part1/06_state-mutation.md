@@ -431,7 +431,7 @@ The three cases, summarised:
 The same distinction, drawn out:
 
 <!---- CL: ditaa interprets : as a contol character, using ∶ instead ---->
-<!---- CL: unfortuantely that replacement doesn't work within ditaa boxes
+<!---- CL: unfortunately that replacement doesn't work within ditaa boxes
        because it is slightly different width. ꞉ might work, but doesn't
        render in vitepress. Fine, use ;        --->
        

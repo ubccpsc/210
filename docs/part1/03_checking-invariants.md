@@ -39,7 +39,7 @@ Invariants are everywhere once you look for them: durations are positive, percen
 <summary>Course Preview: Could We Statically Check Invariants?</summary>
 In the previous chapters, we saw how types allowed us to bring enforcement that in CPSC 110 we had to trust. In CPSC 210, invariants capture what we cannot check solely through types---unfortunately, those won't be statically enforceable. This is where we bring in dynamic checking of invariants, through testing.
 
-But some of the invariants we have aren't too complicated: if we can enforce that `x` is a `number` statically, why can we not enforce that that `x > 10` statically? We won't cover that in CPSC 210, but if this question is interesting to you, you may be interesting in learning more about the fields of _formal verification_ (CPSC 513, 539S) and _programming languages_ (CPSC 311, 411, 509, 511) in the future.
+But some of the invariants we have aren't too complicated: if we can enforce that `x` is a `number` statically, why can we not enforce that `x > 10` statically? We won't cover that in CPSC 210, but if this question is interesting to you, you may be interesting in learning more about the fields of _formal verification_ (CPSC 513, 539S) and _programming languages_ (CPSC 311, 411, 509, 511) in the future.
 </details>
 
 ## Identifying Invariants
@@ -98,7 +98,7 @@ function lateFee(daysLate: number): number
 <details class="tooltip ts-tips">
 <summary>Function Doc Comments</summary>
 
-In TypeScript, `//` comments out the rest of a line. Anything between `/_` and `_/` is also a comment, and these comments can span multile lines.
+In TypeScript, `//` comments out the rest of a line. Anything between `/_` and `_/` is also a comment, and these comments can span multiple lines.
 
 For function doc comments in this course, we'll use syntax that's consistent with [JSDoc](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html):
 ```typescript
@@ -295,7 +295,7 @@ All five tests now pass:
 ✓ fee never exceeds the maximum
 ```
 
-Ntice what did _not_ change: the tests. They were correct all along, because they were written from the specification, and so the requirement our implementation forgot had nowhere to hide. If we had written our tests _after_ the implementation, by reading our own code and checking that it does what it appears to do, we would probably not have thought to test the maximum: the first prototype of `lateFee` contained  no hint that a maximum should exist. Tests written first keep the specification in charge; tests written after tend to mirror the code, mistakes included.
+Notice what did _not_ change: the tests. They were correct all along, because they were written from the specification, and so the requirement our implementation forgot had nowhere to hide. If we had written our tests _after_ the implementation, by reading our own code and checking that it does what it appears to do, we would probably not have thought to test the maximum: the first prototype of `lateFee` contained  no hint that a maximum should exist. Tests written first keep the specification in charge; tests written after tend to mirror the code, mistakes included.
 
 
 <details class="tooltip ts-tips">
@@ -581,7 +581,7 @@ Practise this chapter's concepts on a new problem: write a contract, derive test
 
 > As a parking garage, I want to compute the parking fee by counting how many whole hours a car is parked, with a free first hour and a daily maximum, so that drivers are charged fairly and predictably.
 
-The policy policy states that parking is free for the first hour; after that, each additional hour costs $4; and the total never exceeds $24. The function will have the signature <span class="hint">`parkingFee(hours: number): number`</span>.
+The policy states that parking is free for the first hour; after that, each additional hour costs $4; and the total never exceeds $24. The function will have the signature <span class="hint">`parkingFee(hours: number): number`</span>.
 
 1. Write the contract. Document `parkingFee` with a doc comment giving its purpose, a precondition (<span class="hint">`hours` is a whole number and `hours >= 0`</span>), a postcondition (<span class="hint">the fee is between 0 and 24</span>), and `@param`/`@returns` lines.
 2. Derive the tests first. Use equivalence class partitioning to find the input classes the policy treats alike, and pick one representative of each. Then use boundary value analysis to add the edges: where the free hour ends, and where the cap is reached.

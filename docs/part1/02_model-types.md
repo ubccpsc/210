@@ -1,6 +1,6 @@
 # Using Types to Model Problems
 
-In the last chapter we introduces used types to annotate individual values: a parameter was a `number`, a function returned a `string`, and the compiler checked that we used them consistently. These primitive types are enough when a program passes around single, unrelated values, but real information rarely arrives one value at a time.
+In the last chapter we used types to annotate individual values: a parameter was a `number`, a function returned a `string`, and the compiler checked that we used them consistently. These primitive types are enough when a program passes around single, unrelated values, but real information rarely arrives one value at a time.
 
 Consider a song. A song is not one value; it has its musical contents, as well as much associated metadata.
 
@@ -450,7 +450,7 @@ The data definition provides a template: if the data has distinct cases, the fun
 <details class="tooltip link-110">
   <summary>Function Templates</summary>
 
-This section is analogous the template step of the design recipe. In CPSC 110 the shape of a data definition dictated the shape of the function that consumed it: an itemisation became a `cond` with one clause per case, and a self-referential definition became a natural recursion. The same correspondence holds in TypeScript.
+This section is analogous to the template step of the design recipe. In CPSC 110 the shape of a data definition dictated the shape of the function that consumed it: an itemisation became a `cond` with one clause per case, and a self-referential definition became a natural recursion. The same correspondence holds in TypeScript.
 
 We won't strictly enforce a template step in CPSC 210. But, if you find yourself lost and unsure where to start, you can look at the structure of the type to guide your programming. 
 </details>

@@ -40,7 +40,7 @@ Enrolling in a section can fail in two predictable ways: the section id might no
 
 ## Returning Failure as a Value
 
-The first error-reporting mechanism was introduced in the [checking invariants chapter](../part1/03_checking-invariants#expected-and-unexpected-errors): the failure is modeled as part of the return type, so that a function returns either a success or a failure, and the caller must check the returned value to determine the outcome. The `Result` type captured this as a tagged union.
+The first error-reporting mechanism was introduced in the [checking invariants chapter](./03_checking-invariants#expected-and-unexpected-errors): the failure is modelled as part of the return type, so that a function returns either a success or a failure, and the caller must check the returned value to determine the outcome. The `Result` type captured this as a tagged union.
 
 ```typescript
 type Result<T, E> =

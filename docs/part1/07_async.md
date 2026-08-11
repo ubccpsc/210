@@ -1,6 +1,6 @@
 # Asynchronous Effects and Time
 
-The previous chapter ended with **side effects**: changes that reach beyond a function, and sometimes beyond the program entirely, to files, networks, and users. We saw how side effects significantly complicate the mental model we have of computation. This chapter intorduces asynchronicity, which will further complicate the mental model.
+The previous chapter ended with **side effects**: changes that reach beyond a function, and sometimes beyond the program entirely, to files, networks, and users. We saw how side effects significantly complicate the mental model we have of computation. This chapter introduces asynchronicity, which will further complicate the mental model.
 
 Programs become much more useful when they interact with the outside world. A weather station that can only summarise readings typed into its source code is a _calculator_. A weather station that can load a year of readings from a file, fetch the current conditions from a web service, and write its report somewhere permanent is a _system_. Most software needs require interacting with the outside world:
 
@@ -192,7 +192,7 @@ readFile("report.txt", "utf8").then((contents) => {
 
 This connects callbacks and promises: a promise is, underneath, an object that runs callbacks for you when its value arrives, and the `await` syntax in the next section is built on exactly this mechanism. 
 
-We show `then` here so you will recognise it in documentation and in other people's code, but we will not use it in this course. `await` is a form of _syntatic sugar_ that expresses the same thing and is much more readable.
+We show `then` here so you will recognise it in documentation and in other people's code, but we will not use it in this course. `await` is a form of _syntactic sugar_ that expresses the same thing and is much more readable.
 
 </details>
 
@@ -539,7 +539,7 @@ For this chapter and its exercises, the policy is simple: we will work with file
 
 ## From Mechanics to Abstraction
 
-Mutation introduced state and time _inside_ the program. Asynchrony extends time to the world _outside_ the probram: data lives on disks and on other machines, and arrives only after a wait. The program need not spend all that time standing still. The model TypeScript gives us is single-threaded and deferred: slow operations hand back promises, `await` collects their values while the lone thread stays busy, and `async` marks every function that participates. With files and web services available, our programs can act on data that comes from outside their own source code.
+Mutation introduced state and time _inside_ the program. Asynchrony extends time to the world _outside_ the program: data lives on disks and on other machines, and arrives only after a wait. The program need not spend all that time standing still. The model TypeScript gives us is single-threaded and deferred: slow operations hand back promises, `await` collects their values while the lone thread stays busy, and `async` marks every function that participates. With files and web services available, our programs can act on data that comes from outside their own source code.
 
 <details class="tooltip exercise">
   <summary>Exercise: A Journal on Disk</summary>
