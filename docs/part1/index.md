@@ -44,7 +44,8 @@ Identifying these properties and confirming them are separate tasks. The separat
 - **Types** establish what shapes of data are allowed.
 - **Contracts** state what behaviour each function assumes and promises.
 - **Invariants** state what must remain true of the data at all times.
-- **Tests and assertions** check that those promises hold when the program runs.
+- **Tests** execute the code, choosing which inputs and paths to exercise.
+- **Assertions** check that the code's behaviour matches what was expected.
 
 
 
