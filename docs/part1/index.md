@@ -54,17 +54,18 @@ No layer is sufficient on its own. A program can be perfectly typed and still co
 <details class="tooltip deep-dive">
 <summary>How Guarantees Fail</summary>
 
-Four failure modes account for most broken guarantees, and each corresponds to a missing layer:
+Five failure modes account for most broken guarantees, and each corresponds to a missing layer:
 
 1. _Over-trusting types_: assuming that type-correct means semantically correct.
 2. _Vague contracts_: wording like "valid" or "correct" with no explicit criteria, leaving a promise no one can check.
 3. _Unowned representation_: exposing the raw shape of the data so clients can bypass the safe operations entirely.
-4. _Happy-path tests_: checking typical outputs but never whether the invariants survive a sequence of operations.
+4. _Happy-path tests_: checking typical outputs but never whether the invariants survive more diverse operations.
+5. _Weak assertions_: confirming only that a call returned something, without carefully verifying that the behaviour was correct.
 
-When you find a bug that "should have been impossible," it is usually worth asking which of these four is responsible.
+When you find a bug that "should have been impossible," it is usually worth asking which of these five is responsible.
 </details>
 
-One concern remains. An invariant the language cannot check must still be kept true, and this requires control over creation. If any code can build a value, every such place is an opportunity to break the invariant. In Chapter 4, we'll see how we can keep values hidden (**encapsulation**) using _only the language features_ you already know from CPSC 110. In Part 2, we learn about a new language feature that provides encapsulation more directly, but the idea is the same as in Chapter 4: protecting an invariant shapes how the code is organised.
+One concern remains. An invariant the language cannot check must still be kept true, and this requires control over creation. If any code can build a value, every such place is an opportunity to break the invariant. In Chapter 4, we'll see how we can use encapsulation to keep values hidden using _only the language features_ you already know from CPSC 110. In Part 2, we learn about a new language feature that provides encapsulation more directly, but the idea is the same as in Chapter 4: protecting an invariant shapes how the code is organised.
 
 
 
