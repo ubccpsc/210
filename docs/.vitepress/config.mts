@@ -87,7 +87,13 @@ export default defineConfig({
         sidebar: [{
             text: "Introduction",
             link: "/",
-            items: [],
+            items: [{
+                text: "Why CPSC 210 Exists",
+                link: "/intro/01_why-this-course"
+            }, {
+                text: "GenAI and You",
+                link: "/intro/02_gen-ai-and-you"
+            }],
         }, {
             text: "Part 1: Foundations",
             link: "/part1/",
@@ -110,7 +116,7 @@ export default defineConfig({
                 text: "06: Mutation and Side Effects",
                 link: "/part1/06_state-mutation"
             }, {
-                text: "07: Asynchronousity",
+                text: "07: Asynchronous Effects",
                 link: "/part1/07_async"
             }, {
                 text: "08: Designing for Failure",
@@ -175,6 +181,16 @@ export default defineConfig({
 		link: "/part3/06_new_features"
             }],
         }, // end part 3
+        {
+            text: "Outro",
+            items: [{
+                text: "Uncovered Language Features",
+                link: "/outro/language-features"
+            }, {
+                text: "Glossary",
+                link: "/outro/glossary"
+            }],
+        }, // end outro
         ],
 
         socialLinks: [{
