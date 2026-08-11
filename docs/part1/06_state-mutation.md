@@ -222,7 +222,7 @@ that might be helpful.
 
 To understand what a variable holds, we unfortunately need to deal with the fact that programming languages sometimes make design decisions for the sake of performance. While we do not like to think about performance too much while we are making our first initial systems, performance is the reason this section, and the confusion it imparts, exists.
 
-To predict which changes are visible where, we need a precise picture of what a variable holds. There are two cases. In the first case,  a variable holding a **primitive** value (a `number`, `string`, or `boolean`) holds the value itself. Assigning it to another variable **copies the value**, and from then on the two variables are entirely independent:
+To predict which changes are visible where, we need a precise picture of what a variable holds. There are two cases. In the first case,  a variable holding a **primitive** value (a `number`, `string`, or `boolean`) holds the value itself. Assigning it to another variable copies the value, also called _pass-by-value_, and from then on the two variables are entirely independent:
 
 ```typescript
 let a: number = 5;

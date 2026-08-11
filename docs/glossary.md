@@ -1,6 +1,6 @@
 # Glossary
 
-The vocabulary of software construction can look, at first, like jargon for its own sake. It is not. Engineers build systems that no one person can fully comprehend, and much of their work is therefore reaching agreement with other people about their code. Terms like _invariant_ or _coupling_ compress a paragraph of explanation into something two people can say in a code review and be confident they mean the same thing. Precise names also make distinctions visible: _fault_, _error_, and _failure_ pick out three different things, and a team that uses them indiscriminately will suffer unnecessary complexity and ambiguity. The same holds for processes as much as properties: _refactoring_ does not mean "changing code", it means changing structure while preserving behaviour, and that narrower meaning is what makes it something a team can agree to do safely. Many of these terms carry their criteria with them: calling a class a _god class_ is not name-calling but a claim about cohesion, and it implies what to look at next. So this glossary is less a list of words to memorise than an index of the distinctions those words encode, and learning these terms is how you become able to notice, describe, and reason about properties of a system that would otherwise stay vague.
+The vocabulary of software construction can look like a language of its own for its own sake. It is not. Engineers build systems no one person can fully comprehend, and much of their work is therefore reaching agreement with others about code. Terms like _invariant_ or _coupling_ compress a paragraph of explanation into something two people can say in a code review and mean the same thing. Precise names also make distinctions visible: _fault_, _error_, and _failure_ pick out three different things, and _refactoring_ means restructuring code without changing its behaviour. So this glossary is less a list of words than an index of distinctions, the ones that let you describe what would otherwise stay vague.
 
 Terms introduced in **bold** throughout the book, linked to the section where each is first introduced.
 
@@ -70,7 +70,7 @@ Terms introduced in **bold** throughout the book, linked to the section where ea
 - **Control** — [Encapsulating What Varies § Testing Encapsulated Code](/part2/03_encapsulation#testing-encapsulated-code)
 - **Control Flow** — [Learning a New Programming Language § <code>if</code> statements](/part1/01_new-language#if-statements)
 - **Controllability** — [Encapsulating What Varies § Testing Encapsulated Code](/part2/03_encapsulation#testing-encapsulated-code)
-- **Copies the Value** — [Mutation and Side Effects § Copies and References](/part1/06_state-mutation#copies-and-references)
+
 - **Copy, Deep** — [Encapsulating What Varies § When References Escape](/part2/03_encapsulation#when-references-escape)
 - **Copy, Shallow** — [Encapsulating What Varies § When References Escape](/part2/03_encapsulation#when-references-escape)
 - **Correctness** — [Part 1: Foundations of Software Construction](/part1/index#part-1-foundations-of-software-construction)
