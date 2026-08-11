@@ -67,7 +67,7 @@ Because an interface is a contract that one body of code implements and another 
 <details class="tooltip ts-tips">
 <summary><code>interface</code> Versus <code>type</code></summary>
 
-You have used `type` since Part 1 to name unions and the shapes of data, and TypeScript will in fact let you describe an object's shape with either `type` or `interface`. The convention this course follows is to use an `interface` for a contract that classes implement and callers depend on, and `type` for unions (`"red" | "green" | "yellow"`) and for naming the shape of plain data. Use `interface` when several classes will commit to the same set of operations; use a `type` alias when you are giving a name to a structure.
+You have used `type` since [Part 1](../part1/index) to name unions and the shapes of data, and TypeScript will in fact let you describe an object's shape with either `type` or `interface`. The convention this course follows is to use an `interface` for a contract that classes implement and callers depend on, and `type` for unions (`"red" | "green" | "yellow"`) and for naming the shape of plain data. Use `interface` when several classes will commit to the same set of operations; use a `type` alias when you are giving a name to a structure.
 
 </details>
 

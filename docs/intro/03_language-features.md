@@ -2,7 +2,7 @@
 
 TypeScript is a large, full-featured industrial language. In this course we have taught you the main language features that will translate to most modern programming languages. But we have chosen to leave some aspects of the language out that either are not broadly available in all languages or can complicate learning more than their value is worth.
 
-You will still meet the features below in other people's code, in library documentation, and in whatever a generative tool hands you. This chapter describes each one and gives the reason we have kept it out of the handbook, so you can recognise them without being surprised by their absence. Nothing here is required.
+You will still meet the features below in other people's code, in library documentation, and in whatever a generative tool hands you. This chapter describes each one and gives the reason we have kept it out of the textbook, so you can recognise them without being surprised by their absence. Nothing here is required.
 
 A high-level list of concepts we have intentionally decided not to talk about in this course include:
 
@@ -47,7 +47,7 @@ function greet(name) {           // error: parameter 'name' implicitly has an 'a
 }
 ```
 
-Beyond that, a return type that is only inferred can change silently when the body changes, whereas one that is written down is a promise to callers, in the same way the doc comments in Part 1 record a contract. A written type is also a message to the next reader, who should not have to run the compiler to learn what a name holds. Finally, the habit transfers: most typed languages require the annotations that TypeScript merely permits.
+Beyond that, a return type that is only inferred can change silently when the body changes, whereas one that is written down is a promise to callers, in the same way the doc comments in [Part 1](../part1/index) record a contract. A written type is also a message to the next reader, who should not have to run the compiler to learn what a name holds. Finally, the habit transfers: most typed languages require the annotations that TypeScript merely permits.
 
 There is one deliberate exception in the textbook. An arrow function passed to an array operation leaves its parameter unannotated, because the compiler already knows the element type of the array it is working on. That is a local convenience at a call site, not a change of policy about declarations.
 
@@ -77,7 +77,7 @@ const partial = { name: "Bob" };
 const bad: User = partial;       // error: property 'email' is missing
 ```
 
-We leave this out because it is atypical. Most statically typed languages, Java and C# among them, work the other way: a value belongs to a type only if it was declared to, which is called _nominal_ typing. TypeScript's behaviour follows from JavaScript, where an object is simply a collection of properties and nothing records which type it was meant to be. Building your intuition on the structural rule would not transfer to the next language you learn. It also has a consequence we would rather not rely on: a class can satisfy an interface without ever declaring that it implements it. The handbook always writes `implements` regardless, because declaring the intent is what makes it visible to a reader.
+We leave this out because it is atypical. Most statically typed languages, Java and C# among them, work the other way: a value belongs to a type only if it was declared to, which is called _nominal_ typing. TypeScript's behaviour follows from JavaScript, where an object is simply a collection of properties and nothing records which type it was meant to be. Building your intuition on the structural rule would not transfer to the next language you learn. It also has a consequence we would rather not rely on: a class can satisfy an interface without ever declaring that it implements it. The textbook always writes `implements` regardless, because declaring the intent is what makes it visible to a reader.
 
 ## `enum`
 
@@ -247,9 +247,9 @@ if (channel instanceof SmsNotifier) {
 }
 ```
 
-We leave it out because it undoes the move that Part 2 spends most of its chapters making. An `instanceof` chain over the implementations of an interface is the tag-switch in different syntax: the caller asks which concrete class it was handed and branches on the answer, which is the dependency on concrete types that the coupling chapter warns about, and the shape that the Open/Closed Principle replaces. When behaviour has to differ by kind, the difference belongs in a method that each class implements, so dispatch does the branching and no caller has to ask.
+We leave it out because it undoes the move that [Part 2](../part2/index) spends most of its chapters making. An `instanceof` chain over the implementations of an interface is the tag-switch in different syntax: the caller asks which concrete class it was handed and branches on the answer, which is the dependency on concrete types that the coupling chapter warns about, and the shape that the Open/Closed Principle replaces. When behaviour has to differ by kind, the difference belongs in a method that each class implements, so dispatch does the branching and no caller has to ask.
 
-There are two reasonable exceptions, both of them cases where the type system has lost track of a value rather than a design having failed to commit. The first is a `catch` block, where the caught value has no useful type because anything at all can be thrown, so a handler that wants to read an error's `message` has to establish first that it has one. The error handling chapter sidesteps this by logging the whole caught value, but real handlers often need the narrowing. The second is the edge of the program, where data arrives from a file or a service and nothing about its type has been checked yet, which is a subject of Part 3.
+There are two reasonable exceptions, both of them cases where the type system has lost track of a value rather than a design having failed to commit. The first is a `catch` block, where the caught value has no useful type because anything at all can be thrown, so a handler that wants to read an error's `message` has to establish first that it has one. The error handling chapter sidesteps this by logging the whole caught value, but real handlers often need the narrowing. The second is the edge of the program, where data arrives from a file or a service and nothing about its type has been checked yet, which is a subject of [Part 3](../part3/index).
 
 ## `switch`
 

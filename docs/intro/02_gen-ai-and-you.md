@@ -29,23 +29,23 @@ From anecdotal reports from students and social media, it appears that many stud
 How do we use GenAI?
 </summary>
 
-One of the authors of the handbook used GenAI to create these nicely formatted tooltips. In terms of tooling, simple: just the automated GenAI Google search results, and Gemini's chat interface for more details. The workflow looked a bit like this:
+One of the authors of the textbook used GenAI to create these nicely formatted tooltips. In terms of tooling, simple: just the automated GenAI Google search results, and Gemini's chat interface for more details. The workflow looked a bit like this:
 
 - Use Google's result to get the HTML tags for the first tooltip box. Include this HTML, with embedded CSS, directly into the page.
-- Write the first page of the handbook.
+- Write the first page of the textbook.
 - Add new tooltip boxes by copying the first tooltip box, and changing the colours/icons as needed.
 - Decide to change one of the icons/colours. Realize I am doing a lot of copy-paste. Desire to reduce the copy-paste by introducing abstraction. Remember that CSS might enable this abstraction, but forget how to do this.
-- Enter the Gemini chat interface and ask it how to create custom CSS so the embedded CSS need not be directly embedded in the handbook.
+- Enter the Gemini chat interface and ask it how to create custom CSS so the embedded CSS need not be directly embedded in the textbook.
 - Look at the offered CSS. Realize it doesn't have the icons included in the offered CSS, and that I would still have to copy-paste things. Ask it to include these.
 - Look at the offered CSS again. It seems to do what I want, but I noticed Gemini changed things I didn't want (such as colours), and the CSS seemed to have unnecessary fields in each element (fields I wasn't modifying with my embedded CSS). So I open a CSS file in vim, and copy-paste only the fields I think are necessary.
 - Look at the result. It seems to work. Small query to the AI on how to add spacing between the badges. It offers multiple things. I try them manually, one seems to work best. I do that and call it a day.
 - The next day, look at the website on mobile. Realize the tooltip formatting doesn't work with dark mode---some text is rendered in light font on light background. Realize now why the AI manually set the colour of the text within the tooltip.
 - Google how to adjust CSS for light/dark mode. Google's GenAI offers three methods.
 - I am skeptical these methods work because they mention using the users' or the browsers' settings, but our webpage has a manual light/dark button. I nevertheless try the first approach offered (the `light-dark` function). It doesn't work.
-- I know we are using vitepress to create pages (I have no experience with vitepress; another handbook author set it up). So I google the same thing with the vitepress keyword.
+- I know we are using vitepress to create pages (I have no experience with vitepress; another textbook author set it up). So I google the same thing with the vitepress keyword.
 - Google's GenAI mentions that with vitepress it is the .dark element that must be altered. It gives an example of how to override this for only specific CSS elements. With the little CSS I know, I adapt this to one of the tooltip types. It works.
 - Satisfied, I commit this change without fully changing all the tooltips, wanting to go back to it later.
-- Later, I go back and apply the change to all tooltip types. I document the CSS and push the changes to the handbook's `main` branch on GitHub.   
+- Later, I go back and apply the change to all tooltip types. I document the CSS and push the changes to the textbook's `main` branch on GitHub.   
 
 </details>
 
@@ -114,7 +114,7 @@ From our personal experience using GenAI and observing our colleagues using GenA
 2. The ability to assess whether a code solution is adequate in terms of functionality, performance, and extensibility; and
 3. The ability to understand technical language that appears in LLM outputs, and use this technical language to refine future LLM outputs.
 
-We believe the software construction skills you'll learn in this class will help with all these abilities. Point 1 and Point 2 are classic software construction skills. As for Point 3, we've chosen to make the handbook vocabulary-heavy, and, when possible, link this to vocabulary you've learned in prior classes, to build your confidence. Knowing that vocabulary, you won't be bamboozled when AI output includes technical language: you'll be able to evaluate whether the language is correct, plausible but needing verification, or nonsensical.
+We believe the software construction skills you'll learn in this class will help with all these abilities. Point 1 and Point 2 are classic software construction skills. As for Point 3, we've chosen to make the textbook vocabulary-heavy, and, when possible, link this to vocabulary you've learned in prior classes, to build your confidence. Knowing that vocabulary, you won't be bamboozled when AI output includes technical language: you'll be able to evaluate whether the language is correct, plausible but needing verification, or nonsensical.
 
 These abilities are the hard work. We believe they are the abilities that will make you stand out as an AI-assisted engineer. Picking up on the AI interaction strategies that will be relevant will be easy by comparison.
 

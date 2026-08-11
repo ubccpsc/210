@@ -39,7 +39,7 @@ This split is what makes a change safe, and it gives a test to apply before maki
 <details class="tooltip deep-dive">
 <summary>Two Descriptions, One Class</summary>
 
-The pairing of these two descriptions is standard, and you will see this again under different names that are worth recognising. The rule about which representations are legal is often called the _representation invariant_, which is the class invariant we have been writing since Part 1. The mapping from a legal representation to the value it denotes is often called the _abstraction function_.
+The pairing of these two descriptions is standard, and you will see this again under different names that are worth recognising. The rule about which representations are legal is often called the _representation invariant_, which is the class invariant we have been writing since [Part 1](../part1/index). The mapping from a legal representation to the value it denotes is often called the _abstraction function_.
 
 The word "function" is meaningful. The mapping is many-to-one: many representations map to one abstract value, as the three guest lists above do, but no representation maps to two. This asymmetry explains something that would otherwise be arbitrary. Two objects with different representations _may_ be equal, because equality is a question about the abstract value. Two objects with the same representation are _always_ equal, because the mapping is a function and cannot send one input to two answers.
 

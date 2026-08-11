@@ -157,7 +157,7 @@ Because a subclass instance can stand in wherever the base type or interface is 
 <details class="tooltip deep-dive">
 <summary>Demanding No More, Promising No Less</summary>
 
-The contracts from Part 1 make the rule precise. A method's precondition is what it demands of callers; its postcondition is what it guarantees in return. A subtype honours the supertype's contract when it demands no more and guarantees no less. If a subclass's `send(..)` rejected messages the base accepted, by also forbidding whitespace, say, it would _strengthen_ the precondition, and a caller relying on the base's looser rule would break. If it delivered less than the base promised, it would _weaken_ the postcondition. A subclass must also preserve any invariant the base maintains. These are the conditions under which substituting a subtype for its supertype is always safe, and they are why an override is free to change how a method works but not what it promises.
+The contracts from [Part 1](../part1/index) make the rule precise. A method's precondition is what it demands of callers; its postcondition is what it guarantees in return. A subtype honours the supertype's contract when it demands no more and guarantees no less. If a subclass's `send(..)` rejected messages the base accepted, by also forbidding whitespace, say, it would _strengthen_ the precondition, and a caller relying on the base's looser rule would break. If it delivered less than the base promised, it would _weaken_ the postcondition. A subclass must also preserve any invariant the base maintains. These are the conditions under which substituting a subtype for its supertype is always safe, and they are why an override is free to change how a method works but not what it promises.
 
 </details>
 

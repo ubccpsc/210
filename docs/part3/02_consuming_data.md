@@ -10,7 +10,7 @@ The term API covers two situations that feel different but are the same core ide
 
 A **library API** is code we `import` and call in our own process. Most systems use many libraries, for everything from date arithmetic to encryption, because a library is functionality an author chose not to build themselves. Calls are fast and ordinary: the code runs in our process, and either returns or throws. Being able to judge whether a library is appropriate, and to quickly work out how it should and should not be used, is a skill you will apply constantly.
 
-You have been applying this skill since the verification chapter. Every `expect(...).to.equal(...)` you have written is a call into the Vitest library written by another engineer. You read its documentation when you chose between `to.equal` and `to.deep.equal`, and again when you looked up whether the assertion you wanted was `to.include` or `to.have.members`. You depended on its contract when you wrote `to.throw` and trusted it to run your function, catch the error, and compare the message. You have never seen its implementation, and have not needed to. The same is true of `readFile`, of `JSON.parse`, and of every array operation from Part 1. This chapter is about reflecting on this skill that you have been practising all term.
+You have been applying this skill since the verification chapter. Every `expect(...).to.equal(...)` you have written is a call into the Vitest library written by another engineer. You read its documentation when you chose between `to.equal` and `to.deep.equal`, and again when you looked up whether the assertion you wanted was `to.include` or `to.have.members`. You depended on its contract when you wrote `to.throw` and trusted it to run your function, catch the error, and compare the message. You have never seen its implementation, and have not needed to. The same is true of `readFile`, of `JSON.parse`, and of every array operation from [Part 1](../part1/index). This chapter is about reflecting on this skill that you have been practising all term.
 
 A **web service API** is code we call over HTTP, running in someone else's process, usually on a completely different machine. Web services tend to sit at higher functional boundaries than libraries: not "parse this date" but "tell me where this parcel is." A call leaves our machine, crosses a network, and may take a second, or fail halfway, or return something we did not expect.
 
@@ -507,7 +507,7 @@ The tracker now contains no URL, no JSON, and no knowledge that HTTP exists. A n
 
 ### Supplying the Dependency
 
-Something must still decide which carriers exist and hand them over. `ParcelTracker` does not create them: it takes them in its constructor and uses whatever it is given. Supplying a dependency from outside rather than constructing it internally is called **dependency injection**, and it is the mechanism behind the Dependency Inversion Principle named at the end of Part 2.
+Something must still decide which carriers exist and hand them over. `ParcelTracker` does not create them: it takes them in its constructor and uses whatever it is given. Supplying a dependency from outside rather than constructing it internally is called **dependency injection**, and it is the mechanism behind the Dependency Inversion Principle named at the end of [Part 2](../part2/index).
 
 The decision has to happen somewhere, and the useful discipline is to concentrate it in one place at the program's edge:
 

@@ -2,7 +2,7 @@
 
 > Build systems that you are able to evolve, and evolve systems you did not build.
 
-A working system is not finished. Requirements keep arriving after the first release, the data a program consumes changes shape, the services it depends on come and go, and the code outlives the attention of the people who wrote it. Part 1 built programs that work; Part 2 built abstractions that protect their invariants as systems grow. Part 3 focuses on what happens next: changing software that already exists, without breaking what it already does.
+A working system is not finished. Requirements keep arriving after the first release, the data a program consumes changes shape, the services it depends on come and go, and the code outlives the attention of the people who wrote it. [Part 1](../part1/index) built programs that work; [Part 2](../part2/index) built abstractions that protect their invariants as systems grow. Part 3 focuses on what happens next: changing software that already exists, without breaking what it already does.
 
 This changes your initial starting point. In Parts 1 and 2 you mostly wrote new code into workspaces over which you had full control. From here on, the more common situation is the professional one: the system already exists, much of its code was written by someone else (or by you, months ago, which amounts to the same thing), and you are tasked with fixing, improving, or extending it while ensuring that the rest of the system keeps working.
 
@@ -53,5 +53,5 @@ Part 3 covers three connected themes across six chapters, one per lecture.
 
 ## Beyond CPSC 210
 
-The introduction to this handbook claimed that construction skill matters because someone must decide what to build, judge whether it is correct, and keep it changeable, no matter who or what writes the code. Parts 1 and 2 built that judgement for programs and their abstractions; Part 3 applies it to deployed, long-lived systems, which is where most time is spent. The courses that follow build outward from here, and each of them assumes what this handbook has practised: that you can read code you did not write, state precisely what it should do, and change it with confidence.
+The introduction to this textbook claimed that construction skill matters because someone must decide what to build, judge whether it is correct, and keep it changeable, no matter who or what writes the code. Parts 1 and 2 built that judgement for programs and their abstractions; Part 3 applies it to deployed, long-lived systems, which is where most time is spent. The courses that follow build outward from here, and each of them assumes what this textbook has practised: that you can read code you did not write, state precisely what it should do, and change it with confidence.
 

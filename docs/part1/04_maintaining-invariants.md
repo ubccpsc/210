@@ -4,7 +4,7 @@ The previous chapter placed invariants in documentation, tests, and assertions. 
 
 A shortcoming of these mechanisms though is that they cannot _prevent_ invalid values from being created in the first place. This chapter is about closing that gap: designing code that wholly prevents invalid values from being created, rather than writing code that checks for violations.
 
-In this chapter, we will show how this can be done _solely with programming constructs_ you know from CPSC 110. The solution we'll get to is not standard TypeScript; you may, in fact, find it unwieldy. This is expected. In fact, it will motivate the object-oriented programming we'll get to in Part 2.
+In this chapter, we will show how this can be done _solely with programming constructs_ you know from CPSC 110. The solution we'll get to is not standard TypeScript; you may, in fact, find it unwieldy. This is expected. In fact, it will motivate the object-oriented programming we'll get to in [Part 2](../part2/index).
 
 ## Initial Design with No Enforcement
 
@@ -117,7 +117,7 @@ Intentionally, there is no `balance` field. The type of `BankAccount` no longer 
 const funded = initialAccount.deposit(5);
 ```
 
-We have seen dot before. In Chapter 2 it read a property: `song1.title` selected the value stored under `title`. `initialAccount.deposit` selects the value stored under `deposit` in the same way, and what differs is only that the value found there is a function rather than a string or a number. The `(5)` that follows then calls it, just as `letterGrade(85)` called a function named directly. The expression composes two steps you have already used: select a property, then call what the selection produced.
+We have seen dot before. In [Chapter 2](./02_model-types) it read a property: `song1.title` selected the value stored under `title`. `initialAccount.deposit` selects the value stored under `deposit` in the same way, and what differs is only that the value found there is a function rather than a string or a number. The `(5)` that follows then calls it, just as `letterGrade(85)` called a function named directly. The expression composes two steps you have already used: select a property, then call what the selection produced.
 
 What is new is _which_ function you get. A free-standing `deposit(account, 5)` is one function shared by every caller, which is why it has to be told which account to act on. `initialAccount.deposit` is the function belonging to this _specific_ account, so the balance it operates on is chosen by the object the dot selected it from, and a caller cannot point it at a different account.
 

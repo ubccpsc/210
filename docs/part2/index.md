@@ -2,7 +2,7 @@
 
 > When a system grows beyond one person's attention, the question is no longer whether a design works, but whether it can keep working as it changes.
 
-In Part 1, we saw programs small enough for one person to keep the whole design in their mental model. We maintained invariants by careful factory function design and by personal _programmer discipline_ about how objects were constructed and modified.
+In [Part 1](../part1/index), we saw programs small enough for one person to keep the whole design in their mental model. We maintained invariants by careful factory function design and by personal _programmer discipline_ about how objects were constructed and modified.
 
 In Part 2, we expand our scope. Real software is built by teams, is maintained for years, and solves problems too large for any one person to tackle alone. In real software systems, the contributor count exceeds what an individual can manage, the longevity of the codebase exceeds what an individual can remember, and the code volume exceeds what an individual can audit. All of this means we cannot trust that other programmers will use the code we write correctly, or that every invariant will survive by discipline alone.
 
@@ -69,6 +69,6 @@ Part 2 covers three connected themes across seven chapters.
 6. [Extending Behaviour Through Polymorphism](./06_extension) uses inheritance and overriding to let related classes share behaviour while varying the parts that differ.
 7. [Growing Systems with the Open/Closed Principle](./07_ocp) brings the design ideas together and shows how polymorphism lets software grow by adding new code instead of rewriting code that already works.
 
-## Toward Part 3: Design for Evolution
+## Toward [Part 3](../part3/index): Design for Evolution
 
 Part 2 ends with a design goal that is crucial for large systems: we need the ability to fix problems and add new features without impacting all of the existing code within the rest of the system. Part 3 extends this further: we examine how systems are composed from interchangeable pieces, how dependencies are managed so that concrete implementations can be supplied from the outside, and how a codebase can remain open to new extensions while staying manageable across modules and teams.

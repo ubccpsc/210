@@ -2,7 +2,7 @@
 
 The previous chapter left us wanting four things from the carrier API: a small surface, documentation that explains the API correctly, errors we could act on, and changes that did not arrive without warning. This chapter turns the system around. We are now the ones creating, publishing, and evolving the API, and those properties become the things our clients want from us.
 
-The change is not a technical one. Every design decision in Part 2 could be revised the next morning, because we owned every caller: if a method name was wrong we renamed it, and the compiler listed the places to fix. A published API cannot be revised that way. The clients are people we cannot see, cannot contact, and cannot coordinate with, and they will depend on whatever we ship, including the parts we exposed unintentionally. Two consequences of this situation follow, and this chapter elaborates on both of them.
+The change is not a technical one. Every design decision in [Part 2](../part2/index) could be revised the next morning, because we owned every caller: if a method name was wrong we renamed it, and the compiler listed the places to fix. A published API cannot be revised that way. The clients are people we cannot see, cannot contact, and cannot coordinate with, and they will depend on whatever we ship, including the parts we exposed unintentionally. Two consequences of this situation follow, and this chapter elaborates on both of them.
 
 The first is that _a published API is close to permanent_. Anything a client can reach, a client will eventually depend on, and from that moment removing it breaks working code belonging to somebody who did nothing wrong. The cost of a design mistake is no longer an afternoon of refactoring; it is the correctness of other people's systems.
 
@@ -122,7 +122,7 @@ _Make the wrong call hard to write._ Consider an operation that takes a carrier 
 track(carrierId: string, trackingNumber: string): Promise<Shipment>
 ```
 
-Both parameters are strings, so the two can be swapped without the compiler noticing, and the call `track("9K4T", "carrier-a")` compiles and fails at run time. The type system that has been catching mistakes since Part 1 is contributing nothing here, because we gave it nothing to work with. An options object closes the hole by making each argument name itself at the callsite:
+Both parameters are strings, so the two can be swapped without the compiler noticing, and the call `track("9K4T", "carrier-a")` compiles and fails at run time. The type system that has been catching mistakes since [Part 1](../part1/index) is contributing nothing here, because we gave it nothing to work with. An options object closes the hole by making each argument name itself at the callsite:
 
 ```typescript
 track(request: { carrierId: string; trackingNumber: string }): Promise<Shipment>

@@ -95,7 +95,7 @@ test(<description>, () => {
 });
 ```
 
-The description is unchanged, and it is still what the runner prints. What is new is that the body is an ordinary arrow function with a block body, so it can hold any number of statements. (As Chapter 1 described, a block body returns nothing implicitly. A test body has no value to return in any case: the runner judges the case by whether an assertion inside it failed, not by what the body produced.) This erases the three restrictions of the earlier form:
+The description is unchanged, and it is still what the runner prints. What is new is that the body is an ordinary arrow function with a block body, so it can hold any number of statements. (As [Chapter 1](./01_new-language) described, a block body returns nothing implicitly. A test body has no value to return in any case: the runner judges the case by whether an assertion inside it failed, not by what the body produced.) This erases the three restrictions of the earlier form:
 
 _A case can hold as many assertions as the behaviour needs._ One check per case was a consequence of the check _being_ the body, not a judgement about what makes a good test. A block body can state several expectations about a single result, which is the technique the _Layering Assertions for Clearer Failures_ section develops below: ordering assertions from general to specific so that the first failure names the kind of fault rather than merely reporting that one exists. One assertion per case is still possible, but it is now a choice you make rather than a limit you write around.
 
@@ -498,7 +498,7 @@ Effective verification strategies are layered such that each approach provides a
 
 This also closes Part 1. You now understand the mechanics of modelling a problem with types, writing contracts and tests that validate behaviour, maintaining invariants, managing state, and changing data in the outside world. We have come a long way: TypeScript is a fully-featured, industrial-strength language. 
 
-But so far, every program we have seen has been small enough for one person to hold in their head, and that has let personal discipline carry a lot of weight in ensuring the program works as intended. Part 2 investigates what happens when it cannot: when programs, teams, and lifetimes outgrow any single person, and the discipline has to move into the language itself. That means structuring code so the invariants these tests rely on cannot be broken from the outside in the first place, which requires a new level of abstraction and new support from the programming language.
+But so far, every program we have seen has been small enough for one person to hold in their head, and that has let personal discipline carry a lot of weight in ensuring the program works as intended. [Part 2](../part2/index) investigates what happens when it cannot: when programs, teams, and lifetimes outgrow any single person, and the discipline has to move into the language itself. That means structuring code so the invariants these tests rely on cannot be broken from the outside in the first place, which requires a new level of abstraction and new support from the programming language.
 
 
 

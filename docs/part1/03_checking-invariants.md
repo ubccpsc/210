@@ -1,6 +1,6 @@
 # Checking Invariants
 
-In Chapter 1 we introduced the distinction between the _static_ and _dynamic_ views of a program. The compiler checks the static view: it reads your source code, analyses your types, and flags inconsistencies before the program runs. But a program that passes the type checker can still produce the wrong results. Types tell you what _kind_ of value a function returns; they do not tell you whether that value is _correct_.
+In [Chapter 1](./01_new-language) we introduced the distinction between the _static_ and _dynamic_ views of a program. The compiler checks the static view: it reads your source code, analyses your types, and flags inconsistencies before the program runs. But a program that passes the type checker can still produce the wrong results. Types tell you what _kind_ of value a function returns; they do not tell you whether that value is _correct_.
 
 The properties a correct program must maintain beyond its types are called **invariants**. This chapter is about working with them: what an invariant is, how to identify the invariants in a problem, how to record them in a function's documentation so they can be detected later, and how to test whether the invariant holds.
 
@@ -100,7 +100,7 @@ function lateFee(daysLate: number): number
 
 In TypeScript, `//` comments out the rest of a line. Anything between `/_` and `_/` is also a comment, and these comments can span multiple lines.
 
-For function doc comments in this course, we'll use syntax that's consistent with [JSDoc](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html):
+For function doc comments in this course, we'll use syntax that's consistent with [JSDoc](https://www.typescriptlang.org/docs/textbook/jsdoc-supported-types.html):
 ```typescript
 /**
  * Here you put a summary of the function foo
@@ -345,7 +345,7 @@ Within a class, one representative is as informative as another. `lateFee(12)` a
 <details class="tooltip deep-dive">
 <summary>Equivalence Classes are Only Derived From the Specification</summary>
 
-In Chapter 1, we defined a **branch** as the side of an if-statement that was taken when executed on an input. A **path** is the sequence of branches that are taken when a program executes on a given input. 
+In [Chapter 1](./01_new-language), we defined a **branch** as the side of an if-statement that was taken when executed on an input. A **path** is the sequence of branches that are taken when a program executes on a given input. 
 
 Two inputs belong to the same class when the _specification_ says they should behave the same way, not when they happen to take the same path through the code you wrote. In our buggy implementation, `lateFee(12)` and `lateFee(30)` took the same path through the code; classes derived from that implementation would have merged them, and the fault would have survived. Classes derived from the specification kept them apart, which is exactly why the fault was caught.
 </details>
@@ -448,7 +448,7 @@ A tricky thing about asserts: the `<condition>` describes what _should hold_, wh
 import assert from "node:assert/strict";
 ```
 
-Many TypeScript/JavaScript frameworks provide their own `assert`-like functions as well, and any of them serves the same role. By the end of Part 2, you'll know how to implement `assert` yourself, so you'll be able to use this concept in whatever code you write. 
+Many TypeScript/JavaScript frameworks provide their own `assert`-like functions as well, and any of them serves the same role. By the end of [Part 2](../part2/index), you'll know how to implement `assert` yourself, so you'll be able to use this concept in whatever code you write. 
 </details>
 
 The presence of assertions in the implementation like this can make the code much easier to write and debug, because your implementation can trust that the invariants are valid for the remainder of the function. This helps reduce defensive checks you might otherwise need to make in your code. `assert` also communicates to other developers that these are checks for valid input, rather than checks part of the core program logic. 

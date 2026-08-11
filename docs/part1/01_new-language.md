@@ -385,7 +385,7 @@ The **`return`** keyword is necessary to make functions in TypeScript return val
 
 For instance, if `return <expression>;` is in the function `foo`, wherever the call `foo()` appears, when we execute `return  <expression>;` within `foo`, `foo` evaluates `<expression>` to `v`, and the call to `foo()` is then replaced with `v`.
 
-The `return` statement only makes sense if it appears in a function definition (or method definition, which we'll see in Part 2).
+The `return` statement only makes sense if it appears in a function definition (or method definition, which we'll see in [Part 2](../part2/index)).
 </details>
 
 

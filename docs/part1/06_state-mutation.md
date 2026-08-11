@@ -1,6 +1,6 @@
 # Mutation and Side Effects
 
-In Chapter 5, you may have noticed that our arrays never changed. Every `map` and `filter` produced a new array, every `reduce` produced a new value, and `day` itself came through every example unchanged. That is also true of every program in this course so far, and of every program you wrote in CPSC 110: values were created, used, and combined into new values, but an existing value was never modified.
+In [Chapter 5](./05_arrays), you may have noticed that our arrays never changed. Every `map` and `filter` produced a new array, every `reduce` produced a new value, and `day` itself came through every example unchanged. That is also true of every program in this course so far, and of every program you wrote in CPSC 110: values were created, used, and combined into new values, but an existing value was never modified.
 
 This chapter introduces the ability to change existing values, called **mutation**. The syntax that enables mutation is short (most of it is a single `=` sign) but this small syntax change has _huge_ consequences for how you think about software. 
 
@@ -278,7 +278,7 @@ test("the change reaches back into the original day",
 );
 ```
 
-The array was copied; the readings were not. A copy that duplicates only the top level and shares everything beneath it is called a _shallow copy_, and Part 2 returns to it when the question becomes how to hand data out safely.
+The array was copied; the readings were not. A copy that duplicates only the top level and shares everything beneath it is called a _shallow copy_, and [Part 2](../part2/index) returns to it when the question becomes how to hand data out safely.
 
 <details class="tooltip deep-dive">
 <summary>References Are Pointers (a Preview of CPSC 213)</summary>
@@ -298,7 +298,7 @@ References explain the `const` surprise from the previous section: `const` locks
 <details class="tooltip ts-tips">
 <summary>Reference Equality vs Value Equality</summary>
 
-`===` (strict equality, from Chapter 2) means different things for primitives and objects, and the difference is exactly the visibility distinction from this section.
+`===` (strict equality, from [Chapter 2](./02_model-types)) means different things for primitives and objects, and the difference is exactly the visibility distinction from this section.
 
 For _primitives_, `===` compares _values_. Two numbers that happen to be equal are `===`, whether or not they were declared together:
 
@@ -562,7 +562,7 @@ test("the second reading is shifted by the offset",
 );
 ```
 
-There is one more consequence that we have been building towards in part 1. The invariants chapters established a practice: validate a value when it is constructed, and rely on the invariant afterwards. Mutation breaks the "afterwards". `reading.hour = 99` is a perfectly legal statement that violates the `Reading` invariant long after construction, and aliasing means _any_ part of the program holding a reference can do it, at any time, from anywhere. Under mutation, an invariant is no longer established once; it must be _preserved by every operation that touches the data, forever_. Keeping that promise requires controlling who is allowed to mutate state at all. Chapter 4 already showed one way to do that: hold the invariant-relevant state inside a closure, where no other code can reach it, so there is no reference to alias in the first place. That technique works, and its limit is visible from here. It protects data by never handing it out, whereas the readings in this chapter are passed from function to function precisely because callers need them. Part 2 takes up the general version of the problem, replacing the closure pattern with language syntax that lets data be shared while still restricting who may change it.
+There is one more consequence that we have been building towards in part 1. The invariants chapters established a practice: validate a value when it is constructed, and rely on the invariant afterwards. Mutation breaks the "afterwards". `reading.hour = 99` is a perfectly legal statement that violates the `Reading` invariant long after construction, and aliasing means _any_ part of the program holding a reference can do it, at any time, from anywhere. Under mutation, an invariant is no longer established once; it must be _preserved by every operation that touches the data, forever_. Keeping that promise requires controlling who is allowed to mutate state at all. [Chapter 4](./04_maintaining-invariants) already showed one way to do that: hold the invariant-relevant state inside a closure, where no other code can reach it, so there is no reference to alias in the first place. That technique works, and its limit is visible from here. It protects data by never handing it out, whereas the readings in this chapter are passed from function to function precisely because callers need them. Part 2 takes up the general version of the problem, replacing the closure pattern with language syntax that lets data be shared while still restricting who may change it.
 
 Until then, the working guidance falls back on a discipline-based approach:
 

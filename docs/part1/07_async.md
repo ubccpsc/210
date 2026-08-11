@@ -321,7 +321,7 @@ test("the report loads",
 
 This is the first check we have written whose thunk has a body in braces. Until now every thunk has been a single expression, `() => <actual>`, which _implicitly returns_ its value. Here the check needs two steps, awaiting the report and then measuring it, and two statements cannot be written as one expression, so the thunk takes the block form instead.
 
-The braces change the rules, exactly as the arrow function tooltip in Chapter 1 described. A block body returns nothing implicitly, so the value the check compares must be handed back with an explicit `return`. Written without it:
+The braces change the rules, exactly as the arrow function tooltip in [Chapter 1](./01_new-language) described. A block body returns nothing implicitly, so the value the check compares must be handed back with an explicit `return`. Written without it:
 
 ```typescript
 checkExpect(async () => {

@@ -30,7 +30,7 @@ The practical consequence is that part of receiving a request is making that cos
 
 "Tell me when a parcel is delayed" just brings up a whole lot of unanswered questions. What counts as delayed: later than the carrier's estimate, or no movement for two days, or an explicit exception status? Told how: email, push notification, a badge in the app? Told how often, if the parcel stays delayed for a week? Told about every parcel, or only ones the shopper has asked to watch? None of these are implementation details. Each is a decision about what the feature _is_, and each will be decided by somebody. The only question is whether that somebody is the requester, or a developer guessing at midnight.
 
-Turning a request into something buildable is the user-story work from Part 1: a role, a goal, a benefit, and acceptance criteria concrete enough to tell you when you are done. The questions worth resolving before any code is written are the ones whose answers change the design:
+Turning a request into something buildable is the user-story work from [Part 1](../part1/index): a role, a goal, a benefit, and acceptance criteria concrete enough to tell you when you are done. The questions worth resolving before any code is written are the ones whose answers change the design:
 
 - Who is this for, and what will they do differently once they have it?
 - What does success look like, stated as something observable?
@@ -193,7 +193,7 @@ class ParcelTracker {
 
 This commit adds no feature. With no observers supplied, the loop runs zero times and the system behaves exactly as it did, which is what the existing suite confirms: it passes unchanged, and it passed unchanged is the evidence that this was a refactoring. `locate` is still a query as far as any current caller is concerned.
 
-_Then, make the easy change._ The feature is now a class that implements the contract, holding whatever state the delay rule needs and using the notification channel from Part 2 to send:
+_Then, make the easy change._ The feature is now a class that implements the contract, holding whatever state the delay rule needs and using the notification channel from [Part 2](../part2/index) to send:
 
 ```typescript
 class DelayNotifier implements ShipmentObserver {
@@ -268,7 +268,7 @@ Read from here, most of that turns out to have been one argument. Invariants, co
 
 That is why this chapter is last, and why it exercises everything at once. Adding a feature to a system you did not write asks you to read unfamiliar code, judge a design you had no part in, decide whether it will accept the change, restructure it if it will not, and verify that nothing broke. Those are not five separate skills. They are one skill, and it is the one professional software work mostly consists of.
 
-The introduction to this handbook claimed that construction skill matters because someone has to decide what to build, judge whether it is correct, and keep it changeable, whoever or whatever writes the code. If the book has done its job, you can now read code you did not write, state precisely what it should do, and change it with confidence. The courses that follow build outward from that, to larger systems, more people, and longer timescales. The judgement is the same one; only the scale changes.
+The introduction to this textbook claimed that construction skill matters because someone has to decide what to build, judge whether it is correct, and keep it changeable, whoever or whatever writes the code. If the book has done its job, you can now read code you did not write, state precisely what it should do, and change it with confidence. The courses that follow build outward from that, to larger systems, more people, and longer timescales. The judgement is the same one; only the scale changes.
 
 <details class="tooltip exercise">
   <summary>Exercise: A Feature for the Library System</summary>

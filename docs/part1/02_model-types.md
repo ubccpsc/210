@@ -364,7 +364,7 @@ To relate to a prior concept, you can understand the type of the `kind` property
 </details>
 
 <details class="tooltip deep-dive">
-<summary>Part 2 Preview: The Inelegance of <code>kind</code></summary>
+<summary>[Part 2](../part2/index) Preview: The Inelegance of <code>kind</code></summary>
 
 Reading a `kind` back to recover which case you are looking at can feel indirect, since the case is something the value already is. `EmptyPlaylist` and `NonEmptyPlaylist` are different: why do we need to specify they have different kinds?
 
