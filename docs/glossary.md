@@ -16,11 +16,9 @@ Terms introduced in **bold** throughout the book, linked to the section where ea
 - **Abstract** — [Extending Behaviour Through Polymorphism § Sharing Behaviour with a Base Class](/part2/06_extension#sharing-behaviour-with-a-base-class)
 - **Abstract Value** — [Preserving Implementation Freedom with Abstract Values § What Makes a Change Safe](/part2/04_flexibility#what-makes-a-change-safe)
 - **Accumulator** — [Arrays and Iteration § Combining Elements with `reduce`](/part1/05_arrays#combining-elements-with-reduce)
-- **Actual Type** — [Defining Boundaries with Interfaces § Apparent and Actual Types](/part2/05_boundaries#apparent-and-actual-types)
 - **Adapter** — [Consuming Data and Services by Using APIs § Isolating What You Do Not Control](/part3/02_consuming_data#isolating-what-you-do-not-control)
 - **Aliases** — [Mutation and Side Effects § Copies and References](/part1/06_state-mutation#copies-and-references)
 - **API** — [Consuming Data and Services by Using APIs](/part3/02_consuming_data#consuming-data-and-services-by-using-apis)
-- **Apparent Type** — [Defining Boundaries with Interfaces § Apparent and Actual Types](/part2/05_boundaries#apparent-and-actual-types)
 - **Arguments** — [Learning a New Programming Language § Types as a Language Mechanism](/part1/01_new-language#types-as-a-language-mechanism)
 - **Array** — [Arrays and Iteration](/part1/05_arrays#arrays-and-iteration)
 - **Array Literal** — [Arrays and Iteration § Creating and Accessing Arrays](/part1/05_arrays#creating-and-accessing-arrays)
@@ -70,7 +68,6 @@ Terms introduced in **bold** throughout the book, linked to the section where ea
 - **Control** — [Encapsulating What Varies § Testing Encapsulated Code](/part2/03_encapsulation#testing-encapsulated-code)
 - **Control Flow** — [Learning a New Programming Language § <code>if</code> statements](/part1/01_new-language#if-statements)
 - **Controllability** — [Encapsulating What Varies § Testing Encapsulated Code](/part2/03_encapsulation#testing-encapsulated-code)
-
 - **Copy, Deep** — [Encapsulating What Varies § When References Escape](/part2/03_encapsulation#when-references-escape)
 - **Copy, Shallow** — [Encapsulating What Varies § When References Escape](/part2/03_encapsulation#when-references-escape)
 - **Correctness** — [Part 1: Foundations of Software Construction](/part1/index#part-1-foundations-of-software-construction)
@@ -174,6 +171,8 @@ Terms introduced in **bold** throughout the book, linked to the section where ea
 ## L
 
 - **Lambda Expressions** — [Learning a New Programming Language § Validating the Dynamic View With Testing](/part1/01_new-language#validating-the-dynamic-view-with-testing)
+- **Language, Typed** — [CPSC 210: Software Construction § Choice of Programming Language](/index#choice-of-programming-language)
+- **Language, Untyped** — [CPSC 210: Software Construction § Choice of Programming Language](/index#choice-of-programming-language)
 - **Law of Demeter** — [Coupling and Dependencies § Reaching Past a Neighbour](/part3/01_coupling#reaching-past-a-neighbour)
 - **Library** — [Designing APIs to Provide Data and Services § Publishing the Tracker](/part3/03_api_design#publishing-the-tracker)
 - **Library API** — [Consuming Data and Services by Using APIs § Two Kinds of API](/part3/02_consuming_data#two-kinds-of-api)
@@ -298,16 +297,16 @@ Terms introduced in **bold** throughout the book, linked to the section where ea
 - **Thunk** — [Learning a New Programming Language § Validating the Dynamic View With Testing](/part1/01_new-language#validating-the-dynamic-view-with-testing)
 - **Truthy** — [Uncovered Language Features § Truthiness](/intro/03_language-features#truthiness)
 - **Type Checker** — [Learning a New Programming Language § Types as a Language Mechanism](/part1/01_new-language#types-as-a-language-mechanism)
+- **Type, Actual** — [Defining Boundaries with Interfaces § Apparent and Actual Types](/part2/05_boundaries#apparent-and-actual-types)
+- **Type, Apparent** — [Defining Boundaries with Interfaces § Apparent and Actual Types](/part2/05_boundaries#apparent-and-actual-types)
 - **Type Errors** — [Learning a New Programming Language § Compilation and Type Checking](/part1/01_new-language#compilation-and-type-checking)
 - **Type Narrowing** — [Using Types to Model Problems § Branching on the Case](/part1/02_model-types#branching-on-the-case)
 - **Type Variables** — [Using Types to Model Problems § Example: Playlists](/part1/02_model-types#example-playlists)
-- **Typed Language** — [CPSC 210: Software Construction § Choice of Programming Language](/index#choice-of-programming-language)
 - **Types** — [CPSC 210: Software Construction § Choice of Programming Language](/index#choice-of-programming-language)
 
 ## U
 
 - **Unit Tests** — [Checking Invariants](/part1/03_checking-invariants#checking-invariants)
-- **Untyped Language** — [CPSC 210: Software Construction § Choice of Programming Language](/index#choice-of-programming-language)
 
 ## V
 
