@@ -73,7 +73,7 @@ With a model of the relevant parts, the design question is where the change belo
 
 Such a place is an _extension point_, the term the Open/Closed chapter used for a boundary where behaviour can be varied by adding code rather than editing what is already there. That chapter approached them from the side of the person building one, choosing an axis of change and deciding whether the indirection was justified. Here we approach them from the other side, as somebody who has inherited a design and needs to know what it will accept. You will also hear them called _seams_, which is the term used in much of the industry literature.
 
-The book has been building them for two parts, and they are recognisable on sight:
+The textbook has been building them for two parts, and they are recognisable on sight:
 
 - An interface with more than one implementation. New behaviour is a new implementation.
 - An abstract class with subclasses, where the base defines a sequence and leaves steps open.
@@ -260,9 +260,9 @@ That last criterion is the one that separates a feature that was added from a fe
 
 ## What This Was All For
 
-This is the end of the book, and it is worth saying plainly what the three parts were doing.
+This is the end of the textbook, and it is worth saying plainly what the three parts were doing.
 
-Part 1 was about making programs correct: modelling information as types, stating contracts, maintaining invariants, and verifying behaviour with tests. Part 2 was about abstraction: bundling state with the operations that protect it, decomposing systems into cohesive classes, hiding what varies, and depending on contracts rather than implementations. Part 3 has been about evolution: managing dependencies, working across boundaries you do not control, and the everyday practice of changing systems that already exist.
+[Part 1](../part1/index) was about making programs correct: modelling information as types, stating contracts, maintaining invariants, and verifying behaviour with tests. [Part 2](../part2/index) was about abstraction: bundling state with the operations that protect it, decomposing systems into cohesive classes, hiding what varies, and depending on contracts rather than implementations. Part 3 has been about evolution: managing dependencies, working across boundaries you do not control, and the everyday practice of changing systems that already exist.
 
 Read from here, most of that turns out to have been one argument. Invariants, cohesion, encapsulation, interfaces, polymorphism, low coupling, validated boundaries, small published surfaces, and a regression suite were each introduced for their own reasons, and every one of them was ultimately about the cost of change. A class that protects its invariant is a class you can modify without auditing the program. A small contract is a promise you can keep while the implementation moves. A test suite is what makes any change checkable. None of them make a program more correct today. All of them decide what it costs to correct tomorrow.
 

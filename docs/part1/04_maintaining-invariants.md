@@ -146,7 +146,7 @@ In an object literal, the property is written like a function declaration withou
 If `t` is of type `T`, we can call the function property `foo` with dot notation: `t.foo(an_x, a_b)`.
 
 
-What it means for behaviour to belong to data like this is a question we will revisit when we discuss object-oriented programming in Part 2.
+What it means for behaviour to belong to data like this is a question we will revisit when we discuss object-oriented programming in [Part 2](../part2/index).
 
 </details>
 
@@ -429,7 +429,7 @@ In short, the invariant is no longer protected by _programmer discipline_; it is
        only operations visible to callers
        (balance cannot be accessed directly)
 ```
-<!-- caption="Figure 04.01: Illustration of state hidden inside a closure, with balance not being directly reachable." -->
+<!-- caption="Illustration of state hidden inside a closure, with balance not being directly reachable." -->
 
 <details class="tooltip deep-dive">
 <summary>Course Preview: Does Software in Practice Enforce Security Invariants?</summary>
@@ -451,7 +451,7 @@ Looking at our designs in this chapter, we see that the invariants of our progra
 
 The organisation of the code itself enforces the invariant. This is the first time we have seen an invariant shape the _design of a program_ rather than just _its documentation and tests_. It will not be the last time we see this: protecting invariants frequently drives how code is organised, as this makes the code safer, easier to understand, and easier to evolve without error.
 
-Building objects out of closures works, but the support the language gives us for this task is minimal. In Part 2, we will see that object-oriented programming provides this pattern as direct language syntax: constructors, methods, and fields that the language itself controls access to. The syntax will be new, but the idea will directly flow from this chapter.
+Building objects out of closures works, but the support the language gives us for this task is minimal. In [Part 2](../part2/index), we will see that object-oriented programming provides this pattern as direct language syntax: constructors, methods, and fields that the language itself controls access to. The syntax will be new, but the idea will directly flow from this chapter.
 
 <details class="tooltip exercise">
   <summary>Exercise: Character Health</summary>

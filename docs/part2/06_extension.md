@@ -106,7 +106,7 @@ SmsNotifier : #deliver(..)
 
 @enduml
 ```
-<!-- caption: "BaseNotifier providing common features." -->
+<!-- caption="BaseNotifier providing common features." -->
 
 <details class="tooltip ts-tips">
 <summary>Abstract Classes and <code>protected</code></summary>
@@ -275,7 +275,7 @@ VerboseFormatter : +format(..)
 
 @enduml
 ```
-<!-- caption: "Each channel holds a Formatter and delegates formatting to it, instead of inheriting it." -->
+<!-- caption="Each channel holds a Formatter and delegates formatting to it, instead of inheriting it." -->
 
 The freedom matters more as the system grows. Suppose it must support _c_ channels in _f_ formats. Baking formatting into the hierarchy means a class for each combination, _c_ times _f_ of them, and every new channel or format multiplies the count again. Holding the formatter as a collaborator needs only _c_ channel classes and _f_ formatter classes, _c_ plus _f_ in all, and a new format is a single class that pairs with every existing channel without any of them changing. Composition turns a multiplying cost into an adding one.
 

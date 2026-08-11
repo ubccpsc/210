@@ -2,7 +2,7 @@
 
 The vocabulary of software construction can look like a language of its own for its own sake. It is not. Engineers build systems no one person can fully comprehend, and much of their work is therefore reaching agreement with others about code. Terms like _invariant_ or _coupling_ compress a paragraph of explanation into something two people can say in a code review and mean the same thing. Precise names also make distinctions visible: _fault_, _error_, and _failure_ pick out three different things, and _refactoring_ means restructuring code without changing its behaviour. So this glossary is less a list of words than an index of distinctions, the ones that let you describe what would otherwise stay vague.
 
-Terms introduced in **bold** throughout the book, linked to the section where each is first introduced.
+Terms introduced in **bold** throughout the textbook, linked to the section where each is first introduced.
 
 <!-- Not every bold span belongs here. Terms deliberately kept out are left in
      place as commented-out entries marked "EXCLUDED, do not re-add", with the

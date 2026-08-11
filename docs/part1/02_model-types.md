@@ -337,7 +337,7 @@ digraph Playlist {
   n2:f -> s2;
 }
 ```
-<!-- caption="Figure 02.01: Visual representation of Playlist data structure, containing Song A and Song B." -->
+<!-- caption="Visual representation of Playlist data structure, containing Song A and Song B." -->
 
 <details class="tooltip ts-tips">
   <summary>Tagged Unions</summary>
@@ -368,7 +368,7 @@ To relate to a prior concept, you can understand the type of the `kind` property
 
 Reading a `kind` back to recover which case you are looking at can feel indirect, since the case is something the value already is. `EmptyPlaylist` and `NonEmptyPlaylist` are different: why do we need to specify they have different kinds?
 
-_Object-oriented programming_ offers a solution to this inelegance: we will get a more elegant design once we cover _classes_, in Part 2. In particular, we will return to this when we cover _polymorphism_.
+_Object-oriented programming_ offers a solution to this inelegance: we will get a more elegant design once we cover _classes_, in [Part 2](../part2/index). In particular, we will return to this when we cover _polymorphism_.
 
 </details>
 
@@ -661,7 +661,7 @@ These run the functions and confirm they produce the expected values. The compil
 
 A precise data definition is the foundation everything else rests on. It catches mistakes early, it mirrors the structure of the problem, and it drives the structure of the code that consumes it: once the data is modelled, the functions largely follow its shape. In this chapter we followed one process across a sequence of examples, from a simple enumeration through a song to a recursive playlist, and then wrote functions whose shape follows the data's shape.
 
-From here, Part 1 builds directly on this work: using generic types such as arrays and promises, deriving tests from the structure of data, and leaning further on the type checker. In Part 2, when we move to _object-oriented programming_, the _tagged unions_ you wrote here become class hierarchies. The underlying ideas will carry over even as the syntax changes.
+From here, Part 1 builds directly on this work: using generic types such as arrays and promises, deriving tests from the structure of data, and leaning further on the type checker. In [Part 2](../part2/index), when we move to _object-oriented programming_, the _tagged unions_ you wrote here become class hierarchies. The underlying ideas will carry over even as the syntax changes.
 
 <details class="tooltip exercise">
   <summary>Exercise: Modelling a Journey</summary>

@@ -395,7 +395,7 @@ grace       accruing ( $0.50 / day )             capped ( $10 )
             boundary                             boundary
             ( 2 -> 3 )                           ( 21 -> 22 )
 ```
-<!-- caption="Figure 03.01: The three equivalence classes for daysLate." -->
+<!-- caption="The three equivalence classes for daysLate." -->
 
 ## Expected and Unexpected Errors
 

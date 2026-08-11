@@ -208,7 +208,7 @@ flowchart LR
     class run good
     class err bad
 ```
-<!-- caption="Figure 01.01: How <code>tsc</code> type checks and transforms TypeScript before it can execute." -->
+<!-- caption="How <code>tsc</code> type checks and transforms TypeScript before it can execute." -->
 
 <details class="tooltip deep-dive">
   <summary>Tools for Writing Source Code</summary>

@@ -51,7 +51,7 @@ end note
 
 @enduml
 ```
-<!-- caption: "One core with two published faces: a library other teams import, and a service the app calls." -->
+<!-- caption="One core with two published faces: a library other teams import, and a service the app calls." -->
 
 <details class="tooltip link-110">
 <summary>You Have Designed Contracts Before</summary>
@@ -75,7 +75,7 @@ It is an empirical observation rather than a rule, and it has a practical meanin
 
 </details>
 
-This is the strongest argument the book has offered for a discipline it has been recommending since Part 2. Encapsulation, small interfaces, and depending on contracts rather than classes were all justified earlier by the cost of change within a codebase you own. Here the same advice is stronger: everything exposed is permanent, so the only reliable way to keep a design changeable is to expose as little as possible.
+This is the strongest argument the textbook has offered for a discipline it has been recommending since [Part 2](../part2/index). Encapsulation, small interfaces, and depending on contracts rather than classes were all justified earlier by the cost of change within a codebase you own. Here the same advice is stronger: everything exposed is permanent, so the only reliable way to keep a design changeable is to expose as little as possible.
 
 ## Choosing the Surface
 
@@ -142,7 +142,7 @@ _Decide what absence means, once._ Whether "no such shipment" is `null`, an empt
 
 Failure is part of the contract, not an afterthought. Clients have to handle errors when things go wrong, and they can only handle what we have told them about. The error handling chapter offered two mechanisms, and both are reasonable options. What matters for a published API is that the choice is made deliberately and applied consistently, and that whichever is chosen carries enough structure for clients to respond to appropriately.
 
-A message alone is not enough structure. If the only thing distinguishing "we do not recognise that tracking number" from "the carrier is not responding" is English prose, a client who wants to retry the second and not the first has no option but to match on the text, and our next wording change or a language localization silently breaks them. A tagged union, from Part 1's modelling chapter, provides a more stable alternative:
+A message alone is not enough structure. If the only thing distinguishing "we do not recognise that tracking number" from "the carrier is not responding" is English prose, a client who wants to retry the second and not the first has no option but to match on the text, and our next wording change or a language localization silently breaks them. A tagged union, from [Part 1](../part1/index)'s modelling chapter, provides a more stable alternative:
 
 ```typescript
 export type TrackingError =

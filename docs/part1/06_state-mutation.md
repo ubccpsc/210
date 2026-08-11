@@ -263,7 +263,7 @@ digraph aliasing {
   { rank = same; r; s; t; }
 }
 ```
-<!-- caption="Figure 06.01: variable names r and s reference the same object." -->
+<!-- caption="variable names r and s reference the same object." -->
 
 One way to think about this is in terms of boxes. A variable is a labelled box. For a primitive, the box contains the value. For an object, the box contains an arrow pointing to the object, which lives elsewhere. `const s = r` copies the _arrow_. There is still exactly one `Reading`; it has two arrows pointing at it, and a change made through either arrow is visible through both. Two variables referring to the same object are called **aliases**.  _Aliasing_ is the single most common source of mutation surprises: code changes an object through one name, and the change appears under another name somewhere else entirely.
 
@@ -459,7 +459,7 @@ The same distinction, drawn out:
     function---+
     (mutating through either arrow is seen by both)
 ```
-<!-- caption="Figure 06.02: A primitive argument is copied; an object argument shares one object through a copied reference." -->
+<!-- caption="A primitive argument is copied; an object argument shares one object through a copied reference." -->
 
 
 
@@ -562,7 +562,7 @@ test("the second reading is shifted by the offset",
 );
 ```
 
-There is one more consequence that we have been building towards in part 1. The invariants chapters established a practice: validate a value when it is constructed, and rely on the invariant afterwards. Mutation breaks the "afterwards". `reading.hour = 99` is a perfectly legal statement that violates the `Reading` invariant long after construction, and aliasing means _any_ part of the program holding a reference can do it, at any time, from anywhere. Under mutation, an invariant is no longer established once; it must be _preserved by every operation that touches the data, forever_. Keeping that promise requires controlling who is allowed to mutate state at all. [Chapter 4](./04_maintaining-invariants) already showed one way to do that: hold the invariant-relevant state inside a closure, where no other code can reach it, so there is no reference to alias in the first place. That technique works, and its limit is visible from here. It protects data by never handing it out, whereas the readings in this chapter are passed from function to function precisely because callers need them. Part 2 takes up the general version of the problem, replacing the closure pattern with language syntax that lets data be shared while still restricting who may change it.
+There is one more consequence that we have been building towards in part 1. The invariants chapters established a practice: validate a value when it is constructed, and rely on the invariant afterwards. Mutation breaks the "afterwards". `reading.hour = 99` is a perfectly legal statement that violates the `Reading` invariant long after construction, and aliasing means _any_ part of the program holding a reference can do it, at any time, from anywhere. Under mutation, an invariant is no longer established once; it must be _preserved by every operation that touches the data, forever_. Keeping that promise requires controlling who is allowed to mutate state at all. [Chapter 4](./04_maintaining-invariants) already showed one way to do that: hold the invariant-relevant state inside a closure, where no other code can reach it, so there is no reference to alias in the first place. That technique works, and its limit is visible from here. It protects data by never handing it out, whereas the readings in this chapter are passed from function to function precisely because callers need them. [Part 2](../part2/index) takes up the general version of the problem, replacing the closure pattern with language syntax that lets data be shared while still restricting who may change it.
 
 Until then, the working guidance falls back on a discipline-based approach:
 

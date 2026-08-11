@@ -411,7 +411,7 @@ endif
 
 @enduml
 ```
-<!-- caption: "Control flow through try, catch, and finally." -->
+<!-- caption="Control flow through try, catch, and finally." -->
 
 <details class="tooltip ts-tips">
 <summary>Optional <code>finally</code> Block</summary>

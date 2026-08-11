@@ -67,9 +67,9 @@ If you don't know TypeScript, this reader will introduce relevant TypeScript syn
 That being said, we *will* explain the coding concepts *behind* the syntax. Those concepts will help you learn new programming languages as you go on in your studies.
 
 
-## Using This Book
+## Using This Textbook
 
-We'll assume in lecture you've read the book chapters as indicated on the course website. We'll cover the key points in lecture, but we'll devote most of lecture to writing and reading code. The reader is intended to provide you with the authority on what we covered in lecture. We'll provide lecture slides, but those should be a subset of what's discussed in the reader.
+We'll assume in lecture you've read the textbook chapters as indicated on the course website. We'll cover the key points in lecture, but we'll devote most of lecture to writing and reading code. The reader is intended to provide you with the authority on what we covered in lecture. We'll provide lecture slides, but those should be a subset of what's discussed in the reader.
 
 You'll have noticed this reader includes some nested content. All this nested content is intended as a *parenthetical*: it's relevant to what's discussed in the main text, but the main text is designed to be readable without expanding this content.
 
@@ -83,7 +83,7 @@ You'll have noticed this reader includes some nested content. All this nested co
   <summary>Exercises
   </summary>
      
-   Exercises will contain precise instructions to prompt you to engage with the content. Note that finishing the exercises on their own isn't enough to understanding the content; that's what the lecture exercises, labs, and project are for. We'll simply insert book exercises when we see a particularly good opportunity to grow your understanding with a simple task.
+   Exercises will contain precise instructions to prompt you to engage with the content. Note that finishing the exercises on their own isn't enough to understanding the content; that's what the lecture exercises, labs, and project are for. We'll simply insert textbook exercises when we see a particularly good opportunity to grow your understanding with a simple task.
     
    Here's an exercise: find the other exercise on this page.
 </details>
@@ -126,11 +126,11 @@ Each chapter in this textbook corresponds to one in-class lecture. Each lecture 
 
 The course is separated into 3 parts.
 
-In [Part 1](./part1/index), you will learn how to build software that is correct even when developers make mistakes. Along the way, you will learn the core of a new programming language, TypeScript. Along the way, you will learn *imperative programming*, a programming style which is common to many programming languages. Some keywords for Part 1 include: *types*, *statements* (`if`, `return`, `for`), *pre-conditions*, *post-conditions*, *assertion*, *mutation*, *side effects*, *asynchronous* development, *exception*, and *tests*.
+In [Part 1](./part1/index), you will learn how to build software that is correct even when developers make mistakes. Along the way, you will learn the core of a new programming language, TypeScript. Along the way, you will learn *imperative programming*, a programming style which is common to many programming languages. Some keywords for [Part 1](./part1/index) include: *types*, *statements* (`if`, `return`, `for`), *pre-conditions*, *post-conditions*, *assertion*, *mutation*, *side effects*, *asynchronous* development, *exception*, and *tests*.
 
-In [Part 2](./part2/index), you will learn how to design software split into distinct components, and how to make those components *interact* with each other without *negatively interfering* with each other. Along the way, you will learn *object-oriented programming*, a programming style Java is well-known for, but that exists in most popular programming languages. Some keywords for Part 2 include: *classes*, *constructor*, *method*, *cohesion*, *information hiding*, *interface*, *inheritance*, *polymorphism*.
+In [Part 2](./part2/index), you will learn how to design software split into distinct components, and how to make those components *interact* with each other without *negatively interfering* with each other. Along the way, you will learn *object-oriented programming*, a programming style Java is well-known for, but that exists in most popular programming languages. Some keywords for [Part 2](./part2/index) include: *classes*, *constructor*, *method*, *cohesion*, *information hiding*, *interface*, *inheritance*, *polymorphism*.
 
-In [Part 3](./part3/index), you will learn how to work with and on software systems that interact with software in wholly different code bases. Here we will scale to handling software you did not fully write yourself: nearly all software engineering done in practice is of this type. Some keywords for Part 3 include: *coupling*, *readability*, *complexity*, *refactoring*, *API*, *REST*, and *fault localization*.
+In [Part 3](./part3/index), you will learn how to work with and on software systems that interact with software in wholly different code bases. Here we will scale to handling software you did not fully write yourself: nearly all software engineering done in practice is of this type. Some keywords for [Part 3](./part3/index) include: *coupling*, *readability*, *complexity*, *refactoring*, *API*, *REST*, and *fault localization*.
 
 ## Getting Started
 

@@ -6,7 +6,7 @@ A working system is not finished. Requirements keep arriving after the first rel
 
 This changes your initial starting point. In Parts 1 and 2 you mostly wrote new code into workspaces over which you had full control. From here on, the more common situation is the professional one: the system already exists, much of its code was written by someone else (or by you, months ago, which amounts to the same thing), and you are tasked with fixing, improving, or extending it while ensuring that the rest of the system keeps working.
 
-This part of the course is oriented around three high-level questions. The first is structure: how do the pieces of a system depend on one another, and what does a change to one of them cost the others? Judging that dependency structure deliberately, the way Part 2 judged cohesion, is our first task. The second question is around boundaries: how does a program consume data and services it does not control, and how does it publish a contract of its own for others to build on? This is also where Part 2's open question is settled, since code that depends on a contract rather than a class still needs somebody to decide which implementation it receives. The third question is practice: the everyday workflows of evolution, judging and improving code quality, localizing and fixing faults, and adding features, all protected by the verification habits we established in Part 2.
+This part of the course is oriented around three high-level questions. The first is structure: how do the pieces of a system depend on one another, and what does a change to one of them cost the others? Judging that dependency structure deliberately, the way [Part 2](../part2/index) judged cohesion, is our first task. The second question is around boundaries: how does a program consume data and services it does not control, and how does it publish a contract of its own for others to build on? This is also where [Part 2](../part2/index)'s open question is settled, since code that depends on a contract rather than a class still needs somebody to decide which implementation it receives. The third question is practice: the everyday workflows of evolution, judging and improving code quality, localizing and fixing faults, and adding features, all protected by the verification habits we established in [Part 2](../part2/index).
 
 <details class="tooltip deep-dive">
 <summary>Where the Time Goes</summary>
@@ -19,7 +19,7 @@ Most professional software effort goes to systems that already exist. Building s
 
 By the end of Part 3, you will be able to:
 
-1. _Trace and manage the dependencies among classes and modules_, judging coupling the way Part 2 judged cohesion, and directing dependencies toward abstractions rather than concrete classes.
+1. _Trace and manage the dependencies among classes and modules_, judging coupling the way [Part 2](../part2/index) judged cohesion, and directing dependencies toward abstractions rather than concrete classes.
 
 2. _Isolate the dependencies you do not control_, defining contracts of your own for external libraries and services, and supplying implementations from outside so that the same code serves production and tests.
 
@@ -39,13 +39,13 @@ Part 3 covers three connected themes across six chapters, one per lecture.
 
 #### Working across boundaries:
 
-2. _Consuming Data and Services_ takes the position of a client: we call an API, and somebody else decides what it does. Programs rarely own all their data, and it arrives from libraries, from files, and from web services. This chapter converts JSON text into typed values and validates it the moment it crosses into the program, so that everything past the edge works only with values whose invariants are established. It also settles the question Part 2 left open, isolating what we do not control behind a contract of our own and supplying the implementation from outside.
+2. _Consuming Data and Services_ takes the position of a client: we call an API, and somebody else decides what it does. Programs rarely own all their data, and it arrives from libraries, from files, and from web services. This chapter converts JSON text into typed values and validates it the moment it crosses into the program, so that everything past the edge works only with values whose invariants are established. It also settles the question [Part 2](../part2/index) left open, isolating what we do not control behind a contract of our own and supplying the implementation from outside.
 
 3. _Designing APIs_ looks at the same boundary from the other side, publishing a contract for clients we cannot see and cannot coordinate with. It covers choosing a small surface, designing operations that are easy to use and hard to misuse, documenting behaviour precisely, and judging which changes existing clients can survive.
 
 #### The practice of change:
 
-4. _Code Quality and Refactoring_ originates from a fact of long-lived systems: working code can still be hard to work on. This chapter develops judgement about internal quality, readability, complexity, and the smells that signal trouble, and introduces refactoring: improving structure without changing behaviour, with the regression testing practice from Part 2 used to provide trust that the system remains working as expected.
+4. _Code Quality and Refactoring_ originates from a fact of long-lived systems: working code can still be hard to work on. This chapter develops judgement about internal quality, readability, complexity, and the smells that signal trouble, and introduces refactoring: improving structure without changing behaviour, with the regression testing practice from [Part 2](../part2/index) used to provide trust that the system remains working as expected.
 
 5. _Debugging and Fault Localization_ treats a bug report as a claim that the system misbehaves, usually far from the fault that causes it. The chapter looks at systematic debugging: reproducing the failure, forming and testing hypotheses, localizing the fault, and fixing and verifying the original problem has been resolved.
 

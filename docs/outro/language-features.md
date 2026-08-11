@@ -103,7 +103,7 @@ enum Light {
 }
 ```
 
-Part 1 models a fixed set of choices as a union of string literals instead, `type TrafficLight = "red" | "green" | "yellow"`, which does the same job with less machinery. An `enum` is also unusual among TypeScript's constructs in that it is not purely a type: it emits a real object into the compiled JavaScript, so it leaves a footprint at runtime where every other type we write is erased. A numeric enum's values are opaque once the program is running, too, since logging or storing `signal` yields `0` rather than anything that says "red", whereas a literal union's values are the strings you wrote. The literal union also composes with the tagged unions from the modelling chapter, where the `kind` property that distinguishes the cases is exactly such a set of literals.
+[Part 1](../part1/index) models a fixed set of choices as a union of string literals instead, `type TrafficLight = "red" | "green" | "yellow"`, which does the same job with less machinery. An `enum` is also unusual among TypeScript's constructs in that it is not purely a type: it emits a real object into the compiled JavaScript, so it leaves a footprint at runtime where every other type we write is erased. A numeric enum's values are opaque once the program is running, too, since logging or storing `signal` yields `0` rather than anything that says "red", whereas a literal union's values are the strings you wrote. The literal union also composes with the tagged unions from the modelling chapter, where the `kind` property that distinguishes the cases is exactly such a set of literals.
 
 ## `any`
 
@@ -115,7 +115,7 @@ value = "thirty";            // allowed: any accepts anything
 value.toUpperCase();         // allowed at compile time; crashes at run time if value is a number
 ```
 
-We *never* write any in this course, because it discards exactly the guarantee Part 1 is built on. The type checker is the mechanism that turns a promise into an enforced constraint, and `any` opts a value out of it while still looking like a type annotation. It also spreads: a value typed `any` makes every expression derived from it unchecked too, so a single `any` can quietly disable checking across a whole calculation. `any` exists so that large untyped JavaScript codebases can adopt TypeScript gradually, which is a real need and not one you have. When you are tempted to reach for it, the useful question is the modelling question from Part 1: what _are_ the values this name can hold?
+We *never* write any in this course, because it discards exactly the guarantee [Part 1](../part1/index) is built on. The type checker is the mechanism that turns a promise into an enforced constraint, and `any` opts a value out of it while still looking like a type annotation. It also spreads: a value typed `any` makes every expression derived from it unchecked too, so a single `any` can quietly disable checking across a whole calculation. `any` exists so that large untyped JavaScript codebases can adopt TypeScript gradually, which is a real need and not one you have. When you are tempted to reach for it, the useful question is the modelling question from [Part 1](../part1/index): what _are_ the values this name can hold?
 
 ## Tuple Return Types
 
@@ -189,7 +189,7 @@ if (name) {                  // runs when name is not "", null, or undefined
 }
 ```
 
-We write conditions that are already boolean instead: a comparison such as `songs.length > 0`, a call to a method that returns a `boolean` such as `isFull()`, or an explicit test against `null` or `undefined`. The `=== false` form you see throughout Part 1 comes from the same instinct.
+We write conditions that are already boolean instead: a comparison such as `songs.length > 0`, a call to a method that returns a `boolean` such as `isFull()`, or an explicit test against `null` or `undefined`. The `=== false` form you see throughout [Part 1](../part1/index) comes from the same instinct.
 
 The first reason is that a truthy test does not say what it is testing. `if (songs.length)` asks a reader to recall which numbers are falsy before they can tell what the branch means, whereas `if (songs.length > 0)` states the condition outright.
 
@@ -235,7 +235,7 @@ if (name === null) {
 return name;
 ```
 
-Part 1 treats a missing value as a case the specification usually has something to say about, which is why `null` and `undefined` are handled as explicit branches. `??` makes a fallback so cheap to write that it becomes easy to supply one without deciding whether the absent case deserved handling of its own. Its companion `?.`, called optional chaining, has the same character: `config?.host` produces `undefined` instead of throwing when `config` is absent, which is convenient and equally quiet about the case it just skipped.
+[Part 1](../part1/index) treats a missing value as a case the specification usually has something to say about, which is why `null` and `undefined` are handled as explicit branches. `??` makes a fallback so cheap to write that it becomes easy to supply one without deciding whether the absent case deserved handling of its own. Its companion `?.`, called optional chaining, has the same character: `config?.host` produces `undefined` instead of throwing when `config` is absent, which is convenient and equally quiet about the case it just skipped.
 
 ## `instanceof`
 
@@ -268,7 +268,7 @@ switch (light) {
 }
 ```
 
-Every `switch` can be written as the `if`/`else if` chain from the first chapter, so it adds a second construct for a job you can already do. It also brings a failure mode of its own: a case that omits `break` falls through into the next one and runs it too, which is legal, occasionally intended, and a classic source of bugs. The deeper reason is that a `switch` on a tag is usually a design smell rather than a syntax choice. Part 2 replaces exactly this shape with polymorphism, where each case becomes a class carrying its own behaviour and the branching disappears, so we would rather you learn to recognise the shape than get comfortable writing it.
+Every `switch` can be written as the `if`/`else if` chain from the first chapter, so it adds a second construct for a job you can already do. It also brings a failure mode of its own: a case that omits `break` falls through into the next one and runs it too, which is legal, occasionally intended, and a classic source of bugs. The deeper reason is that a `switch` on a tag is usually a design smell rather than a syntax choice. [Part 2](../part2/index) replaces exactly this shape with polymorphism, where each case becomes a class carrying its own behaviour and the branching disappears, so we would rather you learn to recognise the shape than get comfortable writing it.
 
 ## `break` and `continue`
 

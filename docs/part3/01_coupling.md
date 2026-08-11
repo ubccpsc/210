@@ -118,7 +118,7 @@ end note
 
 @enduml
 ```
-<!-- caption: "Dependencies in the music app. Every arrow is a path a change can travel along." -->
+<!-- caption="Dependencies in the music app. Every arrow is a path a change can travel along." -->
 
 Reading an arrow in the direction it points tells you what a class needs. Reading it backwards tells you something more useful: what a change to this class can break. `PlayHistory` has three classes behind it at one remove, so the blast radius of a change to `PlayHistory` is those three classes and anything that depends on them in turn.
 
@@ -322,7 +322,7 @@ end note
 
 @enduml
 ```
-<!-- caption: "A dependency cycle: each class now needs the other." -->
+<!-- caption="A dependency cycle: each class now needs the other." -->
 
 `Playlist` already depended on `PlayHistory`, so this closes a loop. A reader tracing what happens when a song is played now moves between the two files repeatedly, and neither class can be lifted out for testing without bringing the other with it.
 
@@ -388,7 +388,7 @@ PlayObserver <|.. Playlist
 
 @enduml
 ```
-<!-- caption: "The same notification, with the compile-time dependency pointing one way." -->
+<!-- caption="The same notification, with the compile-time dependency pointing one way." -->
 
 `PlayHistory` still calls back at run time, but at compile time it depends only on `PlayObserver`, which depends on nothing at all. The cycle is broken because the interface has no knowledge of who implements it, and `PlayHistory` can now be tested with a stub observer that records the calls.
 
@@ -509,11 +509,11 @@ end note
 
 @enduml
 ```
-<!-- caption: "WeeklyRecap depends on the PlayLog contract rather than on the class that keeps the data." -->
+<!-- caption="WeeklyRecap depends on the PlayLog contract rather than on the class that keeps the data." -->
 
 Compare the two designs against the change that started this chapter. Adding timestamps to the history was what broke the original; in this design it is what `PlayHistory` was built to do, and the class can move from an array to a map, cap itself at fifty entries, or persist to disk without `WeeklyRecap` noticing. The dependency that remains is on one method signature, which is the smallest thing the two classes could agree on and still work together.
 
-Notice also which class the dependency now points to. `WeeklyRecap` does not depend on `PlayHistory`, and `PlayHistory` does not depend on `WeeklyRecap`; both depend on `PlayLog`, which has no implementation to change. Arranging dependencies so they point at abstractions rather than at concrete classes is the **Dependency Inversion Principle**, named at the end of Part 2, and it is the structural habit that most reliably keeps coupling low.
+Notice also which class the dependency now points to. `WeeklyRecap` does not depend on `PlayHistory`, and `PlayHistory` does not depend on `WeeklyRecap`; both depend on `PlayLog`, which has no implementation to change. Arranging dependencies so they point at abstractions rather than at concrete classes is the **Dependency Inversion Principle**, named at the end of [Part 2](../part2/index), and it is the structural habit that most reliably keeps coupling low.
 
 Coupling shows up in the test suite before it shows up anywhere else, and a test that is hard to write is usually reporting a design problem rather than a testing problem. To test the original `WeeklyRecap`, you needed a real `Playlist`, which needed a real `PlayHistory`, which needed songs recorded through the playlist in the right order. The test dragged in three classes to check one string.
 
@@ -565,13 +565,13 @@ This is why coupling and cohesion are considered concurrently. The decomposition
 
 ## Designing for Low Coupling
 
-Low coupling is the property that lets a system be changed by someone who does not understand all of it. Each class depends on a small number of stable contracts, so a change has a boundary you can see, and the reasoning needed to make it safely fits in one person's head. That is what Part 3 is about: not building a system that works, which Part 2 covered, but keeping one workable after the people who built it have moved on.
+Low coupling is the property that lets a system be changed by someone who does not understand all of it. Each class depends on a small number of stable contracts, so a change has a boundary you can see, and the reasoning needed to make it safely fits in one person's head. That is what Part 3 is about: not building a system that works, which [Part 2](../part2/index) covered, but keeping one workable after the people who built it have moved on.
 
 The habits that produce it are the ones this chapter has worked through. Ask a neighbour for what you want instead of walking through it to reach something else. Tell an object what you need done rather than extracting its data and deciding for it. Depend on a contract rather than on the class that satisfies it. Pass the values an operation needs rather than the object that contains them. Keep dependencies pointing in one direction, and point them at abstractions wherever a change is likely. Each of these narrows what one class must know about another, and what a class does not know cannot break it.
 
 None of this makes a system immune to change, and that was never the goal. The requirements will still arrive, the dependencies will still publish new versions, and the environment will still shift underneath a design that was correct when it was written. What low coupling buys is that those changes stay the size they inherently are, rather than the size the dependency graph makes them.
 
-One question is left open, and it is the same one Part 2 finished on. `WeeklyRecap` now takes a `PlayLog` in its constructor rather than constructing its own, which is what made it loosely coupled and testable. Somebody, somewhere, must still decide that the `PlayLog` it receives is a `PlayHistory` and hand one over. The next chapter answers that question in the setting where it matters most: dependencies on code we did not write and cannot change, where an interface of our own is the only thing standing between a provider's decisions and our own codebase.
+One question is left open, and it is the same one [Part 2](../part2/index) finished on. `WeeklyRecap` now takes a `PlayLog` in its constructor rather than constructing its own, which is what made it loosely coupled and testable. Somebody, somewhere, must still decide that the `PlayLog` it receives is a `PlayHistory` and hand one over. The next chapter answers that question in the setting where it matters most: dependencies on code we did not write and cannot change, where an interface of our own is the only thing standing between a provider's decisions and our own codebase.
 
 <details class="tooltip exercise">
   <summary>Exercise: A Bike-Share Maintenance Report</summary>

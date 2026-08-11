@@ -144,7 +144,7 @@ stateDiagram-v2
 %%      Settles at most once.
 %%    end note
 ```
-<!-- caption="Figure 07.01: Promise states. Promises settle once and only once." -->
+<!-- caption="Promise states. Promises settle once and only once." -->
 
 You will rarely create a promise yourself. Promises are what slow operations _give you_: the file-reading and web-fetching functions later in this chapter all return them. 
 
@@ -280,7 +280,7 @@ OS --> R : hand the data up
 R --> F : resume the awaiting function
 @enduml
 ```
-<!-- caption="Figure 07.02: A file read passing down the runtime and operating system and back." -->
+<!-- caption="A file read passing down the runtime and operating system and back." -->
 
 Notice what this means about `await`: your paused function returns to execution through the very same queue that clicks and timer callbacks travel through. There is one loop, one thread, and one line to wait in, which is also why a long-running computation delays everything: file results, button clicks, and resumed functions all stand in the same queue behind it.
 
@@ -297,7 +297,7 @@ flowchart LR
     class queue q
     class thread t
 ```
-<!-- caption="Figure 07.03: Every event waits in one queue, served by the single thread one at a time." -->
+<!-- caption="Every event waits in one queue, served by the single thread one at a time." -->
 
 This layered design is why a single thread is enough. The expensive waiting is done by hardware and the operating system, which are built for it and can juggle thousands of requests at once; the one thread in your program is reserved for the only thing that needs it: running your code. A Node-based web server handling thousands of simultaneous connections on a single thread is this stack working as intended.
 

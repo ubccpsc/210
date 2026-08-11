@@ -4,7 +4,7 @@
 
 > As a listener, I want a playlist that always knows which song is current, so that pressing "next" moves through my music predictably as I add and remove songs.
 
-Consider the running example for this chapter. A playlist holds a list of songs and remembers which one is _current_, so that an interface can show what is playing and advance to the next song. The current position is a number, an index into the list of songs. The type of that field is `number`, but not every number is meaningful: only an index that points at a real song makes sense, and when the playlist is empty there is no current song at all. This rule, that the current index is always a valid position in the list (or a sentinel when the list is empty), is an _invariant_. As in Part 1, the type system cannot express it: `number` permits `-4` and `9999` just as readily as a valid playlist index.
+Consider the running example for this chapter. A playlist holds a list of songs and remembers which one is _current_, so that an interface can show what is playing and advance to the next song. The current position is a number, an index into the list of songs. The type of that field is `number`, but not every number is meaningful: only an index that points at a real song makes sense, and when the playlist is empty there is no current song at all. This rule, that the current index is always a valid position in the list (or a sentinel when the list is empty), is an _invariant_. As in [Part 1](../part1/index), the type system cannot express it: `number` permits `-4` and `9999` just as readily as a valid playlist index.
 
 ## The Problem: Keeping State Consistent
 
@@ -16,13 +16,13 @@ What we want is a way to bundle the state (the songs and the index) together wit
 
 Before we build the class, it helps to place it among the programming paradigms we have already used, each of which has its place in software development.
 
-**Functional programming** builds values and transforms them with functions, without mutation. We saw this in Part 1 when we modelled data as types and processed it with pure functions. Summing the durations of a list of songs functionally looks like this (note the lack of mutation):
+**Functional programming** builds values and transforms them with functions, without mutation. We saw this in [Part 1](../part1/index) when we modelled data as types and processed it with pure functions. Summing the durations of a list of songs functionally looks like this (note the lack of mutation):
 
 ```typescript
 const total = songs.reduce((sum, song) => sum + song.durationSeconds, 0);
 ```
 
-**Imperative programming** sequences code statements that read and change state step by step. The mutation chapter in Part 1 was imperative: a loop with a running total, reassigned on each pass. Imperatively, the same summing behaviour looks like this:
+**Imperative programming** sequences code statements that read and change state step by step. The mutation chapter in [Part 1](../part1/index) was imperative: a loop with a running total, reassigned on each pass. Imperatively, the same summing behaviour looks like this:
 
 ```typescript
 let total = 0;
@@ -52,7 +52,7 @@ In the Part 1 modelling chapter you described a playlist as a _tagged union_, `E
 
 ## From Closures to Classes
 
-The closure pattern from Part 1 provides the bridge into classes, because it already bundles state with operations, but does so without language support. Here is a playlist built with closures, as a constructor function whose returned operations close over the hidden state:
+The closure pattern from [Part 1](../part1/index) provides the bridge into classes, because it already bundles state with operations, but does so without language support. Here is a playlist built with closures, as a constructor function whose returned operations close over the hidden state:
 
 
 <CollapsibleCode>
@@ -155,7 +155,7 @@ Song : durationSeconds: number
 
 @enduml
 ```
-<!-- caption: "Playlist and its operations." -->
+<!-- caption="Playlist and its operations." -->
 
 ## Declaring and Creating Classes
 
@@ -170,7 +170,7 @@ As systems grow, these files are organized into folders, which are themselves gi
 
 </details>
 
-Each class declares a type, named for the class. As with `type` in Part 1, the name is chosen carefully, because it is the most compact signal of what the class is for.
+Each class declares a type, named for the class. As with `type` in [Part 1](../part1/index), the name is chosen carefully, because it is the most compact signal of what the class is for.
 
 <details class="tooltip ts-tips">
 <summary>Class Declarations</summary>
@@ -212,7 +212,7 @@ class Playlist {
 }
 ```
 
-The constructor is the single point where every object of the class comes into existence, which makes it the place to _establish_ invariants, exactly as the constructor function did in Part 1. Enforcing the invariant to be established correctly lets every method afterward _assume_ it holds. The division of labour is similar to what we saw in Part 1: the constructor establishes the invariant, and each method preserves it.
+The constructor is the single point where every object of the class comes into existence, which makes it the place to _establish_ invariants, exactly as the constructor function did in [Part 1](../part1/index). Enforcing the invariant to be established correctly lets every method afterward _assume_ it holds. The division of labour is similar to what we saw in [Part 1](../part1/index): the constructor establishes the invariant, and each method preserves it.
 
 <details class="tooltip ts-tips">
 <summary>Constructors</summary>
@@ -434,7 +434,7 @@ Declaring a method involves a few decisions: what the method is for and a name t
 
 ## Classes are Types
 
-Declaring a class declares a type, and that type behaves like any other type from Part 1. `Playlist` can annotate a variable, type a parameter, be a return type, or be the element type of an array:
+Declaring a class declares a type, and that type behaves like any other type from [Part 1](../part1/index). `Playlist` can annotate a variable, type a parameter, be a return type, or be the element type of an array:
 
 ```typescript
 function longest(playlists: Playlist[]): Playlist | null {
@@ -448,9 +448,9 @@ function longest(playlists: Playlist[]): Playlist | null {
 }
 ```
 
-The compiler checks these annotations exactly as it did for the types in Part 1. A function that expects a `Playlist` cannot be handed a `Song`, and the result of `longest` is known to be a `Playlist` or `null`, so a caller must consider the empty case. 
+The compiler checks these annotations exactly as it did for the types in [Part 1](../part1/index). A function that expects a `Playlist` cannot be handed a `Song`, and the result of `longest` is known to be a `Playlist` or `null`, so a caller must consider the empty case. 
 
-A field of one object can hold another object, and a variable that "holds" an object in fact holds a _reference_ to it, exactly as in the Part 1 mutation chapter. Two consequences follow.
+A field of one object can hold another object, and a variable that "holds" an object in fact holds a _reference_ to it, exactly as in the [Part 1](../part1/index) mutation chapter. Two consequences follow.
 
 First, two objects are distinct even when their contents match. Each `new` produces a separate object with its own identity:
 
@@ -460,7 +460,7 @@ const b = new Playlist();
 // a and b have identical (empty) contents, but a === b is false: they are different objects
 ```
 
-Second, when an object is passed to a function or stored in a field, it is the reference that is copied, not the object. The caller and the callee then share that single object, and a method call that changes one is visible to both. This is the aliasing from Part 1, now the normal way objects are used; primitives behave differently, as the deep dive below explains.
+Second, when an object is passed to a function or stored in a field, it is the reference that is copied, not the object. The caller and the callee then share that single object, and a method call that changes one is visible to both. This is the aliasing from [Part 1](../part1/index), now the normal way objects are used; primitives behave differently, as the deep dive below explains.
 
 ## Working with Objects
 
@@ -522,7 +522,7 @@ digraph objects {
   { rank = same; favourites; workout; }
 }
 ```
-<!-- caption: "favourites and workout are distinct objects; the songs cells reference separate Song objects, while currentIndex contains a primitive value." -->
+<!-- caption="favourites and workout are distinct objects; the songs cells reference separate Song objects, while currentIndex contains a primitive value." -->
 
 <!--
 <details class="tooltip exercise">
@@ -665,7 +665,7 @@ arrow from B2.s to T2.n
 arrow from T2.n to E2.s
 arrow from E2.n to AA.s
 ```
-<!-- caption: "beforeEach and afterEach wrap every test; beforeAll and afterAll run once for the file." -->
+<!-- caption="beforeEach and afterEach wrap every test; beforeAll and afterAll run once for the file." -->
 
 ## The Value of Class Abstractions
 

@@ -22,7 +22,7 @@ const SITE_URL = "https://ubccpsc.github.io/210/";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-    title: "CPSC 210 Handbook",
+    title: "CPSC 210 Textbook",
     description: "The course textbook for CPSC 210: Software Construction at UBC.",
     base: "/210/",
     head: [
@@ -43,7 +43,7 @@ export default defineConfig({
         const { title, description } = siteConfig.site;
 
         // The landing page's own H1 already names the course, so appending the
-        // site title just repeats it ("CPSC 210: ... | CPSC 210 Handbook").
+        // site title just repeats it ("CPSC 210: ... | CPSC 210 Textbook").
         if (pageData.relativePath === "index.md") {
             pageData.titleTemplate = false;
         }

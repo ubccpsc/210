@@ -194,7 +194,7 @@ Read the two descriptions of `GuestList` once more:
 
 Neither description mentions strings. Nothing about "a bounded set with no duplicates" depends on a member being a guest id rather than an employee record or a seat number. So the representation was not the only commitment `GuestList` made without needing to: it also fixed what its members are, and that second commitment has the same cost. The class serves guest lists and nothing else, and a team wanting the identical rule for seats or employees has to copy it. Declining this second commitment is the same move one level up, and TypeScript has a mechanism for it.
 
-Part 1 introduced **type variables** for naming a type that is not fixed until the type is used, writing `LinkedList<T>` for a list of any element type. A class declares them the same way:
+[Part 1](../part1/index) introduced **type variables** for naming a type that is not fixed until the type is used, writing `LinkedList<T>` for a list of any element type. A class declares them the same way:
 
 ```typescript
 class <Name><T> {
