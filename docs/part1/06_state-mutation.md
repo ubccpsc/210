@@ -205,14 +205,7 @@ The complexity mutation brings is justified by what it models: in the real world
 
 Arrays carry both _mutating_ and _non-mutating_ operations: you must know which is which. 
 
-<!-- TODO(NCB)
-filter/map return a new array, but the elements inside are the same objects as the
-source, so mutating an element of a filtered result reaches back to the original.
-Students lean on filter as "the safe, non-mutating one," so a one-line example showing 
-that might be helpful.
--->
-
-`map` and `filter` are _non-mutating_: they return a _new array_ and leave the original untouched. This is why the previous chapter could use them freely without introducing mutation. 
+`map` and `filter` are _non-mutating_: they return a _new array_ and leave the original untouched. This is why the previous chapter could use them freely without introducing mutation. What they leave untouched is the original array itself, which is a narrower promise than it first appears; the next section explains how this is not quite what you might expect. 
 
 `push`, `pop`, and `sort` _mutate the array in-place_. The names do not announce them as _mutating_, so when using an array operation for the first time, check its documentation to see whether it modifies the array or returns a new one. A surprising number of real-world bugs are due to a `sort` that quietly reordered an array somebody else was still using.
 
@@ -273,6 +266,19 @@ digraph aliasing {
 <!-- caption="Figure 06.01: variable names r and s reference the same object." -->
 
 One way to think about this is in terms of boxes. A variable is a labelled box. For a primitive, the box contains the value. For an object, the box contains an arrow pointing to the object, which lives elsewhere. `const s = r` copies the _arrow_. There is still exactly one `Reading`; it has two arrows pointing at it, and a change made through either arrow is visible through both. Two variables referring to the same object are called **aliases**.  _Aliasing_ is the single most common source of mutation surprises: code changes an object through one name, and the change appears under another name somewhere else entirely.
+
+Aliasing is also why `map` and `filter` are less protective than they look. Each builds a new array, so the original array is untouched. But that new array is filled with the references it found in the original array. When the elements are objects, both arrays lead to the same objects:
+
+```typescript
+const frozen: Reading[] = day.filter((r: Reading) => r.tempCelsius < 0);
+frozen[0].tempCelsius = 0;      // changed through frozen's reference
+
+test("the change reaches back into the original day",
+    checkExpect(() => day[0].tempCelsius, 0)
+);
+```
+
+The array was copied; the readings were not. A copy that duplicates only the top level and shares everything beneath it is called a _shallow copy_, and Part 2 returns to it when the question becomes how to hand data out safely.
 
 <details class="tooltip deep-dive">
 <summary>References Are Pointers (a Preview of CPSC 213)</summary>
@@ -339,8 +345,6 @@ So `r === t` being `false` is not a technicality. It is the runtime telling you 
 
 ## What a Function Can and Cannot Change
 
-(TODO: need to think about whether this is parameter/arguments. I think parameter is correct but I don't trust my 6:20pm brain.)
-
 The copy-versus-reference distinction matters because calling a function performs assignment as we just studied: each argument is assigned to its parameter, copying boxes. Everything about what a function can change in its caller follows from that one fact. 
 
 There are three cases. We will walk through them slowly, because mutation through function parameter passing is where mutation most often defies expectations. Note that these rules _differ_ in different programming languages---when encountering a new language, you should learn how exactly it passes parameters.
@@ -387,7 +391,7 @@ This behaviour is commonly called **pass-by-reference**: the function is operati
 <details class="tooltip ts-tips">
 <summary>The <code>void</code> Return Type</summary>
 
-The functions above are our first whose signatures declare a return type of **`void`**: they return nothing, so there is no value to name. A `void` function is called purely for what it _does_ rather than what it _produces_. Before this chapter, that would have made such a function useless. `bump` is useless; `calibrate` is not, and the difference between them is the subject of this chapter.
+The functions above are our first whose signatures declare a return type of `void`: they return nothing, so there is no value to name. A `void` function is called purely for what it _does_ rather than what it _produces_. Before this chapter, that would have made such a function useless. `bump` is useless; `calibrate` is not, and the difference between them is the subject of this chapter.
 
 </details>
 
@@ -558,14 +562,12 @@ test("the second reading is shifted by the offset",
 );
 ```
 
-(TODO: I'm a bit confused by this paragraph... doesn't the closure thing save us from these nasty side effects of mutation? Again, too late in the day to be totally sure.)
-
-There is one more consequence, and it is the one this part of the course has been building toward. The invariants chapters established a comfortable discipline: validate a value when it is constructed, and rely on the invariant afterwards. Mutation breaks the "afterwards". `reading.hour = 99` is a perfectly legal statement that violates the `Reading` invariant long after construction, and aliasing means _any_ part of the program holding a reference can do it, at any time, from anywhere. Under mutation, an invariant is no longer established once; it must be _preserved by every operation that touches the data, forever_. Keeping that promise when references can travel anywhere in the program requires controlling who is allowed to mutate at all, and that problem (restricting mutation to a trusted set of operations) is precisely the focus of part 2 of the course.
+There is one more consequence that we have been building towards in part 1. The invariants chapters established a practice: validate a value when it is constructed, and rely on the invariant afterwards. Mutation breaks the "afterwards". `reading.hour = 99` is a perfectly legal statement that violates the `Reading` invariant long after construction, and aliasing means _any_ part of the program holding a reference can do it, at any time, from anywhere. Under mutation, an invariant is no longer established once; it must be _preserved by every operation that touches the data, forever_. Keeping that promise requires controlling who is allowed to mutate state at all. Chapter 4 already showed one way to do that: hold the invariant-relevant state inside a closure, where no other code can reach it, so there is no reference to alias in the first place. That technique works, and its limit is visible from here. It protects data by never handing it out, whereas the readings in this chapter are passed from function to function precisely because callers need them. Part 2 takes up the general version of the problem, replacing the closure pattern with language syntax that lets data be shared while still restricting who may change it.
 
 Until then, the working guidance falls back on a discipline-based approach:
 
 - Declare every variable with `const`. When a value turns out to need changing, change that one declaration to `let`, deliberately. Every `let` is a value your reader must trace through time.
-- Prefer the non-mutating operations (`map`, `filter`) when they fit; use mutation when the problem is truly about change, as the arriving readings and the streak counters were.
+- Prefer the non-mutating operations (`map`, `filter`) when they fit, remembering that they copy the array and not the objects inside it; use mutation when the problem is truly about change, as the arriving readings and the streak counters were.
 - Keep mutable state in the smallest scope that works: a counter local to one function is easy to reason about; a mutable value visible to the whole program can be changed by the whole program.
 - Clearly document mutation when it happens: in a function's name, its documentation, and its tests.
 

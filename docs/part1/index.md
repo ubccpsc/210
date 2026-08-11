@@ -96,4 +96,4 @@ Part 1 covers four broad themes across nine chapters.
 
 ## Toward Part 2: Designing and Enforcing Abstractions
 
-Throughout Part 1 our programs stay small, small enough that one person can hold the whole design in their head, and small enough that personal discipline can plausibly maintain every promise the types cannot check. In Part 2 we relax that assumption and ask what happens when programs, teams, and lifetimes grow beyond what any individual can manage. 
+Part 1 ends with promises the language cannot check and a technique for keeping these promises through disciplined design. Part 2 moves that approach into the code itself: classes bundle data together with the operations allowed on it, and encapsulation puts the representation out of reach so an invariant cannot be broken from outside. From there it builds the vocabulary for abstractions that others can depend on: interfaces that state a contract, implementations that can stand in for one another, and designs that stay open to extension as requirements change.

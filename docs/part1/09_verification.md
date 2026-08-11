@@ -496,12 +496,9 @@ This is the second job of a test suite, and over the life of a program it is the
 
 Effective verification strategies are layered such that each approach provides additional unique insight into the correctness of a program. The type checker rules out malformed programs before they run. Tests show that the program behaves as its contract promises when it does run. Specific, layered assertions make a failing test explain not merely that something is wrong but what kind of fault occurred. Partitioning the inputs and the outputs makes a passing suite meaningful rather than merely green. Coverage reveals the code the suite still ignores, and re-running the suite on every change keeps a correct program correct. No single one of these is enough on its own. Together they are how we move from claiming that an abstraction honours its contract to having earned the confidence that it does.
 
-Tests confirm that a program behaves as its contracts promise. Part 2 takes up the complementary question: how to structure code so that the invariants those tests rely on cannot be broken from the outside in the first place.
+This also closes Part 1. You now understand the mechanics of modelling a problem with types, writing contracts and tests that validate behaviour, maintaining invariants, managing state, and changing data in the outside world. We have come a long way: TypeScript is a fully-featured, industrial-strength language. 
 
-(TODO: pasted stuff that was at the end fo chap 7 here)
-This also closes Part 1. You are now adept at the mechanics of modelling a problem with types, writing contracts and tests that validate behaviour, maintaining invariants, managing state, and changing data in the the outside world. We have come a long way: TypeScript is a fully-featured, industrial-strength language. 
-
-But so far, every program we have seen has been small enough for one person to hold in their head, and that has let personal discipline carry a lot of weight in ensuring the program works as intended. Part 2 investigates what happens when it cannot: when programs, teams, and lifetimes outgrow any single person, and the discipline has to move into the language itself. This requires a new level of abstraction, and new support from the programming language.
+But so far, every program we have seen has been small enough for one person to hold in their head, and that has let personal discipline carry a lot of weight in ensuring the program works as intended. Part 2 investigates what happens when it cannot: when programs, teams, and lifetimes outgrow any single person, and the discipline has to move into the language itself. That means structuring code so the invariants these tests rely on cannot be broken from the outside in the first place, which requires a new level of abstraction and new support from the programming language.
 
 
 
