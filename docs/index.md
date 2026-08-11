@@ -9,7 +9,7 @@ Unlike a natural language, you probably won't be *speaking* code or *listening* 
   <summary>The Language of Coding
   </summary>
   
-  By the end of the course, you'll understand what these terms mean: *type-driven development*, *test-driven development*, *functional programming*, *imperative programming*, *object-oriented programming*, *functions*, *expressions*, *statements*, *types*, *structs*, *values* *classes*, *recursion*, *iteration*, *object*, *primitives*, *unit test*, *cohesion*, *coupling*. (TODO:  add other terms, organize into order)
+  By the end of the course, you'll understand what these terms mean: *type-driven development*, *test-driven development*, *functional programming*, *imperative programming*, *object-oriented programming*, *functions*, *expressions*, *statements*, *types*, *structs*, *values* *classes*, *recursion*, *iteration*, *object*, *primitives*, *unit test*, *cohesion*, *coupling*. (TODO:  add other terms, organise into order)
     
    Don't worry, we won't quiz you on these! We want you to learn these terms for the long run through applying them, rather than through flash card definitions.    
  
@@ -76,7 +76,7 @@ You'll have noticed this reader includes some nested content. All this nested co
 <details class="tooltip deep-dive">
   <summary>Deep Dives</summary>
   
-  Deep dives are our catch-all parenthetical: they're things we would *like* to tell you, but we recognize are divergent from the main point we are trying to make.
+  Deep dives are our catch-all parenthetical: they're things we would *like* to tell you, but we recognise are divergent from the main point we are trying to make.
 </details>
 
  <details class="tooltip exercise">
