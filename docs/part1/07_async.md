@@ -113,7 +113,7 @@ That said, relying on `console.log` to diagnose complex problems breaks down as 
 <details class="tooltip deep-dive">
 <summary>Behind the Scenes: The Event Loop</summary>
 
-The runtime keeps a **queue** of callbacks that are ready to run: a timer expired, a button was clicked, data arrived from a disk or a network. The single thread runs a permanent cycle called the **event loop**: it takes the callback at the front of the queue, runs it _to completion_, then returns for the next one; if the queue is empty, the thread sleeps until something is added to the queue.
+The runtime keeps a queue of callbacks that are ready to run: a timer expired, a button was clicked, data arrived from a disk or a network. The single thread runs a permanent cycle called the **event loop**: it takes the callback at the front of the queue, runs it _to completion_, then returns for the next one; if the queue is empty, the thread sleeps until something is added to the queue.
 
 There are two consequences of this architecture. First, run-to-completion means a callback is never interrupted partway through: no other code runs until it returns. This is what makes single-threaded programs simple to reason about. But it is also an added responsibility, because a callback that computes for a long time freezes the rest of the program; the loop cannot move on until the callback returns. Second, a duration like the timer's `10000` means "queue this callback no earlier than ten seconds from now", not "run it at exactly that moment": if the thread is busy when the timer expires, the callback waits in the queue for its turn. The event loop guarantees order and progress, not precise timing.
 

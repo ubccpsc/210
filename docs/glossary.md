@@ -233,7 +233,6 @@ Terms introduced in **bold** throughout the book, linked to the section where ea
 - **Quality, External** — [Code Quality and Refactoring § Two Kinds of Quality](/part3/04_refactoring#two-kinds-of-quality)
 - **Quality, Internal** — [Code Quality and Refactoring § Two Kinds of Quality](/part3/04_refactoring#two-kinds-of-quality)
 - **Query String** — [Consuming Data and Services by Using APIs § Calling a Web Service](/part3/02_consuming_data#calling-a-web-service)
-- **Queue** — [Asynchronous Effects and Time § Deferred Computation: Callbacks](/part1/07_async#deferred-computation-callbacks)
 
 ## R
 
