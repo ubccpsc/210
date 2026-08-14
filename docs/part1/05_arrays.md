@@ -46,7 +46,7 @@ const empty: number[] = [];
 <details class="tooltip ts-tips">
 <summary>Array Types and Literals</summary>
 
-The type `X[]` designates an array of elements of type `X`. `X[]` can also be written `Array<X>`; the two notations mean exactly the same type, and the second uses the generics syntax from Chapter 2. In this course we use the `X[]` form, which is shorter and is the form you will see most often in practice.
+The type `X[]` designates an array of elements of type `X`. `X[]` can also be written `Array<X>`; the two notations mean exactly the same type, and the second uses the generics syntax from [Chapter 2](./02_model-types). In this course we use the `X[]` form, which is shorter and is the form you will see most often in practice.
 
 
 An array literal is an expression:
@@ -77,12 +77,12 @@ const count = day.length;    // 6
 ```
 
 <details class="tooltip ts-tips">
-<summary>Acessing array elements with <code>[]</code></summary>
+<summary>Accessing array elements with <code>[]</code></summary>
 
 Given an array `a`, the expression `a[i]` returns the `i`-th element in `a`, starting counting at 0.
 </details>
 
-In memory, `day` is a row of six cells, one per index. The cells do not contain the `Reading` objects themselves; each cell holds a _reference_ to a separate `Reading` that lives elsewhere. An index like `day[0]` names a cell and follows its reference to the object. (We will introduce _references_ in detail in Chapter 6.)
+In memory, `day` is a row of six cells, one per index. The cells do not contain the `Reading` objects themselves; each cell holds a _reference_ to a separate `Reading` that lives elsewhere. An index like `day[0]` names a cell and follows its reference to the object. (We will introduce _references_ in detail in [Chapter 6](./06_state-mutation).)
 
 <!-- graph playground:
 hhttps://dreampuf.github.io/GraphvizOnline/?engine=dot
@@ -200,7 +200,7 @@ Because JSON is text, a program cannot work with it as values directly. The text
 
 ## The Built-In Array Operations
 
-Arrays come with _operations_ that cover the most common things a program does with a sequence. Each operation is a higher-order function that takes a function as its input. The input function describes what should happen to _one element_, and the operation applies that across the whole array for you.  We will often use arrow functions (lambdas), which we saw in Chapter 1, to specify those input functions.
+Arrays come with _operations_ that cover the most common things a program does with a sequence. Each operation is a higher-order function that takes a function as its input. The input function describes what should happen to _one element_, and the operation applies that across the whole array for you.  We will often use arrow functions (lambdas), which we saw in [Chapter 1](./01_new-language), to specify those input functions.
 
 The four operations we use most are `map`, `filter`, `reduce`, and `find`. These four operations capture some of the most common tasks we perform on arrays. `map` is used to uniformly transform every element of an array into a new array. `filter` returns a subset of an array. `find` locates one element in an array. `reduce` summarizes an array. 
 
@@ -208,7 +208,7 @@ The four operations we use most are `map`, `filter`, `reduce`, and `find`. These
 <details class="tooltip ts-tips">
 <summary>Calling Array Operations</summary>
 
-Given an array of name `a`, we will call operations with `a.operation_name(fun)`. This is because each operation (`map`, `filter`, `reduce`, and `find`) _belongs_ to arrays, similar to the functions as properties we saw in Chapter 4. `fun` represents the input function that characterize the mapping/filter/reduction/find we should do. Usually we will specify it with an arrow function; `(elem: elemType) => <expression-that-we-want-to-derive-from-elem>`.
+Given an array of name `a`, we will call operations with `a.operation_name(fun)`. This is because each operation (`map`, `filter`, `reduce`, and `find`) _belongs_ to arrays, similar to the functions as properties we saw in [Chapter 4](./04_maintaining-invariants). `fun` represents the input function that characterize the mapping/filter/reduction/find we should do. Usually we will specify it with an arrow function; `(elem: elemType) => <expression-that-we-want-to-derive-from-elem>`.
 
 </details>
 <!---- Already introduced in chapter 1
@@ -497,7 +497,7 @@ const readings: Reading[] = JSON.parse(text);   // hoped for, not checked
 
 The compiler accepts that line and will then check every later use of `readings` against a promise nobody verified. If the text came from a file somebody edited by hand, or from a program written by another team, or from a version of the format that has since changed, the values may be nothing like `Reading`. Nothing here will notice.
 
-For the moment, work with JSON you produced yourself, where the shapes are known because your own code wrote them. Data arriving from somewhere you do not control needs to be checked before it is trusted, and that is a large enough topic to have a chapter of its own in Part 3.
+For the moment, work with JSON you produced yourself, where the shapes are known because your own code wrote them. Data arriving from somewhere you do not control needs to be checked before it is trusted, and that is a large enough topic to have a chapter of its own in [Part 3](../part3/index).
 
 ## On Iteration
 

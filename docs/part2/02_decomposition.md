@@ -141,7 +141,7 @@ Everything that does not mention the current index is exactly the play-history m
 
 ## Designing a Decomposition
 
-The previous section diagnosed an existing class. It is just as useful to work top-down, from a high-level problem to a lower-level set of classes, the way the Part 1 modelling chapter moved from a problem to a data definition. A common way to do this, which will feel second nature once you have done it a few times, is to:
+The previous section diagnosed an existing class. It is just as useful to work top-down, from a high-level problem to a lower-level set of classes, the way the [Part 1](../part1/index) modelling chapter moved from a problem to a data definition. A common way to do this, which will feel second nature once you have done it a few times, is to:
 
 1. Identify the invariants the system must maintain.
 2. For each invariant, identify the state it constrains.
@@ -246,7 +246,7 @@ Playlist *--> PlayHistory : delegates history
 
 @enduml
 ```
-<!-- caption: "Playlist composes a PlayHistory and delegates the recording work to it." -->
+<!-- caption="Playlist composes a PlayHistory and delegates the recording work to it." -->
 
 Composition and delegation are how a system of cohesive classes does anything larger than a single class can. Decomposition splits a responsibility out; composition puts the pieces back into a working whole, without merging their invariants. Each class keeps its own state, and richer behaviour is assembled by objects holding and calling one another. We will rely on this constantly: most useful objects are composed of smaller ones they delegate to.
 

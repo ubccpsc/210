@@ -208,7 +208,7 @@ flowchart LR
     class run good
     class err bad
 ```
-<!-- caption="Figure 01.01: How <code>tsc</code> type checks and transforms TypeScript before it can execute." -->
+<!-- caption="How <code>tsc</code> type checks and transforms TypeScript before it can execute." -->
 
 <details class="tooltip deep-dive">
   <summary>Tools for Writing Source Code</summary>
@@ -385,7 +385,7 @@ The **`return`** keyword is necessary to make functions in TypeScript return val
 
 For instance, if `return <expression>;` is in the function `foo`, wherever the call `foo()` appears, when we execute `return  <expression>;` within `foo`, `foo` evaluates `<expression>` to `v`, and the call to `foo()` is then replaced with `v`.
 
-The `return` statement only makes sense if it appears in a function definition (or method definition, which we'll see in Part 2).
+The `return` statement only makes sense if it appears in a function definition (or method definition, which we'll see in [Part 2](../part2/index)).
 </details>
 
 

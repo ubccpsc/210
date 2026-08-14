@@ -1,8 +1,8 @@
 # Glossary
 
-The vocabulary of software construction can look, at first, like jargon for its own sake. It is not. Engineers build systems that no one person can fully comprehend, and much of their work is therefore reaching agreement with other people about their code. Terms like _invariant_ or _coupling_ compress a paragraph of explanation into something two people can say in a code review and be confident they mean the same thing. Precise names also make distinctions visible: _fault_, _error_, and _failure_ pick out three different things, and a team that uses them indiscriminately will suffer unnecessary complexity and ambiguity. The same holds for processes as much as properties: _refactoring_ does not mean "changing code", it means changing structure while preserving behaviour, and that narrower meaning is what makes it something a team can agree to do safely. Many of these terms carry their criteria with them: calling a class a _god class_ is not name-calling but a claim about cohesion, and it implies what to look at next. So this glossary is less a list of words to memorise than an index of the distinctions those words encode, and learning these terms is how you become able to notice, describe, and reason about properties of a system that would otherwise stay vague.
+The vocabulary of software construction can look like a language of its own for its own sake. It is not. Engineers build systems no one person can fully comprehend, and much of their work is therefore reaching agreement with others about code. Terms like _invariant_ or _coupling_ compress a paragraph of explanation into something two people can say in a code review and mean the same thing. Precise names also make distinctions visible: _fault_, _error_, and _failure_ pick out three different things, and _refactoring_ means restructuring code without changing its behaviour. So this glossary is less a list of words than an index of distinctions, the ones that let you describe what would otherwise stay vague.
 
-Terms introduced in **bold** throughout the book, linked to the section where each is first introduced.
+Terms introduced in **bold** throughout the textbook, linked to the section where each is first introduced.
 
 <!-- Not every bold span belongs here. Terms deliberately kept out are left in
      place as commented-out entries marked "EXCLUDED, do not re-add", with the
@@ -16,11 +16,9 @@ Terms introduced in **bold** throughout the book, linked to the section where ea
 - **Abstract** — [Extending Behaviour Through Polymorphism § Sharing Behaviour with a Base Class](/part2/06_extension#sharing-behaviour-with-a-base-class)
 - **Abstract Value** — [Preserving Implementation Freedom with Abstract Values § What Makes a Change Safe](/part2/04_flexibility#what-makes-a-change-safe)
 - **Accumulator** — [Arrays and Iteration § Combining Elements with `reduce`](/part1/05_arrays#combining-elements-with-reduce)
-- **Actual Type** — [Defining Boundaries with Interfaces § Apparent and Actual Types](/part2/05_boundaries#apparent-and-actual-types)
 - **Adapter** — [Consuming Data and Services by Using APIs § Isolating What You Do Not Control](/part3/02_consuming_data#isolating-what-you-do-not-control)
 - **Aliases** — [Mutation and Side Effects § Copies and References](/part1/06_state-mutation#copies-and-references)
 - **API** — [Consuming Data and Services by Using APIs](/part3/02_consuming_data#consuming-data-and-services-by-using-apis)
-- **Apparent Type** — [Defining Boundaries with Interfaces § Apparent and Actual Types](/part2/05_boundaries#apparent-and-actual-types)
 - **Arguments** — [Learning a New Programming Language § Types as a Language Mechanism](/part1/01_new-language#types-as-a-language-mechanism)
 - **Array** — [Arrays and Iteration](/part1/05_arrays#arrays-and-iteration)
 - **Array Literal** — [Arrays and Iteration § Creating and Accessing Arrays](/part1/05_arrays#creating-and-accessing-arrays)
@@ -70,7 +68,6 @@ Terms introduced in **bold** throughout the book, linked to the section where ea
 - **Control** — [Encapsulating What Varies § Testing Encapsulated Code](/part2/03_encapsulation#testing-encapsulated-code)
 - **Control Flow** — [Learning a New Programming Language § <code>if</code> statements](/part1/01_new-language#if-statements)
 - **Controllability** — [Encapsulating What Varies § Testing Encapsulated Code](/part2/03_encapsulation#testing-encapsulated-code)
-- **Copies the Value** — [Mutation and Side Effects § Copies and References](/part1/06_state-mutation#copies-and-references)
 - **Copy, Deep** — [Encapsulating What Varies § When References Escape](/part2/03_encapsulation#when-references-escape)
 - **Copy, Shallow** — [Encapsulating What Varies § When References Escape](/part2/03_encapsulation#when-references-escape)
 - **Correctness** — [Part 1: Foundations of Software Construction](/part1/index#part-1-foundations-of-software-construction)
@@ -101,7 +98,7 @@ Terms introduced in **bold** throughout the book, linked to the section where ea
 
 ## E
 
-- **Encapsulation** — [Part 1: Foundations of Software Construction § Layered Correctness](/part1/index#layered-correctness)
+- **Encapsulation** — [Encapsulating What Varies](/part2/03_encapsulation#encapsulating-what-varies)
 - **Equivalence** — [Preserving Implementation Freedom with Abstract Values § Two Notions of Sameness](/part2/04_flexibility#two-notions-of-sameness)
 - **Equivalence Class Partitioning** — [Checking Invariants § Deriving Tests from the Specification](/part1/03_checking-invariants#deriving-tests-from-the-specification)
 - **Equivalence Classes** — [Checking Invariants § Equivalence Class Partitioning](/part1/03_checking-invariants#equivalence-class-partitioning)
@@ -122,7 +119,7 @@ Terms introduced in **bold** throughout the book, linked to the section where ea
 - **Failure** — [Debugging and Fault Localization § Fault, Error, Failure](/part3/05_debugging#fault-error-failure)
 - **Failure, Returned** — [Designing for Failure § Choosing Between Results and Exceptions](/part1/08_errors#choosing-between-results-and-exceptions)
 - **Failure, Thrown** — [Designing for Failure § Choosing Between Results and Exceptions](/part1/08_errors#choosing-between-results-and-exceptions)
-- **Falsy** — [Uncovered Language Features § Truthiness](/intro/03_language-features#truthiness)
+- **Falsy** — [Uncovered Language Features § Truthiness](/outro/language-features#truthiness)
 - **Fan-In** — [Coupling and Dependencies § Coupling as the Design Criterion](/part3/01_coupling#coupling-as-the-design-criterion)
 - **Fan-Out** — [Coupling and Dependencies § Coupling as the Design Criterion](/part3/01_coupling#coupling-as-the-design-criterion)
 - **Fault** — [Debugging and Fault Localization § Fault, Error, Failure](/part3/05_debugging#fault-error-failure)
@@ -174,6 +171,8 @@ Terms introduced in **bold** throughout the book, linked to the section where ea
 ## L
 
 - **Lambda Expressions** — [Learning a New Programming Language § Validating the Dynamic View With Testing](/part1/01_new-language#validating-the-dynamic-view-with-testing)
+- **Language, Typed** — [CPSC 210: Software Construction § Choice of Programming Language](/index#choice-of-programming-language)
+- **Language, Untyped** — [CPSC 210: Software Construction § Choice of Programming Language](/index#choice-of-programming-language)
 - **Law of Demeter** — [Coupling and Dependencies § Reaching Past a Neighbour](/part3/01_coupling#reaching-past-a-neighbour)
 - **Library** — [Designing APIs to Provide Data and Services § Publishing the Tracker](/part3/03_api_design#publishing-the-tracker)
 - **Library API** — [Consuming Data and Services by Using APIs § Two Kinds of API](/part3/02_consuming_data#two-kinds-of-api)
@@ -233,7 +232,6 @@ Terms introduced in **bold** throughout the book, linked to the section where ea
 - **Quality, External** — [Code Quality and Refactoring § Two Kinds of Quality](/part3/04_refactoring#two-kinds-of-quality)
 - **Quality, Internal** — [Code Quality and Refactoring § Two Kinds of Quality](/part3/04_refactoring#two-kinds-of-quality)
 - **Query String** — [Consuming Data and Services by Using APIs § Calling a Web Service](/part3/02_consuming_data#calling-a-web-service)
-- **Queue** — [Asynchronous Effects and Time § Deferred Computation: Callbacks](/part1/07_async#deferred-computation-callbacks)
 
 ## R
 
@@ -291,29 +289,28 @@ Terms introduced in **bold** throughout the book, linked to the section where ea
 - **Terminal** — [Checking Invariants § Checking Invariants With Tests](/part1/03_checking-invariants#checking-invariants-with-tests)
 - **Ternary Operator** — [Learning a New Programming Language § <code>return</code> statements](/part1/01_new-language#return-statements)
 - **Test Double** — [Defining Boundaries with Interfaces § Testing Across the Boundary](/part2/05_boundaries#testing-across-the-boundary)
-- **Tests and Assertions** — [Part 1: Foundations of Software Construction § Layered Correctness](/part1/index#layered-correctness)
+- **Tests** — [Part 1: Foundations of Software Construction § Layered Correctness](/part1/index#layered-correctness)
 - **Text Encoding** — [Asynchronous Effects and Time § Reading and Writing Files](/part1/07_async#reading-and-writing-files)
 - **Thread** — [Asynchronous Effects and Time § One Thread at a Time](/part1/07_async#one-thread-at-a-time)
 - **Threading Model** — [Asynchronous Effects and Time § One Thread at a Time](/part1/07_async#one-thread-at-a-time)
 - **Throw** — [Designing for Failure § Throwing an Exception](/part1/08_errors#throwing-an-exception)
 - **Thunk** — [Learning a New Programming Language § Validating the Dynamic View With Testing](/part1/01_new-language#validating-the-dynamic-view-with-testing)
-- **Truthy** — [Uncovered Language Features § Truthiness](/intro/03_language-features#truthiness)
+- **Truthy** — [Uncovered Language Features § Truthiness](/outro/language-features#truthiness)
+- **Type, Actual** — [Defining Boundaries with Interfaces § Apparent and Actual Types](/part2/05_boundaries#apparent-and-actual-types)
+- **Type, Apparent** — [Defining Boundaries with Interfaces § Apparent and Actual Types](/part2/05_boundaries#apparent-and-actual-types)
 - **Type Checker** — [Learning a New Programming Language § Types as a Language Mechanism](/part1/01_new-language#types-as-a-language-mechanism)
 - **Type Errors** — [Learning a New Programming Language § Compilation and Type Checking](/part1/01_new-language#compilation-and-type-checking)
 - **Type Narrowing** — [Using Types to Model Problems § Branching on the Case](/part1/02_model-types#branching-on-the-case)
 - **Type Variables** — [Using Types to Model Problems § Example: Playlists](/part1/02_model-types#example-playlists)
-- **Typed Language** — [CPSC 210: Software Construction § Choice of Programming Language](/index#choice-of-programming-language)
 - **Types** — [CPSC 210: Software Construction § Choice of Programming Language](/index#choice-of-programming-language)
 
 ## U
 
 - **Unit Tests** — [Checking Invariants](/part1/03_checking-invariants#checking-invariants)
-- **Untyped Language** — [CPSC 210: Software Construction § Choice of Programming Language](/index#choice-of-programming-language)
 
 ## V
 
 - **Value Object** — [Preserving Implementation Freedom with Abstract Values § Values That Do Not Change](/part2/04_flexibility#values-that-do-not-change)
-- **`void`** — [Mutation and Side Effects § What a Function Can and Cannot Change](/part1/06_state-mutation#what-a-function-can-and-cannot-change)
 
 ## W
 

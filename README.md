@@ -10,7 +10,7 @@ If you find any errors in these materials, please open a Pull Request so we can 
 
 ## Development
 
-Content is written in markdown in the `docs/` directory and rendered using [vitepress](https://vitepress.dev/guide/getting-started).
+Content is written in Markdown in the `docs/` directory and rendered using [vitepress](https://vitepress.dev/guide/getting-started).
 
 Changes can be previewed locally by running:
 

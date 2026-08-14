@@ -10,7 +10,7 @@ The term API covers two situations that feel different but are the same core ide
 
 A **library API** is code we `import` and call in our own process. Most systems use many libraries, for everything from date arithmetic to encryption, because a library is functionality an author chose not to build themselves. Calls are fast and ordinary: the code runs in our process, and either returns or throws. Being able to judge whether a library is appropriate, and to quickly work out how it should and should not be used, is a skill you will apply constantly.
 
-You have been applying this skill since the verification chapter. Every `expect(...).to.equal(...)` you have written is a call into the Vitest library written by another engineer. You read its documentation when you chose between `to.equal` and `to.deep.equal`, and again when you looked up whether the assertion you wanted was `to.include` or `to.have.members`. You depended on its contract when you wrote `to.throw` and trusted it to run your function, catch the error, and compare the message. You have never seen its implementation, and have not needed to. The same is true of `readFile`, of `JSON.parse`, and of every array operation from Part 1. This chapter is about reflecting on this skill that you have been practising all term.
+You have been applying this skill since the verification chapter. Every `expect(...).to.equal(...)` you have written is a call into the Vitest library written by another engineer. You read its documentation when you chose between `to.equal` and `to.deep.equal`, and again when you looked up whether the assertion you wanted was `to.include` or `to.have.members`. You depended on its contract when you wrote `to.throw` and trusted it to run your function, catch the error, and compare the message. You have never seen its implementation, and have not needed to. The same is true of `readFile`, of `JSON.parse`, and of every array operation from [Part 1](../part1/index). This chapter is about reflecting on this skill that you have been practising all term.
 
 A **web service API** is code we call over HTTP, running in someone else's process, usually on a completely different machine. Web services tend to sit at higher functional boundaries than libraries: not "parse this date" but "tell me where this parcel is." A call leaves our machine, crosses a network, and may take a second, or fail halfway, or return something we did not expect.
 
@@ -73,13 +73,13 @@ The second property is what happens to our _types_ when text becomes values agai
 
 ### Parsing Is Not Checking
 
-`JSON.parse` returns `any`. It has to: the text is not known until run time, so there is nothing for the compiler to inspect. The same is true of `response.json()` when reading a web service reply. The asynchronous chapter in Part 1 wrote a line very like this one:
+`JSON.parse` returns `any`. It has to: the text is not known until run time, so there is nothing for the compiler to inspect. The same is true of `response.json()` when reading a web service reply. The asynchronous chapter in [Part 1](../part1/index) wrote a line very like this one:
 
 ```typescript
 const report: StationReport = await response.json();
 ```
 
-That line compiles, and it looks like every other typed assignment in the book, but it is not. The annotation does not check anything; it _claims_ something. We have told the compiler that the `report` is a `StationReport`, the compiler has believed us, and from that point on it will type-check every use of `report` without ever verifying whether this is true. If the service returns a field named `temp` where we expected `tempCelsius`, the program compiles cleanly and fails somewhere else entirely, holding an `undefined` that the type system claimed was a number.
+That line compiles, and it looks like every other typed assignment in the textbook, but it is not. The annotation does not check anything; it _claims_ something. We have told the compiler that the `report` is a `StationReport`, the compiler has believed us, and from that point on it will type-check every use of `report` without ever verifying whether this is true. If the service returns a field named `temp` where we expected `tempCelsius`, the program compiles cleanly and fails somewhere else entirely, holding an `undefined` that the type system claimed was a number.
 
 The same weakness occurs whenever `as` is used to describe outside data:
 
@@ -87,7 +87,7 @@ The same weakness occurs whenever `as` is used to describe outside data:
 const shipment = JSON.parse(text) as Shipment;   // a claim, not a check
 ```
 
-`as Shipment` is a lie told to the compiler. It does not inspect the value, convert it, or reject anything. It disables the one mechanism that has been catching our mistakes since Part 1, at precisely the point where the data is least trustworthy. Whenever you see a claim applied to something that came from outside the program, you are looking at a place where a fault will surface far from its cause.
+`as Shipment` is a lie told to the compiler. It does not inspect the value, convert it, or reject anything. It disables the one mechanism that has been catching our mistakes since [Part 1](../part1/index), at precisely the point where the data is least trustworthy. Whenever you see a claim applied to something that came from outside the program, you are looking at a place where a fault will surface far from its cause.
 
 <details class="tooltip ts-tips">
 <summary>The <code>as</code> Operator</summary>
@@ -100,7 +100,7 @@ This is the first time we have needed `as`, which tells the compiler that a valu
 
 It is worth being precise about what it does, because it does far less than it appears to. `as` performs no conversion and runs no check. It produces no code at all: once compiled, the expression is exactly what it was, and the only thing that changed is that the compiler stopped objecting. Whatever the value was at run time, correctly shaped or not, it still is.
 
-TypeScript's own name for this operator is a _type assertion_. This chapter calls it a _claim_ instead, to keep it clear of the `assert` checks from Part 1, which do the opposite: an `assert` tests a condition while the program runs and halts when it fails, whereas `as` tests nothing and cannot fail.
+TypeScript's own name for this operator is a _type assertion_. This chapter calls it a _claim_ instead, to keep it clear of the `assert` checks from [Part 1](../part1/index), which do the opposite: an `assert` tests a condition while the program runs and halts when it fails, whereas `as` tests nothing and cannot fail.
 
 There is one narrow legitimate use, described later in this section, where the surrounding code has already established the fact being claimed. Everywhere else, using `as` to make a type error go away trades a complaint from the compiler for a fault at run time.
 
@@ -239,7 +239,7 @@ What the library costs is a dependency, and everything this chapter says about d
 <details class="tooltip deep-dive">
 <summary>Schemas Beyond Shape</summary>
 
-A schema library checks more than which fields exist. Constraints that a TypeScript type cannot express are exactly the invariants Part 1 had to write in comments and enforce by hand:
+A schema library checks more than which fields exist. Constraints that a TypeScript type cannot express are exactly the invariants [Part 1](../part1/index) had to write in comments and enforce by hand:
 
 ```typescript
 const ShipmentSchema = z.object({
@@ -306,7 +306,7 @@ const body: unknown = await response.json();
 const shipment = toShipment(body);
 ```
 
-The change from the version in Part 1 is the middle line. The body is taken as `unknown` rather than annotated with the type we are hoping for, so the compiler now requires us to pass it through `toShipment` before anything else can use it.
+The change from the version in [Part 1](../part1/index) is the middle line. The body is taken as `unknown` rather than annotated with the type we are hoping for, so the compiler now requires us to pass it through `toShipment` before anything else can use it.
 
 <details class="tooltip ts-tips">
 <summary>Optional Parameters and Option Objects</summary>
@@ -501,13 +501,13 @@ end note
 
 @enduml
 ```
-<!-- caption: "The tracker depends on a contract we own, and each carrier is adapted to it." -->
+<!-- caption="The tracker depends on a contract we own, and each carrier is adapted to it." -->
 
 The tracker now contains no URL, no JSON, and no knowledge that HTTP exists. A new carrier is a new adapter, which is the Open/Closed Principle applied to a dependency living at another company.
 
 ### Supplying the Dependency
 
-Something must still decide which carriers exist and hand them over. `ParcelTracker` does not create them: it takes them in its constructor and uses whatever it is given. Supplying a dependency from outside rather than constructing it internally is called **dependency injection**, and it is the mechanism behind the Dependency Inversion Principle named at the end of Part 2.
+Something must still decide which carriers exist and hand them over. `ParcelTracker` does not create them: it takes them in its constructor and uses whatever it is given. Supplying a dependency from outside rather than constructing it internally is called **dependency injection**, and it is the mechanism behind the Dependency Inversion Principle named at the end of [Part 2](../part2/index).
 
 The decision has to happen somewhere, and the useful discipline is to concentrate it in one place at the program's edge:
 
@@ -519,7 +519,7 @@ const tracker = new ParcelTracker([
 ]);
 ```
 
-This is the question Part 2 and the coupling chapter both left open. The answer is not that construction disappears, because some code must always name a concrete class. It is that construction is _gathered_ into a single place that the rest of the program does not depend on, so that everything else names only contracts.
+This is the question [Part 2](../part2/index) and the coupling chapter both left open. The answer is not that construction disappears, because some code must always name a concrete class. It is that construction is _gathered_ into a single place that the rest of the program does not depend on, so that everything else names only contracts.
 
 ### Testing Without the Network
 

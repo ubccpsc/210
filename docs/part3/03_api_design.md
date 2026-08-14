@@ -2,7 +2,7 @@
 
 The previous chapter left us wanting four things from the carrier API: a small surface, documentation that explains the API correctly, errors we could act on, and changes that did not arrive without warning. This chapter turns the system around. We are now the ones creating, publishing, and evolving the API, and those properties become the things our clients want from us.
 
-The change is not a technical one. Every design decision in Part 2 could be revised the next morning, because we owned every caller: if a method name was wrong we renamed it, and the compiler listed the places to fix. A published API cannot be revised that way. The clients are people we cannot see, cannot contact, and cannot coordinate with, and they will depend on whatever we ship, including the parts we exposed unintentionally. Two consequences of this situation follow, and this chapter elaborates on both of them.
+The change is not a technical one. Every design decision in [Part 2](../part2/index) could be revised the next morning, because we owned every caller: if a method name was wrong we renamed it, and the compiler listed the places to fix. A published API cannot be revised that way. The clients are people we cannot see, cannot contact, and cannot coordinate with, and they will depend on whatever we ship, including the parts we exposed unintentionally. Two consequences of this situation follow, and this chapter elaborates on both of them.
 
 The first is that _a published API is close to permanent_. Anything a client can reach, a client will eventually depend on, and from that moment removing it breaks working code belonging to somebody who did nothing wrong. The cost of a design mistake is no longer an afternoon of refactoring; it is the correctness of other people's systems.
 
@@ -51,7 +51,7 @@ end note
 
 @enduml
 ```
-<!-- caption: "One core with two published faces: a library other teams import, and a service the app calls." -->
+<!-- caption="One core with two published faces: a library other teams import, and a service the app calls." -->
 
 <details class="tooltip link-110">
 <summary>You Have Designed Contracts Before</summary>
@@ -75,7 +75,7 @@ It is an empirical observation rather than a rule, and it has a practical meanin
 
 </details>
 
-This is the strongest argument the book has offered for a discipline it has been recommending since Part 2. Encapsulation, small interfaces, and depending on contracts rather than classes were all justified earlier by the cost of change within a codebase you own. Here the same advice is stronger: everything exposed is permanent, so the only reliable way to keep a design changeable is to expose as little as possible.
+This is the strongest argument the textbook has offered for a discipline it has been recommending since [Part 2](../part2/index). Encapsulation, small interfaces, and depending on contracts rather than classes were all justified earlier by the cost of change within a codebase you own. Here the same advice is stronger: everything exposed is permanent, so the only reliable way to keep a design changeable is to expose as little as possible.
 
 ## Choosing the Surface
 
@@ -122,7 +122,7 @@ _Make the wrong call hard to write._ Consider an operation that takes a carrier 
 track(carrierId: string, trackingNumber: string): Promise<Shipment>
 ```
 
-Both parameters are strings, so the two can be swapped without the compiler noticing, and the call `track("9K4T", "carrier-a")` compiles and fails at run time. The type system that has been catching mistakes since Part 1 is contributing nothing here, because we gave it nothing to work with. An options object closes the hole by making each argument name itself at the callsite:
+Both parameters are strings, so the two can be swapped without the compiler noticing, and the call `track("9K4T", "carrier-a")` compiles and fails at run time. The type system that has been catching mistakes since [Part 1](../part1/index) is contributing nothing here, because we gave it nothing to work with. An options object closes the hole by making each argument name itself at the callsite:
 
 ```typescript
 track(request: { carrierId: string; trackingNumber: string }): Promise<Shipment>
@@ -142,7 +142,7 @@ _Decide what absence means, once._ Whether "no such shipment" is `null`, an empt
 
 Failure is part of the contract, not an afterthought. Clients have to handle errors when things go wrong, and they can only handle what we have told them about. The error handling chapter offered two mechanisms, and both are reasonable options. What matters for a published API is that the choice is made deliberately and applied consistently, and that whichever is chosen carries enough structure for clients to respond to appropriately.
 
-A message alone is not enough structure. If the only thing distinguishing "we do not recognise that tracking number" from "the carrier is not responding" is English prose, a client who wants to retry the second and not the first has no option but to match on the text, and our next wording change or a language localization silently breaks them. A tagged union, from Part 1's modelling chapter, provides a more stable alternative:
+A message alone is not enough structure. If the only thing distinguishing "we do not recognise that tracking number" from "the carrier is not responding" is English prose, a client who wants to retry the second and not the first has no option but to match on the text, and our next wording change or a language localization silently breaks them. A tagged union, from [Part 1](../part1/index)'s modelling chapter, provides a more stable alternative:
 
 ```typescript
 export type TrackingError =

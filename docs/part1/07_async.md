@@ -1,6 +1,6 @@
 # Asynchronous Effects and Time
 
-The previous chapter ended with **side effects**: changes that reach beyond a function, and sometimes beyond the program entirely, to files, networks, and users. We saw how side effects significantly complicate the mental model we have of computation. This chapter intorduces asynchronicity, which will further complicate the mental model.
+The previous chapter ended with **side effects**: changes that reach beyond a function, and sometimes beyond the program entirely, to files, networks, and users. We saw how side effects significantly complicate the mental model we have of computation. This chapter introduces asynchronicity, which will further complicate the mental model.
 
 Programs become much more useful when they interact with the outside world. A weather station that can only summarise readings typed into its source code is a _calculator_. A weather station that can load a year of readings from a file, fetch the current conditions from a web service, and write its report somewhere permanent is a _system_. Most software needs require interacting with the outside world:
 
@@ -113,7 +113,7 @@ That said, relying on `console.log` to diagnose complex problems breaks down as 
 <details class="tooltip deep-dive">
 <summary>Behind the Scenes: The Event Loop</summary>
 
-The runtime keeps a **queue** of callbacks that are ready to run: a timer expired, a button was clicked, data arrived from a disk or a network. The single thread runs a permanent cycle called the **event loop**: it takes the callback at the front of the queue, runs it _to completion_, then returns for the next one; if the queue is empty, the thread sleeps until something is added to the queue.
+The runtime keeps a queue of callbacks that are ready to run: a timer expired, a button was clicked, data arrived from a disk or a network. The single thread runs a permanent cycle called the **event loop**: it takes the callback at the front of the queue, runs it _to completion_, then checks the queue for any other waiting callbacks to execute. If the event loop queue is empty, the thread sleeps until something is added to the queue.
 
 There are two consequences of this architecture. First, run-to-completion means a callback is never interrupted partway through: no other code runs until it returns. This is what makes single-threaded programs simple to reason about. But it is also an added responsibility, because a callback that computes for a long time freezes the rest of the program; the loop cannot move on until the callback returns. Second, a duration like the timer's `10000` means "queue this callback no earlier than ten seconds from now", not "run it at exactly that moment": if the thread is busy when the timer expires, the callback waits in the queue for its turn. The event loop guarantees order and progress, not precise timing.
 
@@ -144,7 +144,7 @@ stateDiagram-v2
 %%      Settles at most once.
 %%    end note
 ```
-<!-- caption="Figure 07.01: Promise states. Promises settle once and only once." -->
+<!-- caption="Promise states. Promises settle once and only once." -->
 
 You will rarely create a promise yourself. Promises are what slow operations _give you_: the file-reading and web-fetching functions later in this chapter all return them. 
 
@@ -192,7 +192,7 @@ readFile("report.txt", "utf8").then((contents) => {
 
 This connects callbacks and promises: a promise is, underneath, an object that runs callbacks for you when its value arrives, and the `await` syntax in the next section is built on exactly this mechanism. 
 
-We show `then` here so you will recognise it in documentation and in other people's code, but we will not use it in this course. `await` is a form of _syntatic sugar_ that expresses the same thing and is much more readable.
+We show `then` here so you will recognise it in documentation and in other people's code, but we will not use it in this course. `await` is a form of _syntactic sugar_ that expresses the same thing and is much more readable.
 
 </details>
 
@@ -280,7 +280,7 @@ OS --> R : hand the data up
 R --> F : resume the awaiting function
 @enduml
 ```
-<!-- caption="Figure 07.02: A file read passing down the runtime and operating system and back." -->
+<!-- caption="A file read passing down the runtime and operating system and back." -->
 
 Notice what this means about `await`: your paused function returns to execution through the very same queue that clicks and timer callbacks travel through. There is one loop, one thread, and one line to wait in, which is also why a long-running computation delays everything: file results, button clicks, and resumed functions all stand in the same queue behind it.
 
@@ -297,7 +297,7 @@ flowchart LR
     class queue q
     class thread t
 ```
-<!-- caption="Figure 07.03: Every event waits in one queue, served by the single thread one at a time." -->
+<!-- caption="Every event waits in one queue, served by the single thread one at a time." -->
 
 This layered design is why a single thread is enough. The expensive waiting is done by hardware and the operating system, which are built for it and can juggle thousands of requests at once; the one thread in your program is reserved for the only thing that needs it: running your code. A Node-based web server handling thousands of simultaneous connections on a single thread is this stack working as intended.
 
@@ -321,7 +321,7 @@ test("the report loads",
 
 This is the first check we have written whose thunk has a body in braces. Until now every thunk has been a single expression, `() => <actual>`, which _implicitly returns_ its value. Here the check needs two steps, awaiting the report and then measuring it, and two statements cannot be written as one expression, so the thunk takes the block form instead.
 
-The braces change the rules, exactly as the arrow function tooltip in Chapter 1 described. A block body returns nothing implicitly, so the value the check compares must be handed back with an explicit `return`. Written without it:
+The braces change the rules, exactly as the arrow function tooltip in [Chapter 1](./01_new-language) described. A block body returns nothing implicitly, so the value the check compares must be handed back with an explicit `return`. Written without it:
 
 ```typescript
 checkExpect(async () => {
@@ -421,6 +421,114 @@ The type annotation on `report` is a statement of _our expectation_, not somethi
 
 The compiler's guarantees stop at the program's edge. At the edges, the discipline from the invariants chapters takes over: data arriving from outside should be _checked_ before the rest of the program relies on it. We will not build that checking today, but you should notice the boundary it belongs on.
 
+## Waiting for Several Things at Once
+
+Everything so far has waited for one slow thing at a time. Real programs rarely want that. A weather station keeps a log per instrument, and a report needs all of them; a service answers one question per request, and a page needs several answers before it can draw anything. The obvious way to read three files is a loop:
+
+```typescript
+/**
+ * Reads every file named in paths.
+ */
+async function readAllInTurn(paths: string[]): Promise<string[]> {
+    const contents: string[] = [];
+    for (const path of paths) {
+        const text: string = await readFile(path, "utf8");
+        contents.push(text);
+    }
+    return contents;
+}
+```
+
+This produces the right answer, but goes about it inefficiently. The `await` sits _inside_ the loop. This means the second read cannot begin until the first has finished, and the third waits on the second. At the SSD figure from the table at the start of this chapter, three reads take 450 µs instead of 150 µs, and nineteen station files take nineteen times the wait. Nothing about the files demanded this; they have nothing to do with one another.
+
+This is the earlier lesson going unused. The disk does the waiting, not our thread, and the operating system is perfectly capable of having several requests outstanding at once. The loop above declines to use that: it waits for each answer to come back before it will even ask the next question.
+
+The mistake is easier to see once you separate two things that `await` glues together:
+
+* _Calling_ a promise-returning function _starts_ the work.
+* _Awaiting_ the promise _collects_ the result.
+
+`await readFile(...)` does both on one line. That is exactly what you want when the next step depends on the last, which is why `archiveReport` was written that way: the write genuinely could not start before the read finished. It is exactly what you do not want when the operations are independent, because it starts each one only after collecting the one before.
+
+So start them all first, then collect them all:
+
+```typescript
+/**
+ * Reads every file named in paths, all at once.
+ */
+async function readAll(paths: string[]): Promise<string[]> {
+    const pending: Promise<string>[] = paths.map((path: string) => readFile(path, "utf8"));
+    return await Promise.all(pending);
+}
+```
+
+There is no `await` inside the `map`, and that is the whole trick. Each call to `readFile` starts a read and hands back its receipt immediately, so by the time `map` has finished walking the array, every read is already in flight and the disk is working on them together. `Promise.all` then takes that array of receipts and returns a single promise that delivers once the last of them has arrived.
+
+```text
+readAllInTurn   |--A--|--B--|--C--|     450 µs
+readAll         |--A--|                 150 µs
+                |--B--|
+                |--C--|
+```
+
+The total wait becomes the _slowest_ of the operations rather than the _sum_ of them, and the gap widens with every file added.
+
+Two properties of `Promise.all` are worth committing to memory. The first is that it turns an array of promises into a promise of an array, `Promise<T>[]` into `Promise<T[]>`, and the results come back in the order you supplied them, not the order they finished. If `humidity.txt` is tiny and arrives first, it is still second in the returned array because it was second going in. You never have to sort answers back into place.
+
+The second is that a fixed set of operations can be destructured, and the type checker tracks each position separately:
+
+```typescript
+const [current, history, calibration]: [string, string, string] = await Promise.all([
+    readFile("current.json", "utf8"),
+    readFile("history.csv", "utf8"),
+    readFile("calibration.json", "utf8"),
+]);
+```
+
+This approach is recommended whenever a function needs several particular files, or several particular service calls, before it can do anything at all: name them, start them together, and examine what comes back.
+
+_When one of them fails._ `Promise.all` rejects as soon as _any_ one of its promises rejects, reporting that rejection's reason and not waiting for the rest. The other operations are not cancelled; they continue, and their results are discarded. For this chapter's policy of files that exist and services that answer, this is the behaviour you want: if one required file is missing, the whole operation cannot proceed, and failing at once with the reason is more useful than pressing on. The next chapter takes up what to do about such failures. If you ever need every outcome rather than the first failure, `Promise.allSettled` waits for all of them and reports each one separately, but usually `Promise.all` is the default suggestion.
+
+_When a loop is right after all._ Concurrency is the right default only because these operations are independent. When each step actually depends on the one before, a sequential loop is correct and `Promise.all` would be wrong: you cannot start a request that needs the previous request's answer. Writing files one after another to the same place, or walking a service's pages where each reply names the next page, are both genuinely sequential. 
+
+<details class="tooltip ts-tips">
+<summary>The <code>noAwaitInLoops</code> lint rule</summary>
+
+The lint configuration used in this course reports `await` in a loop body as an error. The rule exists because the loop shape is almost always accidental: it is what you get by writing the synchronous version and then adding `await` where the compiler asked for it, and the resulting code is correct but needlessly slow in a way no test is likely to detect. Treat the error as a question rather than an instruction: ask whether iteration _n_ needs anything from iteration _n − 1_. If it does not, the loop wants to be `map` plus `Promise.all`. 
+
+</details>
+
+<details class="tooltip exercise">
+<summary>Check your Understanding of <code>Promise.all</code></summary>
+
+Consider these two functions, both reading the same three files:
+
+```typescript
+async function versionOne(): Promise<number> {
+    const a: string = await readFile("a.txt", "utf8");
+    const b: string = await readFile("b.txt", "utf8");
+    const c: string = await readFile("c.txt", "utf8");
+    return a.length + b.length + c.length;
+}
+
+async function versionTwo(): Promise<number> {
+    const reads: Promise<string>[] = [
+        readFile("a.txt", "utf8"),
+        readFile("b.txt", "utf8"),
+        readFile("c.txt", "utf8"),
+    ];
+    const [a, b, c]: string[] = await Promise.all(reads);
+    return a.length + b.length + c.length;
+}
+```
+
+1. Both return the same number. Which finishes sooner, and roughly by how much, if each read takes 150 µs?
+2. `versionTwo` has no loop, so the lint rule is silent about `versionOne` too. Is `versionOne` nevertheless the same mistake? Explain what makes the two equivalent.
+3. In `versionTwo`, the three reads all start before the `await` on the line below them. What line does the first read actually start on?
+4. Suppose `b.txt` does not exist. In each version, does `a.txt` get read? Does `c.txt`?
+
+</details>
+
 ## When Slow Things Fail
 
 Everything in this chapter can fail in ways pure computation cannot: a file may not exist, a network may be down, a service may answer nonsense. This is what the rejected state of a promise is for, and when an `await`ed promise rejects, the error surfaces in your program at the `await`.
@@ -431,7 +539,7 @@ For this chapter and its exercises, the policy is simple: we will work with file
 
 ## From Mechanics to Abstraction
 
-Mutation introduced state and time _inside_ the program. Asynchrony extends time to the world _outside_ the probram: data lives on disks and on other machines, and arrives only after a wait. The program need not spend all that time standing still. The model TypeScript gives us is single-threaded and deferred: slow operations hand back promises, `await` collects their values while the lone thread stays busy, and `async` marks every function that participates. With files and web services available, our programs can act on data that comes from outside their own source code.
+Mutation introduced state and time _inside_ the program. Asynchrony extends time to the world _outside_ the program: data lives on disks and on other machines, and arrives only after a wait. The program need not spend all that time standing still. The model TypeScript gives us is single-threaded and deferred: slow operations hand back promises, `await` collects their values while the lone thread stays busy, and `async` marks every function that participates. With files and web services available, our programs can act on data that comes from outside their own source code.
 
 <details class="tooltip exercise">
   <summary>Exercise: A Journal on Disk</summary>

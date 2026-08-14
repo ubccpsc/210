@@ -106,7 +106,7 @@ SmsNotifier : #deliver(..)
 
 @enduml
 ```
-<!-- caption: "BaseNotifier providing common features." -->
+<!-- caption="BaseNotifier providing common features." -->
 
 <details class="tooltip ts-tips">
 <summary>Abstract Classes and <code>protected</code></summary>
@@ -157,7 +157,7 @@ Because a subclass instance can stand in wherever the base type or interface is 
 <details class="tooltip deep-dive">
 <summary>Demanding No More, Promising No Less</summary>
 
-The contracts from Part 1 make the rule precise. A method's precondition is what it demands of callers; its postcondition is what it guarantees in return. A subtype honours the supertype's contract when it demands no more and guarantees no less. If a subclass's `send(..)` rejected messages the base accepted, by also forbidding whitespace, say, it would _strengthen_ the precondition, and a caller relying on the base's looser rule would break. If it delivered less than the base promised, it would _weaken_ the postcondition. A subclass must also preserve any invariant the base maintains. These are the conditions under which substituting a subtype for its supertype is always safe, and they are why an override is free to change how a method works but not what it promises.
+The contracts from [Part 1](../part1/index) make the rule precise. A method's precondition is what it demands of callers; its postcondition is what it guarantees in return. A subtype honours the supertype's contract when it demands no more and guarantees no less. If a subclass's `send(..)` rejected messages the base accepted, by also forbidding whitespace, say, it would _strengthen_ the precondition, and a caller relying on the base's looser rule would break. If it delivered less than the base promised, it would _weaken_ the postcondition. A subclass must also preserve any invariant the base maintains. These are the conditions under which substituting a subtype for its supertype is always safe, and they are why an override is free to change how a method works but not what it promises.
 
 </details>
 
@@ -275,7 +275,7 @@ VerboseFormatter : +format(..)
 
 @enduml
 ```
-<!-- caption: "Each channel holds a Formatter and delegates formatting to it, instead of inheriting it." -->
+<!-- caption="Each channel holds a Formatter and delegates formatting to it, instead of inheriting it." -->
 
 The freedom matters more as the system grows. Suppose it must support _c_ channels in _f_ formats. Baking formatting into the hierarchy means a class for each combination, _c_ times _f_ of them, and every new channel or format multiplies the count again. Holding the formatter as a collaborator needs only _c_ channel classes and _f_ formatter classes, _c_ plus _f_ in all, and a new format is a single class that pairs with every existing channel without any of them changing. Composition turns a multiplying cost into an adding one.
 

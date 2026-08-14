@@ -1,8 +1,8 @@
 # Encapsulating What Varies
 
-Much of Part 1 was concerned with invariants: the properties a value must satisfy to be meaningful and the preconditions and postconditions that make up a function's contract (an approach sometimes called **design by contract**). Those approaches describe and detect invariant violations, but cannot prevent them. A documented invariant is a promise, and the rest of the program is free to break it: the object `{ renewalsRemaining: -1 }` satisfies the `Loan` type and simultaneously violates the `Loan` invariant, and the compiler will not object. Classes provide a mechanism for starting to close this gap through the constructor, which provides a single, controlled path for building an object. But a constructor only controls how an object begins. If a class's fields are accessible to anywhere else in a program, any code holding the object can read and write to them directly, and the invariant the constructor established can be undone. A careful constructor is not enough on its own.
+Much of [Part 1](../part1/index) was concerned with invariants: the properties a value must satisfy to be meaningful and the preconditions and postconditions that make up a function's contract (an approach sometimes called **design by contract**). Those approaches describe and detect invariant violations, but cannot prevent them. A documented invariant is a promise, and the rest of the program is free to break it: the object `{ renewalsRemaining: -1 }` satisfies the `Loan` type and simultaneously violates the `Loan` invariant, and the compiler will not object. Classes provide a mechanism for starting to close this gap through the constructor, which provides a single, controlled path for building an object. But a constructor only controls how an object begins. If a class's fields are accessible to anywhere else in a program, any code holding the object can read and write to them directly, and the invariant the constructor established can be undone. A careful constructor is not enough on its own.
 
-**Encapsulation** closes the gap by hiding a class's representation so that the invariant cannot be broken by external code. The data becomes accessible only to the class's own methods, which are designed to maintain the invariant. This is **information hiding**, and TypeScript's access modifiers make it more than a polite request: where Part 1 could only write a comment asking other code to leave a field alone, now the compiler can enforce it. This chapter covers the mechanism (`private`, `public`, and `readonly`), the process of deciding what to hide, and how this improves the design of the overall system.
+**Encapsulation** closes the gap by hiding a class's representation so that the invariant cannot be broken by external code. The data becomes accessible only to the class's own methods, which are designed to maintain the invariant. This is **information hiding**, and TypeScript's access modifiers make it more than a polite request: where [Part 1](../part1/index) could only write a comment asking other code to leave a field alone, now the compiler can enforce it. This chapter covers the mechanism (`private`, `public`, and `readonly`), the process of deciding what to hide, and how this improves the design of the overall system.
 
 #### A Guest List That Must Stay Valid
 
@@ -35,7 +35,7 @@ list.invited.push("carol"); // three guests in a list of capacity two
 list.capacity = -1;         // and now the capacity is meaningless
 ```
 
-Every line type-checks. A comment such as `// invariant: no duplicates, at most capacity` records the rule, exactly as in Part 1, but a comment cannot prevent the offending lines above from being written. And an invariant that can be so easily violated is not an invariant at all, since no caller could depend on it being true.
+Every line type-checks. A comment such as `// invariant: no duplicates, at most capacity` records the rule, exactly as in [Part 1](../part1/index), but a comment cannot prevent the offending lines above from being written. And an invariant that can be so easily violated is not an invariant at all, since no caller could depend on it being true.
 
 ## Hiding the Representation
 
@@ -83,7 +83,7 @@ digraph encapsulation {
   client -> capacity [label = "Compile Error", color = "red", style = dashed];
 }
 ```
-<!-- caption: "External code may call the public methods but not reach the private fields." -->
+<!-- caption="External code may call the public methods but not reach the private fields." -->
 
 <details class="tooltip ts-tips">
 <summary><code>public</code>, <code>private</code>, and <code>readonly</code></summary>
@@ -179,7 +179,7 @@ size(): number {
 }
 ```
 
-This captures the essence of encapsulation. In Part 1 an invariant was documented and checked after the fact. Here, the constructor establishes it and every method preserves it, while the private representation guarantees that no other path exists. The invariant has gone from a property we _hoped held_ to one that _always holds_.
+This captures the essence of encapsulation. In [Part 1](../part1/index) an invariant was documented and checked after the fact. Here, the constructor establishes it and every method preserves it, while the private representation guarantees that no other path exists. The invariant has gone from a property we _hoped held_ to one that _always holds_.
 
 
 ```graphviz
@@ -500,7 +500,7 @@ This chapter's example followed a process you can reuse when designing any class
 
 This results in an object that can only be constructed in a valid state, stays valid through use, and cannot leak the internals that would let someone else violate the invariant.
 
-This design discipline has many benefits. Because nothing outside the class can break its invariant, you can confirm that invariant by reading a single class. Because callers depend only on the public methods, the representation is free to change, as the move from an `Array` to a `Set` showed, and internal changes stay internal. That stable surface also lets a team build against a class while its internals are still being worked out, as long as the public methods maintain their signatures. And because far less code can put the object into a bad state, there are far fewer places for bugs to hide. Encapsulation is the point where the invariants of Part 1 stop being promises and become guarantees.
+This design discipline has many benefits. Because nothing outside the class can break its invariant, you can confirm that invariant by reading a single class. Because callers depend only on the public methods, the representation is free to change, as the move from an `Array` to a `Set` showed, and internal changes stay internal. That stable surface also lets a team build against a class while its internals are still being worked out, as long as the public methods maintain their signatures. And because far less code can put the object into a bad state, there are far fewer places for bugs to hide. Encapsulation is the point where the invariants of [Part 1](../part1/index) stop being promises and become guarantees.
 
 Hiding the representation made it free to change, and the move from an `Array` to a `Set` exercised that freedom without disturbing a single caller. The next chapter takes up that freedom directly: what a safe change rests on, how a class can give the freedom away without noticing, and how much further it extends than the representation alone.
 

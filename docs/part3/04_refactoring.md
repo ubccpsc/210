@@ -76,7 +76,7 @@ The recipe also assumed a fixed problem. Real systems change after they are writ
 
 A **code smell** is a surface sign of a deeper design problem. The word is deliberately weak: a smell is not a defect, it is not always wrong, and it does not oblige you to change anything. Smells are hints of places in the code that deserve a second look in terms of their design.
 
-The useful thing about the standard catalogue of smells is that you already know many of them. This book has spent two parts arguing about design, and the smells are largely the same problems approached from the other direction: not "here is a principle to follow" but "here is what its absence looks like in code you are reading."
+The useful thing about the standard catalogue of smells is that you already know many of them. This textbook has spent two parts arguing about design, and the smells are largely the same problems approached from the other direction: not "here is a principle to follow" but "here is what its absence looks like in code you are reading."
 
 | Smell | Where it came up already |
 |---|---|
@@ -132,7 +132,7 @@ Doing two of these in one change is how refactoring acquired its reputation for 
 
 ### Refactoring Is Pure Risk
 
-It is worth being blunt about the position refactoring puts you in, because it is unlike any other work in this book.
+It is worth being blunt about the position refactoring puts you in, because it is unlike any other work in this textbook.
 
 Every other change has a benefit that arrives with it. A feature gives users something they did not have. A bug fix restores behaviour that was supposed to exist. Each carries risk, and each has something on the other side of the scale to weigh the risk against.
 
@@ -146,7 +146,7 @@ Work with a deferred benefit and an immediate risk has to have its risk actively
 
 The whole value of that sequence is the confidence it produces about a change that is otherwise unverifiable. Without a suite, "the behaviour is unchanged" is a belief about code you have just rearranged, held by the person least able to judge it objectively. With one, it is a claim that has been checked, and a mistake surfaces immediately rather than as a defect report weeks later that nobody connects to a cleanup.
 
-This is the strongest practical argument the book makes for tests. Without them, restructuring code is not refactoring but editing and hoping. The rest of the discipline, covered later in this chapter, is about keeping each individual application of that sequence small enough that a failure at step 3 has an obvious cause.
+This is the strongest practical argument the textbook makes for tests. Without them, restructuring code is not refactoring but editing and hoping. The rest of the discipline, covered later in this chapter, is about keeping each individual application of that sequence small enough that a failure at step 3 has an obvious cause.
 
 <details class="tooltip deep-dive">
 <summary>Refactoring Code That Has No Tests</summary>
@@ -255,7 +255,7 @@ stop
 
 @enduml
 ```
-<!-- caption: "Refactoring as preparation: the test-refactor-test loop runs until the change that prompted it becomes easy." -->
+<!-- caption="Refactoring as preparation: the test-refactor-test loop runs until the change that prompted it becomes easy." -->
 
 Three features of that shape are worth reading off it. The tests are run before any code is touched, so that a later failure means something. They are run again after every individual step, which is what makes the undo path cheap: at most one small change has to be reverted, and you know exactly which. And the loop has an exit condition that comes from outside the refactoring itself, since the point is never a design you find satisfying but the change you originally came to make.
 

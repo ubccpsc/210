@@ -60,14 +60,14 @@ Notifier : +send(message: string): void
 
 @enduml
 ```
-<!-- caption: "Notifier interface. -->
+<!-- caption="Notifier interface." -->
 
 Because an interface is a contract that one body of code implements and another depends on, it is documented with care. Every member is part of a promise that callers rely on and implementers must keep, so the documentation that was good practice for a function is closer to essential for an interface.
 
 <details class="tooltip ts-tips">
 <summary><code>interface</code> Versus <code>type</code></summary>
 
-You have used `type` since Part 1 to name unions and the shapes of data, and TypeScript will in fact let you describe an object's shape with either `type` or `interface`. The convention this course follows is to use an `interface` for a contract that classes implement and callers depend on, and `type` for unions (`"red" | "green" | "yellow"`) and for naming the shape of plain data. Use `interface` when several classes will commit to the same set of operations; use a `type` alias when you are giving a name to a structure.
+You have used `type` since [Part 1](../part1/index) to name unions and the shapes of data, and TypeScript will in fact let you describe an object's shape with either `type` or `interface`. The convention this course follows is to use an `interface` for a contract that classes implement and callers depend on, and `type` for unions (`"red" | "green" | "yellow"`) and for naming the shape of plain data. Use `interface` when several classes will commit to the same set of operations; use a `type` alias when you are giving a name to a structure.
 
 </details>
 
@@ -141,7 +141,7 @@ SmsNotifier : +send(..)
 
 @enduml
 ```
-<!-- caption: "Notifier with multiple concrete classes." -->
+<!-- caption="Notifier with multiple concrete classes." -->
 
 <details class="tooltip deep-dive">
 <summary>Structural Typing</summary>
@@ -158,7 +158,7 @@ Once a class implements an interface, an object of that class can be held in a v
 const alerts: Notifier = new EmailNotifier("ops@example.com");
 ```
 
-Two different types are in play here. The **apparent type** is the one written in the code, `Notifier`: it is what the compiler knows about the variable. The **actual type** is the type of the object that exists at run time, `EmailNotifier`. This is the static and dynamic distinction from Part 1 seen from a new angle: the apparent type belongs to the static view the compiler checks, and the actual type belongs to the dynamic view that exists only once the program runs.
+Two different types are in play here. The **apparent type** is the one written in the code, `Notifier`: it is what the compiler knows about the variable. The **actual type** is the type of the object that exists at run time, `EmailNotifier`. This is the static and dynamic distinction from [Part 1](../part1/index) seen from a new angle: the apparent type belongs to the static view the compiler checks, and the actual type belongs to the dynamic view that exists only once the program runs.
 
 The apparent type decides what you are allowed to do with the variable. Through an apparent type of `Notifier` you may call `send`, because the contract promises it, and nothing more:
 
@@ -236,7 +236,7 @@ package test {
 
 @enduml
 ```
-<!-- caption: "Notifier with multiple concrete classes including one that is just for testing." -->
+<!-- caption="Notifier with multiple concrete classes including one that is just for testing." -->
 
 ## Keeping Interfaces Small
 
@@ -286,7 +286,7 @@ SmsNotifier : +wasDelivered()
 
 @enduml
 ```
-<!-- caption: "SmsNotifier implementing two interfaces." -->
+<!-- caption="SmsNotifier implementing two interfaces." -->
 
 Keeping interfaces small in this way is the interface-level equivalent of the advice for cohesion: classes should have a single responsibility. A small, focused interface describes one capability; a large interface that bundles several forces implementers to support operations that have nothing to do with one another, and forces callers to depend on more than they use. This guidance, that it is better to have many small interfaces than one large one, is known as the **interface segregation principle**. Small interfaces also preserve implementation freedom: every operation a contract promises becomes behaviour callers may rely on, so a large interface leaks more implementation detail into the public surface, while a small one keeps more of each implementation unobservable, and therefore free to change.
 
@@ -400,7 +400,7 @@ RecordingValidator : +rule()
 
 @enduml
 ```
-<!-- caption: "Desired class layout for activity." -->
+<!-- caption="Desired class layout for activity." -->
 
 Work through the following:
 

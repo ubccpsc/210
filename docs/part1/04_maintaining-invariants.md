@@ -4,7 +4,7 @@ The previous chapter placed invariants in documentation, tests, and assertions. 
 
 A shortcoming of these mechanisms though is that they cannot _prevent_ invalid values from being created in the first place. This chapter is about closing that gap: designing code that wholly prevents invalid values from being created, rather than writing code that checks for violations.
 
-In this chapter, we will show how this can be done _solely with programming constructs_ you know from CPSC 110. The solution we'll get to is not standard TypeScript; you may, in fact, find it unwieldy. This is expected. In fact, it will motivate the object-oriented programming we'll get to in Part 2.
+In this chapter, we will show how this can be done _solely with programming constructs_ you know from CPSC 110. The solution we'll get to is not standard TypeScript; you may, in fact, find it unwieldy. This is expected. In fact, it will motivate the object-oriented programming we'll get to in [Part 2](../part2/index).
 
 ## Initial Design with No Enforcement
 
@@ -117,7 +117,7 @@ Intentionally, there is no `balance` field. The type of `BankAccount` no longer 
 const funded = initialAccount.deposit(5);
 ```
 
-We have seen dot before. In Chapter 2 it read a property: `song1.title` selected the value stored under `title`. `initialAccount.deposit` selects the value stored under `deposit` in the same way, and what differs is only that the value found there is a function rather than a string or a number. The `(5)` that follows then calls it, just as `letterGrade(85)` called a function named directly. The expression composes two steps you have already used: select a property, then call what the selection produced.
+We have seen dot before. In [Chapter 2](./02_model-types) it read a property: `song1.title` selected the value stored under `title`. `initialAccount.deposit` selects the value stored under `deposit` in the same way, and what differs is only that the value found there is a function rather than a string or a number. The `(5)` that follows then calls it, just as `letterGrade(85)` called a function named directly. The expression composes two steps you have already used: select a property, then call what the selection produced.
 
 What is new is _which_ function you get. A free-standing `deposit(account, 5)` is one function shared by every caller, which is why it has to be told which account to act on. `initialAccount.deposit` is the function belonging to this _specific_ account, so the balance it operates on is chosen by the object the dot selected it from, and a caller cannot point it at a different account.
 
@@ -146,7 +146,7 @@ In an object literal, the property is written like a function declaration withou
 If `t` is of type `T`, we can call the function property `foo` with dot notation: `t.foo(an_x, a_b)`.
 
 
-What it means for behaviour to belong to data like this is a question we will revisit when we discuss object-oriented programming in Part 2.
+What it means for behaviour to belong to data like this is a question we will revisit when we discuss object-oriented programming in [Part 2](../part2/index).
 
 </details>
 
@@ -445,14 +445,14 @@ In short, the invariant is no longer protected by _programmer discipline_; it is
        only operations visible to callers
        (balance cannot be accessed directly)
 ```
-<!-- caption="Figure 04.01: Illustration of state hidden inside a closure, with balance not being directly reachable." -->
+<!-- caption="Illustration of state hidden inside a closure, with balance not being directly reachable." -->
 
 <details class="tooltip deep-dive">
-<summary>Course Preview: Does Software in Practice Enforce Security Invaraints?</summary>
+<summary>Course Preview: Does Software in Practice Enforce Security Invariants?</summary>
 
 This chapter has focused on how we can ensure that invariants are enforced in code. The examples we have are small, but even in this small example we see a real-world safety implication (that venues not be filled over fire-code limits!). Code nowadays runs on so many platforms and has access to so much of our data. How do we ensure that only code we expect to run runs on our machines, and how do we ensure that that code doesn't leak our information to people who shouldn't have it?
 
-The answer is: much code in the wild _doesn't_ manage to enforce such invariants, leading to many security and privacy issues in the wild. If this is interesting to you from a technical standpoint, you may be interested in learning more about _computer security_, either through courses (CPSC 337, CPSC 541), or cyber-securtity competitions ([Maple Bacon Team](https://maplebacon.org/)). If you're interested in the societal implications, you may be interested in CPSC 430.
+The answer is: much code in the wild _doesn't_ manage to enforce such invariants, leading to many security and privacy issues in the wild. If this is interesting to you from a technical standpoint, you may be interested in learning more about _computer security_, either through courses (CPSC 337, CPSC 541), or cyber-security competitions ([Maple Bacon Team](https://maplebacon.org/)). If you're interested in the societal implications, you may be interested in CPSC 430.
 
 </details>
 
@@ -467,7 +467,7 @@ Looking at our designs in this chapter, we see that the invariants of our progra
 
 The organisation of the code itself enforces the invariant. This is the first time we have seen an invariant shape the _design of a program_ rather than just _its documentation and tests_. It will not be the last time we see this: protecting invariants frequently drives how code is organised, as this makes the code safer, easier to understand, and easier to evolve without error.
 
-Building objects out of closures works, but the support the language gives us for this task is minimal. In Part 2, we will see that object-oriented programming provides this pattern as direct language syntax: constructors, methods, and fields that the language itself controls access to. The syntax will be new, but the idea will directly flow from this chapter.
+Building objects out of closures works, but the support the language gives us for this task is minimal. In [Part 2](../part2/index), we will see that object-oriented programming provides this pattern as direct language syntax: constructors, methods, and fields that the language itself controls access to. The syntax will be new, but the idea will directly flow from this chapter.
 
 <details class="tooltip exercise">
   <summary>Exercise: Character Health</summary>

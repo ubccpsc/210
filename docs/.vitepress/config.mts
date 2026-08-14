@@ -22,7 +22,7 @@ const SITE_URL = "https://ubccpsc.github.io/210/";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-    title: "CPSC 210 Handbook",
+    title: "CPSC 210 Textbook",
     description: "The course textbook for CPSC 210: Software Construction at UBC.",
     base: "/210/",
     head: [
@@ -43,7 +43,7 @@ export default defineConfig({
         const { title, description } = siteConfig.site;
 
         // The landing page's own H1 already names the course, so appending the
-        // site title just repeats it ("CPSC 210: ... | CPSC 210 Handbook").
+        // site title just repeats it ("CPSC 210: ... | CPSC 210 Textbook").
         if (pageData.relativePath === "index.md") {
             pageData.titleTemplate = false;
         }
@@ -87,7 +87,13 @@ export default defineConfig({
         sidebar: [{
             text: "Introduction",
             link: "/",
-            items: [],
+            items: [{
+                text: "Why CPSC 210 Exists",
+                link: "/intro/01_why-this-course"
+            }, {
+                text: "GenAI and You",
+                link: "/intro/02_gen-ai-and-you"
+            }],
         }, {
             text: "Part 1: Foundations",
             link: "/part1/",
@@ -110,7 +116,7 @@ export default defineConfig({
                 text: "06: Mutation and Side Effects",
                 link: "/part1/06_state-mutation"
             }, {
-                text: "07: Asynchronousity",
+                text: "07: Asynchronous Effects",
                 link: "/part1/07_async"
             }, {
                 text: "08: Designing for Failure",
@@ -175,6 +181,16 @@ export default defineConfig({
 		link: "/part3/06_new_features"
             }],
         }, // end part 3
+        {
+            text: "Outro",
+            items: [{
+                text: "Uncovered Language Features",
+                link: "/outro/language-features"
+            }, {
+                text: "Glossary",
+                link: "/outro/glossary"
+            }],
+        }, // end outro
         ],
 
         socialLinks: [{

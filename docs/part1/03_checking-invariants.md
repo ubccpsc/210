@@ -1,6 +1,6 @@
 # Checking Invariants
 
-In Chapter 1 we introduced the distinction between the _static_ and _dynamic_ views of a program. The compiler checks the static view: it reads your source code, analyses your types, and flags inconsistencies before the program runs. But a program that passes the type checker can still produce the wrong results. Types tell you what _kind_ of value a function returns; they do not tell you whether that value is _correct_.
+In [Chapter 1](./01_new-language) we introduced the distinction between the _static_ and _dynamic_ views of a program. The compiler checks the static view: it reads your source code, analyses your types, and flags inconsistencies before the program runs. But a program that passes the type checker can still produce the wrong results. Types tell you what _kind_ of value a function returns; they do not tell you whether that value is _correct_.
 
 The properties a correct program must maintain beyond its types are called **invariants**. This chapter is about working with them: what an invariant is, how to identify the invariants in a problem, how to record them in a function's documentation so they can be detected later, and how to test whether the invariant holds.
 
@@ -39,7 +39,7 @@ Invariants are everywhere once you look for them: durations are positive, percen
 <summary>Course Preview: Could We Statically Check Invariants?</summary>
 In the previous chapters, we saw how types allowed us to bring enforcement that in CPSC 110 we had to trust. In CPSC 210, invariants capture what we cannot check solely through types---unfortunately, those won't be statically enforceable. This is where we bring in dynamic checking of invariants, through testing.
 
-But some of the invariants we have aren't too complicated: if we can enforce that `x` is a `number` statically, why can we not enforce that that `x > 10` statically? We won't cover that in CPSC 210, but if this question is interesting to you, you may be interesting in learning more about the fields of _formal verification_ (CPSC 513, 539S) and _programming languages_ (CPSC 311, 411, 509, 511) in the future.
+But some of the invariants we have aren't too complicated: if we can enforce that `x` is a `number` statically, why can we not enforce that `x > 10` statically? We won't cover that in CPSC 210, but if this question is interesting to you, you may be interesting in learning more about the fields of _formal verification_ (CPSC 513, 539S) and _programming languages_ (CPSC 311, 411, 509, 511) in the future.
 </details>
 
 ## Identifying Invariants
@@ -98,9 +98,9 @@ function lateFee(daysLate: number): number
 <details class="tooltip ts-tips">
 <summary>Function Doc Comments</summary>
 
-In TypeScript, `//` comments out the rest of a line. Anything between `/_` and `_/` is also a comment, and these comments can span multile lines.
+In TypeScript, `//` comments out the rest of a line. Anything between `/_` and `_/` is also a comment, and these comments can span multiple lines.
 
-For function doc comments in this course, we'll use syntax that's consistent with [JSDoc](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html):
+For function doc comments in this course, we'll use syntax that's consistent with [JSDoc](https://www.typescriptlang.org/docs/textbook/jsdoc-supported-types.html):
 ```typescript
 /**
  * Here you put a summary of the function foo
@@ -295,7 +295,7 @@ All five tests now pass:
 ✓ fee never exceeds the maximum
 ```
 
-Ntice what did _not_ change: the tests. They were correct all along, because they were written from the specification, and so the requirement our implementation forgot had nowhere to hide. If we had written our tests _after_ the implementation, by reading our own code and checking that it does what it appears to do, we would probably not have thought to test the maximum: the first prototype of `lateFee` contained  no hint that a maximum should exist. Tests written first keep the specification in charge; tests written after tend to mirror the code, mistakes included.
+Notice what did _not_ change: the tests. They were correct all along, because they were written from the specification, and so the requirement our implementation forgot had nowhere to hide. If we had written our tests _after_ the implementation, by reading our own code and checking that it does what it appears to do, we would probably not have thought to test the maximum: the first prototype of `lateFee` contained  no hint that a maximum should exist. Tests written first keep the specification in charge; tests written after tend to mirror the code, mistakes included.
 
 
 <details class="tooltip ts-tips">
@@ -345,7 +345,7 @@ Within a class, one representative is as informative as another. `lateFee(12)` a
 <details class="tooltip deep-dive">
 <summary>Equivalence Classes are Only Derived From the Specification</summary>
 
-In Chapter 1, we defined a **branch** as the side of an if-statement that was taken when executed on an input. A **path** is the sequence of branches that are taken when a program executes on a given input. 
+In [Chapter 1](./01_new-language), we defined a **branch** as the side of an if-statement that was taken when executed on an input. A **path** is the sequence of branches that are taken when a program executes on a given input. 
 
 Two inputs belong to the same class when the _specification_ says they should behave the same way, not when they happen to take the same path through the code you wrote. In our buggy implementation, `lateFee(12)` and `lateFee(30)` took the same path through the code; classes derived from that implementation would have merged them, and the fault would have survived. Classes derived from the specification kept them apart, which is exactly why the fault was caught.
 </details>
@@ -395,7 +395,7 @@ grace       accruing ( $0.50 / day )             capped ( $10 )
             boundary                             boundary
             ( 2 -> 3 )                           ( 21 -> 22 )
 ```
-<!-- caption="Figure 03.01: The three equivalence classes for daysLate." -->
+<!-- caption="The three equivalence classes for daysLate." -->
 
 ## Expected and Unexpected Errors
 
@@ -448,7 +448,7 @@ A tricky thing about asserts: the `<condition>` describes what _should hold_, wh
 import assert from "node:assert/strict";
 ```
 
-Many TypeScript/JavaScript frameworks provide their own `assert`-like functions as well, and any of them serves the same role. By the end of Part 2, you'll know how to implement `assert` yourself, so you'll be able to use this concept in whatever code you write. 
+Many TypeScript/JavaScript frameworks provide their own `assert`-like functions as well, and any of them serves the same role. By the end of [Part 2](../part2/index), you'll know how to implement `assert` yourself, so you'll be able to use this concept in whatever code you write. 
 </details>
 
 The presence of assertions in the implementation like this can make the code much easier to write and debug, because your implementation can trust that the invariants are valid for the remainder of the function. This helps reduce defensive checks you might otherwise need to make in your code. `assert` also communicates to other developers that these are checks for valid input, rather than checks part of the core program logic. 
@@ -581,7 +581,7 @@ Practise this chapter's concepts on a new problem: write a contract, derive test
 
 > As a parking garage, I want to compute the parking fee by counting how many whole hours a car is parked, with a free first hour and a daily maximum, so that drivers are charged fairly and predictably.
 
-The policy policy states that parking is free for the first hour; after that, each additional hour costs $4; and the total never exceeds $24. The function will have the signature <span class="hint">`parkingFee(hours: number): number`</span>.
+The policy states that parking is free for the first hour; after that, each additional hour costs $4; and the total never exceeds $24. The function will have the signature <span class="hint">`parkingFee(hours: number): number`</span>.
 
 1. Write the contract. Document `parkingFee` with a doc comment giving its purpose, a precondition (<span class="hint">`hours` is a whole number and `hours >= 0`</span>), a postcondition (<span class="hint">the fee is between 0 and 24</span>), and `@param`/`@returns` lines.
 2. Derive the tests first. Use equivalence class partitioning to find the input classes the policy treats alike, and pick one representative of each. Then use boundary value analysis to add the edges: where the free hour ends, and where the cap is reached.

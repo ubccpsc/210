@@ -30,7 +30,7 @@ The practical consequence is that part of receiving a request is making that cos
 
 "Tell me when a parcel is delayed" just brings up a whole lot of unanswered questions. What counts as delayed: later than the carrier's estimate, or no movement for two days, or an explicit exception status? Told how: email, push notification, a badge in the app? Told how often, if the parcel stays delayed for a week? Told about every parcel, or only ones the shopper has asked to watch? None of these are implementation details. Each is a decision about what the feature _is_, and each will be decided by somebody. The only question is whether that somebody is the requester, or a developer guessing at midnight.
 
-Turning a request into something buildable is the user-story work from Part 1: a role, a goal, a benefit, and acceptance criteria concrete enough to tell you when you are done. The questions worth resolving before any code is written are the ones whose answers change the design:
+Turning a request into something buildable is the user-story work from [Part 1](../part1/index): a role, a goal, a benefit, and acceptance criteria concrete enough to tell you when you are done. The questions worth resolving before any code is written are the ones whose answers change the design:
 
 - Who is this for, and what will they do differently once they have it?
 - What does success look like, stated as something observable?
@@ -73,7 +73,7 @@ With a model of the relevant parts, the design question is where the change belo
 
 Such a place is an _extension point_, the term the Open/Closed chapter used for a boundary where behaviour can be varied by adding code rather than editing what is already there. That chapter approached them from the side of the person building one, choosing an axis of change and deciding whether the indirection was justified. Here we approach them from the other side, as somebody who has inherited a design and needs to know what it will accept. You will also hear them called _seams_, which is the term used in much of the industry literature.
 
-The book has been building them for two parts, and they are recognisable on sight:
+The textbook has been building them for two parts, and they are recognisable on sight:
 
 - An interface with more than one implementation. New behaviour is a new implementation.
 - An abstract class with subclasses, where the base defines a sequence and leaves steps open.
@@ -193,7 +193,7 @@ class ParcelTracker {
 
 This commit adds no feature. With no observers supplied, the loop runs zero times and the system behaves exactly as it did, which is what the existing suite confirms: it passes unchanged, and it passed unchanged is the evidence that this was a refactoring. `locate` is still a query as far as any current caller is concerned.
 
-_Then, make the easy change._ The feature is now a class that implements the contract, holding whatever state the delay rule needs and using the notification channel from Part 2 to send:
+_Then, make the easy change._ The feature is now a class that implements the contract, holding whatever state the delay rule needs and using the notification channel from [Part 2](../part2/index) to send:
 
 ```typescript
 class DelayNotifier implements ShipmentObserver {
@@ -260,15 +260,15 @@ That last criterion is the one that separates a feature that was added from a fe
 
 ## What This Was All For
 
-This is the end of the book, and it is worth saying plainly what the three parts were doing.
+This is the end of the textbook, and it is worth saying plainly what the three parts were doing.
 
-Part 1 was about making programs correct: modelling information as types, stating contracts, maintaining invariants, and verifying behaviour with tests. Part 2 was about abstraction: bundling state with the operations that protect it, decomposing systems into cohesive classes, hiding what varies, and depending on contracts rather than implementations. Part 3 has been about evolution: managing dependencies, working across boundaries you do not control, and the everyday practice of changing systems that already exist.
+[Part 1](../part1/index) was about making programs correct: modelling information as types, stating contracts, maintaining invariants, and verifying behaviour with tests. [Part 2](../part2/index) was about abstraction: bundling state with the operations that protect it, decomposing systems into cohesive classes, hiding what varies, and depending on contracts rather than implementations. Part 3 has been about evolution: managing dependencies, working across boundaries you do not control, and the everyday practice of changing systems that already exist.
 
 Read from here, most of that turns out to have been one argument. Invariants, cohesion, encapsulation, interfaces, polymorphism, low coupling, validated boundaries, small published surfaces, and a regression suite were each introduced for their own reasons, and every one of them was ultimately about the cost of change. A class that protects its invariant is a class you can modify without auditing the program. A small contract is a promise you can keep while the implementation moves. A test suite is what makes any change checkable. None of them make a program more correct today. All of them decide what it costs to correct tomorrow.
 
 That is why this chapter is last, and why it exercises everything at once. Adding a feature to a system you did not write asks you to read unfamiliar code, judge a design you had no part in, decide whether it will accept the change, restructure it if it will not, and verify that nothing broke. Those are not five separate skills. They are one skill, and it is the one professional software work mostly consists of.
 
-The introduction to this handbook claimed that construction skill matters because someone has to decide what to build, judge whether it is correct, and keep it changeable, whoever or whatever writes the code. If the book has done its job, you can now read code you did not write, state precisely what it should do, and change it with confidence. The courses that follow build outward from that, to larger systems, more people, and longer timescales. The judgement is the same one; only the scale changes.
+The introduction to this textbook claimed that construction skill matters because someone has to decide what to build, judge whether it is correct, and keep it changeable, whoever or whatever writes the code. If the book has done its job, you can now read code you did not write, state precisely what it should do, and change it with confidence. The courses that follow build outward from that, to larger systems, more people, and longer timescales. The judgement is the same one; only the scale changes.
 
 <details class="tooltip exercise">
   <summary>Exercise: A Feature for the Library System</summary>

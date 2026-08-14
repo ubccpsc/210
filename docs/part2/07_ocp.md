@@ -147,11 +147,11 @@ It is also why no design is open to _every_ change. The notifier system is open 
 
 The Open/Closed Principle is the last piece of a set the design part has been assembling, and the pieces hold one another up:
 
-- **Cohesion** [(Chapter 11)](02_decomposition): each class, and each interface, is responsible for one thing.
-- **Encapsulation** [(Chapter 12)](03_encapsulation): a class hides its representation behind a contract, so its internals can change without its callers changing.
-- **Implementation freedom** [(Chapter 13)](04_flexibility): what a class means is kept separate from how it is built, so the how stays free to change and each commitment a class declines is one more thing that can vary.
-- **Small contracts** [(Chapter 14)](05_boundaries): callers depend on a narrow, named abstraction rather than on a concrete class.
-- **Substitutability** [(Chapter 15)](06_extension): many implementations stand behind one contract, each honouring it, so one can stand in for another.
+- **Cohesion** [(Chapter 11)](./02_decomposition): each class, and each interface, is responsible for one thing.
+- **Encapsulation** [(Chapter 12)](./03_encapsulation): a class hides its representation behind a contract, so its internals can change without its callers changing.
+- **Implementation freedom** [(Chapter 13)](./04_flexibility): what a class means is kept separate from how it is built, so the how stays free to change and each commitment a class declines is one more thing that can vary.
+- **Small contracts** [(Chapter 14)](./05_boundaries): callers depend on a narrow, named abstraction rather than on a concrete class.
+- **Substitutability** [(Chapter 15)](./06_extension): many implementations stand behind one contract, each honouring it, so one can stand in for another.
 - **Open and closed** (this chapter): the above let a system grow by adding implementations rather than by editing existing code.
 
 These are not independent rules to memorise, and the list understates how tightly they are bound together. Each chapter introduced one of them on its own, with its own example and its own argument, which makes them look like six pieces of advice that happen to appear in the same course. They are closer to a single mechanism, and the way to see that is to reexamine something we have already designed.
@@ -185,7 +185,7 @@ _That `alertAll(..)` accepts it_ is because of substitutability. `PushNotifier` 
 
 _That `alertAll(..)` did not have to change_ is the last piece: `alertAll(..)` was written against the abstraction rather than against any channel, so nothing in it could become out of date when a channel was added.
 
-The Open/Closed Principle is not a seventh item alongside those five. It is what you observe from outside when a design encompasses all five simultaneously. This is why it reads as a property of a system rather than as a technique: designers do not apply open/closed directly, by intentionally reasoning about the other principles and judiciously integrating them with their systems they indirectly support the open/closed principle, and all of the benenfits this enables.
+The Open/Closed Principle is not a seventh item alongside those five. It is what you observe from outside when a design encompasses all five simultaneously. This is why it reads as a property of a system rather than as a technique: designers do not apply open/closed directly, by intentionally reasoning about the other principles and judiciously integrating them with their systems they indirectly support the open/closed principle, and all of the benefits this enables.
 
 ### What We Lose When A Principle is Missing
 
@@ -195,7 +195,7 @@ _Without cohesion._ Suppose `EmailNotifier` had also owned message formatting an
 
 _Without encapsulation._ Suppose `address` had been public, and an audit log had come to read `channel.address` to record who was notified. `PushNotifier` has no address; it has a device id. The new channel compiles, satisfies `Notifier`, and breaks the audit log, because a caller depended on a field rather than on behaviour.
 
-_Without implementation freedom._ Suppose `send(..)` had been declared to return the provider's raw response object, so that callers could inspect delivery details. But the response object will differe between providers. This means that either `PushNotifier` cannot conform to the contract, or it fabricates a response in a foreign shape that does not make sense for each provider. The interface leaked a representation, and representations are not interchangeable even though the behaviour is.
+_Without implementation freedom._ Suppose `send(..)` had been declared to return the provider's raw response object, so that callers could inspect delivery details. But the response object will differ between providers. This means that either `PushNotifier` cannot conform to the contract, or it fabricates a response in a foreign shape that does not make sense for each provider. The interface leaked a representation, and representations are not interchangeable even though the behaviour is.
 
 _Without small contracts._ Suppose `Notifier` had grown to nine methods over time: `send`, `confirmDelivery`, `formatAsHtml`, `setPriority`, `remainingQuota`, and so on. Push supports some of these and not others, so the new class must throw errors from the behaviours that does not make sense for its needs. Now no caller can rely on any method being available, and the interface has stopped being a contract.
 
@@ -227,9 +227,9 @@ What the list captures as individual principles is, in practice, one experience:
 
 The Open/Closed Principle is where we move fully into design. A system organised around contracts and polymorphic implementations grows by accretion: a new requirement of an anticipated kind is a new class, and the working system around it is left alone. That is the property that lets software keep changing without becoming impossible to change, which is what the next part of the course is about.
 
-One question this chapter has left open points the way there. The notifier system depends on `Notifier` everywhere except in a single place: wherever the list of channels is assembled, some code must still name `EmailNotifier`, `SmsNotifier`, and now `PushNotifier` in order to create them. Concentrating and controlling that one place, so that a new channel can be wired in without editing the code that assembles the system, is the start of Part 3. From there it takes up the larger questions of evolution and scale: how a program is composed from interchangeable parts, how it admits extensions it was not shipped with, and how change is managed across many modules and the teams that own them.
+One question this chapter has left open points the way there. The notifier system depends on `Notifier` everywhere except in a single place: wherever the list of channels is assembled, some code must still name `EmailNotifier`, `SmsNotifier`, and now `PushNotifier` in order to create them. Concentrating and controlling that one place, so that a new channel can be wired in without editing the code that assembles the system, is the start of [Part 3](../part3/index). From there it takes up the larger questions of evolution and scale: how a program is composed from interchangeable parts, how it admits extensions it was not shipped with, and how change is managed across many modules and the teams that own them.
 
-The principle underlying this arrangement already has a name. Code at every layer should depend on abstractions rather than on concrete classes: `alertAll(..)` depends on `Notifier`, never on `EmailNotifier` or `SmsNotifier`, so the policy of "alert all channels" is decoupled from the delivery of any one. That inversion, where high-level policy reaches down to an abstraction rather than directly to a concrete implementation, is called the **Dependency Inversion Principle**, and Part 3 develops it into the question of who constructs the concrete objects and how they are wired together at the program's boundary.
+The principle underlying this arrangement already has a name. Code at every layer should depend on abstractions rather than on concrete classes: `alertAll(..)` depends on `Notifier`, never on `EmailNotifier` or `SmsNotifier`, so the policy of "alert all channels" is decoupled from the delivery of any one. That inversion, where high-level policy reaches down to an abstraction rather than directly to a concrete implementation, is called the **Dependency Inversion Principle**, and [Part 3](../part3/index) develops it into the question of who constructs the concrete objects and how they are wired together at the program's boundary.
 
 The notifier system in its final form illustrates what the principle looks like once it is in place. `alertAll` has not changed since it was first written; only the list of channels has grown:
 

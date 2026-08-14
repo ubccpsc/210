@@ -4,14 +4,14 @@
 
 You already know how to program, and you already know that programs can go wrong. Part 1 builds on that groundwork and lays the foundations of software construction that apply across a broad set of programming languages. 
 
-We will cover two concerns across Part 1. The first concern is **capability**: the building blocks a real program needs, from structured data to collections, changing state, and communication with files and services. You know many building blocks already; the new building blocks you will learn signal a shift to **imperative programming**. We will see just how far we can get with these building blocks in Chapter 4, which will motivate the introduction of object-oriented programming in Part 2.  Along the way we will learn TypeScript, a language with more capabilities, and that checks far more of your work, than the teaching languages in CPSC 110.
+We will cover two concerns across Part 1. The first concern is **capability**: the building blocks a real program needs, from structured data to collections, changing state, and communication with files and services. You know many building blocks already; the new building blocks you will learn signal a shift to **imperative programming**. We will see just how far we can get with these building blocks in [Chapter 4](./04_maintaining-invariants), which will motivate the introduction of object-oriented programming in [Part 2](../part2/index).  Along the way we will learn TypeScript, a language with more capabilities, and that checks far more of your work, than the teaching languages in CPSC 110.
 
 
 The second concern is **correctness**: specifying what a program should do precisely enough that the language, the tests, or you can confirm that it does. In CPSC 110 you learned to defend against mistakes through _discipline_: you documented each function's signature, you wrote examples before the function bodies, and you followed design recipes carefully. That discipline worked, but almost none of it was _enforced_. A signature that said `(@signature Number -> String)` was a promise you made to yourself, but the language did not check it. TypeScript will allow us to _enforce_ many more correctness properties. We will be careful to separate three kinds of assurance: guarantees the compiler can check before the program runs, behaviours that can only be confirmed by running it, and promises that still rest on the discipline of the programmer.
  
 
 
-Our programs in Part 1 stay small enough that one person can hold the whole design in their head. That assumption is what allows personal discipline to uphold the promises the language cannot. Part 2 moves beyond this size restriction and asks what happens when programs, teams, and lifetimes outgrow any one person.
+Our programs in Part 1 stay small enough that one person can hold the whole design in their head. That assumption is what allows personal discipline to uphold the promises the language cannot. [Part 2](../part2/index) moves beyond this size restriction and asks what happens when programs, teams, and lifetimes outgrow any one person.
 
 ## Intended Learning Objectives
 
@@ -44,7 +44,8 @@ Identifying these properties and confirming them are separate tasks. The separat
 - **Types** establish what shapes of data are allowed.
 - **Contracts** state what behaviour each function assumes and promises.
 - **Invariants** state what must remain true of the data at all times.
-- **Tests and assertions** check that those promises hold when the program runs.
+- **Tests** execute the code, choosing which inputs and paths to exercise.
+- **Assertions** check that the code's behaviour matches what was expected.
 
 
 
@@ -53,17 +54,18 @@ No layer is sufficient on its own. A program can be perfectly typed and still co
 <details class="tooltip deep-dive">
 <summary>How Guarantees Fail</summary>
 
-Four failure modes account for most broken guarantees, and each corresponds to a missing layer:
+Five failure modes account for most broken guarantees, and each corresponds to a missing layer:
 
 1. _Over-trusting types_: assuming that type-correct means semantically correct.
 2. _Vague contracts_: wording like "valid" or "correct" with no explicit criteria, leaving a promise no one can check.
 3. _Unowned representation_: exposing the raw shape of the data so clients can bypass the safe operations entirely.
-4. _Happy-path tests_: checking typical outputs but never whether the invariants survive a sequence of operations.
+4. _Happy-path tests_: checking typical outputs but never whether the invariants survive more diverse operations.
+5. _Weak assertions_: confirming only that a call returned something, without carefully verifying that the behaviour was correct.
 
-When you find a bug that "should have been impossible," it is usually worth asking which of these four is responsible.
+When you find a bug that "should have been impossible," it is usually worth asking which of these five is responsible.
 </details>
 
-One concern remains. An invariant the language cannot check must still be kept true, and this requires control over creation. If any code can build a value, every such place is an opportunity to break the invariant. In Chapter 4, we'll see how we can keep values hidden (**encapsulation**) using _only the language features_ you already know from CPSC 110. In Part 2, we learn about a new language feature that provides encapsulation more directly, but the idea is the same as in Chapter 4: protecting an invariant shapes how the code is organised.
+One concern remains. An invariant the language cannot check must still be kept true, and this requires control over creation. If any code can build a value, every such place is an opportunity to break the invariant. In [Chapter 4](./04_maintaining-invariants), we'll see how we can use encapsulation to keep values hidden using _only the language features_ you already know from CPSC 110. In [Part 2](../part2/index), we learn about a new language feature that provides encapsulation more directly, but the idea is the same as in [Chapter 4](./04_maintaining-invariants): protecting an invariant shapes how the code is organised.
 
 
 
@@ -92,6 +94,6 @@ Part 1 covers four broad themes across nine chapters.
 8. [Designing for Failure](./08_errors) treats failure as part of a function's contract, choosing between returning a failure the type checker forces callers to confront and throwing an exception that propagates to a handler above.
 9. [Verifying Behaviour](./09_verification) moves from the course toolkit to the assertion vocabulary of a real test framework, partitions inputs and outputs, and uses coverage and regression to judge whether a suite checks enough.
 
-## Toward Part 2: Designing and Enforcing Abstractions
+## Toward [Part 2](../part2/index): Designing and Enforcing Abstractions
 
-Throughout Part 1 our programs stay small, small enough that one person can hold the whole design in their head, and small enough that personal discipline can plausibly maintain every promise the types cannot check. In Part 2 we relax that assumption and ask what happens when programs, teams, and lifetimes grow beyond what any individual can manage. 
+Part 1 ends with promises the language cannot check and a technique for keeping these promises through disciplined design. [Part 2](../part2/index) moves that approach into the code itself: classes bundle data together with the operations allowed on it, and encapsulation puts the representation out of reach so an invariant cannot be broken from outside. From there it builds the vocabulary for abstractions that others can depend on: interfaces that state a contract, implementations that can stand in for one another, and designs that stay open to extension as requirements change.
