@@ -178,9 +178,9 @@ To (re-)introduce closures, we'll consider a problem simpler than the bank accou
 > As a door attendant at a venue, I want a clicker counter that refuses to count past the venue's capacity, so that we never admit more people than fire regulations allow.
 
 <details class="tooltip link-110">
-<summary>You Built Closures with <code>local</code></summary>
+<summary>You Built Closures Before</summary>
 
-This is the role `local` played in CPSC 110. Functions defined in a `local` could use the parameters of the enclosing function, and handing those inner functions back was how a value's state could be kept out of reach:
+In CPSC 110, you saw closures, in particular using `local`. Functions defined in a `local` could use the parameters of the enclosing function, and handing those inner functions back was how a value's state could be kept out of reach:
 
 ```racket
 ;; Venue capacity
@@ -201,7 +201,23 @@ This is the role `local` played in CPSC 110. Functions defined in a `local` coul
            (make-counter-interface increment get-count))]))
 ```
 
-The inner functions close over `n`. The TypeScript version of this counter appears below.
+The inner functions close over `n`. 
+
+Note the `local` is not strictly necessary --- we could put lambdas directly in `make-counter-interface` and they would also close over `n`:
+```racket
+;; Venue capacity
+(define MAX-CAPACITY 1000)
+
+;; make-counter : Number -> Counter
+;; Protects the invariant: count cannot exceed MAX-CAPACITY
+(define (make-counter n)
+  (cond [(> n MAX-CAPACITY) (error "Invariant violation: Venue is full!")]
+        [else
+           (make-counter-interface (lambda () (make-counter (+ n 1))) (lambda () n))]))
+```
+But, you might find this version without `local` a little less readable. 
+
+The TypeScript version of this counter appears below.
 
 </details>
 
