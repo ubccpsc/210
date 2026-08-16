@@ -183,6 +183,7 @@ export default defineConfig({
         }, // end part 3
         {
             text: "Outro",
+            link: "/outro/",
             items: [{
                 text: "Uncovered Language Features",
                 link: "/outro/language-features"
