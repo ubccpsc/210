@@ -53,22 +53,22 @@ By the end of Part 2, you will be able to:
 
 Part 2 covers three connected themes across seven chapters.
 
-**Building abstractions:**
+#### Building abstractions:
 
 1. [Building Abstractions with Classes](./01_abstraction) introduces classes as the direct language support for bundling state with the operations that maintain it.
 2. [Decomposing Systems into Cohesive Classes](./02_decomposition) shows how to split a system into classes and responsibilities that belong together.
 
-**Hiding what can change:**
+#### Hiding what can change:
 
 3. [Encapsulating What Varies](./03_encapsulation) uses access control to keep a representation private, so the invariant that makes an object meaningful cannot be broken from outside.
 4. [Preserving Implementation Freedom with Abstract Values](./04_flexibility) treats the freedom to change an implementation as something a design can lose, showing how a careless comparison gives it away and how far it extends beyond the representation.
 5. [Defining Boundaries with Interfaces](./05_boundaries) establishes narrow contracts that let clients depend on a stable shape rather than on a concrete implementation.
 
-**Designing for growth:**
+#### Designing for growth:
 
 6. [Extending Behaviour Through Polymorphism](./06_extension) uses inheritance and overriding to let related classes share behaviour while varying the parts that differ.
 7. [Growing Systems with the Open/Closed Principle](./07_ocp) brings the design ideas together and shows how polymorphism lets software grow by adding new code instead of rewriting code that already works.
 
-## Toward [Part 3](../part3/index): Design for Evolution
+## Toward [Part 3](../part3/index): Evolution
 
 Part 2 ends with a design goal that is crucial for large systems: we need the ability to fix problems and add new features without impacting all of the existing code within the rest of the system. [Part 3](../part3/index) extends this further: we examine how systems are composed from interchangeable pieces, how dependencies are managed so that concrete implementations can be supplied from the outside, and how a codebase can remain open to new extensions while staying manageable across modules and teams.

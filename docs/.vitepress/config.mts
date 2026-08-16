@@ -6,15 +6,15 @@ import {
 //     configureDiagramsPlugin
 // } from "vitepress-plugin-diagrams";
 
-import { 
-    createBuildTimeDiagramsPlugin 
+import {
+    createBuildTimeDiagramsPlugin
 } from "vitepress-plugin-diagrams";
 
 const { configureMarkdown, vitePlugin } = createBuildTimeDiagramsPlugin({
-  diagramsDir: "docs/public/diagrams",
-  publicPath: "/210/diagrams",
-  // Optional: emit SVGs as build assets at this path
-  diagramsDistDir: "diagrams",
+    diagramsDir: "docs/public/diagrams",
+    publicPath: "/210/diagrams",
+    // Optional: emit SVGs as build assets at this path
+    diagramsDistDir: "diagrams",
 });
 
 const SITE_NAME = "UBC CPSC 210 Textbook";
@@ -22,7 +22,7 @@ const SITE_URL = "https://ubccpsc.github.io/210/";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-    title: "CPSC 210 Textbook",
+    title: "UBC CPSC 210 Textbook",
     description: "The course textbook for CPSC 210: Software Construction at UBC.",
     base: "/210/",
     head: [
@@ -159,26 +159,26 @@ export default defineConfig({
             items: [{
                 text: "17: Coupling",
                 link: "/part3/01_coupling"
-            }, 
-	    {
+            },
+            {
                 text: "18: Consuming Data",
-		link: "/part3/02_consuming_data"
+                link: "/part3/02_consuming_data"
             },
-	    {
+            {
                 text: "19: Designing APIs",
-		link: "/part3/03_api_design"
+                link: "/part3/03_api_design"
             },
-	    {
+            {
                 text: "20: Code Quality, Refactoring",
-		link: "/part3/04_refactoring"
+                link: "/part3/04_refactoring"
             },
-	    {
+            {
                 text: "21: Debugging",
-		link: "/part3/05_debugging"
+                link: "/part3/05_debugging"
             },
-	    {
+            {
                 text: "22: Adding New Features",
-		link: "/part3/06_new_features"
+                link: "/part3/06_new_features"
             }],
         }, // end part 3
         {
@@ -220,5 +220,5 @@ export default defineConfig({
     },
     vite: {
         plugins: [vitePlugin()],
-  },
+    },
 });
