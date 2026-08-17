@@ -56,6 +56,10 @@ _Follow the dependency graph, not the file listing._ The arrows from the couplin
 
 _Run it in the debugger._ Watching one path execute, with real values, corrects a mental model faster than reading, which is the same argument the previous chapter made.
 
+The first of those is worth simulating. The screen calls `ParcelTracker.locate("Z2200417")`. `locate` names no carrier: it holds a list of `CarrierClient` and asks each in turn. Each of those is an adapter over one carrier's web service, so `CarrierBClient.track` builds a URL, calls `fetch`, and converts the reply, mapping that carrier's own status words into the `ShipmentStatus` the rest of the system uses. What comes back out is a `Result<Shipment, string>`, which `locate` returns unchanged.
+
+Just looking at four files and we already have insight. A carrier is named in exactly two places, its adapter and the list `locate` is handed. A raw status becomes a `ShipmentStatus` in exactly one, inside each adapter. And a shipment first exists as a value this system understands at the adapter boundary, which is the earliest point where anything could be noticed about it. The first request will turn out to need only the first of those facts; the second needs the third.
+
 Cultivating two habits in this space can make this process more deterministic. Trust tests that run over comments that do not, since a comment can be years out of date and a passing test cannot. And when you notice the code disagreeing with its documentation, write the disagreement down: it is either a defect, or a place the documentation misled you, and both matter to whoever reads next (which can be you, in another six months).
 
 <details class="tooltip link-110">
@@ -108,7 +112,7 @@ const tracker = new ParcelTracker([
 ]);
 ```
 
-Nothing else is touched. `ParcelTracker` does not change, no existing adapter changes, and no existing test changes, which means no existing behaviour can regress. This is the Open/Closed Principle collecting on a promise made several chapters ago: the system grew by addition rather than by disturbance, and the new tests are only the ones for the new carrier.
+Counted as a diff, that is one new file, one line added where the list of clients is assembled, and one new test file. Nothing else is touched: `ParcelTracker` does not change, no existing adapter changes, and no existing test changes, which means no existing behaviour can regress. This is the Open/Closed Principle collecting on a promise made several chapters ago: the system grew by addition rather than by disturbance, and the new tests are only the ones for the new carrier.
 
 It is worth being clear about when that property was created. Not this week. It was created when somebody defined `CarrierClient` instead of calling carriers directly, and preserved when the refactoring chapter moved the status vocabulary back out of the middle of the system. Today's cheap change was paid for earlier.
 
@@ -236,29 +240,32 @@ What matters is that the choice is visible. Taking the awkward route knowingly, 
 
 </details>
 
+Both requests can now be counted. The sixth carrier is one new file, one line of wiring, and one new test file, with no existing file edited. The notification is two pieces of work: an extension point that adds a contract, an announcement in `ParcelTracker`, and changes to the tests that construct it.
+
 ## Planning and Making the Change
 
 Both routes to the change now converge, and the shape of the whole job is visible:
 
-```graphviz
-digraph addFeature {
-  rankdir = TB;
-  node [shape = box, fontname = "sans-serif", fontsize = 11];
-  edge [fontname = "sans-serif", fontsize = 10];
-
-  req      [label = "feature request"];
-  read     [label = "read the code, build a model\nof the parts it touches"];
-  q        [shape = diamond, label = "does the design\nanticipate this change?"];
-  add      [label = "add the new behaviour,\nleaving working code untouched"];
-  refactor [label = "refactor to create\nan extension point"];
-  verify   [label = "verify the new behaviour works\nand the old behaviour still does"];
-
-  req -> read -> q;
-  q -> add      [label = "yes"];
-  q -> refactor [label = "no"];
-  refactor -> add;
-  add -> verify;
-}
+```plantuml
+@startuml
+skinparam defaultTextAlignment center
+skinparam activityDiamondBackgroundColor #fff3c4
+start
+:Feature request;
+:Read the code, build a model
+of the parts it touches;
+if (Does the design
+anticipate this change?) then (Yes)
+else (No)
+  :Refactor to create
+an extension point; <<#ffd6d6>>
+endif
+:Add the new behaviour,
+leaving working code untouched; <<#d6f5d6>>
+:Verify the new behaviour works
+and the old behaviour still does;
+stop
+@enduml
 ```
 <!-- caption: "Adding a feature. The design either anticipated the change or it must first be made to." -->
 
@@ -284,15 +291,15 @@ That last criterion is the one that separates a feature that was added from a fe
 
 ## What This Was All For
 
-This is the end of the textbook, and it is worth saying plainly what the three parts were doing.
+This is the end of the textbook, and it is worth revisiting what we've actually been learning here this term.
 
 [Part 1](../part1/index) was about making programs correct: modelling information as types, stating contracts, maintaining invariants, and verifying behaviour with tests. [Part 2](../part2/index) was about abstraction: bundling state with the operations that protect it, decomposing systems into cohesive classes, hiding what varies, and depending on contracts rather than implementations. Part 3 has been about evolution: managing dependencies, working across boundaries you do not control, and the everyday practice of changing systems that already exist.
 
-Read from here, most of that turns out to have been one argument. Invariants, cohesion, encapsulation, interfaces, polymorphism, low coupling, validated boundaries, small published surfaces, and a regression suite were each introduced for their own reasons, and every one of them was ultimately about the cost of change. A class that protects its invariant is a class you can modify without auditing the program. A small contract is a promise you can keep while the implementation moves. A test suite is what makes any change checkable. None of them make a program more correct today. All of them decide what it costs to correct tomorrow.
+Read from here, most of that turns out to have been making a single argument. Invariants, cohesion, encapsulation, interfaces, polymorphism, low coupling, validated boundaries, small published surfaces, and a regression suite were each introduced for their own reasons, but every one of them was ultimately about the resistance of a design to change. A class that protects its invariant is a class you can modify without auditing the program. A small contract is a promise you can keep while the implementation moves. A test suite is what makes any change checkable. None of them make a program more correct today. But all of them taken together directly impact what it costs to correct a weak design tomorrow.
 
-That is why this chapter is last, and why it exercises everything at once. Adding a feature to a system you did not write asks you to read unfamiliar code, judge a design you had no part in, decide whether it will accept the change, restructure it if it will not, and verify that nothing broke. Those are not five separate skills. They are one skill, and it is the one professional software work mostly consists of.
+That is why this chapter is last, and why it touches upon everything we have discussed at once. Adding a feature to a system you did not write asks you to read unfamiliar code, judge a design that was not your own, decide whether it will accept the change, restructure it if it will not, and verify your changes did not break anything that was working before. Those are not five separate skills. They are one skill, and it is the one professional software work mostly consists of.
 
-The introduction to this textbook claimed that construction skill matters because someone has to decide what to build, judge whether it is correct, and keep it changeable, whoever or whatever writes the code. If the book has done its job, you can now read code you did not write, state precisely what it should do, and change it with confidence. The courses that follow build outward from that, to larger systems, more people, and longer timescales. The judgement is the same one; only the scale changes.
+The introduction to this textbook claimed that the skill of software construction still matters because someone has to decide what to build, judge whether it is correct, and keep it changeable, whoever or whatever writes the code. If this course has done its job, you can now read code you did not write, state precisely what it should do, and change it with confidence. The courses that follow build outward from that, to larger systems, more people, and longer timescales. The judgement required of you is the same; only the scale changes.
 
 <details class="tooltip exercise">
   <summary>Exercise: A Feature for the Library System</summary>

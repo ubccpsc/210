@@ -177,6 +177,16 @@ The names also make a plan expressible. "Extract the status mapping, move it int
 - _Replace a primitive with a value object_, giving an invariant a home.
 - _Replace conditional with polymorphism_, when a branch is choosing between kinds of thing.
 
+Each of these names represents a sequence of steps rather than only an outcome, and the sequence is worth knowing, because it is what keeps the program working while the change is half done. _Extract function_, a refactoring you will commonly use, and it goes like this:
+
+1. Create an empty function and name it for _what_ it does, not for how it does it.
+2. Copy the fragment into the new function's body.
+3. Figure out what the fragment uses. Every variable it reads becomes a parameter; a variable it writes becomes the return value. If it writes to more than one, stop: the fragment is not ready to be extracted.
+4. Replace the original fragment with a call to the new function.
+5. Run the tests.
+
+No step in that sequence requires understanding what the fragment computes, which is precisely the point. A refactoring you can perform mechanically is one you can perform on code you do not understand yet, and in most development you will be working on  unfamiliar code rather than familiar code.
+
 The tracker needs the last of these. The knowledge in `normaliseStatus` is carrier-specific, and there is already a class per carrier, so the fix is to put each branch back where its knowledge belongs. The `CarrierClient` interface gains nothing and changes nothing; each adapter stops handing raw status strings outward:
 
 ```typescript
@@ -212,17 +222,27 @@ The discipline that avoids this is mechanical:
 
 Each step leaves the system working. That matters more than it sounds, because it means the work can be interrupted at any point without leaving a mess, a failure implicates only the last small step, and any step can be reverted on its own.
 
+Here is that loop applied to the tracker, one commit per line, with the test suite fully passing at every point:
+
+1. _Extract function._ Add a private `toStatus` to `CarrierAClient`, holding a copy of carrier A's branches from `normaliseStatus`. Nothing calls it yet, so no behaviour can have changed.
+2. _Move method._ Have `CarrierAClient` convert its own status before returning, and delete carrier A's branch from `normaliseStatus`.
+3. Repeat those two steps for each remaining carrier: four more pairs of commits, each one carrier wide.
+4. _Inline._ `normaliseStatus` now has nothing left to decide. Delete it, along with the `carrierId` parameter that existed only to feed it.
+
+That is the plan quoted earlier, "extract the status mapping, move it into each adapter, then inline the wrapper", with the tests run and a commit taken between every line.
+
 Placed in the wider job it belongs to, the loop looks like this:
 
 ```plantuml
 @startuml
 
 skinparam defaultTextAlignment center
+skinparam activityDiamondBackgroundColor #fff3c4
 
 start
 
 :A change turns out to be
-harder than expected;
+harder than expected; <<#ffdcb2>>
 
 :Run the tests;
 
@@ -235,17 +255,17 @@ repeat
   :Make one small,
   named refactoring;
   :Run the tests;
-  if (all still passing?) then (yes)
-    :Commit the refactoring;
-  else (no)
+  if (All still passing?) then (Yes)
+    :Commit the refactoring; <<#d6f5d6>>
+  else (No)
     :Undo the step: behaviour
     changed, so it was
-    not a refactoring;
+    not a refactoring; <<#ffd6d6>>
   endif
-repeat while (is the change easy yet?) is (not yet) not (yes)
+repeat while (Is the change easy yet?) is (Not yet) not (Yes)
 
 :Make the bug fix
-or add the feature;
+or add the feature; <<#d6f5d6>>
 
 :Run the tests;
 

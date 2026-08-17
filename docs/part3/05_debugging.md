@@ -34,13 +34,13 @@ digraph faultChain {
   node [shape = box, fontname = "sans-serif", fontsize = 11];
   edge [fontname = "sans-serif", fontsize = 10];
 
-  fault   [label = "fault\nthe defect in the code"];
-  error   [label = "error\ninvalid state while running"];
-  failure [label = "failure\nthe behaviour reported"];
+  fault   [label = "Fault\nThe defect in the code"];
+  error   [label = "Error\nInvalid state while running"];
+  failure [label = "Failure\nThe behaviour reported"];
 
-  fault -> error   [label = "executes"];
-  error -> failure [label = "surfaces"];
-  failure -> fault [label = "debugging works backwards", style = dashed, constraint = false];
+  fault -> error   [label = "Executes"];
+  error -> failure [label = "Surfaces"];
+  failure -> fault [label = "Debugging works backwards", style = dashed, constraint = false];
 }
 ```
 <!-- caption: "A fault produces an error, which surfaces as a failure. Debugging travels the chain in the opposite direction." -->
@@ -124,7 +124,27 @@ private toStatus(raw: string): ShipmentStatus {
 }
 ```
 
-The hypothesis is that the carrier is sending a status containing the word `DELIVERED` that does not mean delivered, and it predicts something checkable: the raw response for this tracking number will contain such a string. Logging the response before conversion confirms it. The carrier's status is `NOT_DELIVERED`, and `"NOT_DELIVERED".includes("DELIVERED")` is `true`.
+Reading the code suggests some guesses about the problem, but a guess is not a diagnosis. To focus, the loop below can be run to narrow down the actual problem.
+
+_Round one._ The first hypothesis is one that you can get for free: **the carrier is reporting the parcel as delivered, and we are faithfully passing that on.** If it holds, the raw response says something that plainly means delivered; if it does not hold, the response says something else. The observation is one line, placed before the conversion:
+
+```typescript
+const raw = await response.json();
+console.log(raw.status);   // "NOT_DELIVERED"
+```
+
+When this prediction fails, the hypothesis can be _discarded_. That is a useful knowledge result rather than a waste of time: the carrier is not claiming the parcel arrived, so the wrong answer is being constructed within our code.
+
+_Round two._ The suspicion now falls on the conversion itself: **`toStatus` maps `"NOT_DELIVERED"` to `"delivered"`, because it tests for a substring rather than for the whole value.** The prediction is precise enough to be wrong, and it needs no carrier, no network, and no parcel to check:
+
+```typescript
+checkExpect(() => toStatus("NOT_DELIVERED"), "exception");
+// fails: "delivered"
+```
+
+The hypothesis is correct. `"NOT_DELIVERED".includes("DELIVERED")` is `true`, the first branch wins, and the fault is one line, reachable now by a test that runs in a millisecond.
+
+Notice how far the search narrowed at each step. Reproduction removed the interface, the tracker, and four carriers. Round one removed the carrier itself. Round two removed everything but a single function, and turned the bug into a failing test we can use to strengthen our test suite. Each round was cheap because each prediction was one observation away, which is what "stated precisely enough to be false" enables.
 
 Notice where the fault came from. Nobody edited this code. The carrier introduced a status it had never sent before, and a substring test that had been correct for two years stopped being correct without anything in our repository changing. Faults do not have to be recent to surface, and "we did not change anything" is not evidence that the fault is elsewhere.
 
