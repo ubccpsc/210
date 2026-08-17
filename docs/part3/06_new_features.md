@@ -58,7 +58,7 @@ _Run it in the debugger._ Watching one path execute, with real values, corrects 
 
 The first of those is worth simulating. The screen calls `ParcelTracker.locate("Z2200417")`. `locate` names no carrier: it holds a list of `CarrierClient` and asks each in turn. Each of those is an adapter over one carrier's web service, so `CarrierBClient.track` builds a URL, calls `fetch`, and converts the reply, mapping that carrier's own status words into the `ShipmentStatus` the rest of the system uses. What comes back out is a `Result<Shipment, string>`, which `locate` returns unchanged.
 
-Just looking at four files and we already have insight. A carrier is named in exactly two places, its adapter and the list `locate` is handed. A raw status becomes a `ShipmentStatus` in exactly one, inside each adapter. And a shipment first exists as a value this system understands at the adapter boundary, which is the earliest point where anything could be noticed about it. The first request will turn out to need only the first of those facts; the second needs the third.
+Four files in, and there is already something to work with. A carrier is named in exactly two places, its adapter and the list `locate` is handed. A raw status becomes a `ShipmentStatus` in exactly one, inside each adapter. And a shipment first exists as a value this system understands at the adapter boundary, which is the earliest point where anything could be noticed about it. The first request will turn out to need only the first of those facts; the second needs the third.
 
 Cultivating two habits in this space can make this process more deterministic. Trust tests that run over comments that do not, since a comment can be years out of date and a passing test cannot. And when you notice the code disagreeing with its documentation, write the disagreement down: it is either a defect, or a place the documentation misled you, and both matter to whoever reads next (which can be you, in another six months).
 
@@ -240,7 +240,7 @@ What matters is that the choice is visible. Taking the awkward route knowingly, 
 
 </details>
 
-Both requests can now be counted. The sixth carrier is one new file, one line of wiring, and one new test file, with no existing file edited. The notification is two pieces of work: an extension point that adds a contract, an announcement in `ParcelTracker`, and changes to the tests that construct it.
+Counted as a diff, the notification is larger than the carrier was, and the difference is instructive. The carrier touched no existing file. The notification adds a new contract, edits `ParcelTracker` to announce through it, and changes every test that constructs a tracker. None of that is behaviour, which is why it belongs in its own commit: the feature itself is again one new file and one line of wiring.
 
 ## Planning and Making the Change
 
@@ -267,7 +267,7 @@ and the old behaviour still does;
 stop
 @enduml
 ```
-<!-- caption: "Adding a feature. The design either anticipated the change or it must first be made to." -->
+<!-- caption="Adding a feature. The design either anticipated the change or it must first be made to." -->
 
 With the approach settled, the work is broken into steps, and the property that makes a plan good is that every step leaves the system working and tested. That is what allows the work to be interrupted, reviewed, or abandoned partway without leaving a mess, and it is the same discipline the refactoring chapter applied to structural change.
 
@@ -295,7 +295,7 @@ This is the end of the textbook, and it is worth revisiting what we've actually 
 
 [Part 1](../part1/index) was about making programs correct: modelling information as types, stating contracts, maintaining invariants, and verifying behaviour with tests. [Part 2](../part2/index) was about abstraction: bundling state with the operations that protect it, decomposing systems into cohesive classes, hiding what varies, and depending on contracts rather than implementations. Part 3 has been about evolution: managing dependencies, working across boundaries you do not control, and the everyday practice of changing systems that already exist.
 
-Read from here, most of that turns out to have been making a single argument. Invariants, cohesion, encapsulation, interfaces, polymorphism, low coupling, validated boundaries, small published surfaces, and a regression suite were each introduced for their own reasons, but every one of them was ultimately about the resistance of a design to change. A class that protects its invariant is a class you can modify without auditing the program. A small contract is a promise you can keep while the implementation moves. A test suite is what makes any change checkable. None of them make a program more correct today. But all of them taken together directly impact what it costs to correct a weak design tomorrow.
+Most of that turns out to have been making a single argument. Invariants, cohesion, encapsulation, interfaces, polymorphism, low coupling, validated boundaries, small published surfaces, and a regression suite were each introduced for their own reasons, but every one of them was ultimately about the resistance of a design to change. A class that protects its invariant is a class you can modify without auditing the program. A small contract is a promise you can keep while the implementation moves. A test suite is what makes any change checkable. None of them make a program more correct today. But all of them taken together directly impact what it will cost to change the program tomorrow.
 
 That is why this chapter is last, and why it touches upon everything we have discussed at once. Adding a feature to a system you did not write asks you to read unfamiliar code, judge a design that was not your own, decide whether it will accept the change, restructure it if it will not, and verify your changes did not break anything that was working before. Those are not five separate skills. They are one skill, and it is the one professional software work mostly consists of.
 

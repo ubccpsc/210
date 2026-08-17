@@ -43,7 +43,7 @@ digraph faultChain {
   failure -> fault [label = "Debugging works backwards", style = dashed, constraint = false];
 }
 ```
-<!-- caption: "A fault produces an error, which surfaces as a failure. Debugging travels the chain in the opposite direction." -->
+<!-- caption="A fault produces an error, which surfaces as a failure. Debugging travels the chain in the opposite direction." -->
 
 It is also worth considering the possibility that there is no fault at all. A report may describe intended behaviour that the user did not expect, a misunderstanding of what the software promises, or a problem in configuration or data rather than in code. Establishing that the failure is real, and who it should be assigned to in the technical team, is part of the first step.
 
@@ -124,7 +124,7 @@ private toStatus(raw: string): ShipmentStatus {
 }
 ```
 
-Reading the code suggests some guesses about the problem, but a guess is not a diagnosis. To focus, the loop below can be run to narrow down the actual problem.
+Reading the code suggests some guesses about the problem, but a guess is not a diagnosis. Running the loop above turns those guesses into a diagnosis in two rounds.
 
 _Round one._ The first hypothesis is one that you can get for free: **the carrier is reporting the parcel as delivered, and we are faithfully passing that on.** If it holds, the raw response says something that plainly means delivered; if it does not hold, the response says something else. The observation is one line, placed before the conversion:
 
@@ -133,12 +133,13 @@ const raw = await response.json();
 console.log(raw.status);   // "NOT_DELIVERED"
 ```
 
-When this prediction fails, the hypothesis can be _discarded_. That is a useful knowledge result rather than a waste of time: the carrier is not claiming the parcel arrived, so the wrong answer is being constructed within our code.
+The prediction fails, so the hypothesis can be _discarded_. That is a result rather than a waste of time: the carrier is not claiming the parcel arrived, so the wrong answer is being constructed within our own code.
 
 _Round two._ The suspicion now falls on the conversion itself: **`toStatus` maps `"NOT_DELIVERED"` to `"delivered"`, because it tests for a substring rather than for the whole value.** The prediction is precise enough to be wrong, and it needs no carrier, no network, and no parcel to check:
 
 ```typescript
-checkExpect(() => toStatus("NOT_DELIVERED"), "exception");
+// with toStatus reachable from the test
+checkExpect(() => toStatus("NOT_DELIVERED"), "in-transit");
 // fails: "delivered"
 ```
 
