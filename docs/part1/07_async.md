@@ -133,16 +133,25 @@ A promise's type says what it will eventually deliver: a `Promise<string>` will 
 
 Promises have three possible states. Every promise begins as **pending**: the work is still underway. Each promise completes, or _settles_, in one of two ways: **fulfilled**, holding the delivered value, or **rejected**, holding an error that explains why the value could not be produced. The language maintains two invariants on every promise, and you can rely on them the way you rely on your own data invariants: a promise settles _at most once_, and once settled, its state and value _never change again_. A fulfilled promise is permanently fulfilled, and a rejected promise is permanently rejected.
 
-```mermaid
-stateDiagram-v2
-    [*] --> Pending
-    Pending --> Fulfilled: success
-    Pending --> Rejected: failure
-    Fulfilled --> [*]
-    Rejected --> [*]
-%%    note right of Pending
-%%      Settles at most once.
-%%    end note
+```graphviz
+digraph promiseStates {
+  rankdir = LR;
+  node [shape = box, style = "rounded,filled", fillcolor = white, fontname = "sans-serif", fontsize = 11];
+  edge [fontname = "sans-serif", fontsize = 10];
+
+  start [shape = circle, style = filled, fillcolor = black, label = "", width = 0.18];
+  done  [shape = doublecircle, label = "", width = 0.16];
+
+  Pending;
+  Fulfilled;
+  Rejected;
+
+  start -> Pending;
+  Pending -> Fulfilled [label = "success"];
+  Pending -> Rejected  [label = "failure"];
+  Fulfilled -> done;
+  Rejected -> done;
+}
 ```
 <!-- caption="Promise states. Promises settle once and only once." -->
 
@@ -286,16 +295,23 @@ Notice what this means about `await`: your paused function returns to execution 
 
 Everything that wants the thread waits in one queue, and the single thread takes them one at a time:
 
-```mermaid
-flowchart LR
-    timer["timer<br/>callback"] --> queue["event loop queue"]
-    click["button<br/>click"] --> queue
-    resume["resumed<br/>await"] --> queue
-    queue -- "one at a time" --> thread["single thread"]
-    classDef q fill:#eeeeee,stroke:#999
-    classDef t fill:#cfe8ff,stroke:#69a
-    class queue q
-    class thread t
+```graphviz
+digraph eventLoop {
+  rankdir = LR;
+  node [shape = box, style = filled, fillcolor = white, fontname = "sans-serif", fontsize = 11];
+  edge [fontname = "sans-serif", fontsize = 10];
+
+  timer  [label = "timer\ncallback"];
+  click  [label = "button\nclick"];
+  resume [label = "resumed\nawait"];
+  queue  [label = "event loop queue", fillcolor = "#eeeeee"];
+  thread [label = "single thread", fillcolor = "#cfe8ff"];
+
+  timer  -> queue;
+  click  -> queue;
+  resume -> queue;
+  queue  -> thread [label = "one at a time"];
+}
 ```
 <!-- caption="Every event waits in one queue, served by the single thread one at a time." -->
 

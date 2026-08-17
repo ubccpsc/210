@@ -188,25 +188,24 @@ In TypeScript, the `tsc` compiler checks your types _first_, before execution. A
 
 The compiler sits between the source you write and the program that runs, and it is where static errors are caught before anything executes:
 
-```mermaid
-flowchart LR
-    src["TypeScript File<br/>(.ts)"] --> tsc["tsc<br/>Compiler"]
-    tsc --> X{Compiles &<br/>Type Checks?}
-    
-    X -->|No| err["Static Error<br/> Invalid Program"]
-    X -->|Yes| js["JavaScript File<br/>(.js)"] --> run["Browser/Node<br/>Runtime"]
-    
+```graphviz
+digraph compile {
+  rankdir = LR;
+  node [shape = box, style = filled, fillcolor = white, fontname = "sans-serif", fontsize = 11];
+  edge [fontname = "sans-serif", fontsize = 10];
 
-    classDef step fill:#f5f5dc
-    classDef good fill:#d6f5d6
-    classDef bad fill:#fe6f5e
-    classDef decision fill:#98f5ff
+  src [label = "TypeScript File\n(.ts)"];
+  tsc [label = "tsc\nCompiler", fillcolor = "#f5f5dc"];
+  X   [shape = diamond, label = "Compiles &\nType Checks?", fillcolor = "#98f5ff"];
+  err [label = "Static Error\nInvalid Program", fillcolor = "#fe6f5e"];
+  js  [label = "JavaScript File\n(.js)", fillcolor = "#f5f5dc"];
+  run [label = "Browser/Node\nRuntime", fillcolor = "#d6f5d6"];
 
-    class X decision
-    class tsc step
-    class js step
-    class run good
-    class err bad
+  src -> tsc -> X;
+  X -> err [label = "No"];
+  X -> js  [label = "Yes"];
+  js -> run;
+}
 ```
 <!-- caption="How <code>tsc</code> type checks and transforms TypeScript before it can execute." -->
 
