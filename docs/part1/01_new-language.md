@@ -188,24 +188,28 @@ In TypeScript, the `tsc` compiler checks your types _first_, before execution. A
 
 The compiler sits between the source you write and the program that runs, and it is where static errors are caught before anything executes:
 
-```graphviz
-digraph compile {
-  rankdir = LR;
-  node [shape = box, style = filled, fillcolor = white, fontname = "sans-serif", fontsize = 11];
-  edge [fontname = "sans-serif", fontsize = 10];
-
-  src [label = "TypeScript File\n(.ts)"];
-  tsc [label = "tsc\nCompiler", fillcolor = "#f5f5dc"];
-  X   [shape = diamond, label = "Compiles &\nType Checks?", fillcolor = "#98f5ff"];
-  err [label = "Static Error\nInvalid Program", fillcolor = "#fe6f5e"];
-  js  [label = "JavaScript File\n(.js)", fillcolor = "#f5f5dc"];
-  run [label = "Browser/Node\nRuntime", fillcolor = "#d6f5d6"];
-
-  src -> tsc -> X;
-  X -> err [label = "No"];
-  X -> js  [label = "Yes"];
-  js -> run;
-}
+```plantuml
+@startuml
+skinparam defaultTextAlignment center
+skinparam activityDiamondBackgroundColor #fff3c4
+start
+:TypeScript File
+(.ts);
+:tsc
+Compiler; <<#f5f5dc>>
+if (Compiles &
+Type Checks?) then (Yes)
+  :JavaScript File
+(.js); <<#d6f5d6>>
+  :Browser/Node
+Runtime;
+  stop
+else (No)
+  :Static Error
+Invalid Program; <<#ffd6d6>>
+  stop
+endif
+@enduml
 ```
 <!-- caption="How <code>tsc</code> type checks and transforms TypeScript before it can execute." -->
 
