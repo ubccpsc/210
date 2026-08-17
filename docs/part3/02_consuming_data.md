@@ -71,8 +71,6 @@ Two of its properties matter for this chapter. The first is what JSON can expres
 
 The second property is what happens to our _types_ when text becomes values again, and that is where the trouble starts.
 
-### Parsing Is Not Checking
-
 `JSON.parse` returns `any`. It has to: the text is not known until run time, so there is nothing for the compiler to inspect. The same is true of `response.json()` when reading a web service reply. The asynchronous chapter in [Part 1](../part1/index) wrote a line very like this one:
 
 ```typescript
@@ -126,7 +124,7 @@ The error is the feature. `unknown` forces the check that `any` allows you to sk
 
 </details>
 
-### Converting Instead of Claiming
+## Converting Instead of Claiming
 
 The alternative to claiming is a function that takes `unknown` and returns either a value we can trust or an explanation of what was wrong. This is the `Result` type from the error handling chapter, used for exactly the job it was designed for:
 
@@ -194,7 +192,7 @@ That is the distinction worth holding on to. A claim used _instead of_ a check i
 
 </details>
 
-### The Same Job, From a Library
+## The Same Job, From a Library
 
 Look at `toShipment` again and notice how little of it is about shipments. Confirming that a value is an object, that a field is present, that it holds a string rather than a number, that the string is one of a permitted set: none of that knowledge belongs to parcel tracking. Write a second converter for a different type and almost every line will be the same shape with different names.
 
@@ -255,7 +253,7 @@ This is worth connecting back to the abstraction chapters. A validated boundary 
 
 </details>
 
-### What Serialisation Loses
+## What Serialisation Loses
 
 Turning a value into text so it can be stored or transmitted is called **serialisation**, and turning that text back into a value is **deserialisation**. `JSON.stringify` and `JSON.parse` are the pair we have been using, and there is something they do not carry between them.
 

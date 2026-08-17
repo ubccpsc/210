@@ -62,8 +62,6 @@ That is what an API is, made permanent and given an audience. The difference is 
 
 </details>
 
-## What Publishing Costs
-
 Before designing anything, it is worth being precise about what "we cannot change it" means, because the implications of this reach further than might first appear. It is not only the operations we documented. Clients depend on whatever they can observe: the order of results, the exact wording of an error message, the fact that a call happens to be fast, the field we left in a response because removing it seemed unnecessary. None of those were meant as promises but all of them implicitly end up being promises once somebody writes code that would break without them.
 
 <details class="tooltip deep-dive">
@@ -109,8 +107,6 @@ export type Shipment = {
 The schema stays internal, the derived type is redeclared as ours, and the dependency stops at our edge. This is the isolation argument from the previous chapter applied in the other direction: there we kept a provider's decisions out of our codebase, and here we keep them out of our clients'.
 
 The speculative-generality warning from the Open/Closed chapter applies here. An option nobody asked for, added because it might be useful, is still a promise that has to be honoured for as long as the API is used.
-
-## Designing for Use
 
 A published API is used by engineers under time pressure. That makes API usability a core design property. Our goal is always to create a surface that is easy to use correctly and awkward to use incorrectly.
 
@@ -217,8 +213,6 @@ The entries in that table are the easy cases, because the compiler or the client
 None of these will cause a compiler to flag an error. They break behaviour in production, and they are the reason the previous section put such emphasis on documenting what may _not_ be relied upon.
 
 The **robustness principle**, often stated as "be liberal in what you accept, conservative in what you send", captures part of this: accepting more input is a safe direction to evolve, and sending less than you promised is not. It is worth knowing the standard criticism as well, which is that liberal acceptance lets clients develop dependencies on undocumented leniency, so that tightening validation later becomes a breaking change of exactly the quiet kind listed above.
-
-## Versioning and Deprecation
 
 Breaking changes cannot be avoided forever. What a version number does is let a client find out about one before it reaches production.
 

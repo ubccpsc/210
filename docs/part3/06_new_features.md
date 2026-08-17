@@ -238,6 +238,30 @@ What matters is that the choice is visible. Taking the awkward route knowingly, 
 
 ## Planning and Making the Change
 
+Both routes to the change now converge, and the shape of the whole job is visible:
+
+```graphviz
+digraph addFeature {
+  rankdir = TB;
+  node [shape = box, fontname = "sans-serif", fontsize = 11];
+  edge [fontname = "sans-serif", fontsize = 10];
+
+  req      [label = "feature request"];
+  read     [label = "read the code, build a model\nof the parts it touches"];
+  q        [shape = diamond, label = "does the design\nanticipate this change?"];
+  add      [label = "add the new behaviour,\nleaving working code untouched"];
+  refactor [label = "refactor to create\nan extension point"];
+  verify   [label = "verify the new behaviour works\nand the old behaviour still does"];
+
+  req -> read -> q;
+  q -> add      [label = "yes"];
+  q -> refactor [label = "no"];
+  refactor -> add;
+  add -> verify;
+}
+```
+<!-- caption: "Adding a feature. The design either anticipated the change or it must first be made to." -->
+
 With the approach settled, the work is broken into steps, and the property that makes a plan good is that every step leaves the system working and tested. That is what allows the work to be interrupted, reviewed, or abandoned partway without leaving a mess, and it is the same discipline the refactoring chapter applied to structural change.
 
 Two ordering heuristics help. Put the uncertain parts early, while there is still time to change approach: if the delay rule turns out to need data the carriers do not provide, that is far better discovered on the first afternoon than the last. And decide what you will test, and how you will know it works, before writing the code rather than after.

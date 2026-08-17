@@ -1,5 +1,7 @@
 # Debugging and Fault Localization
 
+The previous chapter left the tracker in a state where change is cheap again. This chapter takes up the first of the two changes that refactoring was preparing for: behaviour that is supposed to work and does not.
+
 A bug report is a claim that a system is not behaving as expected. It arrives with a description of what somebody saw, and almost never with any indication of where in the source code the problem originates. Closing the distance between those two things is an explicit skill, called **fault localization**.
 
 That distance between the report and where it manifests in the code is the reason debugging feels different from writing code. When you write a function you know where you are, and the compiler and the tests tell you when you have gone wrong. When you debug, you begin at the far end of a chain of consequences and work backwards towards a cause you cannot see, in code that may have been correct yesterday and may have been written by somebody else. This is also challenging because you rarely have failing tests in advance for a reported bug, if you did, you would have already fixed the problem.
@@ -25,6 +27,23 @@ An **error** is the incorrect state produced when a fault executes: a variable h
 A **failure** is the externally visible mis-behaviour: the wrong answer, the crash, the parcel marked delivered. It is the only one of the three that a user would report.
 
 The three are separated by distance in both code and time. A fault can sit in a codebase for years without executing. When it executes it produces an error, which may be corrected by later code, or stored and surfaced days afterwards, or propagated through several layers before anyone notices. Debugging runs this chain backwards, from the end you can see to the end you can fix, and the length of that chain is what makes the job hard.
+
+```graphviz
+digraph faultChain {
+  rankdir = LR;
+  node [shape = box, fontname = "sans-serif", fontsize = 11];
+  edge [fontname = "sans-serif", fontsize = 10];
+
+  fault   [label = "fault\nthe defect in the code"];
+  error   [label = "error\ninvalid state while running"];
+  failure [label = "failure\nthe behaviour reported"];
+
+  fault -> error   [label = "executes"];
+  error -> failure [label = "surfaces"];
+  failure -> fault [label = "debugging works backwards", style = dashed, constraint = false];
+}
+```
+<!-- caption: "A fault produces an error, which surfaces as a failure. Debugging travels the chain in the opposite direction." -->
 
 It is also worth considering the possibility that there is no fault at all. A report may describe intended behaviour that the user did not expect, a misunderstanding of what the software promises, or a problem in configuration or data rather than in code. Establishing that the failure is real, and who it should be assigned to in the technical team, is part of the first step.
 

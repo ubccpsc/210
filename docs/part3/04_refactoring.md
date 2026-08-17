@@ -10,7 +10,7 @@ The chapter is organised around a single practical claim: _refactoring is most o
 
 The running example continues, some months on.
 
-> As the team maintaining the tracker, we need to add a sixth carrier, and the last two took a week each.
+> As the team maintaining the tracker, we want adding a carrier to be a day's work again, so that we can take on the integrations our customers are asking for. The last two took a week each.
 
 The design from the earlier chapters was sound. Each carrier had an adapter, the adapters implemented `CarrierClient`, and the tracker depended on the interface and knew nothing about any particular carrier. Adding a carrier was meant to be a new class and nothing else.
 
