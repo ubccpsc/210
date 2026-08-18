@@ -50,15 +50,33 @@
   display: block;
 }
 
+/* Width of VitePress's "On this page" aside: 224px of content plus a 32px
+   gutter. Named because the offsets below both depend on it. */
+.VPFooter {
+  --footer-aside-width: 256px;
+}
+
 @media (min-width: 960px) {
   .VPFooter.has-sidebar {
     padding-left: calc(var(--vp-sidebar-width) + 32px);
   }
 }
 
+/* The aside appears at 1280px, and the footer band spans the whole content
+   area. Without reserving the same space on the right, the licence block
+   centres against text-plus-aside and so sits right of the prose column it
+   belongs under. Reserving it lines the two centres up. */
+@media (min-width: 1280px) {
+  .VPFooter.has-sidebar {
+    padding-right: calc(32px + var(--footer-aside-width));
+  }
+}
+
 @media (min-width: 1440px) {
   .VPFooter.has-sidebar {
-    padding-right: calc((100% - var(--vp-layout-max-width)) / 2 + 32px);
+    padding-right: calc(
+      (100% - var(--vp-layout-max-width)) / 2 + 32px + var(--footer-aside-width)
+    );
     padding-left: calc((100% - var(--vp-layout-max-width)) / 2 + var(--vp-sidebar-width) + 32px);
   }
 }
