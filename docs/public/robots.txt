@@ -1,0 +1,93 @@
+# Crawling policy for the CPSC 210 textbook.
+#
+# The textbook is published under CC BY-NC-SA 4.0. Training a commercial model
+# on it is not a use the licence grants, so the crawlers below are asked not to
+# take it. Conventional search engines are welcome: finding this book in a
+# search result is the point of publishing it on the open web.
+#
+# IMPORTANT: robots.txt is only honoured at the root of a host. This file is
+# served at https://ubccpsc.github.io/210/robots.txt, which crawlers do NOT
+# read. For these rules to take effect they must live at
+# https://ubccpsc.github.io/robots.txt, which is served from the org's
+# ubccpsc.github.io repository, or the book must move to a domain of its own.
+# Until one of those happens, the opt-out that does apply here is the
+# <meta name="robots" content="all, noai, noimageai"> tag set in
+# docs/.vitepress/config.mts, which travels with each page.
+#
+# This is a request, not a control. Well-behaved crawlers honour it; nothing
+# obliges the rest to.
+
+# ---------------------------------------------------------------------------
+# Crawlers that collect training data
+# ---------------------------------------------------------------------------
+
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: Claude-Web
+User-agent: anthropic-ai
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: Bytespider
+User-agent: meta-externalagent
+User-agent: FacebookBot
+User-agent: PerplexityBot
+User-agent: Amazonbot
+User-agent: cohere-ai
+User-agent: cohere-training-data-crawler
+User-agent: Diffbot
+User-agent: Omgilibot
+User-agent: Omgili
+User-agent: Webzio-Extended
+User-agent: ImagesiftBot
+User-agent: img2dataset
+User-agent: YouBot
+User-agent: AI2Bot
+User-agent: AI2Bot-Dolma
+User-agent: Timpibot
+User-agent: PanguBot
+User-agent: DuckAssistBot
+User-agent: iaskspider/2.0
+User-agent: Kangaroo Bot
+User-agent: SemrushBot-OCOB
+Disallow: /
+
+# Common Crawl. Its archives are not themselves a model, but they are a
+# standard ingredient in training corpora, so it is listed here.
+User-agent: CCBot
+Disallow: /
+
+# ---------------------------------------------------------------------------
+# Search engines: explicitly welcome
+#
+# Note that Google-Extended and Applebot-Extended above are the *training*
+# opt-outs for Google and Apple. Blocking them does not affect Google Search
+# or Siri, which use Googlebot and Applebot and remain allowed here.
+# ---------------------------------------------------------------------------
+
+User-agent: Googlebot
+User-agent: Googlebot-Image
+User-agent: Bingbot
+User-agent: Applebot
+User-agent: DuckDuckBot
+User-agent: Slurp
+User-agent: Baiduspider
+User-agent: YandexBot
+User-agent: facebookexternalhit
+Allow: /
+
+# Retrieval agents that answer a question live rather than train on the page.
+# They are allowed on the same reasoning as a search engine. Uncomment to
+# treat them as training crawlers instead.
+#
+# User-agent: OAI-SearchBot
+# User-agent: ChatGPT-User
+# User-agent: Perplexity-User
+# User-agent: MistralAI-User
+# Disallow: /
+
+# ---------------------------------------------------------------------------
+# Everything else
+# ---------------------------------------------------------------------------
+
+User-agent: *
+Allow: /

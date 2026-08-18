@@ -48,6 +48,13 @@ export default defineConfig({
         ["meta", { property: "og:image:height", content: "630" }],
         ["meta", { property: "og:image:alt", content: "CPSC 210: Software Construction" }],
         ["meta", { name: "twitter:card", content: "summary_large_image" }],
+        // Opt out of AI training. `all` keeps ordinary indexing switched on, so
+        // this does not affect search ranking; `noai`/`noimageai` are the
+        // conventional opt-out tokens and are ignored by crawlers that do not
+        // recognise them. This is here because the site is served from a
+        // project path (/210/), where robots.txt is not read at all -- see the
+        // header of docs/public/robots.txt.
+        ["meta", { name: "robots", content: "all, noai, noimageai" }],
         ["meta", { name: "twitter:image", content: SITE_URL + "logo.png" }],
     ],
     // Give each chapter its own link-preview title/description/url, so sharing a
