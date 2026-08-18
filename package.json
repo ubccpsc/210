@@ -1,6 +1,7 @@
 {
   "name": "cpsc210-handbook",
   "private": true,
+  "license": "CC-BY-NC-SA-4.0",
   "packageManager": "pnpm@11.15.1",
   "scripts": {
     "docs:dev": "vitepress dev --base /210/ docs",
