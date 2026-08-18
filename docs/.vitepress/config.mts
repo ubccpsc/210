@@ -227,21 +227,24 @@ export default defineConfig({
         },
         ],
 
-        // Rendered as raw HTML by VPFooter. The default theme hides the footer
-        // on any page that has a sidebar, which is every page here, so
-        // theme/style.css re-enables it and aligns it with the content column.
+        // Rendered as raw HTML by VPFooter, which emits it inside a <p>. Only
+        // phrasing content is safe here: a <div> would make the HTML parser
+        // close the paragraph early and split the DOM, so the layout wrapper is
+        // a <span> that CSS turns into a flex row.
         //
-        // Both paragraphs carry RDFa describing the licence. `about` points the
-        // statements at the textbook as a whole rather than at whichever page
-        // the footer happens to be on, and the two paragraphs share a subject so
-        // their triples join up. VPFooter renders them as siblings, so the
-        // prefix declaration has to be repeated in each.
+        // Everything lives in `message` (and `copyright` is left unset) because
+        // VPFooter renders the two fields as separate sibling paragraphs, and
+        // the badge has to share a box with both text lines to sit beside them.
+        //
+        // The RDFa describes the licence. `about` points the statements at the
+        // textbook as a whole rather than at whichever page the footer is on.
         footer: {
             message:
-                `<span prefix="${RDFA_PREFIX}" about="${SITE_URL}">` +
+                `<span class="license" prefix="${RDFA_PREFIX}" about="${SITE_URL}">` +
                 `<a class="license-badge" href="${LICENSE_URL}" target="_blank" rel="license noopener noreferrer">` +
                 `<img src="${BASE}cc-by-nc-sa.svg" width="88" height="31"` +
                 ` alt="Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License"></a>` +
+                `<span class="license-text">` +
                 // Metadata the footer does not state visibly. `content` supplies
                 // the literal, so these spans stay empty and render nothing.
                 `<span property="dct:title" content="${SITE_NAME}"></span>` +
@@ -250,17 +253,16 @@ export default defineConfig({
                 // CC's own chooser emits; `cc:license` states it in the Creative
                 // Commons namespace too, for consumers that query that instead.
                 `Licensed under <a href="${LICENSE_URL}" target="_blank"` +
-                ` rel="license cc:license noopener noreferrer">CC BY-NC-SA 4.0</a>.` +
-                `</span>`,
-            copyright:
-                `<span prefix="${RDFA_PREFIX}" about="${SITE_URL}">Copyright &copy; 2026 ` +
+                ` rel="license cc:license noopener noreferrer">CC BY-NC-SA 4.0</a>.<br>` +
+                `Copyright &copy; 2026 ` +
                 // With `rel` present, `property` takes the element's text rather
                 // than the `resource` IRI, so this yields the names as a literal
                 // and the site URL as the attribution link, as CC's own markup does.
                 // The per-author links nested inside carry no RDFa attributes, so
                 // they contribute their text to that literal and nothing else.
                 `<span property="cc:attributionName" rel="cc:attributionURL" resource="${SITE_URL}">` +
-                `${authorLinks}</span>.</span>`
+                `${authorLinks}</span>.` +
+                `</span></span>`
         },
     },
     markdown: {

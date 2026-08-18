@@ -63,12 +63,28 @@
   }
 }
 
-/* The CC badge sits on its own line above the licence sentence. The default
-   theme underlines every footer link, which looks wrong around an image. */
+/* The badge sits to the left of the two licence lines, vertically centred
+   against them, with the pair of them left-aligned and the whole group centred
+   in the footer. `justify-content` does the centring rather than the
+   container's `text-align`, which is overridden to left so the two lines share
+   a left edge. Deliberately `nowrap`: with wrapping on, flex breaks the line
+   before it shrinks the text, which drops the badge back above the text on
+   narrow screens. Without it the text shrinks and rewraps internally instead,
+   so the badge stays alongside at every width. */
+.VPFooter .message .license {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 14px;
+  text-align: left;
+}
+
+/* The default theme underlines every footer link, which looks wrong as a box
+   drawn around an image. */
 .VPFooter .message .license-badge {
+  flex: none;
   display: block;
-  margin: 0 auto 10px;
-  width: 88px;
   text-decoration-line: none;
 }
 
@@ -77,3 +93,4 @@
   width: 88px;
   height: 31px;
 }
+
