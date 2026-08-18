@@ -1,8 +1,8 @@
-# CPSC 210: Software Construction Handbook
+# CPSC 210: Software Construction Textbook
 
-### [CPSC 210 Software Construction Handbook Link](https://ubccpsc.github.io/210/)
+### [CPSC 210 Software Construction Textbook Link](https://ubccpsc.github.io/210/)
 
-This repository contains the source of the CPSC 210 online handbook. While the first draft will be ready by the start of 26W1 (Sept 9, 2026), it will be rapidly changing before then and will still evolve as the term progresses. Unless you're developing the text, you probably just want to use the handbook link above.
+This repository contains the source of the CPSC 210 online textbook. While the first draft will be ready by the start of 26W1 (Sept 9, 2026), it will be rapidly changing before then and will still evolve as the term progresses. Unless you're developing the text, you probably just want to use the textbook link above.
 
 ## Errata / Contributions
 
