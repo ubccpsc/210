@@ -36,3 +36,44 @@
   padding: 0.5rem;
   border-radius: 6px;
 }
+
+/* Site footer (licence and copyright, set in config.mts).
+   The default theme hides .VPFooter on any page with a sidebar, which here is
+   every page, so the licence would only ever appear where there is no sidebar.
+   Show it everywhere and mirror VPContent's sidebar offsets so it lines up with
+   the text column rather than running under the sidebar. Embed mode
+   (?embed) still hides it via the !important rule at the top of this file. */
+/* The selector is padded out to beat the theme's own scoped rule, which carries
+   a [data-v-*] attribute and so is not as weak as it looks. Deliberately not
+   !important, so the embed-mode display:none !important above still wins. */
+.Layout .VPFooter.VPFooter.has-sidebar {
+  display: block;
+}
+
+@media (min-width: 960px) {
+  .VPFooter.has-sidebar {
+    padding-left: calc(var(--vp-sidebar-width) + 32px);
+  }
+}
+
+@media (min-width: 1440px) {
+  .VPFooter.has-sidebar {
+    padding-right: calc((100% - var(--vp-layout-max-width)) / 2 + 32px);
+    padding-left: calc((100% - var(--vp-layout-max-width)) / 2 + var(--vp-sidebar-width) + 32px);
+  }
+}
+
+/* The CC badge sits on its own line above the licence sentence. The default
+   theme underlines every footer link, which looks wrong around an image. */
+.VPFooter .message .license-badge {
+  display: block;
+  margin: 0 auto 10px;
+  width: 88px;
+  text-decoration-line: none;
+}
+
+.VPFooter .message .license-badge img {
+  display: block;
+  width: 88px;
+  height: 31px;
+}

@@ -26,3 +26,11 @@ pnpm docs:build
 ````
 
 Any changes pushed to `main` will automatically be deployed in the [handbook](https://ubccpsc.github.io/210/).
+
+## License
+
+Copyright © 2026 [Reid Holmes](https://www.cs.ubc.ca/~rtholmes/) and [Caroline Lemieux](https://www.carolemieux.com).
+
+This work is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/) (CC BY-NC-SA 4.0). You are free to share and adapt this material, provided you give appropriate credit, do not use it commercially, and license your adaptations under the same terms. The full legal code is in [LICENSE](LICENSE).
+
+By opening a Pull Request, you agree that your contribution may be distributed under these terms.

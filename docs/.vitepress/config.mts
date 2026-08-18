@@ -19,12 +19,25 @@ const { configureMarkdown, vitePlugin } = createBuildTimeDiagramsPlugin({
 
 const SITE_NAME = "UBC CPSC 210 Textbook";
 const SITE_URL = "https://ubccpsc.github.io/210/";
+const BASE = "/210/";
+const LICENSE_URL = "https://creativecommons.org/licenses/by-nc-sa/4.0/";
+// RDFa vocabularies used by the footer's licence metadata. Declared with the
+// RDFa 1.1 `prefix` attribute rather than the legacy `xmlns:` form that the old
+// Creative Commons chooser emitted, which is not valid HTML5.
+const RDFA_PREFIX = "cc: http://creativecommons.org/ns# dct: http://purl.org/dc/terms/";
+const AUTHORS = [
+    { name: "Reid Holmes", url: "https://www.cs.ubc.ca/~rtholmes/" },
+    { name: "Caroline Lemieux", url: "https://www.carolemieux.com" },
+];
+const authorLinks = AUTHORS
+    .map((a) => `<a href="${a.url}" target="_blank" rel="noopener noreferrer">${a.name}</a>`)
+    .join(" and ");
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
     title: "UBC CPSC 210 Textbook",
     description: "The course textbook for CPSC 210: Software Construction at UBC.",
-    base: "/210/",
+    base: BASE,
     head: [
         ["meta", { property: "og:site_name", content: SITE_NAME }],
         ["meta", { property: "og:type", content: "website" }],
@@ -206,6 +219,42 @@ export default defineConfig({
             ariaLabel: "UBC SPL"
         },
         ],
+
+        // Rendered as raw HTML by VPFooter. The default theme hides the footer
+        // on any page that has a sidebar, which is every page here, so
+        // theme/style.css re-enables it and aligns it with the content column.
+        //
+        // Both paragraphs carry RDFa describing the licence. `about` points the
+        // statements at the textbook as a whole rather than at whichever page
+        // the footer happens to be on, and the two paragraphs share a subject so
+        // their triples join up. VPFooter renders them as siblings, so the
+        // prefix declaration has to be repeated in each.
+        footer: {
+            message:
+                `<span prefix="${RDFA_PREFIX}" about="${SITE_URL}">` +
+                `<a class="license-badge" href="${LICENSE_URL}" target="_blank" rel="license noopener noreferrer">` +
+                `<img src="${BASE}cc-by-nc-sa.svg" width="88" height="31"` +
+                ` alt="Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License"></a>` +
+                // Metadata the footer does not state visibly. `content` supplies
+                // the literal, so these spans stay empty and render nothing.
+                `<span property="dct:title" content="${SITE_NAME}"></span>` +
+                `<span rel="dct:type" resource="http://purl.org/dc/dcmitype/Text"></span>` +
+                // `license` alone yields only the XHTML-vocabulary term, which is what
+                // CC's own chooser emits; `cc:license` states it in the Creative
+                // Commons namespace too, for consumers that query that instead.
+                `Licensed under <a href="${LICENSE_URL}" target="_blank"` +
+                ` rel="license cc:license noopener noreferrer">CC BY-NC-SA 4.0</a>.` +
+                `</span>`,
+            copyright:
+                `<span prefix="${RDFA_PREFIX}" about="${SITE_URL}">Copyright &copy; 2026 ` +
+                // With `rel` present, `property` takes the element's text rather
+                // than the `resource` IRI, so this yields the names as a literal
+                // and the site URL as the attribution link, as CC's own markup does.
+                // The per-author links nested inside carry no RDFa attributes, so
+                // they contribute their text to that literal and nothing else.
+                `<span property="cc:attributionName" rel="cc:attributionURL" resource="${SITE_URL}">` +
+                `${authorLinks}</span>.</span>`
+        },
     },
     markdown: {
         // config: (md) => {
