@@ -172,7 +172,7 @@ CPSC 110 also provides a family of checks, and the idea behind the family is tha
 (check-error (require-section cat "missing") "no section with id")
 ```
 
-That a number is close enough; that a value is one of several; that an expression must fail at all. Choosing the check that says what you actually mean is a small design decision, and it pays off at the moment a test fails, because the report names the thing you meant rather than an inequality you have to interpret. [Verifying Behaviour](../part1/09_verification) reaches for a much larger vocabulary of the same kind, and goes on to ask how you judge whether a suite checks enough.
+That a number is close enough; that a value is one of several; that an expression must fail at all. Choosing the check that says what you actually mean is a small design decision, and it pays off at the moment a test fails, because the report names the thing you meant rather than an inequality you have to interpret. [Chapter 9](../part1/09_validation) reaches for a much larger vocabulary of the same kind, and goes on to ask how you judge whether a suite checks enough.
 
 ## Arbitrary-Sized Information
 
@@ -306,7 +306,7 @@ If it helps to know where the friction will be, these are the genuine shifts rat
 | Recursive traversal | [Arrays and Iteration](../part1/05_arrays) |
 | Reasoning by substitution | [Mutation and Side Effects](../part1/06_state-mutation) |
 | `error` and `check-error` | [Designing for Failure](../part1/08_errors) |
-| The wider family of checks | [Verifying Behaviour](../part1/09_verification) |
+| The wider family of checks | [Validating Behaviour](../part1/09_validation) |
 | Data and operations kept apart | [Building Abstractions with Classes](../part2/01_abstraction) |
 | Invariants kept by discipline alone | [Encapsulating What Varies](../part2/03_encapsulation) |
 | The wish list as a contract | [Defining Boundaries with Interfaces](../part2/05_boundaries) |
