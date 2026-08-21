@@ -30,16 +30,16 @@ Terms introduced in **bold** throughout the textbook, linked to the section wher
 ## B
 
 - **Base Class** — [Extending Behaviour Through Polymorphism § Sharing Behaviour with a Base Class](/part2/06_extension#sharing-behaviour-with-a-base-class)
-- **Behaviour-Driven Development** — [Verifying Behaviour § From `checkExpect` to `expect`](/part1/09_verification#from-checkexpect-to-expect)
+- **Behaviour-Driven Development** — [Validating Behaviour § From `checkExpect` to `expect`](/part1/09_validation#from-checkexpect-to-expect)
 - **Binding** — [Preserving Implementation Freedom with Abstract Values § Values That Do Not Change](/part2/04_flexibility#values-that-do-not-change)
-- **Black-Box Testing** — [Verifying Behaviour § White-Box Testing](/part1/09_verification#white-box-testing)
+- **Black-Box Testing** — [Validating Behaviour § White-Box Testing](/part1/09_validation#white-box-testing)
 - **Block** — [Learning a New Programming Language § <code>if</code> statements](/part1/01_new-language#if-statements)
 - **Block Scope** — [Mutation and Side Effects § Scope: Where Names Live](/part1/06_state-mutation#scope-where-names-live)
 - **Blocking** — [Asynchronous Effects and Time § How Long Computers Wait](/part1/07_async#how-long-computers-wait)
 - **Body** — [Consuming Data and Services by Using APIs § Calling a Web Service](/part3/02_consuming_data#calling-a-web-service)
 - **Boundary Value Analysis** — [Checking Invariants § Deriving Tests from the Specification](/part1/03_checking-invariants#deriving-tests-from-the-specification)
 - **Branch** — [Learning a New Programming Language § <code>if</code> statements](/part1/01_new-language#if-statements)
-- **Branch Coverage** — [Verifying Behaviour § Code Coverage](/part1/09_verification#code-coverage)
+- **Branch Coverage** — [Validating Behaviour § Code Coverage](/part1/09_validation#code-coverage)
 - **Branch, Else** — [Learning a New Programming Language § <code>if</code> statements](/part1/01_new-language#if-statements)
 - **Branch, Then** — [Learning a New Programming Language § <code>if</code> statements](/part1/01_new-language#if-statements)
 - **Breakpoint** — [Mutation and Side Effects § State Gives Loops a Memory](/part1/06_state-mutation#state-gives-loops-a-memory)
@@ -53,7 +53,7 @@ Terms introduced in **bold** throughout the textbook, linked to the section wher
 - **Client** — [Consuming Data and Services by Using APIs](/part3/02_consuming_data#consuming-data-and-services-by-using-apis)
 - **Closed for Modification** — [Growing Systems with the Open/Closed Principle § Open for Extension, Closed for Modification](/part2/07_ocp#open-for-extension-closed-for-modification)
 - **Closure** — [Maintaining Invariants § Hiding State with a Closure](/part1/04_maintaining-invariants#hiding-state-with-a-closure)
-- **Code Coverage** — [Verifying Behaviour § Code Coverage](/part1/09_verification#code-coverage)
+- **Code Coverage** — [Validating Behaviour § Code Coverage](/part1/09_validation#code-coverage)
 - **Code Fluency** — [CPSC 210: Software Construction](/index#cpsc-210-software-construction)
 - **Code Smell** — [Code Quality and Refactoring § Reading the Symptoms](/part3/04_refactoring#reading-the-symptoms)
 - **Code Under Test** — [Checking Invariants § The Testing Process](/part1/03_checking-invariants#the-testing-process)
@@ -176,7 +176,7 @@ Terms introduced in **bold** throughout the textbook, linked to the section wher
 - **Law of Demeter** — [Coupling and Dependencies § Reaching Past a Neighbour](/part3/01_coupling#reaching-past-a-neighbour)
 - **Library** — [Designing APIs to Provide Data and Services § Publishing the Tracker](/part3/03_api_design#publishing-the-tracker)
 - **Library API** — [Consuming Data and Services by Using APIs § Two Kinds of API](/part3/02_consuming_data#two-kinds-of-api)
-- **Lifecycle Hooks** — [Verifying Behaviour § What a Test Case Can Now Hold](/part1/09_verification#what-a-test-case-can-now-hold)
+- **Lifecycle Hooks** — [Validating Behaviour § Richer Test Case Bodies](/part1/09_validation#richer-test-case-bodies)
 - **Loop** — [Arrays and Iteration § Writing Your Own Loops](/part1/05_arrays#writing-your-own-loops)
 
 ## M
@@ -239,7 +239,7 @@ Terms introduced in **bold** throughout the textbook, linked to the section wher
 - **Recovery** — [Designing for Failure § Recovering, or Just Reporting](/part1/08_errors#recovering-or-just-reporting)
 - **Refactoring** — [Code Quality and Refactoring § What Refactoring Is](/part3/04_refactoring#what-refactoring-is)
 - **Reference** — [Mutation and Side Effects § Copies and References](/part1/06_state-mutation#copies-and-references)
-- **Regression** — [Verifying Behaviour § Regression Testing](/part1/09_verification#regression-testing)
+- **Regression** — [Validating Behaviour § Regression Testing](/part1/09_validation#regression-testing)
 - **Rejected** — [Asynchronous Effects and Time § Promises: A Value That Does Not Exist Yet](/part1/07_async#promises-a-value-that-does-not-exist-yet)
 - **Representation** — [Preserving Implementation Freedom with Abstract Values § What Makes a Change Safe](/part2/04_flexibility#what-makes-a-change-safe)
 - **Representative** — [Checking Invariants § Equivalence Class Partitioning](/part1/03_checking-invariants#equivalence-class-partitioning)
@@ -316,4 +316,4 @@ Terms introduced in **bold** throughout the textbook, linked to the section wher
 
 - **Web Service** — [Asynchronous Effects and Time § Calling Web Services](/part1/07_async#calling-web-services)
 - **Web Service API** — [Consuming Data and Services by Using APIs § Two Kinds of API](/part3/02_consuming_data#two-kinds-of-api)
-- **White-Box Testing** — [Verifying Behaviour § White-Box Testing](/part1/09_verification#white-box-testing)
+- **White-Box Testing** — [Validating Behaviour § White-Box Testing](/part1/09_validation#white-box-testing)
