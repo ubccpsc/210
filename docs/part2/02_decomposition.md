@@ -6,7 +6,7 @@ This chapter is about those decisions. Classes only improve the design of a syst
 
 ## How Classes Lose Cohesion
 
-Classes rarely start out doing too much: they gain responsibilities one reasonable change at a time. Our `Playlist` from the previous chapter contained a single invariant: the current index is always a valid position in the song list. 
+Classes rarely start out doing too much: they gain responsibilities one reasonable change at a time. Our `Playlist` from the previous chapter contained a single invariant: the current index is always a valid position in the song list.
 
 > As a listener, I want my music app to remember what I have recently played, so that I can return to a song without searching for it again.
 
@@ -213,7 +213,7 @@ class Playlist {
 
 Each class is now understandable from a single invariant. `PlayHistory` can change how it orders or deduplicates songs without `Playlist` knowing, and `Playlist` owns the navigation invariant by itself. `play` shrank to two ideas a reader can hold at once: get the current song, and tell the history it was played.
 
-Being cohesive pays dividends when we valdiate the system. Because `PlayHistory` owns its invariant and holds its own state, it can be tested entirely on its own, without constructing a `Playlist`: record a few songs and check that the result is deduplicated and ordered. `Playlist` can likewise be tested against the navigation invariant alone. When the two were tangled in one class, no test could exercise one invariant without dragging in the other. [Chapter 9](../part1/09_validation) discusses how to write these tests; the point here is that a cohesive decomposition is what makes each invariant testable in isolation in the first place.
+Being cohesive pays dividends when we validate the system. Because `PlayHistory` owns its invariant and holds its own state, it can be tested entirely on its own, without constructing a `Playlist`: record a few songs and check that the result is deduplicated and ordered. `Playlist` can likewise be tested against the navigation invariant alone. When the two were tangled in one class, no test could exercise one invariant without dragging in the other. [Chapter 9](../part1/09_validation) discusses how to write these tests; the point here is that a cohesive decomposition is what makes each invariant testable in isolation in the first place.
 
 ## Composition and Delegation
 

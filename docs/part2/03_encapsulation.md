@@ -276,7 +276,7 @@ deep[0].seat = 42;    // original is unaffected
 
 For a plain object rather than an array, `Object.assign({}, original)` is the shallow copy; `structuredClone` is the deep copy either way.
 
-`structuredClone` walks the structure itself, and it tracks what it has already visited, so the self-referencing case above copies correctly. It copies data, not behaviour: it will refuse to clone a function, and an object built from a class comes back as a plain object with the same fields but none of its methods. 
+`structuredClone` walks the structure itself, and it tracks what it has already visited, so the self-referencing case above copies correctly. It copies data, not behaviour: it will refuse to clone a function, and an object built from a class comes back as a plain object with the same fields but none of its methods.
 
 When the elements are themselves mutable, you therefore need either a deep copy or elements that cannot be changed, which is the subject of the next chapter.
 

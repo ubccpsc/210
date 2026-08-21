@@ -39,17 +39,6 @@ const total = playlist.totalDuration();
 
 These three are programming paradigms, not competitors. A method body is usually imperative; a class can hold immutable values; a functional pipeline can run inside a method. What changes between them is how a program is organised, and the object-oriented answer is to organise programs around objects that own their state.
 
-<!--
-RTH: not clear this digression is worth adding
-
-<details class="tooltip link-110">
-<summary>You Have Already Modelled a Playlist</summary>
-
-In the Part 1 modelling chapter you described a playlist as a _tagged union_, `EmptyPlaylist | NonEmptyPlaylist`, and wrote separate functions such as `countSongs` and `totalDuration` that each took a `Playlist` and returned a result. The data lived in the type; the operations lived in free-standing functions; the two were separate things that a caller connected by hand. The object-oriented version keeps the same information but joins the data and the operations into one unit. The shift from "a type plus the functions that operate on it" to "an object that carries its own operations" is the move this chapter is about.
-
-</details>
--->
-
 ## From Closures to Classes
 
 The closure pattern from [Part 1](../part1/index) provides the bridge into classes, because it already bundles state with operations, but does so without language support. Here is a playlist built with closures, as a constructor function whose returned operations close over the hidden state:
@@ -272,7 +261,7 @@ class T {
 }
 ```
 
-The `this` keyword refers to the _current instance_ of the class; it only makes sense within a class body. Within the constructor, `this.myField` refers to `myField` in the object being constructed. 
+The `this` keyword refers to the _current instance_ of the class; it only makes sense within a class body. Within the constructor, `this.myField` refers to `myField` in the object being constructed.
 
 </details>
 
@@ -448,7 +437,7 @@ function longest(playlists: Playlist[]): Playlist | null {
 }
 ```
 
-The compiler checks these annotations exactly as it did for the types in [Part 1](../part1/index). A function that expects a `Playlist` cannot be handed a `Song`, and the result of `longest` is known to be a `Playlist` or `null`, so a caller must consider the empty case. 
+The compiler checks these annotations exactly as it did for the types in [Part 1](../part1/index). A function that expects a `Playlist` cannot be handed a `Song`, and the result of `longest` is known to be a `Playlist` or `null`, so a caller must consider the empty case.
 
 A field of one object can hold another object, and a variable that "holds" an object in fact holds a _reference_ to it, exactly as in the [Part 1](../part1/index) mutation chapter. Two consequences follow.
 
@@ -524,19 +513,11 @@ digraph objects {
 ```
 <!-- caption="favourites and workout are distinct objects; the songs cells reference separate Song objects, while currentIndex contains a primitive value." -->
 
-<!--
-<details class="tooltip exercise">
-<summary>Exercise: Testing</summary>
-
-The code above puts several checks in one block. The verification chapter argues that a test should focus on one behaviour at a time. How would you split these checks into separate tests, and what makes that harder for stateful objects than for the pure functions of Part 1?
-
-</details>
--->
 
 <details class="tooltip deep-dive">
 <summary>References vs values</summary>
 
-We saw what variables hold in [Copies and References](../part1/06_state-mutation#copies-and-references). But now that we are declaring and instantiating our own objects, we will start to encounter the differences between what variables hold for objects compared to primitive values. This can be especially confusing in terms of where changes are visible. 
+We saw what variables hold in [Copies and References](../part1/06_state-mutation#copies-and-references). But now that we are declaring and instantiating our own objects, we will start to encounter the differences between what variables hold for objects compared to primitive values. This can be especially confusing in terms of where changes are visible.
 
 Specifically, calling a function with an argument that is an object means any changes to that object within the function will be visible in any other context that has access to that object. But making the exact same changes to a primitive argument will _not_ be visible to external code that has access to the same value.
 
@@ -680,13 +661,9 @@ Look back at how we used `favourites`. We called `add(..)`, `next()`, `current()
 
 This confines each concern to a single place. The class is the one location responsible for its own state, which frees the rest of the program from that responsibility. Because the operations that maintain the invariant live alongside the state they protect, rather than in the calling code, a client cannot accidentally leave an object in an inconsistent configuration by following the intended path.
 
-<!--
-So far this is the class _offering_ an interface that a client has no need to look past. It is not yet a guarantee. Nothing in this chapter stops a determined caller from reaching in and writing `favourites.currentIndex = 99` directly, breaking the invariant from outside. Guaranteeing that a client _cannot_ reach past the interface, so that an object's state is truly the class's own, is the role of [encapsulation](./03_encapsulation).
--->
-
 <details class="tooltip exercise">
 <summary>Exercise: Designing a Class</summary>
-        
+
 Design a class for the scenario below, following the same path this chapter used for `Playlist`.
 
 > As a homeowner, I want a thermostat whose target temperature I can nudge up or down but never set outside a safe range, so that the house is never driven dangerously hot or cold.
