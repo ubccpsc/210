@@ -307,7 +307,7 @@ Notice what did _not_ change: the tests. They were correct all along, because th
 <details class="tooltip deep-dive">
 <summary>Tests as Executable Specifications</summary>
 
-A test suite written before the implementation acts as an _executable specification_: a precise, runnable description of the intended behaviour. This is more valuable than a written description alone, because the computer can verify whether your implementation matches it, every time you run the suite.
+A test suite written before the implementation acts as an _executable specification_: a precise, runnable description of the intended behaviour. This is more valuable than a written description alone, because the computer can check whether your implementation matches it, every time you run the suite.
 </details>
 
 <!--
@@ -566,7 +566,7 @@ As a rule of thumb, if the specification describes the outcome, check the outcom
 
 ## Triangulating Quality: Type Checking, Testing, and Assertions
 
-Types give us structure, but tests give us confidence. The type checker and the test suite operate at different times. The type checker works _statically_ on the source code, ruling out whole categories of invalid calls before the program runs. Tests work _dynamically_, verifying specific behaviours by executing the function. They are complementary approaches: a program that passes every type check can still return the wrong value for a given input. But, a program that passes all its tests may still fail on an input the test suite did not evaluate. The combination is what gives confidence: types narrow the space of programs that can even be written, and tests verify that the program you wrote does what you intended.
+Types give us structure, but tests give us confidence. The type checker and the test suite operate at different times. The type checker works _statically_ on the source code, ruling out whole categories of invalid calls before the program runs. Tests work _dynamically_, checking specific behaviours by executing the function. They are complementary approaches: a program that passes every type check can still return the wrong value for a given input. But, a program that passes all its tests may still fail on an input the test suite did not evaluate. The combination is what gives confidence: types narrow the space of programs that can even be written, and tests validate that the program you wrote does what you intended.
 
 Documented invariants are the bridge between the two. The preconditions and postconditions in a function's doc comment record exactly the part of the specification the compiler cannot see, and they are exactly what the tests should check. Assertions add a third layer of protection: where types check structure before the program runs and tests probe chosen inputs from the outside, assertions watch the invariants from inside the implementation, on every execution. 
 

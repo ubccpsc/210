@@ -360,7 +360,7 @@ test("reading a missing file rejects the promise",
 );
 ```
 
-In this case, `checkError` is able to verify that the promise has rejected rather than fulfilled. `checkError` also knows if a function returns a promise, allowing the compact version from `checkExpect` to also be used:
+In this case, `checkError` is able to check that the promise has rejected rather than fulfilled. `checkError` also knows if a function returns a promise, allowing the compact version from `checkExpect` to also be used:
 
 ```typescript
 test("reading a missing file rejects the promise",

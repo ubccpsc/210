@@ -1,4 +1,4 @@
-# Verifying Behaviour
+# Validating Behaviour
 
 A function's contract states what it _should_ do. A test demonstrates _what_ a function does, for a chosen input. 
 
@@ -42,7 +42,7 @@ expect(() => requireSection(catalogue, "NOPE")).to.throw("no section with id NOP
 ```
 is more verbose than a bare check, but it reads _almost_ the same the English sentence it stands for. 
 
-Paired with a descriptive test name, the whole test case becomes as a human-readable description of the behaviour it verifies. 
+Now, if the test description is clear, the whole test case is a human-readable description of the behaviour it validates. 
 
 This legibility allows a test suite serve as documentation of what the code is meant to do. This is why chai favours a longer, readable form over a terse one.
 </details>
@@ -193,9 +193,9 @@ The description part is unchanged. But now, the body is an ordinary arrow functi
 3. _Code under test can be driven through several steps._ In [Chapter 7](./07_async.html), we saw that `checkExpect` could hold more than one statement: but, it had the funnel all the computation into one final value to check. A test body has no such funnel. It can construct a value, configure it, exercise it, and assert at any point along the way, choosing a different operator for each assertion. Most real testing needs exactly that: behaviour that is not reachable until the value under test has been built up through several steps. 
 
 <details class="tooltip deep-dive">
-<summary>Repetitive Setup</summary>
-A disadvantage of
-Test runners extend this further with **lifecycle hooks**, `beforeEach` and `afterEach`, which run around every case so that setup common to a group of tests is written once while each case still receives its own fresh copy of it. 
+<summary>Lifecycle hooks: avoiding repetitive setup</summary>
+
+A disadvantage of each test method owning its own state is that there might be repetitive setup (or teardown) in each test case. To remove this repetition, many test runners provide **lifecycle hooks** like `beforeEach` and `afterEach`. These hooks run around every case so that setup common to a group of tests is written once, while each case still receives its own fresh copy of it. 
 </details>
 
 The body of the test case being an arbitrary block allows us to improve failure reporting.
@@ -596,12 +596,12 @@ The assumption is wrong: `t2` is not published, yet it is now judged playable. T
 
 The job of a test suite you've seen so far is in implementation. Regression is the second job of a test suite, and over the life of a program it is the more important one. Tests do not only help you get code right the first time; they keep it right as it changes. Re-running the whole suite after every change, even one that looks unable to break anything, is what makes it safe to keep improving a program. The effort of writing tests is repaid each time someone touches the code.
 
-## Verifying with Confidence
+## Validating with Confidence
 
 
 The type checker rules out malformed programs before they run. Tests show that the program behaves as its contract promises when it does run. Layered assertions make a failing test explain what kind of fault occurred. Partitioning the inputs and the outputs makes a passing suite meaningful. Coverage reveals the code the suite still ignores. Re-running the suite on every change keeps a correct program correct.
 
-No single one of these verification techniques is enough on its own. Together, they are how we move from _claiming_ that a program honours its contract to being confident that it does.
+No single one of these validation techniques is enough on its own. Together, they are how we move from _claiming_ that a program honours its contract to being confident that it does.
 
 This also closes Part 1. We have come a long way. You now understand the mechanics of modelling a problem with types, writing contracts and tests that validate behaviour, maintaining invariants, managing state, and changing data in the outside world. 
 
@@ -610,9 +610,9 @@ But so far, every program we have seen has been small enough for one person to h
 
 
 <details class="tooltip exercise">
-  <summary>Exercise: Verifying a Shipping Calculator</summary>
+  <summary>Exercise: Validating a Shipping Calculator</summary>
 
-The function below is complete. Your task is to verify it with a thorough suite of `expect` assertions.
+The function below is complete. Your task is to validate it with a thorough suite of `expect` assertions.
 
 > As a shipping desk, I want each parcel priced by its weight, with express doubling the rate and unshippable parcels rejected, so that customers are charged correctly and never quoted a price we cannot honour.
 

@@ -501,7 +501,7 @@ In Part 1 of this course, we will use a `checkExpect`, a function call that can 
 test("Score of 88 returns an A", checkExpect(() => letterGrade(88), "A"));
 ```
 
-This cannot be checked statically; we must execute the test to verify the program behaviour. If the call and the expected value evaluate to the same value the check passes; if they differ, the check fails with an error that describes the expected behaviour that was violated.
+This cannot be checked statically; we must execute the test to check the program behaviour. If the call and the expected value evaluate to the same value the check passes; if they differ, the check fails with an error that describes the expected behaviour that was violated.
 
 TypeScript does not natively have a `checkExpect`, we have built the utility to better align with 110 and require less syntax than most test approaches.
 
@@ -514,7 +514,7 @@ A `checkExpect` takes two arguments:
 checkExpect(() => <actual>, <expected>);
 ```
 
-`<actual>` is an expression whose value you want to verify. This is usually a call to the function under test, such as `letterGrade(88)`. It is wrapped in `() =>`, an _anonymous_ **arrow function** (a syntax we explain below), so that the expression is not evaluated where you write it: `checkExpect` decides when to run it. A parameterless function that wraps up a computation this way is called a **thunk**, programming jargon from the 1960s glossed as the past tense of _think_: an expression already thought about, set aside to be evaluated when it is needed. `<expected>` is the value you are claiming that expression should produce, such as `"A"`.
+`<actual>` is an expression whose value you want to check. This is usually a call to the function under test, such as `letterGrade(88)`. It is wrapped in `() =>`, an _anonymous_ **arrow function** (a syntax we explain below), so that the expression is not evaluated where you write it: `checkExpect` decides when to run it. A parameterless function that wraps up a computation this way is called a **thunk**, programming jargon from the 1960s glossed as the past tense of _think_: an expression already thought about, set aside to be evaluated when it is needed. `<expected>` is the value you are claiming that expression should produce, such as `"A"`.
 
 Note that there are no braces around `<actual>`, and no `return` in front of it. This is deliberate. An arrow function written as `() => <expression>`, with no `{ }`, _implicitly returns_ the value of that single expression, so `() => letterGrade(88)` is a function that returns `"A"` when it is called. Adding braces would change the meaning: `() => { letterGrade(88) }` calls `letterGrade` and then returns nothing, so the check would compare `undefined` against `"A"` and fail. Write the thunk as a single expression with no braces, and the value flows to `checkExpect` on its own.
 
@@ -535,7 +535,7 @@ import { test, checkExpect } from "@ubccpsc/210-toolkit/testing";
 test(<description>, checkExpect(() => <actual>, <expected>));
 ```
 
-`test` takes two arguments. `<description>` is a string that names the case, such as `"Score of 88 returns an A"`; it is printed in the test output, so it should state what the case verifies. The second argument is the check that forms the body of the test. Each test case holds exactly one `checkExpect`, so a test that fails always names the single expectation that was violated.
+`test` takes two arguments. `<description>` is a string that names the case, such as `"Score of 88 returns an A"`; it is printed in the test output, so it should state what the case checks. The second argument is the check that forms the body of the test. Each test case holds exactly one `checkExpect`, so a test that fails always names the single expectation that was violated.
 
 When the test suite is executed, each test file is executed top-to-bottom running each test in turn. If the check passes, the case passes; if it fails, the case fails, and the framework reports the case's description along with the message from the check that failed.
 
