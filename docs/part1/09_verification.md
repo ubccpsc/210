@@ -2,13 +2,11 @@
 
 A function's contract states what it _should_ do. A test demonstrates _what_ a function does, for a chosen input. 
 
-The earlier chapters began the practice of testing with `checkExpect`. In these, we write down a function call on a particular input and the result the contract promises on that input. The testing framework compares the two. `checkExpect`s keep two things simple that real test suites do not [TODO???]. Our assertions checked only equality, and we chose our tests one clause of the contract at a time. This chapter develops both: a richer vocabulary for stating what a result must satisfy, and more systematic ways to judge whether a suite checks enough.
+The earlier chapters began the practice of testing with `checkExpect`and `checkError`. There functions were a deliberately simple stand-in for the assertions used in real test frameworks. From here on we will use assertions from real test frameworks. We write tests with `expect`, the assertion vocabulary provided by the [chai](https://www.chaijs.com/) library that the [vitest](https://vitest.dev/) test runner is built on.
 
-It also changes our tools. The `checkExpect` and `checkError` functions were a deliberately simple stand-in for the assertions used in real test frameworks, and from here on we use those assertions. We write tests with `expect`, the assertion vocabulary provided by the [chai](https://www.chaijs.com/) library that the [vitest](https://vitest.dev/) test runner is built on.
+The change is more than spelling, and every part of it is a gain. `checkExpect` did exactly one thing, compare for equality, and could report a failure only in those terms. `expect` offers a family of assertion operators, each stating a different kind of expectation and, when it fails, reporting a message that names the actual problem. A test case is now a function body that you write. This means it can hold several assertions, build the values it needs privately, and drive code that takes more than one step to configure. 
 
-The change is more than spelling, and every part of it is a gain. `checkExpect` did exactly one thing, compare for equality, and could report a failure only in those terms; `expect` offers a family of assertion operators, each stating a different kind of expectation and, when it fails, reporting a message that names the actual problem. The shape of a test case changes along with it: a case is now a function body that you write, so it can hold several assertions, build the values it needs privately, and drive code that takes more than one step to configure. 
-
-Nothing we could say before becomes harder to say; the earlier form turns out to have been a restricted version of this one. Learning to choose among the assertion operators is the first half of this chapter.
+Nothing we could say before becomes harder to say; the earlier `checkExpect` form was a restricted version of the "real" test form. 
 
 ## From `checkExpect` to `expect`
 
