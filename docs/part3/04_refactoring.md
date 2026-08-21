@@ -138,7 +138,7 @@ Every other change has a benefit that arrives with it. A feature gives users som
 
 Refactoring has nothing on that side of the scale. You take working code, change it, and if everything goes to plan the result behaves in exactly the way it behaved before. No user notices. No client notices. Nothing observable improves. What you have done is taken on the full risk of modifying a working system in exchange for a benefit that is entirely deferred: the next change, whenever it comes, will be cheaper. That is a real benefit, and it is the reason the chapter exists, but it does not show up today and it will never show up in a way anyone can point at.
 
-Work with a deferred benefit and an immediate risk has to have its risk actively managed, because there is nothing else to make the trade acceptable. The management is the regression suite from the verification chapter, used in a specific order:
+Work with a deferred benefit and an immediate risk has to have its risk actively managed, because there is nothing else to make the trade acceptable. The management is the regression suite from [Chapter 9](../part1/09_validation), used in a specific order:
 
 1. _Run the suite first, before touching anything._ Confirm it passes. This step is the one most often skipped and the most costly to skip: if a test was already failing when you started, then a failure afterwards tells you nothing, and you can spend an afternoon hunting for a break you did not cause.
 2. _Make the change._
