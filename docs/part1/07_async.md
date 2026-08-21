@@ -26,7 +26,7 @@ A call that waits like this is called **blocking**: the function does not return
 
 ## One Thread at a Time
 
-What a program can do while it waits depends on the language's **threading model**. A **thread** is an independent sequence of executing statements. 
+What a program can do while it waits depends on the language's **threading model**. A **thread** is an independent sequence of executing statements.
 
 Many languages (e.g., Java and Rust) let a program run several threads at once: one thread can block on the network while the others keep working. Using multiple threads is powerful... and famously difficult to use correctly. The previous chapter showed how hard it is to reason about _one_ sequence of mutations. With _multiple_ threads mutating shared objects at the same instant, through all the aliases references allow, it is even harder. Whole categories of bugs exist only in multi-threaded programs.
 
@@ -37,9 +37,9 @@ But a single thread sharpens the waiting problem. If the only thread blocks on a
 <details class="tooltip deep-dive">
 <summary>Threads Elsewhere, and Why TypeScript Has One</summary>
 
-In Java, creating a thread is a few lines of code, and large Java systems routinely run hundreds of them. The price is that any object reachable from two threads can be mutated by both at the same time, and the programmer must coordinate every such access; getting this wrong produces bugs that appear and vanish depending on timing, which are among the hardest in software to find. 
+In Java, creating a thread is a few lines of code, and large Java systems routinely run hundreds of them. The price is that any object reachable from two threads can be mutated by both at the same time, and the programmer must coordinate every such access; getting this wrong produces bugs that appear and vanish depending on timing, which are among the hardest in software to find.
 
-Rust goes further and uses its type system to prevent many of these errors statically. This is part of why Rust is considered safer than other languages... and harder to learn. 
+Rust goes further and uses its type system to prevent many of these errors statically. This is part of why Rust is considered safer than other languages... and harder to learn.
 
 Python technically allows multiple threads, but only one thread may make progress at once. If you're writing single-file Python code without `multiprocessing` or other Python multi-threaded libraries, when you make a network call or read a file, your code waits for the file to be read or the network call to finish. You will see a lag between a print statement put before and after an `open(*)` call, if the file you're opening is big enough.
 
@@ -86,7 +86,7 @@ Asynchronous programming requires a mental shift: source code still lists statem
 Timers are predicatable: you register their duration when you start them. But callbacks are typically used to allow programs to respond to _unpredictable_ events.
 
 
-Nowhere is this clearer than in a _user interface_ (UI). Suppose the weather station's display has a refresh button. The program cannot know when the button will be clicked, whether it will be clicked at all, or how many times. We could try continually checking whether the button is clicked, but this would either yield wasted computation (as we're continually checking), and we might not respond soon enough (if we only check every few seconds). 
+Nowhere is this clearer than in a _user interface_ (UI). Suppose the weather station's display has a refresh button. The program cannot know when the button will be clicked, whether it will be clicked at all, or how many times. We could try continually checking whether the button is clicked, but this would either yield wasted computation (as we're continually checking), and we might not respond soon enough (if we only check every few seconds).
 
 <!---And the single thread must not sit in a loop asking "clicked yet?... clicked yet?... clicked yet?", because a thread that is spinning is just as occupied as a thread that is blocked: the display would freeze, unable to respond to anything else, while it watched one button. ---->
 
@@ -104,7 +104,7 @@ When the user clicks the refresh button, the runtime raises an **event** and pla
 <details class="tooltip deep-dive">
 <summary>Debugging with <code>console.log</code> or a Debugger?</summary>
 
-`console.log` prints its argument to the terminal. Printing is itself a side effect: an observable change made to the world outside the program, and printing is a standard tool for watching a program's behaviour unfold in time. We use it in this chapter precisely because _when_ something happens has started to matter. 
+`console.log` prints its argument to the terminal. Printing is itself a side effect: an observable change made to the world outside the program, and printing is a standard tool for watching a program's behaviour unfold in time. We use it in this chapter precisely because _when_ something happens has started to matter.
 
 That said, relying on `console.log` to diagnose complex problems breaks down as programs grow and become distributed. Your IDE's debugger is almost always a better choice than printing to the screen, as it lets you pause computation at any time and observe the current state of the whole program.
 
@@ -125,7 +125,7 @@ There are two consequences of this architecture. First, run-to-completion means 
 
 Callbacks defer computation, but they say nothing about _results_. Reading a file produces the file's contents; fetching from a web service produces a response. The program wants that value, the value will not exist until the slow operation finishes, and the program should not stand still in the meantime. TypeScript models a result-we-will-eventually-have in an object called a **promise**.
 
-A promise is a receipt. When you order at a busy coffee shop, you need not stand at the espresso machine until your drink is poured; you are handed a numbered receipt, after which you can go about your business. When your drink is ready, your number is called and you trade your receipt for your drink. 
+A promise is a receipt. When you order at a busy coffee shop, you need not stand at the espresso machine until your drink is poured; you are handed a numbered receipt, after which you can go about your business. When your drink is ready, your number is called and you trade your receipt for your drink.
 
 A promise fills the same role: it is an ordinary object, returned to you _immediately_ by a slow operation, representing a value that will arrive later. Being an ordinary object, it can be stored in a variable, passed to a function, or placed in an array, like any other value.
 
@@ -155,7 +155,7 @@ digraph promiseStates {
 ```
 <!-- caption="Promise states. Promises settle once and only once." -->
 
-You will rarely create a promise yourself. Promises are what slow operations _give you_: the file-reading and web-fetching functions later in this chapter all return them. 
+You will rarely create a promise yourself. Promises are what slow operations _give you_: the file-reading and web-fetching functions later in this chapter all return them.
 
 Where you _will_ meet promises constantly is in return types. When a function's signature says it returns a `Promise<string>`, the signature is telling you two things: the call itself will return immediately, and what it returns will not yet contain the value you want. The promise comes back right away; the result is available when the promise settles later. Here is what happens when the promise itself is treated as the value:
 
@@ -171,11 +171,11 @@ console.log(contents);  // prints "Promise { <pending> }", not the file's text
 <details class="tooltip deep-dive">
 <summary>Syntactic Sugar</summary>
 
-_Syntactic sugar_ is syntax that doesn't introduce new semantics, but simplifies writing code. For instance, in ISL, 
+_Syntactic sugar_ is syntax that doesn't introduce new semantics, but simplifies writing code. For instance, in ISL,
 ```racket
 (define (addone x) (+ x 1))
 ```
-is _syntactic sugar_ for 
+is _syntactic sugar_ for
 ```racket
 (define addone (lambda (x) (+ x 1)))
 ```
@@ -184,7 +184,7 @@ Or, in TypeScript, the array type notation `number[]` is _syntactic sugar_ for `
 
 You can understand the use of "sugar" to mean that this is syntax that figuratively "sweetens", i.e. eases or [makes less painful](https://www.merriam-webster.com/dictionary/sweeten), the use of the language.
 
-Syntax that is _syntactic sugar_ can _always_ be rewritten in some other way in the language. 
+Syntax that is _syntactic sugar_ can _always_ be rewritten in some other way in the language.
 
 </details>
 
@@ -199,7 +199,7 @@ readFile("report.txt", "utf8").then((contents) => {
 });
 ```
 
-This connects callbacks and promises: a promise is, underneath, an object that runs callbacks for you when its value arrives, and the `await` syntax in the next section is built on exactly this mechanism. 
+This connects callbacks and promises: a promise is, underneath, an object that runs callbacks for you when its value arrives, and the `await` syntax in the next section is built on exactly this mechanism.
 
 We show `then` here so you will recognise it in documentation and in other people's code, but we will not use it in this course. `await` is a form of _syntactic sugar_ that expresses the same thing and is much more readable.
 
@@ -218,7 +218,7 @@ async function loadReport(): Promise<string> {
 }
 ```
 
-`await` takes a promise and produces the value it delivers. Above, `readFile(...)` is a `Promise<string>`, so `await readFile(...)` is a `string`. When execution reaches the `await`, the function pauses until the promise settles, and then continues with the value, on the very next line, as if the file's contents had been returned directly. 
+`await` takes a promise and produces the value it delivers. Above, `readFile(...)` is a `Promise<string>`, so `await readFile(...)` is a `string`. When execution reaches the `await`, the function pauses until the promise settles, and then continues with the value, on the very next line, as if the file's contents had been returned directly.
 
 The most important property of `await` is that _it pauses the function, not the program_. While `loadReport` is suspended at the `await`, the thread is free, and everything else the program has to do (timers, other deferred work, other paused functions whose promises have settled) keeps happening. An `await` is the program saying "wake me here when the value arrives", not "stand still until it does".
 
@@ -233,14 +233,14 @@ await <expression>
 where `<expression>` evaluates to a value of `Promise<T>` type, suspends execution until the promise resolves. If the promise settles successfully, `await <expression>` evaluates to the value the promise resolves to, and execution resumes from there. If the promise is rejected, execution resumes for the program to _throw an error_: more on that in the next chapter.
 </details>
 
-`async` communicates that a function may contain `await`, and it changes the function's return type: an `async` function always returns a _promise_ of its result. `loadReport` is declared to return `Promise<string>`, not `string`, even though its body returns a string. This is because `loadReport` cannot hand its caller a `string` immediately: it itself is waiting on `readFile`. And what should the caller of `loadReport` do while `loadReport` is waiting on `readFile`? The caller itself must await on `loadReport`. 
+`async` communicates that a function may contain `await`, and it changes the function's return type: an `async` function always returns a _promise_ of its result. `loadReport` is declared to return `Promise<string>`, not `string`, even though its body returns a string. This is because `loadReport` cannot hand its caller a `string` immediately: it itself is waiting on `readFile`. And what should the caller of `loadReport` do while `loadReport` is waiting on `readFile`? The caller itself must await on `loadReport`.
 
 So the caller gets a receipt, and collects it the same way, with `await`. Asynchrony is contagious: a function that awaits must be `async`, so its callers await it and must themselves be `async`, all the way up the program.
 
 <details class="tooltip ts-tips">
 <summary><code>async</code></summary>
 
-The keyword `async` declares that a function will include some waiting on a promise. 
+The keyword `async` declares that a function will include some waiting on a promise.
 
 ```typescript
 async function f(x: X, y: Y, z: B): Promise<T> {
@@ -262,7 +262,7 @@ While promises and `async`/`await` do not create threads, they take advantage of
 <details class="tooltip deep-dive">
 <summary>Systems Details: Your Program, the Runtime, and the Operating System</summary>
 
-A TypeScript program is the top layer of a stack, and each layer below it does part of the waiting. Beneath your program sits the **runtime**. One of the most common runtimes is [Node](https://nodejs.org/), which executes your compiled code, operates the event loop described earlier in this chapter, and provides the functions the language itself does not have, including `setTimeout`, `readFile`, and `fetch`. 
+A TypeScript program is the top layer of a stack, and each layer below it does part of the waiting. Beneath your program sits the **runtime**. One of the most common runtimes is [Node](https://nodejs.org/), which executes your compiled code, operates the event loop described earlier in this chapter, and provides the functions the language itself does not have, including `setTimeout`, `readFile`, and `fetch`.
 
 Beneath the runtime sits the **operating system**, which manages the machine's hardware on behalf of all running programs at once. Nothing your program does touches a disk or a network card directly; requests are passed down this stack.
 
@@ -381,7 +381,7 @@ async function slowlyReturnsThree(): Promise<number> {
     return three;
 }
 ```
-The function is annotated to return `Promise<number>`. However, the `return three` statement returns `three`, a variable whose type is `number`, not `Promise<number>`. 
+The function is annotated to return `Promise<number>`. However, the `return three` statement returns `three`, a variable whose type is `number`, not `Promise<number>`.
 
 Should the return type of `slowlyReturnsThree` be `number` or `Promise<number>`? Explain why in your own words.
 </details>
@@ -433,7 +433,7 @@ async function currentTemperature(stationId: string): Promise<number> {
 
 There are two `await`s because the answer arrives in stages: the first delivers the response once the service has begun answering, and `response.json()` delivers the response's _body_, parsed from text into an object, which can itself take time for a large reply. After the second `await`, `report` is an ordinary object, and the function reads a property from it like any other.
 
-The type annotation on `report` is a statement of _our expectation_, not something the compiler can verify: the data was manufactured by another machine at runtime, and no type checker can see across a network. If the service changes its reply format, the program will compile cleanly and then misbehave when it runs. 
+The type annotation on `report` is a statement of _our expectation_, not something the compiler can verify: the data was manufactured by another machine at runtime, and no type checker can see across a network. If the service changes its reply format, the program will compile cleanly and then misbehave when it runs.
 
 The compiler's guarantees stop at the program's edge. At the edges, the discipline from the invariants chapters takes over: data arriving from outside should be _checked_ before the rest of the program relies on it. We will not build that checking today, but you should notice the boundary it belongs on.
 
@@ -505,12 +505,12 @@ This approach is recommended whenever a function needs several particular files,
 
 _When one of them fails._ `Promise.all` rejects as soon as _any_ one of its promises rejects, reporting that rejection's reason and not waiting for the rest. The other operations are not cancelled; they continue, and their results are discarded. For this chapter's policy of files that exist and services that answer, this is the behaviour you want: if one required file is missing, the whole operation cannot proceed, and failing at once with the reason is more useful than pressing on. The next chapter takes up what to do about such failures. If you ever need every outcome rather than the first failure, `Promise.allSettled` waits for all of them and reports each one separately, but usually `Promise.all` is the default suggestion.
 
-_When a loop is right after all._ Concurrency is the right default only because these operations are independent. When each step actually depends on the one before, a sequential loop is correct and `Promise.all` would be wrong: you cannot start a request that needs the previous request's answer. Writing files one after another to the same place, or walking a service's pages where each reply names the next page, are both genuinely sequential. 
+_When a loop is right after all._ Concurrency is the right default only because these operations are independent. When each step actually depends on the one before, a sequential loop is correct and `Promise.all` would be wrong: you cannot start a request that needs the previous request's answer. Writing files one after another to the same place, or walking a service's pages where each reply names the next page, are both genuinely sequential.
 
 <details class="tooltip ts-tips">
 <summary>The <code>noAwaitInLoops</code> lint rule</summary>
 
-The lint configuration used in this course reports `await` in a loop body as an error. The rule exists because the loop shape is almost always accidental: it is what you get by writing the synchronous version and then adding `await` where the compiler asked for it, and the resulting code is correct but needlessly slow in a way no test is likely to detect. Treat the error as a question rather than an instruction: ask whether iteration _n_ needs anything from iteration _n − 1_. If it does not, the loop wants to be `map` plus `Promise.all`. 
+The lint configuration used in this course reports `await` in a loop body as an error. The rule exists because the loop shape is almost always accidental: it is what you get by writing the synchronous version and then adding `await` where the compiler asked for it, and the resulting code is correct but needlessly slow in a way no test is likely to detect. Treat the error as a question rather than an instruction: ask whether iteration _n_ needs anything from iteration _n − 1_. If it does not, the loop wants to be `map` plus `Promise.all`.
 
 </details>
 
@@ -549,7 +549,7 @@ async function versionTwo(): Promise<number> {
 
 Everything in this chapter can fail in ways pure computation cannot: a file may not exist, a network may be down, a service may answer nonsense. This is what the rejected state of a promise is for, and when an `await`ed promise rejects, the error surfaces in your program at the `await`.
 
-Handling these failures well is complex: we will defer this subject to the next chapter, rather than compressing that complexity into a paragraph in this already-complex chapter. 
+Handling these failures well is complex: we will defer this subject to the next chapter, rather than compressing that complexity into a paragraph in this already-complex chapter.
 
 For this chapter and its exercises, the policy is simple: we will work with files that exist and services that answer. If your program crashes, read the message it crashed with and fix the bug it points at (the most common error is that a path or URL is not quite right). Crashing immediately with a clear message is acceptable behaviour for a program at this stage; handling failures more gracefully comes later.
 
@@ -566,7 +566,7 @@ Practise using `async` and `await` for reading and writing files on a new kind o
 
 The journal is a plain text file, one entry per line.
 
-1. Write `async function lineCount(path: string): Promise<number>` that reads the file at `path` as text (pass `"utf8"` to `readFile`) and returns how many lines it has. (Hint: <span class="hint">`text.split("\n")` gives an array of the lines.</span>) Test it with an async check, of the form <span class="hint">`test("...", checkExpect(async () => await lineCount("entries.txt"), ...))`</span>. 
+1. Write `async function lineCount(path: string): Promise<number>` that reads the file at `path` as text (pass `"utf8"` to `readFile`) and returns how many lines it has. (Hint: <span class="hint">`text.split("\n")` gives an array of the lines.</span>) Test it with an async check, of the form <span class="hint">`test("...", checkExpect(async () => await lineCount("entries.txt"), ...))`</span>.
 2. Write `async function backUp(path: string): Promise<void>` that reads the journal and writes its contents to a new file at `path + ".bak"`. Write the doc comment: <span class="hint">record that the function modifies the file system, as the mutation chapter required.</span> Note that <span class="hint">the two `await`s must run in order: the backup cannot be written before the contents have been read</span>.
 3. Write `async function restore(path: string): Promise<void>` that reads the backup <span class="hint">at `path + ".bak"`</span> and writes its contents back to `path`, replacing the journal with the backed-up copy. Write the doc comment: <span class="hint"> document the file-system change,</span> and,  <span class="hint">as in `backUp`, make sure the read finishes before the write begins</span>.
 

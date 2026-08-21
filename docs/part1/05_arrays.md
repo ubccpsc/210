@@ -1,8 +1,8 @@
 # Arrays and Iteration
 
-Much of the data programs work with arrives as a _sequence_: the messages in an inbox, the transactions on an account, the students in a course, the readings from a sensor. Because sequences are so common, most programming languages provides a built-in data structure for them: the **array**, an ordered collection of elements that can be accessed by position and that knows its own size. C, Java, Rust, Python, and TypeScript all provide arrays (Python calls them lists), and an engineer moving between languages can rely on them being there.
+Much of the data programs work with arrives as a _sequence_: the messages in an inbox, the transactions on an account, the students in a course, the readings from a sensor. Because sequences are so common, most programming languages provide a built-in data structure for them: the **array**, an ordered collection of elements that can be accessed by position and that knows its own size. C, Java, Rust, Python, and TypeScript all provide arrays (Python calls them lists), and an engineer moving between languages can rely on them being there.
 
-We have already built a sequence by hand. In [Using Types to Model Problems](./02_model-types) we defined a recursive `Playlist` and wrote a recursive function every time we wanted to count, total, or search it. That worked, but we had to re-write the same traversal pattern in every function. Patterns this common are exactly what languages provide explicit support for to make work easier. 
+We have already built a sequence by hand. In [Using Types to Model Problems](./02_model-types) we defined a recursive `Playlist` and wrote a recursive function every time we wanted to count, total, or search it. That worked, but we had to re-write the same traversal pattern in every function. Patterns this common are exactly what languages provide explicit support for to make work easier.
 
 Arrays come with the traversal operations already written for transforming, selecting, and searching sequences. This chapter introduces arrays, those built-in operations, and then the general mechanism underneath them all: iteration.
 
@@ -202,7 +202,7 @@ Because JSON is text, a program cannot work with it as values directly. The text
 
 Arrays come with _operations_ that cover the most common things a program does with a sequence. Each operation is a higher-order function that takes a function as its input. The input function describes what should happen to _one element_, and the operation applies that across the whole array for you.  We will often use arrow functions (lambdas), which we saw in [Chapter 1](./01_new-language), to specify those input functions.
 
-The four operations we use most are `map`, `filter`, `reduce`, and `find`. These four operations capture some of the most common tasks we perform on arrays. `map` is used to uniformly transform every element of an array into a new array. `filter` returns a subset of an array. `find` locates one element in an array. `reduce` summarizes an array. 
+The four operations we use most are `map`, `filter`, `reduce`, and `find`. These four operations capture some of the most common tasks we perform on arrays. `map` is used to uniformly transform every element of an array into a new array. `filter` returns a subset of an array. `find` locates one element in an array. `reduce` summarizes an array.
 
 
 <details class="tooltip ts-tips">
@@ -321,7 +321,7 @@ const thaw: Reading = day.find((reading: Reading) => reading.tempCelsius > 0);
 // { hour: 12, tempCelsius: 3 }
 ```
 
-If no element matches, `find` returns `undefined`, and its return type says so: searching a `Reading[]` produces a `Reading | undefined`. 
+If no element matches, `find` returns `undefined`, and its return type says so: searching a `Reading[]` produces a `Reading | undefined`.
 
 This is a deliberate language design choice. Recall the two absence values from the modelling chapter: `null` is a deliberate "no value here" that we choose when designing our own types, while `undefined` is the language's own value for "nothing was provided". TypeScript's built-in operations consistently use `undefined` for their "not found" results, and `find` follows that convention. Either way the protection is the same: the union type forces every caller to consider the case where nothing matched.
 
@@ -378,7 +378,7 @@ is a statement that executes as follows, for each element of `<iterable>`:
 1. assigns the element to the name declared by `<var-decl>`. I.e., if `<var-decl>` is `const x`, each element of iterable will be assigned to the name `x`.
 2. runs the statements in the body of the for loop (here, `<statement-1>; <statement-2>;`) in order
 
-This means the body of the `for of` loop will execute `n` times, where `n` is the number of elements in `<iterable>`. Since the `for of` loop is a statement, `for of` loops can be nested (i.e., `<statement-i>` can be another loop). 
+This means the body of the `for of` loop will execute `n` times, where `n` is the number of elements in `<iterable>`. Since the `for of` loop is a statement, `for of` loops can be nested (i.e., `<statement-i>` can be another loop).
 
 </details>
 
@@ -451,7 +451,7 @@ test("a repeated temperature is detected",
 Loops have a second strength we are not ready to use yet: values that change as the loop runs, allowing a running tally to be carried from one element to the next. Doing that requires changing existing values, which is the subject of the next chapter.
 
 Should you use loops or built-in array operations?
-Prefer the named operation whenever the task is exactly a transform (`map`), a selection (`filter`), a summary (`reduce`), or a first-match search (`find`). The operation name tells every future reader what the computation does at a glance, and the traversal it performs has no room for the small mistakes a hand-written loop can contain. 
+Prefer the named operation whenever the task is exactly a transform (`map`), a selection (`filter`), a summary (`reduce`), or a first-match search (`find`). The operation name tells every future reader what the computation does at a glance, and the traversal it performs has no room for the small mistakes a hand-written loop can contain.
 
 Write a loop when the computation does not fit a named pattern: when it relates elements to one another, like the repeated-temperature check, or when one pass must answer a question no single named operation can. The named operations say _what_; the loop is for when you must control _how_.
 
@@ -501,9 +501,9 @@ For the moment, work with JSON you produced yourself, where the shapes are known
 
 ## On Iteration
 
-Arrays give sequences built-in support in the language, and their operations package the traversals we used to write by hand: `map` to transform, `filter` to select, `reduce` to summarise, `find` to search, with `for of` underneath them all for the computations that fit no named pattern. 
+Arrays give sequences built-in support in the language, and their operations package the traversals we used to write by hand: `map` to transform, `filter` to select, `reduce` to summarise, `find` to search, with `for of` underneath them all for the computations that fit no named pattern.
 
-Notice one property everything in this chapter shared: none of these operations changed `day`, our array of daily temperatures. Every `map` and `filter` produced a new array, every `reduce` produced a new value, and even our hand-written loops only read the elements they visited; the original readings were never touched. This reflects a general principle of program design that runs through this course: once a pattern is understood and reliable, it is packaged up so it never needs to be re-derived, and we get to focus on _what_ to compute instead of _how_ to traverse. 
+Notice one property everything in this chapter shared: none of these operations changed `day`, our array of daily temperatures. Every `map` and `filter` produced a new array, every `reduce` produced a new value, and even our hand-written loops only read the elements they visited; the original readings were never touched. This reflects a general principle of program design that runs through this course: once a pattern is understood and reliable, it is packaged up so it never needs to be re-derived, and we get to focus on _what_ to compute instead of _how_ to traverse.
 
 What happens when programs _do_ change existing values, and why that calls for so much care, is the subject of the next chapter.
 

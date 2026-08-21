@@ -2,13 +2,13 @@
 
 > Software exists to solve real problems. These chapters are about building solutions that work, and using a language that helps you get them right.
 
-You already know how to program, and you already know that programs can go wrong. Part 1 builds on that groundwork and lays the foundations of software construction that apply across a broad set of programming languages. 
+You already know how to program, and you already know that programs can go wrong. Part 1 builds on that groundwork and lays the foundations of software construction that apply across a broad set of programming languages.
 
 We will cover two concerns across Part 1. The first concern is **capability**: the building blocks a real program needs, from structured data to collections, changing state, and communication with files and services. You know many building blocks already; the new building blocks you will learn signal a shift to **imperative programming**. We will see just how far we can get with these building blocks in [Chapter 4](./04_maintaining-invariants), which will motivate the introduction of object-oriented programming in [Part 2](../part2/index).  Along the way we will learn TypeScript, a language with more capabilities, and that checks far more of your work, than the teaching languages in CPSC 110.
 
 
 The second concern is **correctness**: specifying what a program should do precisely enough that the language, the tests, or you can confirm that it does. In CPSC 110 you learned to defend against mistakes through _discipline_: you documented each function's signature, you wrote examples before the function bodies, and you followed design recipes carefully. That discipline worked, but almost none of it was _enforced_. A signature that said `(@signature Number -> String)` was a promise you made to yourself, but the language did not check it. TypeScript will allow us to _enforce_ many more correctness properties. We will be careful to separate three kinds of assurance: guarantees the compiler can check before the program runs, behaviours that can only be confirmed by running it, and promises that still rest on the discipline of the programmer.
- 
+
 
 
 Our programs in Part 1 stay small enough that one person can hold the whole design in their head. That assumption is what allows personal discipline to uphold the promises the language cannot. [Part 2](../part2/index) moves beyond this size restriction and asks what happens when programs, teams, and lifetimes outgrow any one person.
@@ -25,7 +25,7 @@ By the end of Part 1, you will be able to:
 
 ## Building on CPSC 110
 
-We introduce TypeScript by scaffolding from the teaching languages you already know. Where a concept is familiar we point at its teaching language counterpart; where it differs we call the difference out explicitly. Many of the ideas are not new. Designing data, breaking a problem into functions, and writing examples before code all carry over. What changes is how much the language records and checks for you. The central change is the **type**: in CPSC 110, a signature like `(@signature Number -> String)` was an annotation the language ignored. 
+We introduce TypeScript by scaffolding from the teaching languages you already know. Where a concept is familiar we point at its teaching language counterpart; where it differs we call the difference out explicitly. Many of the ideas are not new. Designing data, breaking a problem into functions, and writing examples before code all carry over. What changes is how much the language records and checks for you. The central change is the **type**: in CPSC 110, a signature like `(@signature Number -> String)` was an annotation the language ignored.
 
 In TypeScript the signature is a _checked part_ of the program. With this checking, a whole slew of mistakes become errors reported before the program runs rather than bugs discovered afterward.
 
@@ -73,23 +73,23 @@ One concern remains. An invariant the language cannot check must still be kept t
 
 Part 1 covers four broad themes across nine chapters.
 
-#### The language and its data:
+### The language and its data:
 
 1. [Learning a New Programming Language](./01_new-language) introduces TypeScript from Intermediate Student Language: types as a checked mechanism, the compiler, statements like `if` and `return`, and the static and dynamic views the rest of the part builds on.
 2. [Using Types to Model Problems](./02_model-types) designs precise data: compound types, unions for distinct cases, and recursive structure, with functions whose shape follows the shape of the data.
 
-#### Correctness:
+### Correctness:
 
 3. [Checking Invariants](./03_checking-invariants) records contracts and invariants, derives tests from them using equivalence classes and boundary values, and uses assertions to catch impossible states.
 4. [Maintaining Invariants](./04_maintaining-invariants) keeps an invariant true for the life of a program by controlling creation with a constructor function and hiding state inside a closure.
 
-#### The capabilities of real programs:
+### The capabilities of real programs:
 
 5. [Arrays and Iteration](./05_arrays) introduces collections and the operations over them: `map`, `filter`, `reduce`, and `find`, with the `for of` loop beneath them.
 6. [Mutation and Side Effects](./06_state-mutation) adds state that changes over time, along with the references, aliasing, scope, and side effects that come with it.
 7. [Asynchronous Effects and Time](./07_async) reaches outside the program to files and web services, where a result arrives only after a wait, using promises and `async`/`await`.
 
-#### Handling and verifying failure:
+### Handling and verifying failure:
 
 8. [Designing for Failure](./08_errors) treats failure as part of a function's contract, choosing between returning a failure the type checker forces callers to confront and throwing an exception that propagates to a handler above.
 9. [Validating Behaviour](./09_validation) moves from the course toolkit to the assertion vocabulary of a real test framework, partitions inputs and outputs, and uses coverage and regression to judge whether a suite checks enough.

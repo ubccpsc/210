@@ -1,6 +1,6 @@
 # Maintaining Invariants
 
-The previous chapter placed invariants in documentation, tests, and assertions. These mechanisms _detect_ problems: tests probe chosen inputs, and assertions terminate the program when an impossible state is observed. 
+The previous chapter placed invariants in documentation, tests, and assertions. These mechanisms _detect_ problems: tests probe chosen inputs, and assertions terminate the program when an impossible state is observed.
 
 A shortcoming of these mechanisms though is that they cannot _prevent_ invalid values from being created in the first place. This chapter is about closing that gap: designing code that wholly prevents invalid values from being created, rather than writing code that checks for violations.
 
@@ -35,7 +35,7 @@ function deposit(account: BankAccount, amount: number): BankAccount {
 }
 ```
 
-A matching `withdraw` follows the same shape. The contracts are documented, tests can be derived from them, and assertions can guard the implementations. 
+A matching `withdraw` follows the same shape. The contracts are documented, tests can be derived from them, and assertions can guard the implementations.
 
 By the standards of the previous chapter, this design is complete.
 
@@ -47,14 +47,14 @@ The design above allows invalid values to pass the type checker:
 const account: BankAccount = { balance: -100 }; // passes the type checker
 ```
 
-This is the same issue we encountered with the `Song` whose duration was `-30`: the object has the right _shape_, so the static check passes, but its _meaning_ is wrong. 
+This is the same issue we encountered with the `Song` whose duration was `-30`: the object has the right _shape_, so the static check passes, but its _meaning_ is wrong.
 
-However, nothing about the `BankAccount` type connects it to `deposit` and `withdraw`. We can build any object literal with a `balance` property and the language will call it a `BankAccount`, whether or not the invariant holds. 
+However, nothing about the `BankAccount` type connects it to `deposit` and `withdraw`. We can build any object literal with a `balance` property and the language will call it a `BankAccount`, whether or not the invariant holds.
 
-To ensure an invariant holds for the life of a program, we must ensure two things: 
+To ensure an invariant holds for the life of a program, we must ensure two things:
 
-1. when the value is created, the invariant must be _established_; and 
-2. every operation that produces a new value from an old one must _preserve_ the invariant. 
+1. when the value is created, the invariant must be _established_; and
+2. every operation that produces a new value from an old one must _preserve_ the invariant.
 
 If both are true, then every value that ever exists is valid: the first one was checked, and every later one came from an operation that kept the promise. In the initial design, creation---by writing an object literal---is open to everyone, so we cannot ensure the invariant is _established_ on account creation.
 
@@ -85,9 +85,9 @@ test("accounts cannot be created with a negative balance",
 );
 ```
 
-This is progress: accounts created with `makeAccount` protect the invariant. 
+This is progress: accounts created with `makeAccount` protect the invariant.
 
-But, the protection remains a convention. Nothing _forces_ a client to call `makeAccount`: the literal `{ balance: -100 }` still type checks, exactly as before. The same is true of `deposit` and `withdraw`; a client can skip them and write `{ balance: account.balance - 200 }` by hand. The constructor function and the operations exist alongside data that remains open to everyone. 
+But, the protection remains a convention. Nothing _forces_ a client to call `makeAccount`: the literal `{ balance: -100 }` still type checks, exactly as before. The same is true of `deposit` and `withdraw`; a client can skip them and write `{ balance: account.balance - 200 }` by hand. The constructor function and the operations exist alongside data that remains open to everyone.
 
 Making the invariant safe depends on every engineer choosing to go through the right functions---the exact _programmer discipline_ we have been trying to avoid relying on.
 
@@ -124,7 +124,7 @@ What is new is _which_ function you get. A free-standing `deposit(account, 5)` i
 <details class="tooltip ts-tips">
 <summary>Functions as Properties</summary>
 
-So far, every object property we have used has held a data value: `song.title` held a string, and `account.balance` held a number. 
+So far, every object property we have used has held a data value: `song.title` held a string, and `account.balance` held a number.
 
 A property can also hold a _function_. In particular:
 ```typescript
@@ -171,7 +171,7 @@ Removing the balance field solves our invariant preservation problem: `balance` 
 
 The initial balance lives in the constructor function's parameter. Could we keep the balance field there? Yes, with a concept you've seen in CPSC 110: the **closure**.
 
-A function created inside another function keeps access to the enclosing function's parameters and definitions, even after the enclosing function has returned. A function that carries captured context like this is called a **closure**. 
+A function created inside another function keeps access to the enclosing function's parameters and definitions, even after the enclosing function has returned. A function that carries captured context like this is called a **closure**.
 
 To (re-)introduce closures, we'll consider a problem simpler than the bank account:
 
@@ -201,7 +201,7 @@ In CPSC 110, you saw closures, in particular using `local`. Functions defined in
            (make-counter-interface increment get-count))]))
 ```
 
-The inner functions close over `n`. 
+The inner functions close over `n`.
 
 Note the `local` is not strictly necessary --- we could put lambdas directly in `make-counter-interface` and they would also close over `n`:
 ```racket
@@ -215,13 +215,13 @@ Note the `local` is not strictly necessary --- we could put lambdas directly in 
         [else
            (make-counter-interface (lambda () (make-counter (+ n 1))) (lambda () n))]))
 ```
-But, you might find this version without `local` a little less readable. 
+But, you might find this version without `local` a little less readable.
 
 The TypeScript version of this counter appears below.
 
 </details>
 
-We have all the syntax ingredients we need to create closures:  function declarations, object literals, and functions as object properties. Let's put these together to write code that _protects_ the fire-safety invariant. In particular, we'll write a constructor function that returns a `Counter` object whose functions close over the current counter value: 
+We have all the syntax ingredients we need to create closures:  function declarations, object literals, and functions as object properties. Let's put these together to write code that _protects_ the fire-safety invariant. In particular, we'll write a constructor function that returns a `Counter` object whose functions close over the current counter value:
 
 ```typescript
 const MAX_CAPACITY: number = 1000;
@@ -272,7 +272,7 @@ This code both _establishes_ and _preserves_ the fire-safety invariant. The cons
 <details class="tooltip deep-dive">
 <summary>Every Operation Returns a New Value</summary>
 
-`increment` does not change the account it was called on; it returns a new counter whose count is higher. This may seem roundabout, but it is the only option available to us: we (so far) have no way to change an existing value. This is also the way every program in CPSC 110 worked. 
+`increment` does not change the account it was called on; it returns a new counter whose count is higher. This may seem roundabout, but it is the only option available to us: we (so far) have no way to change an existing value. This is also the way every program in CPSC 110 worked.
 
 </details>
 
@@ -459,7 +459,7 @@ The answer is: much code in the wild _doesn't_ manage to enforce such invariants
 
 ## Protecting Invariants Drives Design
 
-Looking at our designs in this chapter, we see that the invariants of our programs strongly influenced our program design: 
+Looking at our designs in this chapter, we see that the invariants of our programs strongly influenced our program design:
 
 1. To ensure the invariant is established, we restricted creation of BankAccounts to a single constructor function;
 2. To ensure the invariant was preserved, we bound operations to the data, so that they---rather than every caller of the operation---could preserve the invariant;
