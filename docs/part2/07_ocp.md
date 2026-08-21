@@ -100,7 +100,7 @@ In CPSC 110, a function over a data type with several variants had one `cond` br
 
 ## Why Closed to Modification Matters
 
-Why prefer adding code to editing it? The answer comes from the verification chapter. Code that already works is code that has been tested, and every edit to it is a chance to break something that worked before, a regression. Editing `notify(..)` to add push reopens the email and SMS branches: they have to be read, possibly disturbed, and re-tested to be sure they still work. Adding `PushNotifier` touches none of that. The existing channels and their tests are left alone, so they cannot regress; the only new tests are the ones for `PushNotifier`, and the existing suite stays green.
+Why prefer adding code to editing it? The answer comes from [Chapter 9](../part1/09_validation). Code that already works is code that has been tested, and every edit to it is a chance to break something that worked before, a regression. Editing `notify(..)` to add push reopens the email and SMS branches: they have to be read, possibly disturbed, and re-tested to be sure they still work. Adding `PushNotifier` touches none of that. The existing channels and their tests are left alone, so they cannot regress; the only new tests are the ones for `PushNotifier`, and the existing suite stays green.
 
 This is what "closed to modification" provides, and it is worth being precise about what it does not mean. It is not a rule that code must never change; bugs are still fixed and contracts are still refined. It means that adding a foreseen _kind_ of new behaviour should not require reopening code that already works. A system with that property grows more safely the larger it gets, because the impact of a new feature is localized within the new file rather than throughout a breadth of previously-tested code.
 
@@ -242,7 +242,7 @@ const channels: Notifier[] = [
 alertAll(channels, "deploy complete");
 ```
 
-The open/closed property can be verified directly. A `CapturingNotifier`, written after `alertAll`, drops into any channel list and is exercised by the same function with no modification:
+The open/closed property can be checked directly. A `CapturingNotifier`, written after `alertAll`, drops into any channel list and is exercised by the same function with no modification:
 
 ```typescript
 class CapturingNotifier extends BaseNotifier {
@@ -277,7 +277,7 @@ Work through the following:
 
 1. _Extension._ Add a `PrefixTransformer` that takes a fixed string in its constructor and prepends it to its input. List every class or function outside `PrefixTransformer` itself that needed to change.
 2. _Order matters._ Write a test showing that applying trim then uppercase to `"  hello  "` produces `"HELLO"`. Write a second test showing that reversing the two transformers produces a different result. What does this say about what `applyAll` guarantees?
-3. _Verification._ Write a `CapturingTransformer` that records the input it receives and returns it unchanged. Use it to confirm that `applyAll` passes the correct accumulated text to each transformer in sequence.
+3. _Validation._ Write a `CapturingTransformer` that records the input it receives and returns it unchanged. Use it to confirm that `applyAll` passes the correct accumulated text to each transformer in sequence.
 4. _The axis._ Your pipeline is open for new transformers. Suppose the requirement is to skip a transformation when its input is shorter than a given length. What would need to change, and why does `TextTransformer` not help with this?
 
 </details>
