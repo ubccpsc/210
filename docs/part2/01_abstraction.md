@@ -1,16 +1,24 @@
 # Building Abstractions with Classes
 
-[Part 1](../part1/index) ended with invariants maintained by hand: we wrote a constructor function that established an invariant when a value was created, and we hid the value's state inside a closure so that only a fixed set of operations could change it. This chapter introduces object-oriented programming, which provides this same pattern as direct language syntax. The mechanism is the **class**: a named unit that bundles _state_ with the _operations that maintain it_.
+[Part 1](../part1/index) ended with invariants maintained by hand. In [Chapter 4](../part1/04_maintaining-invariants), we wrote a constructor function that established an invariant when a value was created, and we hid the value's state inside a closure so that only a fixed set of operations could change it. 
+
+This chapter introduces object-oriented programming, which provides this same pattern as direct language syntax. The mechanism is the **class**: a named unit that bundles _state_ with the _operations that maintain it_.
+
+Consider the running example for this chapter:
 
 > As a listener, I want a playlist that always knows which song is current, so that pressing "next" moves through my music predictably as I add and remove songs.
 
-Consider the running example for this chapter. A playlist holds a list of songs and remembers which one is _current_, so that an interface can show what is playing and advance to the next song. The current position is a number, an index into the list of songs. The type of that field is `number`, but not every number is meaningful: only an index that points at a real song makes sense, and when the playlist is empty there is no current song at all. This rule, that the current index is always a valid position in the list (or a sentinel when the list is empty), is an _invariant_. As in [Part 1](../part1/index), the type system cannot express it: `number` permits `-4` and `9999` just as readily as a valid playlist index.
+A playlist holds a list of songs and remembers which one is _current_, so that an interface can show what is playing and advance to the next song. The current position is a number, an index into the list of songs. The type of that field is `number`, but not every number is meaningful: only an index that points at a real song makes sense, and when the playlist is empty there is no current song at all. This rule, that the current index is always a valid position in the list (or a sentinel when the list is empty), is an _invariant_. As in [Part 1](../part1/index), the type system cannot express it: `number` permits `-4` and `9999` just as readily as a valid playlist index.
 
 ## The Problem: Keeping State Consistent
 
-An invariant like this is only useful if it is always true. In a small program this can be maintained through discipline: every place that changes the song list also fixes the current index. That discipline does not scale. If the song list and the index are ordinary variables that any part of the program can read and write, then the entire program can leave the index pointing at a song that no longer exists. Spreading the state across more files does not help; a **global variable** is a reachable, and therefore writable, memory location that can be accessed from anywhere in a system. To maintain the invariant we would have to audit the whole program, which is exactly the kind of whole-program reasoning we are trying to avoid.
+An invariant like _"the current position points to a real song in the playlist"_ is only useful if it is always true. In a small program it can be maintained through _discipline_: every place that changes the song list also fixes the current index. 
 
-What we want is a way to bundle the state (the songs and the index) together with the operations that are allowed to change it (add, remove, advance), so that the invariant is the responsibility of one small, named unit rather than of every caller. That unit of organization is the class.
+That discipline does not scale. If the song list and the index are ordinary variables that any part of the program can read and write, then the entire program can leave the index pointing at a song that no longer exists. Spreading the state across more files does not help; a **global variable** is a reachable, and therefore writable, memory location that can be accessed from anywhere in a system. To maintain the invariant we would have to audit the whole program; and whole-program reasoning is costly and error-prone.
+
+What we want is a way to bundle the _state_ (the songs and the index) together with the _operations that are allowed to change it_ (add, remove, advance). With this bundling, the invariant is the responsibility of one small, named unit, rather than of every caller. 
+
+The unit of organization that bundles _state_ and _operations_ is the _class_.
 
 ## Three Programming Paradigms
 
@@ -19,25 +27,25 @@ Before we build the class, it helps to place it among the programming paradigms 
 **Functional programming** builds values and transforms them with functions, without mutation. We saw this in [Part 1](../part1/index) when we modelled data as types and processed it with pure functions. Summing the durations of a list of songs functionally looks like this (note the lack of mutation):
 
 ```typescript
-const total = songs.reduce((sum, song) => sum + song.durationSeconds, 0);
+const total: number = songs.reduce((sum: number, song: Song) => sum + song.durationSeconds, 0);
 ```
 
-**Imperative programming** sequences code statements that read and change state step by step. The mutation chapter in [Part 1](../part1/index) was imperative: a loop with a running total, reassigned on each pass. Imperatively, the same summing behaviour looks like this:
+**Imperative programming** sequences code statements ([Chapter 1](../part1/01_new-language)) that read and change state ([Chapter 6](../part1/06_state-mutation)) step by step. Recursion is the idiomatic functional way of dealing with variable-sized data; loops ([Chapter 5](../part1/05_arrays)) are the idiomatic imperative way of dealing with variable-sized data.  Imperatively, the same summing behaviour as above looks like this:
 
 ```typescript
-let total = 0;
+let total: number = 0;
 for (const song of songs) {
     total = total + song.durationSeconds;
 }
 ```
 
-**Object-oriented programming**, the subject of this part, bundles state together with the operations that maintain it. Written this way, the sum is a question we ask an object:
+**Object-oriented programming**, bundles state together with the operations that maintain it. Written this way, the sum is a question we ask an object:
 
 ```typescript
-const total = playlist.totalDuration();
+const total: number = playlist.totalDuration();
 ```
 
-These three are programming paradigms, not competitors. A method body is usually imperative; a class can hold immutable values; a functional pipeline can run inside a method. What changes between them is how a program is organised, and the object-oriented answer is to organise programs around objects that own their state.
+These three are not competitors. A method body is usually imperative; a class can hold immutable values; a functional pipeline can run inside a method. What changes between them is how a program is organised. Object-orientation naturally organizes programs around objects that own their state.
 
 <!--
 RTH: not clear this digression is worth adding
@@ -52,7 +60,7 @@ In the Part 1 modelling chapter you described a playlist as a _tagged union_, `E
 
 ## From Closures to Classes
 
-The closure pattern from [Part 1](../part1/index) provides the bridge into classes, because it already bundles state with operations, but does so without language support. Here is a playlist built with closures, as a constructor function whose returned operations close over the hidden state:
+The closure pattern from [Chapter 4](../part1/04_maintaining-invariants) provided the bridge into classes. We saw how to bundle state with operations, using only what you knew from 110. But we did thiswithout language support. Here is a playlist built with closures, as a constructor function whose returned operations close over the hidden state:
 
 
 <CollapsibleCode>
@@ -89,9 +97,9 @@ function makePlaylist(): Playlist {
 
 </CollapsibleCode>
 
-The state (`songs` and `currentIndex`) is reachable only through the three returned operations, so the invariant is safe. This works, but the language is not helping: the connection between the state, the constructor function, and the operations exists only because we arranged it by hand, and there is no named type that other code can depend on beyond the structural `Playlist` record.
+The state (`songs` and `currentIndex`) is reachable only through the three returned operations, so the invariant is safe. This works, but with no help from the language. The connection between the state, the constructor function, and the operations exists only because we arranged it by hand. There is no named type that other code can depend on beyond the `Playlist` record.
 
-A **class** expresses the same arrangement directly. The same playlist, written as a class would look like:
+A **class** expresses the same arrangement with support from the programming language. The same playlist, written as a class would look like:
 
 <CollapsibleCode>
 
@@ -188,7 +196,7 @@ is a _statement_ that declares the name `X` as a type.
 A class on its own describes its values but does no work. To use a class, we need to create one. We do this with the `new` operator:
 
 ```typescript
-const favourites = new Playlist();
+const favourites: Playlist = new Playlist();
 ```
 
 <details class="tooltip ts-tips">
@@ -212,7 +220,7 @@ class Playlist {
 }
 ```
 
-The constructor is the single point where every object of the class comes into existence, which makes it the place to _establish_ invariants, exactly as the constructor function did in [Part 1](../part1/index). Enforcing the invariant to be established correctly lets every method afterward _assume_ it holds. The division of labour is similar to what we saw in [Part 1](../part1/index): the constructor establishes the invariant, and each method preserves it.
+The constructor is the single point where every object of the class comes into existence, which makes it the place to _establish_ invariants, exactly as the constructor function did in  [Chapter 4](../part1/04_maintaining-invariants). Established an invariant correctly lets every method afterward _assume_ it holds. The division of labour is similar to what we saw in [Part 1](../part1/index): the constructor establishes the invariant, and each method preserves it.
 
 <details class="tooltip ts-tips">
 <summary>Constructors</summary>
@@ -232,15 +240,15 @@ defines how objects of type `T` are created. We do not call `constructor()` expl
 When we create an object from a class, we say we are **instantiating** the class. That is, we are creating an **instance** of a class that can store its own state and provides its own operations. Every instance of a class is called an **object** and is independent of the others: its state is unique to that individual instance.
 
 ```typescript
-const favourites = new Playlist();
-const workout = new Playlist();
+const favourites: Playlist = new Playlist();
+const workout: Playlist = new Playlist();
 ```
 
 Adding a song to `favourites` does nothing to `workout`. This independence is one of the ways classes help us manage state: a program can hold many objects, each responsible for its own slice of the world.
 
 <!-- ## Class Bodies: Storing State and Functionality -->
 
-A class binds together _state_ and _functionality_. We look at each in turn.
+A class binds together _state_ and _functionality_. Let's look at each of these.
 
 ## Class State
 
@@ -259,7 +267,7 @@ The `= []` and `= -1` give the fields default values, used when the constructor 
 <details class="tooltip ts-tips">
   <summary>Fields and <code>this</code></summary>
 
-The following defines a field named `field_1` of type `X` within class `T`.
+The following defines a field named `myField` of type `X` within class `T`.
 
 ```typescript
 class T {
@@ -303,9 +311,9 @@ Declaring a field is relatively straightforward: identify what state you need to
 The contents of a field are unique to each object. After:
 
 ```typescript
-const chill = new Playlist();
+const chill: Playlist = new Playlist();
 chill.add(slowSong);
-const party = new Playlist();
+const party: Playlist = new Playlist();
 party.add(fastSong);
 ```
 
@@ -313,7 +321,39 @@ party.add(fastSong);
 
 ## Class Functionality
 
-Functionality is provided by methods. A **method** is a callable property that acts on the object's state. Most methods exist to establish, preserve, or observe class invariants. Here is the `Playlist` class with its methods, including the `remove` operation that makes the invariant interesting:
+Functionality is provided by methods. A **method** is a callable property that acts on the object's state. Most methods exist to establish, preserve, or observe class invariants. 
+
+<details class="tooltip ts-tips">
+<summary>Methods (and <code>this</code> again)</summary>
+
+The following defines a method `firstMethod` for class `T`:
+```typescript
+class T {
+    firstMethod(x: X, y: Y): Z {
+       // do something with x and y to return a value of type Z
+    }
+}
+```
+Given an instance `const t: T = new T()`, we call the method with `t.firstMethod(...)`. The call can see only the data stored in `t`. To call one method from another, we use `this`:
+
+```typescript
+class T {
+    firstMethod(x: X, y: Y): Z {
+       if (this.secondMethod()) {
+         // ...
+       }
+    }
+
+    secondMethod(): boolean {
+       // ...
+    }
+}
+```
+
+</details>
+
+
+Here is the `Playlist` class with its methods, including the `remove` operation that makes the invariant interesting:
 
 <CollapsibleCode>
 
@@ -344,7 +384,7 @@ class Playlist {
 
     /** Removes the given song, keeping the current position valid. */
     remove(song: Song): void {
-        const i = this.songs.indexOf(song);
+        const i: number = this.songs.indexOf(song);
         if (i === -1) {
             return;
         }
@@ -369,7 +409,7 @@ class Playlist {
 
 Removing a song can invalidate the current index: if the removed song was before the current one in the song list, every later index shifts down by one; if the removed song was the last one and it was current, the index now points past the end. Each branch repairs the index so that the invariant still holds when `remove` returns. The caller does not have to think about any of this. That is the point: the work of keeping the index valid lives _with_ the data it constrains, inside the method, not scattered through the calling code.
 
-One decision inside `remove` is worth noticing now and settling later. `indexOf` locates the song by _identity_, so this method removes the exact object it was handed and ignores a separately built song with identical fields. Which of those a caller should expect is a design question we take up in the implementation freedom chapter.
+Notice that, in `remove`, `indexOf` locates the song by _identity_. So, `remove` removes the exact object it was handed and ignores a separately built song with identical fields. Is this reasonable to expect of the caller? We discuss this design tradeoff in [Chapter 13](./04_flexibility).
 
 ```plantuml
 @startuml
@@ -398,38 +438,15 @@ Song : durationSeconds: number
 ```
 <!-- caption="The same Playlist after adding the remove and totalDuration operations." -->
 
-<details class="tooltip ts-tips">
-<summary>Methods (and <code>this</code> again)</summary>
-
-The following defines a method `firstMethod` for class `T`:
-```typescript
-class T {
-    firstMethod(x: X, y: Y): Z {
-       // do something with x and y to return a value of type Z
-    }
-}
-```
-Given an instance `const t = new T()`, we call the method with `t.firstMethod(...)`. The call can see only the data stored in `t`. To call one method from another, we use `this`:
-
-```typescript
-class T {
-    firstMethod(x: X, y: Y): Z {
-       if (this.secondMethod()) {
-         // ...
-       }
-    }
-
-    secondMethod(): boolean {
-       // ...
-    }
-}
-```
-
-</details>
 
 In all languages, methods have a name, take zero or more parameters, and return either a value or `void`. When a method returns nothing, declaring its return type as `void` signals to a reader that the absence of a return value is intentional.
 
-Declaring a method involves a few decisions: what the method is for and a name that captures that intent; what parameters it takes, with their names and types; and what it returns, with its type. It can help to think from a testing perspective. If you know what you want to check about a method, the parameters encode the data you would pass it and the return value the result you would inspect. Unlike a free function, a method can also read and change the object's _fields_, so part of its input and part of its result may live in the object rather than in the parameters and return value.
+Declaring a method involves a few decisions: 
+- what the method is for and a name that captures that intent; 
+- what parameters it takes, with their names and types; and 
+- what it returns, with its type. 
+
+It can help to think from a testing perspective. If you know what you want to check about a method, the parameters encode the data you would pass it and the return value the result you would inspect. However, unlike a free function, a method can also read and change the object's _fields_. So part of its input and part of its result may live in the _object_ rather than in the parameters and return value.
 
 
 ## Classes are Types
@@ -450,29 +467,31 @@ function longest(playlists: Playlist[]): Playlist | null {
 
 The compiler checks these annotations exactly as it did for the types in [Part 1](../part1/index). A function that expects a `Playlist` cannot be handed a `Song`, and the result of `longest` is known to be a `Playlist` or `null`, so a caller must consider the empty case. 
 
-A field of one object can hold another object, and a variable that "holds" an object in fact holds a _reference_ to it, exactly as in the [Part 1](../part1/index) mutation chapter. Two consequences follow.
+### Objects and References
 
-First, two objects are distinct even when their contents match. Each `new` produces a separate object with its own identity:
+A field of one object can hold another object, and a variable that "holds" an object in fact holds a _reference_ to it, exactly as in [Chapter 6](../part1/06_state-mutation). This has two consequences:
+
+1. Two objects are distinct even when their contents match. Each `new` produces a separate object with its own identity:
 
 ```typescript
-const a = new Playlist();
-const b = new Playlist();
-// a and b have identical (empty) contents, but a === b is false: they are different objects
+const a: Playlist = new Playlist();
+const b: Playlist = new Playlist();
+// a === b is false: they are different objects
 ```
 
-Second, when an object is passed to a function or stored in a field, it is the reference that is copied, not the object. The caller and the callee then share that single object, and a method call that changes one is visible to both. This is the aliasing from [Part 1](../part1/index), now the normal way objects are used; primitives behave differently, as the deep dive below explains.
+2. When an object is passed to a function or stored in a field, it is the _reference_ that is copied, not the object. The caller and the callee then share that single object, and a method call that changes one is visible to both. This is the aliasing from [Chapter 6](../part1/06_state-mutation). Primitives behave differently: see the "References vs values" deep-dive below.
 
 ## Working with Objects
 
-A class declaration only describes what its objects look like. To do work, we instantiate objects and call their methods, using dot notation: in `playlist.next()`, the `.` separates the object from the method called on it. Because every object holds its own fields, a method call on one object never affects another.
+A class declaration only describes what its objects look like. To do work, we instantiate objects and call their methods, using dot notation: in `playlist.next()`, the `.` separates the object from the method called on it. Because every object holds its own fields, a method call on one object does not affect another.
 
 The following walks a small program through two independent playlists:
 
 <CollapsibleCode>
 
 ```typescript
-const favourites = new Playlist();
-const workout = new Playlist();
+const favourites: Playlist = new Playlist();
+const workout: Playlist = new Playlist();
 
 const a: Song = { title: "Aubade", artist: "Dawn Quartet", durationSeconds: 180 };
 const b: Song = { title: "Bassline", artist: "Low End", durationSeconds: 240 };
@@ -494,7 +513,7 @@ expect(workout.current()).to.equal(null);        // workout is untouched and sti
 
 </CollapsibleCode>
 
-After the three `add` calls, the objects and the references between them look like this. Each variable holds a reference to its own `Playlist`, and `favourites`' `songs` cells hold references to three separate `Song` objects, while `currentIndex` is an ordinary number rather than a reference:
+After the three `add` calls, the objects and the references between them look like this. Each variable holds a reference to its own `Playlist`, and `favourites`' `songs` cells hold references to three separate `Song` objects. But note `currentIndex` is an ordinary number, not a reference:
 
 ```graphviz
 digraph objects {
@@ -536,9 +555,9 @@ The code above puts several checks in one block. The verification chapter argues
 <details class="tooltip deep-dive">
 <summary>References vs values</summary>
 
-We saw what variables hold in [Copies and References](../part1/06_state-mutation#copies-and-references). But now that we are declaring and instantiating our own objects, we will start to encounter the differences between what variables hold for objects compared to primitive values. This can be especially confusing in terms of where changes are visible. 
+We saw what variables hold in [Copies and References](../part1/06_state-mutation#copies-and-references). But now that we are declaring and instantiating our own objects, we will start to encounter the differences between what variables hold for _objects_ compared to _primitive values_. This gets confusing when paired with mutation.
 
-Specifically, calling a function with an argument that is an object means any changes to that object within the function will be visible in any other context that has access to that object. But making the exact same changes to a primitive argument will _not_ be visible to external code that has access to the same value.
+Specifically, when we call a function with an object argument, any changes to that object within the function will be visible in _any other context_ that has access to that object. But changes to a primitive argument will _not_ be visible outside the function.
 
 <CollapsibleCode>
 
@@ -550,7 +569,7 @@ function addSong(list: Playlist, song: Song): void {
     list.add(song);
 }
 
-const mix = new Playlist();
+const mix: Playlist = new Playlist();
 addSong(mix, someSong);
 expect(mix.current()).to.equal(someSong);   // the very same object, not a copy
 
@@ -562,25 +581,27 @@ expect(someSong.durationSeconds).to.equal(199);
 expect(mix.current().durationSeconds).to.equal(199);
 
 
-// A primitive argument is copied: the function cannot change the caller's value.
+// Copying a primitive argument: function does change the caller's value.
 function bumpToZero(value: number): void {
     value = 0;
 }
 
-const count = 5;
+const count: number = 5;
 bumpToZero(count);
 expect(count).to.equal(5); // `count` is a value, not a `reference` and does not change
 ```
 
 </CollapsibleCode>
 
-The two assertions capture the whole difference: `mix` was shared with `addSong`, so the song it added is still there afterward, while `count` was copied into `bumpToZero`, so the caller's value never changed.
+The assertions above capture the difference: `mix` was a reference _shared with_ `addSong`, so the song it added is still there afterward.  On the other hand, `count` was a primitive _copied into_ `bumpToZero`, so the caller's value never changed.
 
 </details>
 
 ## Testing Classes
 
-In [Chapter 9](../part1/09_validation), we tested pure functions: pass arguments, inspect the return value. A class is different. An object carries _state_ between calls, so a test usually constructs the object, performs a sequence of operations, and then asserts on the state that results. The value under test is the object's observable behaviour, not a single return value.
+In [Chapter 9](../part1/09_validation), we tested pure functions by passing them arguments and inspecting the return value. 
+
+Testing a class looks different. An object carries _state_ between calls, so a test usually constructs an object, performs a sequence of operations, and then asserts on the state that results. The value under test is the object's observable behaviour, not a single return value.
 
 The `Playlist` class from this chapter tracks a current song as songs are added and removed. A test for it reads as a short story: set up an object, drive it through some calls, and check where it ended up.
 
@@ -589,7 +610,7 @@ const songA: Song = { title: "Aubade", artist: "Dawn Quartet", durationSeconds: 
 const songB: Song = { title: "Bassline", artist: "Low End", durationSeconds: 240 };
 
 test("removing the current song keeps the position valid", () => {
-    const playlist = new Playlist();
+    const playlist: Playlist = new Playlist();
     playlist.add(songA);
     playlist.add(songB);
     playlist.next();                                  // current is now songB
@@ -598,9 +619,9 @@ test("removing the current song keeps the position valid", () => {
 });
 ```
 
-The test-design ideas carry over unchanged. Equivalence classes and boundaries now describe _sequences of method calls_ rather than single arguments (an empty playlist, a one-song playlist, removing the current song versus another song), and layered assertions still apply to whatever the object exposes.
+The test-design ideas carry over unchanged. Equivalence classes and boundaries now describe _sequences of method calls_ rather than single arguments (an empty playlist, a one-song playlist, removing the current song versus another song). Layered assertions apply to whatever state the object exposes.
 
-Almost every test of a class starts the same way: build a fresh object to work on. Writing `new Playlist()` at the top of every test is repetitive, and reusing one shared object across tests is worse than repetitive: one test's mutations would leak into the next, and the suite would quietly depend on the order its tests happen to run in. Test runners solve this with **lifecycle hooks**, functions the runner calls around your tests. The most useful is `beforeEach`, which runs before every test, the natural place to create a fresh object:
+Almost every test of a class starts the same way: build a fresh object to work on. Writing `new Playlist()` at the top of every test is repetitive. But reusing one shared object across tests is worse than repetitive: one test's mutations would leak into the next, and the suite would quietly depend on the order its tests happen to run in. Test runners solve this with **lifecycle hooks**, functions the runner calls around your tests. The most useful is `beforeEach`, which runs before every test, the natural place to create a fresh object:
 
 ```typescript
 let playlist: Playlist;
@@ -624,11 +645,11 @@ Each test now receives its own `playlist`, untouched by any other, so the tests 
 There are four hooks provided by most testing frameworks:
 
 - `beforeEach` runs before each test and `afterEach` runs after each test. These are helpful for per-test setup and teardown.
-- `beforeAll` runs once before the first test and `afterAll` runs once after the last test is complete. These are best for setup too expensive to repeat, such as opening a connection shared, read-only, by every test.
+- `beforeAll` runs once before the first test and `afterAll` runs once after the last test is complete. These are best for setup too expensive to repeat, such as opening a read-only connection shared by every test.
 
-For the in-memory objects in this course, a `beforeEach` that constructs a fresh object is almost always all you need; the teardown hooks matter most when a test touches something outside the program, such as a file or a network connection, that must be released whether the test passed or threw.
+For the in-memory objects in this course, a `beforeEach` that constructs a fresh object is almost always all you need. The `afterEach` teardown hooks matter most when a test touches something outside the program, such as a file or a network connection, that must be released whether the test passed or failed.
 
-The runner wraps each test in the per-test hooks, with the run-once hooks on the outside. The inner `beforeEach`, test, `afterEach` cycle repeats for every test case:
+The test runner wraps each test in the per-test hooks, with the run-once hooks on the outside. The inner `beforeEach`, test, `afterEach` cycle repeats for every test case:
 
 <!-- pikchr playground: https://pikchr.org/home/pikchrshow -->
 ```pikchr
@@ -669,16 +690,17 @@ arrow from E2.n to AA.s
 
 ## The Value of Class Abstractions
 
-Bundling state with the operations that maintain it is what makes the class a unit of _abstraction_. A client reasons about _what_ a `Playlist` does, through the behaviour its methods expose, without needing to know _how_ it keeps the current index valid. To use the class, a client finds the one that models the thing they care about and calls the methods that provide the behaviour they want. This is part of why naming matters so much in design: a good name is what lets an engineer find the abstraction they need. The work of storing the state and keeping it consistent stays inside the class.
+A class is a unit of _abstraction_ because it bundles state with the operations that maintain it. A client reasons about _what_ a `Playlist` does, through the behaviour its methods expose, without needing to know _how_ it keeps the current index valid. A client need only find a class that models the thing they care about, and call the methods that provide the behaviour they want. The work of storing the state and keeping it consistent stays inside the class. 
+Naming matters in class design because a good name will allow an engineer to find the abstraction they need _without_ looking at the code that implements the class.
 
 <details class="tooltip deep-dive">
-  <summary>The abstraction at work in <code>Playlist</code></summary>
+  <summary>Abstraction at work in <code>Playlist</code></summary>
 
 Look back at how we used `favourites`. We called `add(..)`, `next()`, `current()`, and `remove(..)`, but we never touched the `songs` array directly, never adjusted `currentIndex`, and never worried about what removing the current song would do to the position. That work still happened; it was performed by `Playlist`. When we removed the current song, the index stayed valid because `remove` repairs it, and the caller could not get this wrong. As a client we only needed to know that a `Playlist` tracks a current song and moves through its list. How it stores the songs, and where it keeps the index valid, were details we never had to see.
 
 </details>
 
-This confines each concern to a single place. The class is the one location responsible for its own state, which frees the rest of the program from that responsibility. Because the operations that maintain the invariant live alongside the state they protect, rather than in the calling code, a client cannot accidentally leave an object in an inconsistent configuration by following the intended path.
+The class is the one location responsible for its own state. This frees the rest of the program from that responsibility. Because the operations that maintain the invariant live alongside the state they protect, rather than in the calling code, a client cannot accidentally leave an object in an inconsistent configuration by following the intended path.
 
 <!--
 So far this is the class _offering_ an interface that a client has no need to look past. It is not yet a guarantee. Nothing in this chapter stops a determined caller from reaching in and writing `favourites.currentIndex = 99` directly, breaking the invariant from outside. Guaranteeing that a client _cannot_ reach past the interface, so that an object's state is truly the class's own, is the role of [encapsulation](./03_encapsulation).

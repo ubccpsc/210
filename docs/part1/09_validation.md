@@ -192,11 +192,13 @@ The description part is unchanged. But now, the body is an ordinary arrow functi
 
 3. _Code under test can be driven through several steps._ In [Chapter 7](./07_async.html), we saw that `checkExpect` could hold more than one statement: but, it had the funnel all the computation into one final value to check. A test body has no such funnel. It can construct a value, configure it, exercise it, and assert at any point along the way, choosing a different operator for each assertion. Most real testing needs exactly that: behaviour that is not reachable until the value under test has been built up through several steps. 
 
+<!---- Defined better in Chapter 10
 <details class="tooltip deep-dive">
 <summary>Lifecycle hooks: avoiding repetitive setup</summary>
 
 A disadvantage of each test method owning its own state is that there might be repetitive setup (or teardown) in each test case. To remove this repetition, many test runners provide **lifecycle hooks** like `beforeEach` and `afterEach`. These hooks run around every case so that setup common to a group of tests is written once, while each case still receives its own fresh copy of it. 
 </details>
+--->
 
 The body of the test case being an arbitrary block allows us to improve failure reporting.
 
