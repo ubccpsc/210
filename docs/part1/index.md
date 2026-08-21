@@ -92,7 +92,7 @@ Part 1 covers four broad themes across nine chapters.
 ### Handling and verifying failure:
 
 8. [Designing for Failure](./08_errors) treats failure as part of a function's contract, choosing between returning a failure the type checker forces callers to confront and throwing an exception that propagates to a handler above.
-9. [Verifying Behaviour](./09_verification) moves from the course toolkit to the assertion vocabulary of a real test framework, partitions inputs and outputs, and uses coverage and regression to judge whether a suite checks enough.
+9. [Validating Behaviour](./09_validation) moves from the course toolkit to the assertion vocabulary of a real test framework, partitions inputs and outputs, and uses coverage and regression to judge whether a suite checks enough.
 
 ## Toward [Part 2](../part2/index): Abstraction
 

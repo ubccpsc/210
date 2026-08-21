@@ -580,7 +580,7 @@ The two assertions capture the whole difference: `mix` was shared with `addSong`
 
 ## Testing Classes
 
-The verification chapter tested pure functions: pass arguments, inspect the return value. A class is different. An object carries _state_ between calls, so a test usually constructs the object, performs a sequence of operations, and then asserts on the state that results. The value under test is the object's observable behaviour, not a single return value.
+In [Chapter 9](../part1/09_validation), we tested pure functions: pass arguments, inspect the return value. A class is different. An object carries _state_ between calls, so a test usually constructs the object, performs a sequence of operations, and then asserts on the state that results. The value under test is the object's observable behaviour, not a single return value.
 
 The `Playlist` class from this chapter tracks a current song as songs are added and removed. A test for it reads as a short story: set up an object, drive it through some calls, and check where it ended up.
 

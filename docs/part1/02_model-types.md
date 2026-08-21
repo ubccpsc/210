@@ -632,7 +632,7 @@ Without the types, none of these would be caught until the program ran, if they 
 
 <!---- </details> --->
 
-The types rule out whole categories of mistakes statically, but they cannot check that a function computes the _right_ answer. For that we still write tests. As in CPSC 110, we use `checkExpect` to state what a call should produce and have it verified when the program runs.
+The types rule out whole categories of mistakes statically, but they cannot check that a function computes the _right_ answer. For that we still write tests. As in CPSC 110, we use `checkExpect` to state what a call should produce and have it checked when the program runs.
 
 <!---- <details class="tooltip ts-tips">
   <summary>Testing behaviour with `checkExpect`</summary> --->

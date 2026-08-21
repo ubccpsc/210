@@ -209,7 +209,7 @@ test("alertAll delivers the message over every channel", () => {
 });
 ```
 
-`RecordingNotifier` is a third implementation of `Notifier`, written only for tests. A stand-in like this is called a **test double**, or a **mock object**: it satisfies the same contract as the real thing but is simpler and observable, so the code under test can be exercised in isolation. This is the black-box testing of the verification chapter, now made easy by an interface: the test depends on the contract, the code under test depends on the contract, and the real delivery mechanism is not present at all. Designing against interfaces is, among other things, what makes code testable.
+`RecordingNotifier` is a third implementation of `Notifier`, written only for tests. A stand-in like this is called a **test double**, or a **mock object**: it satisfies the same contract as the real thing but is simpler and observable, so the code under test can be exercised in isolation. This is the black-box testing from [Chapter 9](../part1/09_validation), now made easy by an interface: the test depends on the contract, the code under test depends on the contract, and the real delivery mechanism is not present at all. Designing against interfaces is, among other things, what makes code testable.
 
 ```plantuml
 @startuml

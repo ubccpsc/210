@@ -47,9 +47,9 @@ Part 3 covers three connected themes across six chapters, one per lecture.
 
 4. [Code Quality and Refactoring](./04_refactoring) originates from a fact of long-lived systems: working code can still be hard to work on. This chapter develops judgement about internal quality, readability, complexity, and the smells that signal trouble, and introduces refactoring: improving structure without changing behaviour, with the regression testing practice from [Part 2](../part2/index) used to provide trust that the system remains working as expected.
 
-5. [Debugging and Fault Localization](./05_debugging) treats a bug report as a claim that the system misbehaves, usually far from the fault that causes it. The chapter looks at systematic debugging: reproducing the failure, forming and testing hypotheses, localizing the fault, and fixing and verifying the original problem has been resolved.
+5. [Debugging and Fault Localization](./05_debugging) treats a bug report as a claim that the system misbehaves, usually far from the fault that causes it. The chapter looks at systematic debugging: reproducing the failure, forming and testing hypotheses, localizing the fault, and fixing and checking the original problem has been resolved.
 
-6. [Adding New Features](./06_new_features) closes with feature requests, and with the observation that a feature's cost depends less on the feature than on whether the design anticipated it. It looks at the process of extending systems: reading unfamiliar code, finding the extension points the existing design left open, creating one where none exists, planning and making the change, and, as with debugging, verifying that everything that worked before still works.
+6. [Adding New Features](./06_new_features) closes with feature requests, and with the observation that a feature's cost depends less on the feature than on whether the design anticipated it. It looks at the process of extending systems: reading unfamiliar code, finding the extension points the existing design left open, creating one where none exists, planning and making the change, and, as with debugging, checking that everything that worked before still works.
 
 ## Beyond CPSC 210
 

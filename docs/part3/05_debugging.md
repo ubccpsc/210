@@ -6,7 +6,7 @@ A bug report is a claim that a system is not behaving as expected. It arrives wi
 
 That distance between the report and where it manifests in the code is the reason debugging feels different from writing code. When you write a function you know where you are, and the compiler and the tests tell you when you have gone wrong. When you debug, you begin at the far end of a chain of consequences and work backwards towards a cause you cannot see, in code that may have been correct yesterday and may have been written by somebody else. This is also challenging because you rarely have failing tests in advance for a reported bug, if you did, you would have already fixed the problem.
 
-The claim of this chapter is that debugging is a process rather than a talent. It has four steps, each with techniques that can be learned: reproduce the failure, localize the fault, fix it, and verify that the fix worked and didn't introduce any other new defects. Engineers who are quick at debugging are usually not guessing better than everybody else; they are following those steps more systematically.
+The claim of this chapter is that debugging is a process rather than a talent. It has four steps, each with techniques that can be learned: reproduce the failure, localize the fault, fix it, and validate that the fix worked and didn't introduce any other new defects. Engineers who are quick at debugging are usually not guessing better than everybody else; they are following those steps more systematically.
 
 ## A Parcel That Was Never Delivered
 
@@ -250,7 +250,7 @@ test("a NOT_DELIVERED status is not reported as delivered", () => {
 
 The order of operations matters. Add the test and watch it fail _before_ applying the fix. A test written after the fix and never seen to fail is a test that may be checking nothing at all: it passes, but so would an empty test, and neither tells you anything. Seeing it fail first is what establishes that it detects the fault.
 
-Then run the whole suite, not only the new test. This is the same argument the refactoring chapter made about restructuring, and it is the reason both chapters depend on the verification chapter: a suite is what converts "I believe this change is safe" into evidence.
+Then run the whole suite, not only the new test. This is the same argument the refactoring chapter made about restructuring, and it is the reason both chapters depend on [Chapter 9](../part1/09_validation): a suite is what converts "I believe this change is safe" into evidence.
 
 ## Bug-Fixing in a Public API
 
@@ -270,7 +270,7 @@ Severity overrides the calculus. A bug that loses data, exposes information, or 
 
 ## Debugging Is a Process
 
-The chain from a fault to a failure is what makes debugging hard, and every step in this chapter is a way of shortening it or searching it systematically. Reproduce, so that the failure is available on demand and small enough to reason about. Localize by hypothesis and by halving, rather than by changing code and hoping. Fix the fault at the level it lives, and ask why it was possible, because the answer is often a design improvement rather than only a correction. Verify with a test that was seen to fail first, and with a suite that guards everything else.
+The chain from a fault to a failure is what makes debugging hard, and every step in this chapter is a way of shortening it or searching it systematically. Reproduce, so that the failure is available on demand and small enough to reason about. Localize by hypothesis and by halving, rather than by changing code and hoping. Fix the fault at the level it lives, and ask why it was possible, because the answer is often a design improvement rather than only a correction. Validate with a test that was seen to fail first, and with a suite that guards everything else.
 
 Notably, little of the debugging process is new to you at this point. The properties that make a system quick to debug are the ones earlier chapters argued for on entirely different grounds: small units that a failing test can name, low coupling so the chain of arrows is short, validated boundaries so bad data is rejected where it enters rather than interpreted three layers later, assertions that turn silent errors into loud ones, and a regression suite that makes any fix checkable. None of those were introduced as debugging techniques. All of them are, on the day something goes wrong.
 

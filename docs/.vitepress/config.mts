@@ -142,8 +142,8 @@ export default defineConfig({
                 text: "08: Designing for Failure",
                 link: "/part1/08_errors"
             }, {
-                text: "09: Verifying Behaviour",
-                link: "/part1/09_verification"
+                text: "09: Validating Behaviour",
+                link: "/part1/09_validation"
             }]
 
         }, // end part 1
