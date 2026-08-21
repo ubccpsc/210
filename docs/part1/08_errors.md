@@ -2,11 +2,11 @@
 
 Every function's contract describes what happens when the function works, and when it doesn't. A function that looks up a course section must also handle what happens when no such section exists; a function that enrols a student must handle what happens when a prerequisite is missing. Failures should be designed as deliberately as successes, so that a design offers a consistent, understandable failure model: one that stays out of the way when the system is working, but makes it hard to do the wrong thing when it is not.
 
-In [Chapter 3](./03_checking-invariants.html) we differentiated two kinds of failure. An **unexpected error** is one that should be impossible: an invariant has been violated, which means the program has a bug. We proactively detect these with `assert`, which stops the program the moment an impossible state appears, because no sensible computation can continue from corrupt data. These are often triggered only during development, because an implementation is typically strengthened to prevent precondition violations in deployed systems. 
+In [Chapter 3](./03_checking-invariants) we differentiated two kinds of failure. An **unexpected error** is one that should be impossible: an invariant has been violated, which means the program has a bug. We proactively detect these with `assert`, which stops the program the moment an impossible state appears, because no sensible computation can continue from corrupt data. These are often triggered only during development, because an implementation is typically strengthened to prevent precondition violations in deployed systems.
 
-An **expected error** is a foreseeable, unsuccessful outcome that is not a bug at all: a section is full, a prerequisite is missing, a file is absent. Expected errors belong in the contract, and the caller is expected to deal with them. 
+An **expected error** is a foreseeable, unsuccessful outcome that is not a bug at all: a section is full, a prerequisite is missing, a file is absent. Expected errors belong in the contract, and the caller is expected to deal with them.
 
-This chapter dives deeper into expected errors: how a function communicates errors to its caller, and how the caller responds. There are two mechanisms in wide use. A function can _return_ its failure as an ordinary value, or it can _throw_ an exception that travels up the call stack until something handles it. Each mechanism has strengths and weaknesses. 
+This chapter dives deeper into expected errors: how a function communicates errors to its caller, and how the caller responds. There are two mechanisms in wide use. A function can _return_ its failure as an ordinary value, or it can _throw_ an exception that travels up the call stack until something handles it. Each mechanism has strengths and weaknesses.
 
 ## A Student Enrolling in Sections
 
@@ -86,9 +86,9 @@ function checkPrerequisite(student: Student, section: Section): Result<Section, 
 }
 ```
 
-The strength of this approach is that the failure is captured by the type. A caller of `findSection` receives a `Result<Section, string>`, not a `Section`, so the compiler will not let them access `.value` without first checking `.ok`. The possibility of failure is impossible to overlook, because the type checker forces the caller to deal with the error case. 
+The strength of this approach is that the failure is captured by the type. A caller of `findSection` receives a `Result<Section, string>`, not a `Section`, so the compiler will not let them access `.value` without first checking `.ok`. The possibility of failure is impossible to overlook, because the type checker forces the caller to deal with the error case.
 
-Since the returned failure is an ordinary value, it is tested like any other value: 
+Since the returned failure is an ordinary value, it is tested like any other value:
 
 ```typescript
 const cpsc213: Section = { id: "CPSC213", prerequisite: ["CPSC210"] };
@@ -207,7 +207,7 @@ The languages above differ in how much they ask of a caller. TypeScript uses **u
 
 Some languages, like Java, also offer **checked exceptions**, which must be declared in the signature and which the compiler forces every caller either to handle or to re-declare. Checked exceptions make a failure impossible to forget: a function must declare what it throws, and any function that calls it must either catch the exception or declare that it, too, can throw it.
 
-The `Result` type from earlier in this chapter recovers the _checked_ property inside an unchecked language. By putting the failure in the return type, it makes the compiler insist that callers deal with errors. 
+The `Result` type from earlier in this chapter recovers the _checked_ property inside an unchecked language. By putting the failure in the return type, it makes the compiler insist that callers deal with errors.
 </details>
 
 Looking at the rest of our example:
@@ -288,7 +288,7 @@ You raised errors in CPSC 110 with `error`, which stopped the program with a mes
 
 ## Catching an Exception
 
-A thrown exception is handled with a `try`/`catch` statement. Code that might encounter an error goes in the `try` block, while the code to run if an error occurs goes in the `catch` block. 
+A thrown exception is handled with a `try`/`catch` statement. Code that might encounter an error goes in the `try` block, while the code to run if an error occurs goes in the `catch` block.
 
 For example, the `enrolStudent` function needs to handle the situation where `enrolAll` fails:
 
@@ -318,7 +318,7 @@ try {
 // (C)
 ```
 
-If `(A)` runs to completion without throwing, the `catch` block `(B)` is skipped entirely and control continues at `(C)`. If anything in `(A)` throws, the rest of `(A)` is abandoned at once, control jumps to `(B)` with the thrown error bound to the name `x`, and then continues at `(C)`. Either way `(C)` runs; the only difference is whether `(B)` ran on the way there. Crucially, the throw caught in `(B)` need not have happened directly in `(A)`: it may have come from deep inside a function that `(A)` called, because a `try` catches throws from anywhere in the work it encloses. 
+If `(A)` runs to completion without throwing, the `catch` block `(B)` is skipped entirely and control continues at `(C)`. If anything in `(A)` throws, the rest of `(A)` is abandoned at once, control jumps to `(B)` with the thrown error bound to the name `x`, and then continues at `(C)`. Either way `(C)` runs; the only difference is whether `(B)` ran on the way there. Crucially, the throw caught in `(B)` need not have happened directly in `(A)`: it may have come from deep inside a function that `(A)` called, because a `try` catches throws from anywhere in the work it encloses.
 
 TypeScript gives the caught value the type `unknown`, because in principle any value can be thrown, so in the catch statement above, we log the whole error rather than reach into it. That is enough to report what went wrong: an `Error` prints with the message it was given.
 </details>
@@ -585,7 +585,7 @@ This is what separates exceptions from ordinary control flow. An `if`, a `return
 
 The consequence is that you can no longer reason about a function from the function alone. Normally, to understand a piece of code, you read it together with the contracts of the functions it calls, and everything you need is local. Exceptions break that locality in both directions: the error a function raises may be handled far above it, by code it does not know about, and an error it must be ready to receive may originate far below it, passed up through callees that only forwarded it. Look again at the `deep`, `middle`, and `shallow` chain above. `middle` neither throws nor catches, yet it sits squarely on the path of an exception, and reading `middle` on its own gives no sign that it takes part in a failure raised in `deep` and handled in `shallow`. This _non-locality_, which kept the success path clean, makes failure behaviour hard to trace.
 
-Two development habits keep this in check. First, keep exceptions _rare_. Reserve them for errors, so that the points where control can jump non-locally are few and meaningful. Second, _document_ what the function throws in its contract: the documentation should capture what it can throw and under what conditions. 
+Two development habits keep this in check. First, keep exceptions _rare_. Reserve them for errors, so that the points where control can jump non-locally are few and meaningful. Second, _document_ what the function throws in its contract: the documentation should capture what it can throw and under what conditions.
 
 <!---- CL: removed this because I think it's repetitive and don't quite get it?
  Catching exceptions is also deliberate: it is common for direct callers to ignore exceptions and let their own callers do the handling if they have the context to respond and act more appropriately. --->
@@ -600,16 +600,16 @@ A **thrown** failure _propagates itself_, which clarifies the common success pat
 
 Where to let an exception propagate is as much a design decision as when to throw one. A function that encounters an error it cannot meaningfully address should not catch it; letting the exception rise through the call stack to a layer with the context to recover or report is often exactly right. A parser that reads a file can detect a malformed record, but it is rarely in a position to decide what the program does about it. The practical rule is to catch at the boundary where the program knows what to do: a command-line tool might catch at the top level and print the message; a web server might catch per request and return an error response; a low-level library should almost never catch at all, since doing so hides failures from the only code that can act on them.
 
-Within a single codebase, _consistency_ matters as much as the individual choice. Consistent error handling is always easier to use correctly than a mix where every function makes its own call. 
+Within a single codebase, _consistency_ matters as much as the individual choice. Consistent error handling is always easier to use correctly than a mix where every function makes its own call.
 
-Whatever the error mechanism, a few practices hold across all of them: 
-- never silently discard an error; 
-- do not use exceptions for ordinary control flow, only for real errors; and 
+Whatever the error mechanism, a few practices hold across all of them:
+- never silently discard an error;
+- do not use exceptions for ordinary control flow, only for real errors; and
 - check data the moment it crosses into your program from a file, a network, or a user, converting outside uncertainty into either a trusted value or a clear error right at the boundary. (more on this in a future chapter)
 
 ## Designing for Failure
 
-A well-designed abstraction handles failures as deliberately as it handles successes. Expected failures belong in the contract, and a function communicates them in one of two ways: by returning a value that the type checker forces callers to confront, or by throwing an exception that propagates on its own to a handler far above. Unexpected failures, the impossible states that signal bugs, are thrown by `assert` and left uncaught so the program halts at the first sign of corruption. The choice between returning and throwing is a design decision, weighing visibility in the types against the readability of the success path, and it is one you now have the vocabulary to make. So far we have been testing errors with `checkExpect` and `checkError`; the next chapter on verifying behaviour introduces more expressive tools for asserting exactly how and why a piece of code fails. 
+A well-designed abstraction handles failures as deliberately as it handles successes. Expected failures belong in the contract, and a function communicates them in one of two ways: by returning a value that the type checker forces callers to confront, or by throwing an exception that propagates on its own to a handler far above. Unexpected failures, the impossible states that signal bugs, are thrown by `assert` and left uncaught so the program halts at the first sign of corruption. The choice between returning and throwing is a design decision, weighing visibility in the types against the readability of the success path, and it is one you now have the vocabulary to make. So far we have been testing errors with `checkExpect` and `checkError`; the next chapter on verifying behaviour introduces more expressive tools for asserting exactly how and why a piece of code fails.
 
 <details class="tooltip exercise">
   <summary>Exercise: Booking a Trip</summary>
