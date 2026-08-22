@@ -282,7 +282,7 @@ While making the change, the habits are the ones the last two chapters establish
 "Done" is not "the code I wrote works", and the difference is worth being explicit about, since it is where features get shipped half-finished.
 
 - The new behaviour has tests, including its failure cases. What happens when the channel is unavailable is part of the feature, not an afterthought.
-- The whole regression suite passes, which is [Chapter 9](../part1/09_validation.html)'s argument arriving in its final form: the evidence that a change added something without removing anything.
+- The whole regression suite passes, which is [Chapter 9](../part1/09_validation)'s argument arriving in its final form: the evidence that a change added something without removing anything.
 - Documentation and contracts are updated. If a class gained state, its invariant is stated. If a published surface changed, its documentation changed with it.
 - No new smells were introduced, by the standards of the refactoring chapter.
 - And the test that matters most in the long run: _the next feature is not harder because of this one_.

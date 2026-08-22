@@ -184,7 +184,7 @@ The first is that it documents what a client may _not_ rely on. Saying the resul
 
 The second is that it documents the order carriers are consulted, which is a promise we have chosen to make. That decision has a cost: having documented it, we can no longer parallelise those lookups without a breaking change. Both kinds of statement are design decisions, and the documentation is where they get made.
 
-Beyond the operations, a client needs guidance for getting started. Most people evaluating a library read one example and decide whether to keep going, so a README that answers what this is for, how to install it, and what a typical call looks like is doing more work than any individual signature. For a web service the same role is played by a written specification of the routes. <!-- ; OpenAPI is a commonly-used format, and its details belong in a later course. -->
+Beyond the operations, a client needs guidance for getting started. Most people evaluating a library read one example and decide whether to keep going, so a README that answers what this is for, how to install it, and what a typical call looks like is doing more work than any individual signature. For a web service the same role is played by a written specification of the routes.
 
 ## Compatible and Breaking Change
 
@@ -286,7 +286,7 @@ Authentication is a real part of most published services and a large enough topi
 
 ## An API Is a Promise
 
-Publishing changes what a design decision means. Inside a system we own, a decision is provisional and the cost of revising it is our own time. Published, it becomes a promise to people we will never meet, and the cost of revising it is theirs.Two properties follow: 
+Publishing changes what a design decision means. Inside a system we own, a decision is provisional and the cost of revising it is our own time. Published, it becomes a promise to people we will never meet, and the cost of revising it is theirs.Two properties follow:
 
 Because the surface is close to permanent, it should be small: expose the behaviour clients need and keep everything else unreachable, so that the parts we may want to change are parts nobody can see. Because the clients are engineers under time pressure, the surface should be easy to use correctly and difficult to use incorrectly: names that describe, parameters that cannot be swapped by accident, failures that can be branched on, and consistency that lets a client generalise from the first call to the rest.
 
