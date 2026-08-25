@@ -171,8 +171,8 @@ Terms introduced in **bold** throughout the textbook, linked to the section wher
 ## L
 
 - **Lambda Expressions** — [Learning a New Programming Language § Validating the Dynamic View With Testing](/part1/01_new-language#validating-the-dynamic-view-with-testing)
-- **Language, Typed** — [CPSC 210: Software Construction § Choice of Programming Language](/index#choice-of-programming-language)
-- **Language, Untyped** — [CPSC 210: Software Construction § Choice of Programming Language](/index#choice-of-programming-language)
+- **Language, Typed** — [CPSC 210: Software Construction § Language Choice](/index#language-choice)
+- **Language, Untyped** — [CPSC 210: Software Construction § Language Choice](/index#language-choice)
 - **Law of Demeter** — [Coupling and Dependencies § Reaching Past a Neighbour](/part3/01_coupling#reaching-past-a-neighbour)
 - **Library** — [Designing APIs to Provide Data and Services § Publishing the Tracker](/part3/03_api_design#publishing-the-tracker)
 - **Library API** — [Consuming Data and Services by Using APIs § Two Kinds of API](/part3/02_consuming_data#two-kinds-of-api)
