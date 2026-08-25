@@ -73,23 +73,23 @@ One concern remains. An invariant the language cannot check must still be kept t
 
 Part 1 covers four broad themes across nine chapters.
 
-### The language and its data:
+#### The language and its data:
 
 1. [Learning a New Programming Language](./01_new-language) introduces TypeScript from Intermediate Student Language: types as a checked mechanism, the compiler, statements like `if` and `return`, and the static and dynamic views the rest of the part builds on.
 2. [Using Types to Model Problems](./02_model-types) designs precise data: compound types, unions for distinct cases, and recursive structure, with functions whose shape follows the shape of the data.
 
-### Correctness:
+#### Correctness:
 
 3. [Checking Invariants](./03_checking-invariants) records contracts and invariants, derives tests from them using equivalence classes and boundary values, and uses assertions to catch impossible states.
 4. [Maintaining Invariants](./04_maintaining-invariants) keeps an invariant true for the life of a program by controlling creation with a constructor function and hiding state inside a closure.
 
-### The capabilities of real programs:
+#### The capabilities of real programs:
 
 5. [Arrays and Iteration](./05_arrays) introduces collections and the operations over them: `map`, `filter`, `reduce`, and `find`, with the `for of` loop beneath them.
 6. [Mutation and Side Effects](./06_state-mutation) adds state that changes over time, along with the references, aliasing, scope, and side effects that come with it.
 7. [Asynchronous Effects and Time](./07_async) reaches outside the program to files and web services, where a result arrives only after a wait, using promises and `async`/`await`.
 
-### Handling and verifying failure:
+#### Handling and verifying failure:
 
 8. [Designing for Failure](./08_errors) treats failure as part of a function's contract, choosing between returning a failure the type checker forces callers to confront and throwing an exception that propagates to a handler above.
 9. [Validating Behaviour](./09_validation) moves from the course toolkit to the assertion vocabulary of a real test framework, partitions inputs and outputs, and uses coverage and regression to judge whether a suite checks enough.

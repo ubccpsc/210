@@ -8,7 +8,7 @@ In Part 2, we expand our scope. Real software is built by teams, is maintained f
 
 In response, we move from _programmer discipline_ to encoding invariants _in the language_ itself. By encoding invariants into classes and their associated abstractions, we shift the burden of consistency from individual care to _language enforcement_ and from ad hoc coordination to explicit design.
 
-<details class="tooltip link-110"> 
+<details class="tooltip link-110">
 <summary>Programmer Discipline vs Enforcement</summary>
 
 Recall in CPSC 110, the _signature_ encoded type information. But the teaching languages did not enforce this signature. In [Part 1](../part1/index), we saw the shift from the unenforced signature in CPSC 110:
@@ -31,10 +31,10 @@ double("Clearly not a number")
 
 ```
 
-This is a shift from programmer discipline (in CPSC 110, _assuming_ callers of the function would respect the signature) to enforcement by the language. In addition to the type checker giving us a static error, so the code will not fail at runtime, we see that the error is more accurate: the issue was not in passing a number to the `*` operator, but in passing a string as parameter `n`.  
+This is a shift from programmer discipline (in CPSC 110, _assuming_ callers of the function would respect the signature) to enforcement by the language. In addition to the type checker giving us a static error, so the code will not fail at runtime, we see that the error is more accurate: the issue was not in passing a number to the `*` operator, but in passing a string as parameter `n`.
 
-In Part 2, we'll see the same shift, but with more complex constraints than type signatures. 
- 
+In Part 2, we'll see the same shift, but with more complex constraints than type signatures.
+
 </details>
 
 In this module we develop _class-based_ abstractions as the mechanism for invariant enforcement. Across seven lectures, we define classes, decompose systems into cohesive units, hide what is free to change, separate what a class means from how it stores it, depend on abstractions through interfaces, organise classes into hierarchies, and write code that continues to apply as new types arrive.

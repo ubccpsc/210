@@ -47,7 +47,7 @@ Nothing here is obviously wrong. `WeeklyRecap` is cohesive: it has one job, and 
 * It assumes that the history comes back as an array.
 * It assumes that the array is ordered with the most recent play first.
 * It assumes that its elements are `Song` objects.
-* It assumes that each `Song` has a `title`. 
+* It assumes that each `Song` has a `title`.
 
 None of those facts is part of the `PlayHistory` contract. They are _implementation details_ of how `PlayHistory` happens to store its data, and `WeeklyRecap` now depends on all of them.
 
@@ -83,7 +83,7 @@ You saw this effect in CPSC 110, though not by name. A function's template was d
 
 **Coupling** is the degree to which one part of a system depends on another. Two classes are tightly coupled when a change to one is likely to force a change to the other, and loosely coupled when each can change without disturbing its neighbour.
 
-The practical test is a question about knowledge: _how much must you know about B in order to write or change A?_ `WeeklyRecap` had to know the shape of `PlayHistory`'s private fields, so the two are tightly coupled even though `WeeklyRecap` never mentions `PlayHistory` by name. Contrast this with what `WeeklyRecap` needs to know in principle: it needs a list of songs played since some time. 
+The practical test is a question about knowledge: _how much must you know about B in order to write or change A?_ `WeeklyRecap` had to know the shape of `PlayHistory`'s private fields, so the two are tightly coupled even though `WeeklyRecap` never mentions `PlayHistory` by name. Contrast this with what `WeeklyRecap` needs to know in principle: it needs a list of songs played since some time.
 
 This sits exactly opposite cohesion, and the two are best read together:
 

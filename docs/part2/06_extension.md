@@ -215,7 +215,7 @@ Removing the branch is an improvement on its own terms, but its real importance 
 
 ## Composition Over Inheritance
 
-Class extension is powerful, and the language gives it dedicated syntax, but it is used more often than it should be. Most relationships between classes are better expressed by composition: one class _holds_ another as a field and delegates to it. That is, classes more often have _has-a_ relationships with each other, rather than _being_ a special kind of another class. 
+Class extension is powerful, and the language gives it dedicated syntax, but it is used more often than it should be. Most relationships between classes are better expressed by composition: one class _holds_ another as a field and delegates to it. That is, classes more often have _has-a_ relationships with each other, rather than _being_ a special kind of another class.
 
 To see when composition fits better, suppose the alert text needs more than one format, terse for SMS and verbose for email, and that the choice of format should be independent of the channel. Baking formatting into the class hierarchy through `decorate(..)` ties each format to a class: a verbose email and a terse email would be two classes, and a third format would multiply the hierarchy again. Holding a formatter keeps the two concerns separate:
 

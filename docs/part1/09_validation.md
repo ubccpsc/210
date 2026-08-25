@@ -138,7 +138,7 @@ By using specific operators, a test failure will give us the cause of failure.
 <details class="tooltip ts-tips">
 <summary>When do we need to add <code>() =></code>?</summary>
 
-Above, we've set the argument to `expect` to be a variable name in most cases, and a function call wrapped in `() =>` for `expect...to.throw`. Why? This is because `.to.throw` needs to observe the _execution_ of the function to determine if it throws: it cannot simply examine the return value, because when a function throws, there is no return value (recall [Chapter 8](./08_errors.html))
+Above, we've set the argument to `expect` to be a variable name in most cases, and a function call wrapped in `() =>` for `expect...to.throw`. Why? This is because `.to.throw` needs to observe the _execution_ of the function to determine if it throws: it cannot simply examine the return value, because when a function throws, there is no return value (recall [Chapter 8](./08_errors))
 
 If you can write:
 ```typescript
@@ -188,9 +188,9 @@ The description part is unchanged. But now, the body is an ordinary arrow functi
 
 1. _A case can hold as many assertions as the behaviour needs._ We had only one check per test case because the check _was_ the test body, not because a good test has only one check. With a whole block,  the body can state several expectations about a single result. This is handy to poinpoint bugs: by ordering assertions from general to specific, an assertion failure gives us the _kind_ of the fault, not just the _presence_ of a fault. We'll develop this more in the _Layering Assertions for Clearer Failures_ section below. You may still only write one assertion per test case, but now it is a choice rather than a limitation. 
 
-2. _Setup belongs inside the case._ In the earlier chapters, a check was a single call `checkExpect(() => <actual>, <expected>)`. So any values that wouldn't fit into this call had to be declared above the tests, at the top level of the file. Everything declared there is visible to every later test. If one of those values is _mutable_ ([Chapter 6](./06_state-mutation.html)) changes by one test are visible by every subsequent test. A test suite that accesses top-level state like this can pass or fail depending on the order its cases happen to run in. That's no good! With a full block as test case body, each test case can hold its own `const` and `let` declarations. So, each test case can build only the values it needs, without disturbing another test case's values. 
+2. _Setup belongs inside the case._ In the earlier chapters, a check was a single call `checkExpect(() => <actual>, <expected>)`. So any values that wouldn't fit into this call had to be declared above the tests, at the top level of the file. Everything declared there is visible to every later test. If one of those values is _mutable_ ([Chapter 6](./06_state-mutation)) changes by one test are visible by every subsequent test. A test suite that accesses top-level state like this can pass or fail depending on the order its cases happen to run in. That's no good! With a full block as test case body, each test case can hold its own `const` and `let` declarations. So, each test case can build only the values it needs, without disturbing another test case's values. 
 
-3. _Code under test can be driven through several steps._ In [Chapter 7](./07_async.html), we saw that `checkExpect` could hold more than one statement: but, it had the funnel all the computation into one final value to check. A test body has no such funnel. It can construct a value, configure it, exercise it, and assert at any point along the way, choosing a different operator for each assertion. Most real testing needs exactly that: behaviour that is not reachable until the value under test has been built up through several steps. 
+3. _Code under test can be driven through several steps._ In [Chapter 7](./07_async), we saw that `checkExpect` could hold more than one statement: but, it had the funnel all the computation into one final value to check. A test body has no such funnel. It can construct a value, configure it, exercise it, and assert at any point along the way, choosing a different operator for each assertion. Most real testing needs exactly that: behaviour that is not reachable until the value under test has been built up through several steps. 
 
 <!---- Defined better in Chapter 10
 <details class="tooltip deep-dive">
@@ -204,7 +204,7 @@ The body of the test case being an arbitrary block allows us to improve failure 
 
 ## Richer Failures: Layering Assertions for Clearer Failures
 
-Consider a function that lists the sections a student can currently enrol in: those they have not already completed and whose prerequisites they have all met. Let's reuse the `Section` and `Student` types from [Chapter 8](./08_errors.html), with a catalogue that now offers two first-year courses:
+Consider a function that lists the sections a student can currently enrol in: those they have not already completed and whose prerequisites they have all met. Let's reuse the `Section` and `Student` types from [Chapter 8](./08_errors), with a catalogue that now offers two first-year courses:
 
 <CollapsibleCode>
 
@@ -319,7 +319,7 @@ In test design, as in software design more broadly, there is rarely a single rig
  
 A test case has three core parts: (1) constructing inputs; (2) exercising the software with those inputs; (3) asserting the software behaves as expected.  We've discussed how to build richer assertions. How should we construct inputs?
 
-In [Chapter 3](./03_checking-invariants.html), we discussed equivalence class partitioning and boundary value checking. We divided a function's input space into equivalence classes, grouping those the specification treats alike, and tested one representative of each. We looked hardest at the boundaries between classes. 
+In [Chapter 3](./03_checking-invariants), we discussed equivalence class partitioning and boundary value checking. We divided a function's input space into equivalence classes, grouping those the specification treats alike, and tested one representative of each. We looked hardest at the boundaries between classes. 
 
 These techniques form the basis on input selection. But once  a function's inputs and outputs are richer than a single number, (1) the input classes are defined over combinations of fields rather than ranges, and (2) the output deserves partitioning of its own.
 
@@ -469,7 +469,7 @@ All the techniques we've discussed so far are forms of **black-box testing**. **
 
 Once an implementation exists, we can look into the box. **White-box testing** refers to tests that consider the _exact code written_ in the function under test. We read the code and ask: do our tests _exercise_ what was written? 
 
-Reading code reveals the code's _branches_ (ref. [Chapter 1](01_new-language.html)). Each branch is a place a fault can hide untested. The decisions in `playableTitles` all live in its helper, `canPlay`, so that is where we look:
+Reading code reveals the code's _branches_ (ref. [Chapter 1](./01_new-language)). Each branch is a place a fault can hide untested. The decisions in `playableTitles` all live in its helper, `canPlay`, so that is where we look:
 
 ```typescript
 function canPlay(viewer: Viewer, title: Title): boolean {

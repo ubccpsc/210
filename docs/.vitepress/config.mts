@@ -189,7 +189,7 @@ export default defineConfig({
                 link: "/part3/03_api_design"
             },
             {
-                text: "20: Code Quality, Refactoring",
+                text: "20: Code Quality and Refactoring",
                 link: "/part3/04_refactoring"
             },
             {
