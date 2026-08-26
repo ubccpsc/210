@@ -85,6 +85,11 @@ export default defineConfig({
         );
     },
     themeConfig: {
+        // Show h3 headings in the "On this page" outline, nested under their h2.
+        // 12 chapters use ### for sub-topics; without this they are invisible to
+        // the outline. theme/style.css styles the two levels differently.
+        outline: [2, 3],
+
         search: {
             provider: 'local'
         },
