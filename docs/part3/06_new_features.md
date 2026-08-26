@@ -114,7 +114,7 @@ const tracker = new ParcelTracker([
 
 Counted as a diff, that is one new file, one line added where the list of clients is assembled, and one new test file. Nothing else is touched: `ParcelTracker` does not change, no existing adapter changes, and no existing test changes, which means no existing behaviour can regress. This is the Open/Closed Principle collecting on a promise made several chapters ago: the system grew by addition rather than by disturbance, and the new tests are only the ones for the new carrier.
 
-It is worth being clear about when that property was created. Not this week. It was created when somebody defined `CarrierClient` instead of calling carriers directly, and preserved when the refactoring chapter moved the status vocabulary back out of the middle of the system. Today's cheap change was paid for earlier.
+That property was not created this week. It was created when somebody defined `CarrierClient` instead of calling carriers directly, and preserved when the refactoring chapter moved the status vocabulary back out of the middle of the system. Today's cheap change was paid for earlier.
 
 ## When There Is No Extension Point
 
@@ -227,7 +227,7 @@ and one more line at the composition root, where it is handed in alongside the c
 
 Compare the result with the version that was forced in. `locate` is a query again. No caller carries a `Notifier` it does not use. The delay policy lives in one class named for it, so changing what counts as delayed means editing that class and nothing else. And the tracker knows nothing about notifications, which means the next observer, an analytics recorder or an audit log, is another new class and no further change.
 
-The reason to split this into two commits rather than one is worth stating plainly. The first changes structure and no behaviour; the second changes behaviour and no structure. Reviewed separately, each is easy to judge. Combined into one commit, a reviewer cannot tell which lines are the feature and which are the rearrangement, and if something breaks, reverting means losing both.
+Splitting this into two commits rather than one has a clear reason. The first changes structure and no behaviour; the second changes behaviour and no structure. Reviewed separately, each is easy to judge. Combined into one commit, a reviewer cannot tell which lines are the feature and which are the rearrangement, and if something breaks, reverting means losing both.
 
 <details class="tooltip deep-dive">
 <summary>When the Refactoring Is Too Large</summary>
@@ -279,7 +279,7 @@ While making the change, the habits are the ones the last two chapters establish
 
 ## Knowing When A Feature Is Done
 
-"Done" is not "the code I wrote works", and the difference is worth being explicit about, since it is where features get shipped half-finished.
+"Done" is not "the code I wrote works", and the difference is where features get shipped half-finished.
 
 - The new behaviour has tests, including its failure cases. What happens when the channel is unavailable is part of the feature, not an afterthought.
 - The whole regression suite passes, which is [Chapter 9](../part1/09_validation)'s argument arriving in its final form: the evidence that a change added something without removing anything.

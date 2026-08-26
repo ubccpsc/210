@@ -132,7 +132,7 @@ Doing two of these in one change is how refactoring acquired its reputation for 
 
 ### Refactoring Is Pure Risk
 
-It is worth being blunt about the position refactoring puts you in, because it is unlike any other work in this textbook.
+Refactoring puts you in a position unlike any other work in this textbook.
 
 Every other change has a benefit that arrives with it. A feature gives users something they did not have. A bug fix restores behaviour that was supposed to exist. Each carries risk, and each has something on the other side of the scale to weigh the risk against.
 

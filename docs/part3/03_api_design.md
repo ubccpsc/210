@@ -62,7 +62,7 @@ That is what an API is, made permanent and given an audience. The difference is 
 
 </details>
 
-Before designing anything, it is worth being precise about what "we cannot change it" means, because the implications of this reach further than might first appear. It is not only the operations we documented. Clients depend on whatever they can observe: the order of results, the exact wording of an error message, the fact that a call happens to be fast, the field we left in a response because removing it seemed unnecessary. None of those were meant as promises but all of them implicitly end up being promises once somebody writes code that would break without them.
+Before designing anything, be precise about what "we cannot change it" means, because the implications reach further than they first appear. It is not only the operations we documented. Clients depend on whatever they can observe: the order of results, the exact wording of an error message, the fact that a call happens to be fast, the field we left in a response because removing it seemed unnecessary. None of those were meant as promises but all of them implicitly end up being promises once somebody writes code that would break without them.
 
 <details class="tooltip deep-dive">
 <summary>Hyrum's Law</summary>
@@ -89,7 +89,7 @@ export type { CarrierClient } from "./CarrierClient";
 export type { TrackingError } from "./TrackingError";
 ```
 
-This details four exports, but it is worth noting what is missing. `CarrierAClient` and the validator are how the library does its job, not what it promises, so they are unexported and stay changeable. A client that cannot name `CarrierAClient` cannot come to depend on it, which means we can rewrite it, rename it, or delete it without anyone noticing. But there are two common traps here worth discussing:
+This details four exports; what is missing matters just as much. `CarrierAClient` and the validator are how the library does its job, not what it promises, so they are unexported and stay changeable. A client that cannot name `CarrierAClient` cannot come to depend on it, which means we can rewrite it, rename it, or delete it without anyone noticing. But there are two common traps here worth discussing:
 
 _Do not export internal types for convenience._ It is tempting to export a helper because a test needs it or because exporting is easier than arranging the code properly. Every such export is permanent, and a type exported for our convenience becomes a type we must maintain for client's benefit.
 
@@ -227,7 +227,7 @@ We then fix what we consider a defect in our own code: `lastSeenAt` had been rec
 
 Notice that none of the mechanisms we rely on to catch mistakes have prevented this failure. The compiler sees no change to catch. Our tests pass, because we updated them in the same commit that changed the behaviour, which is the correct thing to do for a bug fix and is exactly what hides the problem. The client's tests pass too, because their fixtures were built against whichever convention they had. The only artifact that could have flagged it is a written statement of what `lastSeenAt` means, which is why documenting a field's meaning is worth as much as declaring its type.
 
-The **robustness principle**, often stated as "be liberal in what you accept, conservative in what you send", captures part of this: accepting more input is a safe direction to evolve, and sending less than you promised is not. It is worth knowing the standard criticism as well, which is that liberal acceptance lets clients develop dependencies on undocumented leniency, so that tightening validation later becomes a breaking change of exactly the quiet kind listed above.
+The **robustness principle**, often stated as "be liberal in what you accept, conservative in what you send", captures part of this: accepting more input is a safe direction to evolve, and sending less than you promised is not. The standard criticism is that liberal acceptance lets clients develop dependencies on undocumented leniency, so that tightening validation later becomes a breaking change of exactly the quiet kind listed above.
 
 Breaking changes cannot be avoided forever. What a version number does is let a client find out about one before it reaches production.
 
@@ -248,9 +248,9 @@ Removing something is a process rather than an event, and the steps are the same
 
 Written as releases, replacing the two-argument `track` happens like this:
 
-1. **2.4.0.** Ship `track(request)` alongside the old operation, and mark the old one `@deprecated` with its replacement and the version that will remove it. Nothing has broken, so a minor bump is correct, and every client sees the strikethrough in their editor the next time they call it.
-2. **2.4.0 through 2.9.x.** Both operations ship. The deprecation is repeated in each set of release notes rather than announced once, because the client who most needs to read it is the one who skipped four versions.
-3. **3.0.0.** Remove the old operation. The major number communicates to clients that work is required before upgrading, and by this point the warning has been in their editor for months.
+1. _2.4.0._ Ship `track(request)` alongside the old operation, and mark the old one `@deprecated` with its replacement and the version that will remove it. Nothing has broken, so a minor bump is correct, and every client sees the strikethrough in their editor the next time they call it.
+2. _2.4.0 through 2.9.x._ Both operations ship. The deprecation is repeated in each set of release notes rather than announced once, because the client who most needs to read it is the one who skipped four versions.
+3. _3.0.0._ Remove the old operation. The major number communicates to clients that work is required before upgrading, and by this point the warning has been in their editor for months.
 
 The middle step is the one under pressure, and it is the one that cannot be compressed. Leave the old operation in place long enough for clients to move, and only then remove it. Skipping the waiting period turns a manageable migration into an outage. While this might sound like we can just make breaking changes anyways and add a `@deprecated` annotation, note that these tags are mainly used to steer clients to new API and often persist for years, sometimes for decades, before they are finally removed.
 
@@ -282,7 +282,7 @@ _Anything unbounded needs pagination._ A collection that can grow will eventuall
 
 _Limits should be visible._ If calls are rate limited, a client can only respect the limit if the service says what it is and when it resets. A limit communicated only as a rejected request teaches a client nothing except to try again.
 
-Authentication is a real part of most published services and a large enough topic to leave to a later course. It is worth noting as a design surface rather than an implementation detail: who may call what is a decision about the contract, and it is made at the same time as everything else in this chapter.
+Authentication is a real part of most published services and a large enough topic to leave to a later course. Treat it as a design surface rather than an implementation detail: who may call what is a decision about the contract, and it is made at the same time as everything else in this chapter.
 
 ## An API Is a Promise
 
