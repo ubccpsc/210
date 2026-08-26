@@ -286,7 +286,7 @@ If it helps to know where the friction will be, these are the genuine shifts rat
 
 ## Where Each Idea Returns
 
-| From CPSC 110 | Where the textbook picks it up |
+| From CPSC 110 | Where the CPSC 210 textbook picks it up |
 | --- | --- |
 | Modelling information as data | [Using Types to Model Problems](../part1/02_model-types) |
 | Data definitions and their forms | [Using Types to Model Problems](../part1/02_model-types) |
@@ -318,3 +318,72 @@ If it helps to know where the friction will be, these are the genuine shifts rat
 | Why code never needed cleaning up | [Code Quality and Refactoring](../part3/04_refactoring) |
 | The stepper | [Debugging and Fault Localization](../part3/05_debugging) |
 | The wish list, in reverse | [Adding New Features](../part3/06_new_features) |
+
+## Building on CPSC 121
+
+CPSC 121 also underpins much of what CPSC 210 is about. CPSC 110 supplied a process for building software. CPSC 121 supplied the vocabulary for stating precisely what must be true of a program, and for arguing that it stays true. Both are used throughout this course. The difference is that the claims here are written in English rather than in notation, which is what makes the connection easy to miss.
+
+Seven ideas from CPSC 121 are used in this textbook, but none of them bear their CPSC 121 names.
+
+### An Invariant Is a Predicate
+
+The invariants Part 1 spends two chapters on are quantified statements written in prose. "No two readings share the same day and hour" is a claim about _all_ pairs of readings. "The collection contains no duplicates" denies that _some_ such pair exists. A precondition is a predicate over a function's arguments and a postcondition is a predicate over its result. Two points from CPSC 121 matter in practice: First, the negation of "every element satisfies P" is "some element does not satisfy P", not "every element fails P". Getting this wrong produces checks and error messages that report a different condition than the one that failed. Second, a constraint relating two fields, such as a booking whose start must not fall after its end, is a two-place predicate, so it cannot be enforced by validating each field on its own.
+
+An invariant stated as a predicate can be asserted in a constructor and tested but a vague one cannot. [Checking Invariants](../part1/03_checking-invariants) and [Maintaining Invariants](../part1/04_maintaining-invariants) apply this directly.
+
+### Establishing and Preserving an Invariant Is an Induction
+
+[Maintaining Invariants](../part1/04_maintaining-invariants) states the discipline in two parts: the invariant must be _established_ when a value is created, and every operation that produces a new value from an old one must _preserve_ it. It concludes that every value that ever exists is therefore valid. That conclusion is an induction. Construction is the base case, each operation is the inductive step, and the result holds for an unbounded number of states that are never enumerated. This is why a small number of checks in a constructor is enough to guarantee a property for the lifetime of the program.
+
+The same argument appears in [Using Types to Model Problems](../part1/02_model-types), which observes that a recursion over a playlist terminates because every playlist ends in the empty case. That is structural induction: the argument runs over how the data was built, and holds because the data definition admits no other way to build it. The practical consequence is which question to ask when reviewing a class. Not whether each method works, but whether any operation can violate an invariant. One unguarded operation breaks the inductive step, and the guarantee fails for every state after it.
+
+### Sets Are a Model, Not Just a Data Structure
+
+A `Set` holds each value at most once and answers membership queries. [Encapsulating What Varies](../part2/03_encapsulation) changes a guest list from an array to a `Set` because the class had a uniqueness invariant it was maintaining by hand; the set's own semantics enforce it instead. Choosing between an array and a set is therefore a modelling decision: whether order and multiplicity are part of the information being represented, or artifacts of how it is stored.
+
+Set vocabulary also underlies testing. **Equivalence class partitioning** in [Validating Behaviour](../part1/09_validation) divides the input space into classes in which any member is as good as any other. A partition is disjoint and covering. Covering is why one input per class is sufficient; disjointness is why the number of classes is the number of tests required.
+
+### Every Condition Is a Proposition
+
+Each conditional tests a proposition, and compound conditions combine propositions using the connectives CPSC 121 gave truth tables for. This has two consequences: The first is negation. Rewriting a negated compound condition is an application of a logical equivalence. An incorrect rewrite still compiles and still returns a value, so the resulting fault is easily missed. The second is coverage. [Validating Behaviour](../part1/09_validation) asks for tests that reach every branch of a function and reports branch coverage as the fraction reached. Determining which input reaches a given branch means working backwards from a boolean expression to an assignment that satisfies it. When a branch is never taken, the question is whether a satisfying assignment is untested or does not exist.
+
+One difference from CPSC 121's treatment is worth noting. TypeScript stops evaluating `&&` and `||` once the result is determined, so unlike the connectives in a truth table their operands cannot be reordered freely: a check that a value exists must precede the use that depends on it.
+
+### Numbers Are Stored, and Storage Is Finite
+
+CPSC 121 covers how numbers are represented in binary. TypeScript has a single `number` type that stores a binary approximation, and [Learning a New Programming Language](../part1/01_new-language) shows the consequence: `(11 / 20) * 100` evaluates to `55.00000000000001`. Its advice is to order arithmetic so that division comes last, and to avoid exact equality comparisons on computed decimals. The cause is representation. One fifth has no finite binary expansion, for the same reason one third has no finite decimal expansion, so the stored value differs from the exact value before any arithmetic is performed. The CPSC 110 teaching languages compute with exact rationals, where `(/ 35 50)` is `7/10`, so this behaviour is new in this course but not new in CPSC 121.
+
+### A Stateful Object Is a Machine With States
+
+CPSC 121 introduces finite automata: a finite set of states, transitions driven by input, and distinguished accepting states. An object that holds state has the same structure. [Asynchronous Effects and Time](../part1/07_async) contains a direct example. A promise has exactly three states, and its diagram is captioned to note that promises settle once and only once. Fulfilled and rejected are absorbing states with no outgoing transitions, which is why attaching a handler to an already-settled promise still works, and why a settled promise cannot change. The same view applies to types designed in [Mutation and Side Effects](../part1/06_state-mutation) and in Part 2. Asking which states a value can occupy, which transitions are legal, and which are one-way yields a finite description that can be drawn and checked. An invariant, stated this way, is the claim that no state outside the intended set is reachable.
+
+### Programs Run on a Machine
+
+The final modules of CPSC 121 assemble a working computer: memory, the fetch-decode-execute cycle, and Big-O notation for expressing cost. CPSC 210 performs no complexity analysis and does not use Big-O. It does assume the model underneath: a program is instructions executing against a memory hierarchy, and the costs of different operations differ by orders of magnitude. [Asynchronous Effects and Time](../part1/07_async) depends on that assumption. It traces a file read down through the runtime and the operating system and back. Asynchronous code exists because disk and network access are far slower than memory access, so blocking the program while waiting is not viable.
+
+### What CPSC 121 Covered That This Textbook Does Not Lean On
+
+As with CPSC 110, some CPSC 121 material is not directly used in CPSC 210 but is left for future Computer Science courses:
+
+- _Writing formal proofs._ Inductive and contrapositive reasoning are used throughout, as above, but no proof is written out formally.
+- _Regular expressions and their correspondence with automata._ The textbook does not require them, though you will meet them in real code eventually.
+- _Circuit-level and instruction-level detail._ CPSC 213 covers this, and this textbook points forward to it where references and pointers are introduced.
+- _Big-O and complexity analysis._ CPSC 221 develops this material.
+
+
+### Where Each Idea Returns
+
+| From CPSC 121 | Where the CPSC textbook picks it up |
+| --- | --- |
+| Predicate logic and quantified claims | [Checking Invariants](../part1/03_checking-invariants) |
+| Preconditions and postconditions as predicates | [Maintaining Invariants](../part1/04_maintaining-invariants) |
+| Induction, base case and inductive step | [Maintaining Invariants](../part1/04_maintaining-invariants) |
+| Structural induction over recursive definitions | [Using Types to Model Problems](../part1/02_model-types) |
+| Sets, membership, and uniqueness | [Encapsulating What Varies](../part2/03_encapsulation) |
+| Partitions as disjoint and covering | [Validating Behaviour](../part1/09_validation) |
+| Propositional connectives and negation | [Learning a New Programming Language](../part1/01_new-language) |
+| Truth tables and satisfying assignments | [Validating Behaviour](../part1/09_validation) |
+| Binary representation of numbers | [Learning a New Programming Language](../part1/01_new-language) |
+| Finite state machines | [Mutation and Side Effects](../part1/06_state-mutation) |
+| States, transitions, and absorbing states | [Asynchronous Effects and Time](../part1/07_async) |
+| The machine underneath the program | [Asynchronous Effects and Time](../part1/07_async) |
