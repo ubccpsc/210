@@ -125,7 +125,7 @@ That is still cohesion: the unit is the smallest set of state that must stay mut
 
 ## Diagnosing a Class
 
-We can start analyzing the cohesion of a class with the following test:  First, name the invariant the class claims to protect. Then, take its parts one at a time, the fields first and then the methods, and ask of each whether it serves that invariant.
+We can start analysing the cohesion of a class with the following test:  First, name the invariant the class claims to protect. Then, take its parts one at a time, the fields first and then the methods, and ask of each whether it serves that invariant.
 
 Every field should participate in the invariant the class protects. Once we know the class invariant, we can check each field against it. A field the invariant refers to belongs in the class. A field the invariant never mentions is usually a signal that a second responsibility has crept in. The common exception is a field that holds the object's identity, such as a name or id; it names the thing the invariant is about rather than taking part in the invariant. 
 

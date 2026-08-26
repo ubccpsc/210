@@ -485,7 +485,7 @@ const restored = JSON.parse(text);
 
 After that call, `restored` holds a real array of real objects. The elements are ordinary values, and every operation in this chapter works on them as usual.
 
-Two cautions are worth carrying forward, and both follow from JSON being nothing but text.
+Two cautions follow from JSON being nothing but text.
 
 The first is that _the conversion is lossy in one direction_. JSON has no notation for a date, for `undefined`, or for a function, so `JSON.stringify` has no way to record them. It does not complain; it drops them. A value that goes out and comes back is equal to the original only when everything in it was one of the kinds JSON can express.
 

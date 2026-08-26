@@ -40,13 +40,13 @@ The syntax
 ```typescript
 const x: T = e
 ```
-declares a variable `x` of type `T` and initializes it to the value that expression `e` evaluates to. Variables declared with `const` cannot be reassigned to different values later. Also, you cannot use `const` to declare the same variable multiple times.
+declares a variable `x` of type `T` and initialises it to the value that expression `e` evaluates to. Variables declared with `const` cannot be reassigned to different values later. Also, you cannot use `const` to declare the same variable multiple times.
 
 As with other one-line statements, we will put a semicolon `;` after it when writing it in programs.
 </details>
 
 
-Two values are worth knowing from the start because they stand for the _absence_ of a value: `null` and `undefined`. `null` represents a deliberate "no value here", such as the result of a lookup that finds nothing. `undefined` is the value a name has when nothing has been assigned to it yet. Each is its own type, and both become useful in combination with other types, as we will see when a function may or may not find a result.
+Two values matter from the start because they stand for the _absence_ of a value: `null` and `undefined`. `null` represents a deliberate "no value here", such as the result of a lookup that finds nothing. `undefined` is the value a name has when nothing has been assigned to it yet. Each is its own type, and both become useful in combination with other types, as we will see when a function may or may not find a result.
 
 ```typescript
 const noMatch: null = null;
@@ -473,7 +473,7 @@ function action(light: TrafficLight): string {
 }
 ```
 
-The comparisons above use `===` to test a value against each literal. Because this is the first time we compare values, it is worth being precise about what `===` means.
+The comparisons above use `===` to test a value against each literal. This is the first time we compare values, so we should be precise about what `===` means.
 
 <details class="tooltip ts-tips">
 <summary>Evaluating Equality with <code>===</code></summary>

@@ -255,7 +255,7 @@ If an `await` expression appears in a function body, that function must be decla
 
 
 
-It is worth being clear about what `async` and `await` are _not_. They do not make anything run faster, and they do not create threads; there is still exactly one statement executing at any moment. They are readable syntax for deferred computation: the same deferral the `setTimeout` example performed with a callback, but now written so that the code reads top to bottom again. The semantics did not change; the syntax did.
+Be clear about what `async` and `await` are _not_. They do not make anything run faster, and they do not create threads; there is still exactly one statement executing at any moment. They are readable syntax for deferred computation: the same deferral the `setTimeout` example performed with a callback, but now written so that the code reads top to bottom again. The semantics did not change; the syntax did.
 
 While promises and `async`/`await` do not create threads, they take advantage of a deeper fact: the slow part of the work never needed our thread in the first place. When `readFile` starts, the request is handed down to the language runtime and the operating system, which carry the operation forward in the background whether our thread attends to it or not. Blocking was never _necessary_; it was our thread standing guard over work it could not help with. `await` is the program declining to stand guard: the thread spends the interval running whatever else is ready (or, in a user interface, staying responsive), and the paused function continues the moment its value arrives.
 
@@ -403,7 +403,7 @@ async function archiveReport(): Promise<void> {
 }
 ```
 
-Two things are worth noting. First, the documentation says what the function _modifies_, exactly as the mutation chapter required: writing a file is a side effect, one that outlives not just the function but the entire program. Second, the order of the `await`s is important: `writeFile` cannot start until the contents have arrived, and the sequence of awaits expresses that dependency naturally. The function pauses at the first `await`, resumes when the contents arrive, pauses at the second, and resumes when the write completes; the program as a whole never stops.
+Two things stand out. First, the documentation says what the function _modifies_, exactly as the mutation chapter required: writing a file is a side effect, one that outlives not just the function but the entire program. Second, the order of the `await`s is important: `writeFile` cannot start until the contents have arrived, and the sequence of awaits expresses that dependency naturally. The function pauses at the first `await`, resumes when the contents arrive, pauses at the second, and resumes when the write completes; the program as a whole never stops.
 
 <details class="tooltip ts-tips">
 <summary>Text encoding (the <code>"utf8"</code> argument)</summary>
@@ -489,7 +489,7 @@ readAll         |--A--|                 150 µs
 
 The total wait becomes the _slowest_ of the operations rather than the _sum_ of them, and the gap widens with every file added.
 
-Two properties of `Promise.all` are worth committing to memory. The first is that it turns an array of promises into a promise of an array, `Promise<T>[]` into `Promise<T[]>`, and the results come back in the order you supplied them, not the order they finished. If `humidity.txt` is tiny and arrives first, it is still second in the returned array because it was second going in. You never have to sort answers back into place.
+Two properties of `Promise.all` matter here. The first is that it turns an array of promises into a promise of an array, `Promise<T>[]` into `Promise<T[]>`, and the results come back in the order you supplied them, not the order they finished. If `humidity.txt` is tiny and arrives first, it is still second in the returned array because it was second going in. You never have to sort answers back into place.
 
 The second is that a fixed set of operations can be destructured, and the type checker tracks each position separately:
 

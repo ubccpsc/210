@@ -18,7 +18,7 @@ That discipline does not scale. If the song list and the index are ordinary vari
 
 What we want is a way to bundle the _state_ (the songs and the index) together with the _operations that are allowed to change it_ (add, remove, advance). With this bundling, the invariant is the responsibility of one small, named unit, rather than of every caller. 
 
-The unit of organization that bundles _state_ and _operations_ is the _class_.
+The unit of organisation that bundles _state_ and _operations_ is the _class_.
 
 ## Three Programming Paradigms
 
@@ -45,7 +45,7 @@ for (const song of songs) {
 const total: number = playlist.totalDuration();
 ```
 
-These three are not competitors. A method body is usually imperative; a class can hold immutable values; a functional pipeline can run inside a method. What changes between them is how a program is organised. Object-orientation naturally organizes programs around objects that own their state.
+These three are not competitors. A method body is usually imperative; a class can hold immutable values; a functional pipeline can run inside a method. What changes between them is how a program is organised. Object-orientation naturally organises programs around objects that own their state.
 
 <!--
 RTH: not clear this digression is worth adding
@@ -174,7 +174,7 @@ A class is the primary unit of abstraction in object-oriented programs. It can b
 
 In all languages, classes are stored in files. In some languages (like Java), a file must contain only a single class. This restriction is not present in TypeScript, where a file can contain multiple classes. In practice, it is most predictable for a file to contain a single class and for the filename to match the class name.
 
-As systems grow, these files are organized into folders, which are themselves given meaningful names and collect related classes together.
+As systems grow, these files are organised into folders, which are themselves given meaningful names and collect related classes together.
 
 </details>
 
@@ -285,7 +285,7 @@ The `this` keyword refers to the _current instance_ of the class; it only makes 
 </details>
 
 <details class="tooltip ts-tips">
-  <summary>Default Initializing Fields</summary>
+  <summary>Default Initialising Fields</summary>
 
 When a field has a default initial value that the constructor does not need to customise, rather than writing:
 ```typescript
