@@ -1,7 +1,3 @@
----
-outline: [2, 3]
----
-
 # What This Course Assumes You Know
 
 The main prerequisite for CPSC 210 is CPSC 110. This textbook is written with that prerequisite knowledge in mind. It does not re-teach that material, but it leans on it constantly: the chapters ahead assume you have designed data before writing code, derived a function's shape from the shape of its input, and written down what you expected a function to produce before you produced it. For students entering CPSC 210 without having taken CPSC 110, this chapter tries to bring that pre-requisite knowledge together for you to review in advance. We also hope having it here will help students who _did_ take CPSC 110 to review and reference their past knowledge and apply it to this course.
@@ -251,7 +247,11 @@ What the stepper taught you is valuable: when something is wrong, find the earli
 
 Giving up single binding is the most significant change in Part 1, which is why [Mutation and Side Effects](../part1/06_state-mutation) works through it slowly. Once a name can be reassigned, it can no longer be replaced by "its value", because which value it holds depends on where the program has got to. It also means a structure can be corrupted after it was built, which is why invariants need more protection here than a comment.
 
-## The Notation
+## Reference
+
+Four things to consult rather than read through: how to read the notation in the examples above, what CPSC 110 covers that this course does not use, what changes in CPSC 210, and where each idea reappears.
+
+### The Notation
 
 Little of the above depends on how the teaching languages are written, but the examples do, so here is the short version.
 
@@ -278,7 +278,7 @@ TypeScript writes most operators between their operands instead. This is the fir
 
 _Numbers are exact._ Dividing two integers yields an exact rational: `(/ 35 50)` is `7/10`, not `0.7`, and multiplying that by `100` gives exactly `70`. TypeScript has a single `number` type that stores a binary approximation, so the order of your arithmetic starts to matter and equality on computed decimals stops being reliable. [Learning a New Programming Language](../part1/01_new-language) covers the consequences.
 
-## What CPSC 110 Covered That This Textbook Does Not Lean On
+### What CPSC 110 Covered That This Textbook Does Not Lean On
 
 CPSC 110 covers a good deal of material that CPSC 210 never uses directly. Knowing it will not hurt, and not remembering it will not hold you back:
 
@@ -289,7 +289,7 @@ CPSC 110 covers a good deal of material that CPSC 210 never uses directly. Knowi
 
 These are not omitted because they are not important. They are the algorithmic strand of CPSC 110, and it is CPSC 221 rather than this course that picks that material up. What CPSC 210 takes from CPSC 110 is the design perspective: modelling information before representing it, deriving code from that description, and deriving the tests from it as well.
 
-## What Actually Changes
+### What Actually Changes
 
 If it helps to know where the friction will be, these are the genuine shifts rather than the notational ones:
 
@@ -298,7 +298,7 @@ If it helps to know where the friction will be, these are the genuine shifts rat
 - _Data arrives from outside._ In CPSC 110 every value your functions consumed was one your own code had built, usually a few lines earlier. Once data comes from a file, a service, or a person, a data definition is a hope until something checks it.
 - _Programs outlive the problem they were written for._ The design recipe assumed a fixed problem and delivered code already in a standard shape, so there was never anything to tidy up. Real systems change after they are written, and each change arrives without a recipe saying where it belongs. That is why Part 3 spends a chapter on putting a design back into a shape that fits what the system has since become.
 
-## Where Each Idea Returns
+### Where Each Idea Returns
 
 | From CPSC 110 | Where the textbook picks it up |
 | --- | --- |
