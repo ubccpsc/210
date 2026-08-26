@@ -1,16 +1,19 @@
 # Decomposing Systems into Cohesive Classes
 
-The previous chapter established the class as the unit of abstraction: a class bundles state with the operations that maintain an invariant, bounds reasoning to one kind of thing at a time, and gives the rest of the program a named type it can depend on. That tells us how to build an abstraction, but it does not tell us how to build a _good_ abstraction. We still have to decide what classes we need, what state they maintain, and what operations they afford.
+[Chapter 10](./01_abstraction) established the _class_ as the unit of abstraction. A class bundles state that must respect an ivariant with the operations that maintain that invariant, giving the rest of the program a named type it can depend on. This bounds reasoning to one kind of thing at a time. 
 
-This chapter is about those decisions. Classes only improve the design of a system when they make sense on their own: a class that maintains several unrelated invariants stops being an idea a reader can hold in their head. When we think about what state and operations belong in a class, we think about **cohesion**, and the principle that follows from it is one invariant per class.
+A class is a way to build an abstraction, but how do we build a _good_ abstraction? We still have to decide what classes we need, what state they maintain, and what operations they afford.
+
+This chapter is about those decisions. Classes only improve the design of a system when they make sense on their own. A class that maintains several unrelated invariants _stops_ being a single thing someone can reason about. When we think about what state and operations belong in a class, we are evaluating **cohesion**. 
 
 ## How Classes Lose Cohesion
 
-Classes rarely start out doing too much: they gain responsibilities one reasonable change at a time. Our `Playlist` from the previous chapter contained a single invariant: the current index is always a valid position in the song list.
+Classes rarely start out doing too much: they gain responsibilities one reasonable change at a time. Our `Playlist` from the previous chapter contained a single invariant: the current index is always a valid position in the song list. Suppose we now add a new feature, remembering recently played songs:
+
 
 > As a listener, I want my music app to remember what I have recently played, so that I can return to a song without searching for it again.
 
-Suppose we now add a new feature, remembering recently played songs. Adding it to the class we already have is the path of least resistance:
+The path of least resistence is to add this feature to the `Playlist` class we already have:
 
 <CollapsibleCode>
 
@@ -49,13 +52,13 @@ class Playlist {
 
 </CollapsibleCode>
 
-The class now maintains two unrelated invariants at once: the original navigation invariant says the current index is valid, and a new history invariant says the recently played list holds each song at most once, most-recently-played first. The two have nothing to do with each other, yet they now live in one class, and `play()` straddles both: it observes the navigation state through `current()` and maintains the history state directly. To understand or safely change either invariant, an engineer now has to consider multiple invariants.
+This change doesn't add much code. But, the class now maintains two unrelated invariants: (1) the original navigation invariant says the current index is valid, and (2) a new history invariant says the recently played list holds each song at most once, most-recently-played first. The two invariants nothing to do with each other, yet they now live in one class. Now, `play()` straddles both: it observes the navigation state through `current()` and maintains the history state directly. To understand or safely change either invariant, an engineer now has to consider the other one.
 
 Left unchecked, a class that keeps absorbing responsibilities becomes a **god class**: one type that knows about and does everything. Each addition seemed reasonable on its own, but the result is a class with many fields and methods that collaborate on multiple invariants. This happens because adding one more method to an existing class is easier than creating a new class and keeping its contents cohesive.
 
-A god class is hard to maintain: there is no one invariant to reason about, so any change risks disturbing something unrelated. It is also hard to _use_, and that cost is easy to overlook. Clients use a class by finding the one that models what they care about and calling the methods that provide that behaviour. That depends on a class having a clear, single purpose. When disparate functionality is included in one class with no organising invariant, an engineer cannot predict where a feature lives. In a god class the answer is that it could be anywhere, and the engineer is left scrolling a long list of unrelated methods hoping to recognise the right one.
+A god class is hard to maintain: there is no one invariant to reason about, so any change risks disturbing something unrelated. It is also hard to _use_. This usage cost is easy to overlook. Clients use a class by finding the one that models what they care about, and calling the methods that provide that behaviour. This reuse depends on a class having a clear, single purpose. When disparate functionality is included in one class with no organising invariant, an engineer cannot predict where a feature lives. In a god class the answer is: it could be anywhere! The engineer is left scrolling a long list of unrelated methods hoping to recognise the right one.
 
-Cohesion is what makes features findable. When every class is organised around a single invariant, an engineer can reason about where a capability should live and look there first, and the name of the class confirms whether they have found the right place. A system of many small, cohesive classes is easier to navigate than one of a few large ones, even though it has more parts, because each part announces what it is responsible for.
+Cohesion makes features findable. When every class is organised around a single invariant, we can easily reason about where a capability should live and look there first. The name of the class confirms whether we have found that right place. A system of many small, cohesive classes is easier to navigate than one of a few large ones, even though it has more parts, because each part announces what it is responsible for.
 
 <details class="tooltip ts-tips">
   <summary>A <code>Playlist</code> that has grown into a god class</summary>
@@ -99,35 +102,43 @@ Consider where you would look in a class like this to change how recently played
 
 ## Cohesion and the Single Responsibility Principle
 
-A class is cohesive when everything it contains works toward a single purpose. We make "single purpose" precise by anchoring it to one invariant: a cohesive class enforces exactly one invariant, and every field and method exists to establish, preserve, or observe it. Such a class can be understood from its invariant alone and changed without reaching into the rest of the system. These are the properties of an abstraction: it bounds reasoning to one kind of thing and offers a named type the rest of the program can depend on. Evaluating cohesion is how we judge whether a decomposition keeps those properties true.
+**Single Responsibility Principle** at the class level means: one class, one invariant. A _cohesive_ class enforces exactly one invariant, and every field and method exists to establish, preserve, or observe it. We can understand such a class from its invariant alone. And we can change it without reaching into the rest of the system. Both of these (understanding classes easily, changes being isolated) are properties of a good decomposition.
 
-This is the **Single Responsibility Principle** at the class level: one class, one invariant. A class should have exactly one reason to change, and that reason is the invariant it protects. Deciding where one class ends and another begins is the core activity of **decomposition**, the act of breaking a problem into smaller pieces that have well-defined roles. We use cohesion to reason about the quality of a decomposition to differentiate a good split from a bad one.
+**Decomposition** is the act of breaking a problem into smaller pieces that have well-defined roles. In object-oriented programming, we decompose problems by deciding where one class ends and another begins. We will use the concept of _cohesion_ to reason about the quality of a decomposition, and differentiate a good split from a bad one.
 
-Some classes are not built around an explicit invariant. A pure value object or a stateless helper holds no invariant, and is cohesive around a single concept or operation instead. The underlying principle, one purpose per class, is unchanged, and a class that serves several purposes fails regardless of how its purpose is expressed.
+Some classes are not built around an explicit invariant. A pure value object or a stateless helper (e.g., `mean`) holds no invariant, but is cohesive around a single concept or operation instead. The underlying principle, one purpose per class, is unchanged. A class that serves several purposes fails regardless of how its purpose is expressed.
 
-Cohesion also shapes how a system behaves when it needs to change. When each invariant lives in exactly one class, a bug fix or a new feature for that invariant stays inside the class that owns it, instead of spreading across the system. The change stays local, which makes it easier to make and less likely to cause the cascading edits that follow when one change forces matching changes in many other places.
+Cohesion shapes how a system behaves when it needs to change. When each invariant lives in exactly one class, a bug fix or a new feature for that invariant stays inside the class that owns it, instead of spreading across the system. The change stays local, which makes it easier to make and less likely to cause the cascading edits that follow when one change forces matching changes in many other places.
 
-There is rarely a single correct decomposition. The same system can usually be split in several reasonable ways, and competent engineers will sometimes disagree about which is best. What cohesion gives us is not the one _right_ split but a reliable way to recognise _poor_ splits. A poorly decomposed class leaves clues in the code itself: it enforces more than one invariant, it has fields the invariant never mentions, it has methods that maintain some other invariant, or its name is disconnected from the fields and methods it contains. These are easy to spot once you know to look, so the goal is less about finding the perfect decomposition than about steering clear of bad ones.
+There is rarely a single "good" decomposition. The same system can usually be split in several reasonable ways. Competent engineers will sometimes disagree about which is best. What cohesion gives us is not the one _right_ split but a reliable way to recognise _poor_ splits. A poorly decomposed class leaves clues in the code itself: it enforces more than one invariant, it has fields the invariant never mentions, it has methods that maintain some other invariant, or its name is disconnected from the fields and methods it contains. These are easy to spot once you know to look. The goal is not about finding the perfect decomposition than about steering clear of bad ones.
 
 <details class="tooltip deep-dive">
   <summary>When one class legitimately manages several invariants</summary>
 
-The Single Responsibility Principle reads as one invariant per class, but a more practical statement is one _cluster of coherent invariants_ per class. Counting alone is unreliable because invariants compose. When several invariants constrain the _same_ state and must hold together, for example an `Order` whose total must equal the sum of its line items and which may not ship before payment, they form a single consistency boundary and belong in one class. That is still cohesion: the unit is the smallest set of state that must stay mutually consistent. `PlayHistory` separates cleanly from `Playlist` precisely because navigation and play history share no state.
+The Single Responsibility Principle reads as one invariant per class, but a more practical statement is one _cluster of coherent invariants_ per class. 
+
+Counting invariants alone is unreliable because invariants may compose. When several invariants constrain the _same_ state and must hold together (e.g, an `Order` whose total must equal the sum of its line items and which may not ship before payment), they form a single consistency boundary and belong in one class.
+
+That is still cohesion: the unit is the smallest set of state that must stay mutually consistent. `PlayHistory` separates cleanly from `Playlist` precisely because navigation and play history share no state.
 
 </details>
 
 ## Diagnosing a Class
 
-The clues listed above share a single test. Name the invariant the class claims to protect, then take its parts one at a time, the fields first and then the methods, and ask of each whether it serves that invariant.
+We can start analysing the cohesion of a class with the following test:  First, name the invariant the class claims to protect. Then, take its parts one at a time, the fields first and then the methods, and ask of each whether it serves that invariant.
 
-Every field should participate in the invariant the class protects. Once the class invariant is known, each field can be checked against it: a field the invariant refers to belongs in the class, and a field the invariant never mentions is the clearest signal that a second responsibility has crept in. The usual exception is a field that holds the object's identity, such as a name or id; it names the thing the invariant is about rather than taking part in the invariant. For a value object or a stateless helper, the same test reads against the single concept the class represents, and a field that has nothing to do with that concept exhibits the same smell.
+Every field should participate in the invariant the class protects. Once we know the class invariant, we can check each field against it. A field the invariant refers to belongs in the class. A field the invariant never mentions is usually a signal that a second responsibility has crept in. The common exception is a field that holds the object's identity, such as a name or id; it names the thing the invariant is about rather than taking part in the invariant. 
 
-The Single Responsibility Principle applies at the method level too: one method, one operation on the invariant. Every method should act in maintenance of the class invariant, and nothing else. A method that maintains a different invariant is the method-level version of the same smell, and it points to the same fix: the invariant it serves, and the method with it, belongs in another class.
+For a value object or a stateless helper, we can do the same test using _the single concept_ the class represents, rather than the invariant it maintains. A field that has nothing to do with that concept may signal poor decomposision.
 
-<details class="tooltip deep-dive">
+The Single Responsibility Principle applies at the method level too: one method, one operation on the invariant. Every method should act in maintenance of the class invariant, and nothing else. A method that maintains a different invariant is the method-level version of a cohesion issue. It points to the same fix: the invariant it serves, and the method with it, belongs in another class.
+
+<details class="tooltip exercise">
   <summary>Diagnosing the bloated <code>Playlist</code></summary>
 
-For the play-history version of `Playlist`, evaluate the navigation invariant (the current index is a valid position) and check each field and method against it.
+For the play-history version of `Playlist` from the top of this chapter, evaluate the navigation invariant (_"the current index is a valid position"_) and check each field and method against it.
+
+<details class="tooltip deep-dive"><summary>Solution</summary>
 
 - `songs` and `currentIndex`: named in the invariant, so they belong to navigation.
 - `recentlyPlayed`: never mentioned by the navigation invariant.
@@ -136,6 +147,7 @@ For the play-history version of `Playlist`, evaluate the navigation invariant (t
 - `recentlyPlayedSongs`: observes the history, not navigation.
 
 Everything that does not mention the current index is exactly the play-history material. It is a second complete responsibility with its own invariant, and it should become its own class.
+</details>
 
 </details>
 

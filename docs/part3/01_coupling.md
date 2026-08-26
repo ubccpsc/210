@@ -2,7 +2,7 @@
 
 [Part 2](../part2/index) considered a design one class at a time. Cohesion provided a means for evaluating whether everything inside a class belongs together, guiding designers towards individual invariants per class. That question is necessary, but it is not sufficient: a system can be built entirely from cohesive classes and still be difficult to change, because the difficulty lives in the connections between the classes rather than inside any one of them. Additionally, there are other costs of over-decomposition as each class has its own cognitive overhead inhibiting reasoning about a design.
 
-It is worth being explicit about why this question dominates Part 3. A design principle is easy to misread as insurance: design carefully enough at the outset, and the code will not need to change later. Software does not work that way. Requirements arrive after release, libraries publish new major versions, the services a program calls alter their responses, platforms deprecate the interfaces a system was built against, and the rules governing the data are rewritten. None of these are failures of the original design, and no amount of care up front prevents them, because the pressure to change originates outside the program entirely. A well-designed system is not one that avoids being modified; it is one that can be modified cheaply. Code that is never changed is usually code that is no longer used.
+This question dominates Part 3 for a reason. A design principle is easy to misread as insurance: design carefully enough at the outset, and the code will not need to change later. Software does not work that way. Requirements arrive after release, libraries publish new major versions, the services a program calls alter their responses, platforms deprecate the interfaces a system was built against, and the rules governing the data are rewritten. None of these are failures of the original design, and no amount of care up front prevents them, because the pressure to change originates outside the program entirely. A well-designed system is not one that avoids being modified; it is one that can be modified cheaply. Code that is never changed is usually code that is no longer used.
 
 This chapter examines the connection between coupling and cohesion. When we ask how tightly one class is bound to another, we are asking about **coupling**, and the principle that follows from it is that a class should _depend on as little as possible, as loosely as possible_. Cohesion and coupling are the two dimensions on which a decomposition is judged, and neither is meaningful on its own.
 
@@ -535,7 +535,7 @@ test("the recap names the count and the most recent song", () => {
 });
 ```
 
-This is the test double from the interfaces chapter, doing the same work for the same reason. The general rule is worth stating plainly: if a unit test requires you to construct a large part of the system, the class under test is coupled to a large part of the system, and no amount of test-writing skill will fix that from the outside.
+This is the test double from the interfaces chapter, doing the same work for the same reason. The general rule is this: if a unit test requires you to construct a large part of the system, the class under test is coupled to a large part of the system, and no amount of test-writing skill will fix that from the outside.
 
 ## When Coupling Is a Judgment Call
 

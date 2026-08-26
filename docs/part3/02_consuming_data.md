@@ -24,7 +24,7 @@ The design advice is the same for both kinds of APIs. Depend on what is document
 | Changing under you | On the version you choose to install | Whenever the provider deploys. |
 | Testing | Call it directly | Needs a stand-in unless tests hit the network. |
 
-The last two rows are worth extra reflection. A library changes when _we_ upgrade it, so we choose the moment and can read its release notes first before we decide to upgrade. A web service changes when _they_ deploy, which may be during our lunch break, and the first sign is often a test failure or a support ticket.
+The last two rows deserve extra reflection. A library changes when _we_ upgrade it, so we choose the moment and can read its release notes first before we decide to upgrade. A web service changes when _they_ deploy, which may be during our lunch break, and the first sign is often a test failure or a support ticket.
 
 ## A Tracker Across Several Carriers
 
@@ -96,7 +96,7 @@ This is the first time we have needed `as`, which tells the compiler that a valu
 <expression> as <Type>
 ```
 
-It is worth being precise about what it does, because it does far less than it appears to. `as` performs no conversion and runs no check. It produces no code at all: once compiled, the expression is exactly what it was, and the only thing that changed is that the compiler stopped objecting. Whatever the value was at run time, correctly shaped or not, it still is.
+Be precise about what it does, because it does far less than it appears to. `as` performs no conversion and runs no check. It produces no code at all: once compiled, the expression is exactly what it was, and the only thing that changed is that the compiler stopped objecting. Whatever the value was at run time, correctly shaped or not, it still is.
 
 TypeScript's own name for this operator is a _type assertion_. This chapter calls it a _claim_ instead, to keep it clear of the `assert` checks from [Part 1](../part1/index), which do the opposite: an `assert` tests a condition while the program runs and halts when it fails, whereas `as` tests nothing and cannot fail.
 
@@ -249,7 +249,7 @@ const ShipmentSchema = z.object({
 
 `z.number()` corresponds to the type `number`; `z.number().int().nonnegative()` corresponds to a documented invariant that no type could hold. The boundary is where such a constraint has to be checked anyway, because the value came from outside, so it is the natural place to state it once and enforce it mechanically.
 
-This is worth connecting back to the abstraction chapters. A validated boundary establishes an invariant on incoming data in the same way a constructor establishes one on a new object: past that point, the value is known to satisfy something the type alone cannot say.
+This connects back to the abstraction chapters. A validated boundary establishes an invariant on incoming data in the same way a constructor establishes one on a new object: past that point, the value is known to satisfy something the type alone cannot say.
 
 </details>
 
@@ -268,7 +268,7 @@ Serialisation records an object's fields. It does not record its class, its meth
 
 Anything with behaviour therefore needs an explicit reconstruction step, which is the conversion function again. Read the deserialised fields, validate them, and hand them to the real constructor, so the object comes back through the same door every other instance came through, with its invariant established the same way. Persisting state to a file and reading it back is the same problem as reading a carrier's response, and it has the same answer.
 
-A schema library does not change this. `safeParse` returns validated _data_, which is what it promised and all it promised; turning that data into an object with methods and a class invariant is still ours to do. The division is worth stating explicitly, because it is easy to assume a validation library has done more than it has: the schema establishes that the deserialised fields are present and well formed, and the constructor establishes everything a `Shipment` is supposed to guarantee beyond that.
+A schema library does not change this. `safeParse` returns validated _data_, which is what it promised and all it promised; turning that data into an object with methods and a class invariant is still ours to do. State the division explicitly, because it is easy to assume a validation library has done more than it has: the schema establishes that the deserialised fields are present and well formed, and the constructor establishes everything a `Shipment` is supposed to guarantee beyond that.
 
 <details class="tooltip deep-dive">
 <summary>Other Exchange Formats</summary>
@@ -401,7 +401,7 @@ class CarrierAClient {
 
 Each failure produces a different message, which is what a maintainer reading a log will need. "Could not reach the carrier" and "carrier returned status 500" and "unrecognised status: held-at-depot" call for three different responses, and collapsing them into "tracking failed" throws away the only information that distinguishes them.
 
-Two further properties of network calls are worth naming, because neither has an analogue in local code.
+Two further properties of network calls have no analogue in local code.
 
 _Latency cannot be hidden._ The call takes real time, `track` is therefore `async`, and every caller of it is `async` too, all the way up to whatever handles the user's click. The asynchronous chapter showed this propagation; a web service is where you meet it in earnest.
 

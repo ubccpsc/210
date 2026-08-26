@@ -45,7 +45,7 @@ digraph faultChain {
 ```
 <!-- caption="A fault produces an error, which surfaces as a failure. Debugging travels the chain in the opposite direction." -->
 
-It is also worth considering the possibility that there is no fault at all. A report may describe intended behaviour that the user did not expect, a misunderstanding of what the software promises, or a problem in configuration or data rather than in code. Establishing that the failure is real, and who it should be assigned to in the technical team, is part of the first step.
+Consider also the possibility that there is no fault at all. A report may describe intended behaviour that the user did not expect, a misunderstanding of what the software promises, or a problem in configuration or data rather than in code. Establishing that the failure is real, and who it should be assigned to in the technical team, is part of the first step.
 
 ## Reproduction
 
@@ -126,7 +126,7 @@ private toStatus(raw: string): ShipmentStatus {
 
 Reading the code suggests some guesses about the problem, but a guess is not a diagnosis. Running the loop above turns those guesses into a diagnosis in two rounds.
 
-_Round one._ The first hypothesis is one that you can get for free: **the carrier is reporting the parcel as delivered, and we are faithfully passing that on.** If it holds, the raw response says something that plainly means delivered; if it does not hold, the response says something else. The observation is one line, placed before the conversion:
+_Round one._ The first hypothesis is one that you can get for free: _the carrier is reporting the parcel as delivered, and we are faithfully passing that on._ If it holds, the raw response says something that plainly means delivered; if it does not hold, the response says something else. The observation is one line, placed before the conversion:
 
 ```typescript
 const raw = await response.json();
@@ -135,7 +135,7 @@ console.log(raw.status);   // "NOT_DELIVERED"
 
 The prediction fails, so the hypothesis can be _discarded_. That is a result rather than a waste of time: the carrier is not claiming the parcel arrived, so the wrong answer is being constructed within our own code.
 
-_Round two._ The suspicion now falls on the conversion itself: **`toStatus` maps `"NOT_DELIVERED"` to `"delivered"`, because it tests for a substring rather than for the whole value.** The prediction is precise enough to be wrong, and it needs no carrier, no network, and no parcel to check:
+_Round two._ The suspicion now falls on the conversion itself: _`toStatus` maps `"NOT_DELIVERED"` to `"delivered"`, because it tests for a substring rather than for the whole value._ The prediction is precise enough to be wrong, and it needs no carrier, no network, and no parcel to check:
 
 ```typescript
 // with toStatus reachable from the test
@@ -155,7 +155,7 @@ Debugging tools mostly answer one of two questions: what is the state at this po
 
 _The debugger_ answers both. A breakpoint pauses the program at a line and lets you inspect every variable in scope, which is the direct way to test a hypothesis about state. Stepping moves one line at a time, either over a call or into it, so you can follow a value as it is transformed. A conditional breakpoint pauses only when an expression is true, which is what makes it practical to catch the one parcel out of four hundred that goes wrong.
 
-_Print statements_ answer the first question crudely, and they remain widely used because they are quick and they work everywhere, including places a debugger cannot easily reach. Their limits are worth knowing: the output is noisy, and adding them changes the program's timing, which can move or hide a failure that depends on it.
+_Print statements_ answer the first question crudely, and they remain widely used because they are quick and they work everywhere, including places a debugger cannot easily reach. They have two limits: the output is noisy, and adding them changes the program's timing, which can move or hide a failure that depends on it.
 
 The larger problem is what happens to them afterwards. A `console.log` added to catch one value is chatty by nature, and it is easy to add a dozen while narrowing a search. They are then trivial to forget, because nothing fails when one is left behind: the tests still pass, the build is still green, and the only symptom is output nobody asked for. Left in, they accumulate into a codebase that prints a steady stream of noise, in which the messages that matter are the hardest to notice, and every future reader has to work out whether a given line is deliberate or a fossil from somebody's debugging session years ago. Treat removing them as part of the fix rather than as tidying to be done later, and prefer the debugger where it is available, since a breakpoint leaves nothing behind.
 

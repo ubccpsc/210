@@ -112,3 +112,26 @@
   height: 31px;
 }
 
+
+/* Outline ("On this page"): make heading depth visible.
+   The default theme indents a nested entry by 16px and changes nothing else, so
+   an h3 reads almost the same as an h2. Nested entries now sit behind a guide
+   line and are set lighter; top-level entries gain weight, but only on pages
+   that actually have nesting, so single-level outlines are untouched.
+   Selectors are padded out to beat the theme's own scoped rules, which carry a
+   [data-v-*] attribute and are not as weak as they look. */
+.VPDocAsideOutline .VPDocOutlineItem.root:has(.nested) > li > .outline-link {
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+}
+
+.VPDocAsideOutline .VPDocOutlineItem.nested {
+  margin-left: 3px;
+  padding-left: 13px;
+  border-left: 1px solid var(--vp-c-divider);
+}
+
+.VPDocAsideOutline .VPDocOutlineItem.nested > li > .outline-link {
+  font-weight: 400;
+  font-size: 12.5px;
+}

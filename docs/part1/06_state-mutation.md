@@ -26,7 +26,7 @@ The statement
 ```typescript
 let x: T = e
 ```
-declares a variable `x` of type `T` and initializes it to the value that expression `e` evaluates to. Variables declared with `let` _can_ be reassigned to different values later. But as with `const`, you cannot use `let` to declare the same variable multiple times.
+declares a variable `x` of type `T` and initialises it to the value that expression `e` evaluates to. Variables declared with `let` _can_ be reassigned to different values later. But as with `const`, you cannot use `let` to declare the same variable multiple times.
 
 A habit to build: declare _everything_ with `const`. When a value turns out to need changing, the compiler will tell you so (it refuses to compile a reassignment to a `const`), and at that moment you make a deliberate decision to change that one declaration to `let`. A `const` tells every reader "this value is settled"; the fewer `let`s a program contains, the less state there is to trace.
 

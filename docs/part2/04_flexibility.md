@@ -370,7 +370,7 @@ const seats = new Roster<Seat>(400, (a, b) => a.equals(b));
 
 The class is still ignorant of `T`, and that ignorance is what lets one implementation serve every kind of member; the missing knowledge is passed in rather than assumed.
 
-This is the general shape of the trade, and it is worth stating plainly because it applies well beyond generics. Flexibility is bought, not free. Every commitment a class declines to make is a piece of knowledge it no longer has, and any behaviour that depended on that knowledge must arrive some other way: from a parameter, from a collaborator, or from the caller. A design becomes flexible by moving decisions outward, never by making them disappear. The question worth asking of each commitment is not whether avoiding it is possible, but whether the freedom gained is worth the knowledge given up.
+This is the general shape of the trade, and it applies well beyond generics. Flexibility is bought, not free. Every commitment a class declines to make is a piece of knowledge it no longer has, and any behaviour that depended on that knowledge must arrive some other way: from a parameter, from a collaborator, or from the caller. A design becomes flexible by moving decisions outward, never by making them disappear. The question worth asking of each commitment is not whether avoiding it is possible, but whether the freedom gained is worth the knowledge given up.
 
 There is a second route here. Rather than passing the operation in, we could restrict `T` to types that are guaranteed to provide it, so that every member is known to have an `equals` method of its own. That requires a way to name "the types that offer these operations" as a type in its own right, which is the subject of the next chapter.
 

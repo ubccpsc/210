@@ -102,7 +102,7 @@ In CPSC 110, a function over a data type with several variants had one `cond` br
 
 Why prefer adding code to editing it? The answer comes from [Chapter 9](../part1/09_validation). Code that already works is code that has been tested, and every edit to it is a chance to break something that worked before, a regression. Editing `notify(..)` to add push reopens the email and SMS branches: they have to be read, possibly disturbed, and re-tested to be sure they still work. Adding `PushNotifier` touches none of that. The existing channels and their tests are left alone, so they cannot regress; the only new tests are the ones for `PushNotifier`, and the existing suite stays green.
 
-This is what "closed to modification" provides, and it is worth being precise about what it does not mean. It is not a rule that code must never change; bugs are still fixed and contracts are still refined. It means that adding a foreseen _kind_ of new behaviour should not require reopening code that already works. A system with that property grows more safely the larger it gets, because the impact of a new feature is localized within the new file rather than throughout a breadth of previously-tested code.
+This is what "closed to modification" provides, and it is easy to overstate. It is not a rule that code must never change; bugs are still fixed and contracts are still refined. It means that adding a foreseen _kind_ of new behaviour should not require reopening code that already works. A system with that property grows more safely the larger it gets, because the impact of a new feature is localized within the new file rather than throughout a breadth of previously-tested code.
 
 <details class="tooltip deep-dive">
 <summary>Many Clients, One Change</summary>
