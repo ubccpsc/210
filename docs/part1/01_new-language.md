@@ -89,7 +89,7 @@ Two of them behave differently from their ISL counterparts, and both differences
 
 `%` produces the _remainder_ left after division, the role that `remainder` played in ISL: `7 % 2` is `1`, and `6 % 2` is `0`. Its most common use is keeping a value inside a fixed range. To step through a list of `n` items and wrap back to the beginning, write `(i + 1) % n`, which returns to `0` as soon as `i + 1` reaches `n`.
 
-`_`, `/`, and `%` are evaluated before `+` and `-`, as in ordinary arithmetic, so `2 + 3 _ 4` is `14`. Use parentheses wherever the grouping would otherwise be easy to misread.
+`*`, `/`, and `%` are evaluated before `+` and `-`, as in ordinary arithmetic, so `2 + 3 * 4` is `14`. Use parentheses wherever the grouping would otherwise be easy to misread.
 
 Because a `number` is stored as a binary approximation, arithmetic on decimal values can produce results that are slightly off from the exact answer. We return to that, and to what it means when comparing computed values, later in this chapter.
 
