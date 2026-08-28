@@ -363,15 +363,16 @@ type Type1 = {
 To relate to a prior concept, you can understand the type of the `kind` property of any value of `UnionType` to be a union of literals. However, we know more than that: we know that `kind` is a specific one of those literals for each option in the tagged union.
 </details>
 
+<!-- RTH: don't like this foreshadowing; we can re-add it if we think it's important
 <details class="tooltip deep-dive">
-<summary>[Part 2](../part2/index) Preview: The Inelegance of <code>kind</code></summary>
+<summary>Part 2 Preview: The Inelegance of <code>kind</code></summary>
 
 Reading a `kind` back to recover which case you are looking at can feel indirect, since the case is something the value already is. `EmptyPlaylist` and `NonEmptyPlaylist` are different: why do we need to specify they have different kinds?
 
 _Object-oriented programming_ offers a solution to this inelegance: we will get a more elegant design once we cover _classes_, in [Part 2](../part2/index). In particular, we will return to this when we cover _polymorphism_.
 
 </details>
-
+-->
 
 5. _Concrete Examples:_ With the type written, we build concrete examples from the songs we already have. If they are easy to construct, the design fits; if they are awkward, the model is probably too complicated. These examples also become the data our tests run against later.
 
