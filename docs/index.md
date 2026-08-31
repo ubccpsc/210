@@ -30,8 +30,6 @@ If you've ever become fluent in a natural language as an adult, you'll know this
 
 The course is separated into 3 parts. Each chapter corresponds to one in-class lecture, and each lecture will be accompanied by an active learning activity, provided to registered students through a PrairieLearn workspace (see course webpage for links). While the chapters are standalone resources, they are most effective if read prior to the lecture they accompany.
 
-Two short chapters come before Part 1. [Why CPSC 210 Exists](./intro/01_why-this-course) makes the case for learning software construction at a moment when models can generate code, and [GenAI and You](./intro/02_gen-ai-and-you) sets out where generative AI may and may not be used in this course. Read them both before the term gets underway.
-
 In [Part 1](./part1/index), you will learn how to build software that is correct even when developers make mistakes. Along the way, you will learn the core of a new programming language, TypeScript. You will also learn *imperative programming*, a programming style which is common to many programming languages. Some keywords for [Part 1](./part1/index) include: *types*, *statements* (`if`, `return`, `for`), *pre-conditions*, *post-conditions*, *assertion*, *arrays*, *iteration*, *mutation*, *side effects*, *asynchronous* development, *exception*, and *tests*.
 
 In [Part 2](./part2/index), you will learn how to design software split into distinct components, and how to make those components *interact* with each other without *negatively interfering* with each other. Along the way, you will learn *object-oriented programming*, a programming style Java is well-known for, but that exists in most popular programming languages. Some keywords for [Part 2](./part2/index) include: *classes*, *constructor*, *method*, *cohesion*, *information hiding*, *interface*, *inheritance*, *polymorphism*.
@@ -138,3 +136,8 @@ You'll have noticed this textbook includes some nested content. All this nested 
 ## Getting Started
 
 For term-specific logistics and syllabus and details about the labs, in class activities, and project, refer to the course website.
+
+## Curious about GenAI's Relationship to the Course?
+
+[Why CPSC 210 Exists](./why-this-course) makes the high-level case for learning software construction at a moment when Generative AI models can generate code. [GenAI and You](./gen-ai-and-you) sets out the detailed _why_ behind our Generative AI policy, including results from the educational literature on how GenAI can hamper learning outcomes. 
+

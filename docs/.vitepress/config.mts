@@ -112,13 +112,7 @@ export default defineConfig({
         sidebar: [{
             text: "Introduction",
             link: "/",
-            items: [{
-                text: "Why CPSC 210 Exists",
-                link: "/intro/01_why-this-course"
-            }, {
-                text: "GenAI and You",
-                link: "/intro/02_gen-ai-and-you"
-            }],
+            items: [],
         }, {
             text: "Part 1: Foundations",
             link: "/part1/",
@@ -215,6 +209,12 @@ export default defineConfig({
             }, {
                 text: "Glossary",
                 link: "/outro/glossary"
+            }, {
+                text: "Why CPSC 210 Exists",
+                link: "/why-this-course"
+            }, {
+                text: "GenAI and You",
+                link: "/gen-ai-and-you"
             }],
         }, // end outro
         ],
