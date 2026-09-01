@@ -273,6 +273,7 @@ export default defineConfig({
                 // they contribute their text to that literal and nothing else.
                 `<span property="cc:attributionName" rel="cc:attributionURL" resource="${SITE_URL}">` +
                 `${authorLinks}</span>.` +
+                 `<br/><span>Using this in your own course? We'd love to hear about it, get in touch.</span>` +
                 `</span></span>`
         },
     },
