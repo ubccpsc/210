@@ -36,7 +36,7 @@ In [Part 2](./part2/index), you will learn how to design software split into dis
 
 In [Part 3](./part3/index), you will learn how to work with and on software systems that interact with software in wholly different code bases. Here we will scale to handling software you did not fully write yourself: nearly all software engineering done in practice is of this type. Some keywords for [Part 3](./part3/index) include: *coupling*, *readability*, *complexity*, *refactoring*, *API*, *REST*, and *fault localization*.
 
-The [Reference](./outro/index) section at the end is not read in order. It collects a [Glossary](./outro/glossary) of every term the textbook defines, each linked to the section that introduces it, alongside a guide to the [parts of TypeScript this course leaves out](./outro/language-features).
+The [Reference](./reference/index) section at the end is not read in order. It collects a [Glossary](./reference/glossary) of every term the textbook defines, each linked to the section that introduces it, alongside a guide to the [parts of TypeScript this course leaves out](./reference/language-features).
 
 ## Language Choice
 

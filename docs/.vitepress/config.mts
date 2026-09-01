@@ -202,7 +202,7 @@ export default defineConfig({
         }, // end part 3
         {
             text: "Reference",
-            link: "/outro/",
+            link: "/reference/",
             items: [{
                     text: "Why CPSC 210 Exists",
                     link: "/why-this-course"
@@ -211,13 +211,18 @@ export default defineConfig({
                     link: "/gen-ai-and-you"
                 },
                 {
+                    text: "Prerequisite Knowledge",
+                    link: "/reference/prerequisite-knowledge"
+                },
+                {
                 text: "Uncovered Language Features",
-                link: "/outro/language-features"
-            }, {
+                link: "/reference/language-features"
+                },
+                {
                 text: "Glossary",
-                link: "/outro/glossary"
+                link: "/reference/glossary"
             }],
-        }, // end outro
+        }, // end reference
         ],
 
         socialLinks: [{
