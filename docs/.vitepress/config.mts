@@ -204,17 +204,18 @@ export default defineConfig({
             text: "Reference",
             link: "/outro/",
             items: [{
+                    text: "Why CPSC 210 Exists",
+                    link: "/why-this-course"
+                }, {
+                    text: "GenAI and You",
+                    link: "/gen-ai-and-you"
+                },
+                {
                 text: "Uncovered Language Features",
                 link: "/outro/language-features"
             }, {
                 text: "Glossary",
                 link: "/outro/glossary"
-            }, {
-                text: "Why CPSC 210 Exists",
-                link: "/why-this-course"
-            }, {
-                text: "GenAI and You",
-                link: "/gen-ai-and-you"
             }],
         }, // end outro
         ],
