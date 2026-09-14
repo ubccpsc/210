@@ -112,13 +112,7 @@ export default defineConfig({
         sidebar: [{
             text: "Introduction",
             link: "/",
-            items: [{
-                text: "Why CPSC 210 Exists",
-                link: "/intro/01_why-this-course"
-            }, {
-                text: "GenAI and You",
-                link: "/intro/02_gen-ai-and-you"
-            }],
+            items: [],
         }, {
             text: "Part 1: Foundations",
             link: "/part1/",
@@ -207,16 +201,28 @@ export default defineConfig({
             }],
         }, // end part 3
         {
-            text: "Outro",
-            link: "/outro/",
+            text: "Reference",
+            link: "/reference/",
             items: [{
+                    text: "Why CPSC 210 Exists",
+                    link: "/why-this-course"
+                }, {
+                    text: "GenAI and You",
+                    link: "/gen-ai-and-you"
+                },
+                {
+                    text: "Prerequisite Knowledge",
+                    link: "/reference/prerequisite-knowledge"
+                },
+                {
                 text: "Uncovered Language Features",
-                link: "/outro/language-features"
-            }, {
+                link: "/reference/language-features"
+                },
+                {
                 text: "Glossary",
-                link: "/outro/glossary"
+                link: "/reference/glossary"
             }],
-        }, // end outro
+        }, // end reference
         ],
 
         socialLinks: [{
@@ -267,6 +273,7 @@ export default defineConfig({
                 // they contribute their text to that literal and nothing else.
                 `<span property="cc:attributionName" rel="cc:attributionURL" resource="${SITE_URL}">` +
                 `${authorLinks}</span>.` +
+                 `<br/><span>Using this in your own course? We'd love to hear about it, get in touch.</span>` +
                 `</span></span>`
         },
     },

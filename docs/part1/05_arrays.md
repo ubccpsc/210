@@ -334,6 +334,33 @@ test("find returns undefined when nothing matches",
 );
 ```
 
+### The Function Argument
+
+In all the array operation examples above, we use an anonymous function with a single expression as body for the function argument. But this is not a restriction!
+
+As with anywhere you have a single-expression anonymous function, the function argument can also be an anonymous function with statements in the body:
+
+```typescript
+const totalTemps: number = day.reduce((sum: number, reading: Reading) => {
+	const total = sum + reading;
+	return total;
+}, 0);
+```
+
+..or the name of a function with the appropriate signature:
+
+```typescript
+function add(x: number, y: number) {
+   const sum = x + y;
+   return sum;
+}
+
+const totalTemps: number = day.reduce(add, 0);
+```
+
+Defining the function argument as a proper `function` can be helpful for clarity when the computation that is performed gets more complex (e.g., including multiple if statements).
+
+
 ### Chaining Operations
 
 We can chain these operations , and we will frequently combine them to perform more complex tasks. Because `map` and `filter` return new arrays, the result of one operation can immediately feed the next.

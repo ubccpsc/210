@@ -100,7 +100,7 @@ function lateFee(daysLate: number): number
 
 In TypeScript, `//` comments out the rest of a line. Anything between `/_` and `_/` is also a comment, and these comments can span multiple lines.
 
-For function doc comments in this course, we'll use syntax that's consistent with [JSDoc](https://www.typescriptlang.org/docs/textbook/jsdoc-supported-types.html):
+For function doc comments in this course, we'll use syntax that's consistent with [JSDoc](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html):
 ```typescript
 /**
  * Here you put a summary of the function foo
@@ -420,9 +420,7 @@ How do we encode an expected error? We could encode the result as a `null` value
 So that we can be clear about the failure, and rely on the typechecker to check whether errors are correctly handled, we introduce a _result type_:
 
 ```typescript
-type Result<T, E> =
-  | { ok: true, value: T }
-  | { ok: false, error: E };
+type Result<T, E> = { ok: true, value: T } | { ok: false, error: E };
 ```
 
 `Result` is generic over two type parameters: `T` is the type of a successful value, and `E` is the type of the error. This is the same tagged-union idea from the previous chapter, with `ok` as the discriminator: a caller checks `ok` to learn whether it received a `value` or an `error`. We will express _expected_ errors with an error result type.
