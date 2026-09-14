@@ -100,7 +100,7 @@ function lateFee(daysLate: number): number
 
 In TypeScript, `//` comments out the rest of a line. Anything between `/_` and `_/` is also a comment, and these comments can span multiple lines.
 
-For function doc comments in this course, we'll use syntax that's consistent with [JSDoc](https://www.typescriptlang.org/docs/textbook/jsdoc-supported-types.html):
+For function doc comments in this course, we'll use syntax that's consistent with [JSDoc](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html):
 ```typescript
 /**
  * Here you put a summary of the function foo
