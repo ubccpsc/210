@@ -130,7 +130,7 @@ const broken: TrafficLight = "blue"; // error: "blue" is not a TrafficLight
 <details class="tooltip ts-tips">
   <summary>Union of Literals</summary>
 
-A union of literal values restricts expresses that variables of that type can take on _exactly_ the specified literal values. The following, where `|` is read as "or":
+A union of literal values expresses that variables of that type can take on _exactly_ the specified literal values. The following, where `|` is read as "or":
 
 ```typescript
 type TypeName = v_1 | v_2 | v_3;
