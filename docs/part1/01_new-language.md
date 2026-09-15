@@ -285,9 +285,9 @@ A block statement is started by `{` and `}`. It groups together a list of statem
    <statement-3>;
 }
 ```
-so that first `<statement-1>` will run, then `<statement-3>` will run, etc. It can group together any number of statements. We use `<>` to designate that any statement can be held there, `<>` is _not_ part of the actual TypeScript syntax for blocks.
+so that first `<statement-1>` will run, then `<statement-2>` will run, etc. It can group together any number of statements. We use `<>` to designate that any statement can be held there, `<>` is _not_ part of the actual TypeScript syntax for blocks.
 
-In general typescript, if you separate your statements with `;`, you can write them on the same line, and the meaning is the same: `{ <statement-1>; <statement-2>; <statement-3> }`. However, in this course, we will always put statements on separate lines for clarity.
+In general TypeScript, if you separate your statements with `;`, you can write them on the same line, and the meaning is the same: `{ <statement-1>; <statement-2>; <statement-3> }`. However, in this course, we will always put statements on separate lines for clarity.
 
 If statements have two forms. First, the `if` (no else) statement:
 ```typescript
