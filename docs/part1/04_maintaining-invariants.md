@@ -2,13 +2,13 @@
 
 The previous chapter placed invariants in documentation, tests, and assertions. These mechanisms _detect_ problems: tests probe chosen inputs, and assertions terminate the program when an impossible state is observed.
 
-A shortcoming of these mechanisms though is that they cannot _prevent_ invalid values from being created in the first place. This chapter is about closing that gap: designing code that wholly prevents invalid values from being created, rather than writing code that checks for violations.
+But they cannot _prevent_ invalid values from being created. This chapter is about closing that gap: designing code so that invalid values cannot be created, rather than checking for them afterwards.
 
-In this chapter, we will show how this can be done _solely with programming constructs_ you know from CPSC 110. The solution we'll get to is not standard TypeScript; you may, in fact, find it unwieldy. This is expected. In fact, it will motivate the object-oriented programming we'll get to in [Part 2](../part2/index).
+We will do this using only programming constructs you know from CPSC 110. The result is not standard TypeScript, and you may find it unwieldy. That is part of the point: it motivates the object-oriented programming in [Part 2](../part2/index).
 
 ## Initial Design with No Enforcement
 
-We will build on the `BankAccount` design from the previous lecture activity. The design has a data type with an associated invariant along with some functions:
+We will build on the `BankAccount` design from the previous lecture activity. The design has a data type with an invariant, and some functions:
 
 ```typescript
 /**
@@ -49,16 +49,16 @@ This is the same issue we encountered with the `Song` whose duration was `-30`: 
 
 However, nothing about the `BankAccount` type connects it to `deposit` and `withdraw`. We can build any object literal with a `balance` property and call it a `BankAccount`, whether the invariant remains true or not.
 
-To ensure an invariant holds for the life of a program, we must ensure two things:
+For an invariant to hold for the life of a program, two things must be true:
 
 1. When the value is created, the invariant must be _established_; and
 2. Every operation that produces a new value from an old one must _preserve_ the invariant.
 
-If both are true, then every value that ever exists is valid: the first one was checked, and every subsequent value came from an operation that maintained the invariant. The initial design had a shortcoming: creation,by writing an object literal, was available to everyone, so we cannot ensure the invariant is _established_ when the account was created.
+If both are true, then every value that ever exists is valid: the first one was checked, and every subsequent value came from an operation that maintained the invariant. In the initial design, anyone could create an account by writing an object literal, so nothing ensures the invariant is _established_.
 
 ## Controlling Creation with a Constructor Function
 
-To ensure invariants are established correctly, we can construct a function whose job is to create valid accounts:
+To ensure the invariant is established, we write a function whose only job is to create valid accounts:
 
 ```typescript
 /**
@@ -83,13 +83,13 @@ test("accounts cannot be created with a negative balance",
 );
 ```
 
-So we are making progress: accounts created with `makeAccount` establish the invariant in `BankAccount`. Unfortunately, the protection remains a convention. Nothing _forces_ a client to call `makeAccount`: the literal `{ balance: -100 }` would still be allowed by the compiler. The same is true of `deposit` and `withdraw`; a client can skip them and write `{ balance: account.balance - 200 }`. The constructor function and the operations exist alongside data remain open to everyone.
+Accounts created with `makeAccount` satisfy the invariant. Unfortunately, the protection is only a convention. Nothing _forces_ a client to call `makeAccount`: the literal `{ balance: -100 }` still type checks. The same is true of `deposit` and `withdraw`; a client can skip them and write `{ balance: account.balance - 200 }`. The constructor function and the operations exist alongside data that remains open to everyone.
 
-Making the invariant safe depends on every engineer choosing to go through the right functions. This is the kind of _programmer discipline_ we have been trying to avoid relying on.
+The invariant is safe only if every engineer chooses to go through the right functions. This is the kind of _programmer discipline_ we have been trying to avoid relying on.
 
 ## True Safety by Binding Operations to the Data
 
-The main problem is that the data, and its operations, are reachable by anyone. To solve the problem, we must make it so the data is only reachable through operations that can maintain the required invariants. To do this, we need a new language feature: an object property that holds a function. We can define a `BankAccount` type whose properties are not data at all, but operations:
+The main problem is that the data is reachable by anyone, so the operations can be bypassed. To solve it, the data must be reachable only through operations that maintain the invariant. To do this, we need a new language feature: an object property that holds a function. We can define a `BankAccount` type whose properties are operations rather than data:
 
 ```typescript
 /**
@@ -104,16 +104,16 @@ type BankAccount = {
 };
 ```
 
-There is no `balance` field. The type of `BankAccount` no longer describes what an account _stores_; it describes what an account _can do_. A holder of a `BankAccount` can deposit, withdraw, and observe the balance (`getBalance`), and that is all. Each of these operations can be invoked with dot notation:
+There is no `balance` field. The type of `BankAccount` now describes what an account _can do_ rather than what it stores. A holder of a `BankAccount` can deposit, withdraw, and observe the balance (`getBalance`), and that is all. Each of these operations can be invoked with dot notation:
 
 ```typescript
 // given an initialAccount of type BankAccount ...
 const funded = initialAccount.deposit(5);
 ```
 
-We have seen dot before. In [Chapter 2](./02_model-types) it read a property: `song1.title` selected the value stored under `title`. `initialAccount.deposit` selects the value stored under `deposit` in the same way, and what differs is only that the value found there is a function rather than a string or a number. The `(5)` that follows is a parameter to a function call, just as `letterGrade(85)` called a function named directly. 
+We have seen dot before. In [Chapter 2](./02_model-types) it read a property: `song1.title` selected the value stored under `title`. `initialAccount.deposit` selects the value stored under `deposit` in the same way, the only difference is that the value there is a function rather than a string or a number. The `(5)` that follows is an argument, just as in `letterGrade(85)`. 
 
-What is new is _which_ function you get. A free-standing `deposit(account, 5)` is one function shared by every caller, which is why it has to be told which account to act on. `initialAccount.deposit` is the function belonging to this _specific_ account, so the balance it operates on is chosen by the object the dot selected it from. A caller cannot point it at a different account.
+The difference is _which_ function you get. A free-standing `deposit(account, 5)` is one function shared by every caller, which is why it has to be told which account to act on. `initialAccount.deposit` is the function belonging to this _specific_ account, so it operates on that account's balance. A caller cannot point it at a different account.
 
 <details class="tooltip ts-tips">
 <summary>Functions as Properties</summary>
@@ -126,7 +126,7 @@ type T = {
   foo(x: X, b: Y): Z;
 };
 ```
-declares a function property `foo` on the type `T`. `foo` takes in two arguments, `x` and `b`, of types `X` and `Y`, and returns a value of type `Z`.
+declares a function property `foo` on the type `T`. `foo` takes two parameters, `x` and `b`, of types `X` and `Y`, and returns a value of type `Z`.
 
 In an object literal, the property is written like a function declaration without the `function` keyword:
 ```typescript
@@ -155,11 +155,11 @@ CPSC 110 allowed a similar approach. A structure's fields could hold functions, 
 ```
 </details>
 
-Removing the balance field solves our invariant preservation problem as `balance` is no longer accessible by others. But it introduces a logic problem. The operations themselves can no longer access a `balance` field either, which they need to their job. How can we create a `balance` field only the operations can access?
+Removing the `balance` field solves the preservation problem: nobody outside can reach `balance`. But it introduces a logic problem. The operations themselves can no longer access a `balance` field either, which they need to do their job. We need a `balance` that only the operations can reach.
 
 ## Hiding State with a Closure
 
-The initial balance can be provided to the constructor function's parameter. We can keep the balance field there using a concept you've seen in CPSC 110: the **closure**. A function created inside another function keeps access to the enclosing function's parameters and definitions, even after the enclosing function has returned. A function that carries context like this is called a **closure**.
+The initial balance arrives as the constructor function's parameter, and we can keep it there using a concept you've seen in CPSC 110. A function created inside another function keeps access to the enclosing function's parameters and definitions, even after the enclosing function has returned. A function that carries context like this is called a **closure**.
 
 To (re-)introduce closures, we'll consider a problem simpler than the bank account:
 
@@ -206,7 +206,7 @@ Note the `local` is not strictly necessary. We could put lambdas directly in `ma
 But, you might find this version without `local` a little less readable.
 </details>
 
-We already know all the syntax we need to create closures in TypeScript: function declarations, object literals, and functions as object properties. Let's put these together to write code that _protects_ the fire-safety invariant. In particular, we'll write a constructor function that returns a `Counter` object whose functions close over the current counter value:
+We already know all the syntax we need to create closures in TypeScript: function declarations, object literals, and functions as object properties. Let's put these together to write a constructor function that returns a `Counter` whose functions close over the current count, protecting the fire-safety invariant:
 
 ```typescript
 const MAX_CAPACITY: number = 1000;
@@ -248,16 +248,16 @@ export function makeCounter(count: number): Counter {
 <details class="tooltip ts-tips">
 <summary>The <code>export</code> Keyword</summary>
 
-The `export` in front of `makeCounter` marks it as available to code in other files; definitions without it, like `MAX_CAPACITY`, stay private to the file that contains them. Choosing what a file exports is another way to control what code exposes about itself to clients.
+The `export` in front of `makeCounter` marks it as available to code in other files; definitions without it, like `MAX_CAPACITY`, stay private to the file that contains them. Choosing what a file exports is another way to control what it exposes to clients.
 
 </details>
 
-This code both _establishes_ and _preserves_ the fire-safety invariant. The constructor function `makeCounter` establishes the invariant with its top-level assertion. Because `increment` produces its successor by calling `makeCounter` again, every state the counter ever occupies passes through that check. The closure over `count` allows `increment` and `getCount` to access count, but no `count` property exists for anyone else to alter. The operations returned by the constructor are the only way to interact with the state, and they preserve the invariant.
+This code both _establishes_ and _preserves_ the fire-safety invariant. The constructor function `makeCounter` establishes the invariant with its top-level assertion. Because `increment` produces its successor by calling `makeCounter` again, every state the counter ever occupies passes through that check. `increment` and `getCount` can see `count` through the closure, but there is no `count` property for anyone else to alter. The operations returned by the constructor are the only way to interact with the state, and they preserve the invariant.
 
 <details class="tooltip deep-dive">
 <summary>Every Operation Returns a New Value</summary>
 
-`increment` does not change the account it was called on; it returns a new counter whose count is higher. While this might seem indirect, it is the only option available to us to protect the counter from being manipulated. This is also the way every program in CPSC 110 worked.
+`increment` does not change the account it was called on; it returns a new counter whose count is higher. This might seem indirect, but it is the only way we have to protect the counter from being altered. This is also the way every program in CPSC 110 worked.
 
 </details>
 
@@ -282,7 +282,7 @@ test("the counter refuses to count past capacity",
 );
 ```
 
-Connecting back to the previous chapter, the last test treats an increment at full capacity as an _unexpected_ error and halts. If turning people away at the door were a normal outcome the program should handle, `increment` would instead return a `Result`; which is right depends on the design you are building.
+As in the previous chapter, the last test treats an increment at full capacity as an _unexpected_ error and halts. If turning people away at the door were a normal outcome the program should handle, `increment` would instead return a `Result`; which is right depends on the design you are building.
 
 <details class="tooltip exercise">
   <summary>Exercise: Reflect on Closures</summary>
@@ -321,7 +321,7 @@ function makeCounter(count: number): Counter {
  * Creates a counter holding the given count.
  *
  * Precondition: count < MAX_CAPACITY
- * Postcondtion: count <= MAX_CAPACITY
+ * Postcondition: count <= MAX_CAPACITY
  *
  * @param {Counter} the counter to increment
  * @returns {Counter} a new Counter satisfying the invariant
@@ -341,7 +341,7 @@ If you could tell TypeScript that `n` can only be changed by certain functions, 
 
 ## Using Closures to Protect BankAccount
 
-Let's now use closures to take advantage of removing the `balance` field (outsiders can't access it) while removing its disadvantage (operations can't access it). We do this by creating the three operations inside `makeAccount`, while `balance` is in scope. Each of them closes over it:
+Let's now use closures to take advantage of removing the `balance` field (outsiders can't access it) while removing its disadvantage (operations can't access it). We create the three operations inside `makeAccount`, where `balance` is in scope, so each closes over it:
 
 ```typescript
 /**
@@ -380,9 +380,9 @@ export function makeAccount(balance: number): BankAccount {
 
 In our earlier designs, `deposit` and `withdraw` took the account as a parameter. These versions take none, because the operations know their balance: it is the `balance` of the `makeAccount` call that created it. Every call to `makeAccount` produces a fresh `balance` and three fresh functions closed over it, so two accounts never share state.
 
-Notice where new account states come from. `deposit` and `withdraw` do not build result objects by hand; they call `makeAccount` again with the new balance. Every account that ever exists in the program, including every intermediate state produced by an operation, has passed through the gatekeeper and its assertion. The invariant is established at creation and re-established at every transition.
+`deposit` and `withdraw` do not build result objects by hand; they call `makeAccount` again with the new balance. Every account that ever exists in the program, including every intermediate state produced by an operation, has passed through `makeAccount` and its assertion. So the invariant is checked at creation and checked again on every change.
 
-The structural change  ensures that the invariant is _enforced by the programming language_ rather than by _programmer discipline_. There is no longer a `balance` property anywhere in the program for a client to read, to forge, or to copy incorrectly. The only access to the balance is `getBalance`, and the only way to produce a new state is through `deposit` and `withdraw`. The literal `{ balance: -100 }` no longer represents `BankAccount`; the type checker will reject `const ba: BankAccount = {balance: -100}`. Here's an example use of our new `BankAccount` type:
+The structural change ensures that the invariant is _enforced by the programming language_ rather than by _programmer discipline_. There is no longer a `balance` property anywhere in the program for a client to read or forge. The only access to the balance is `getBalance`, and the only way to produce a new state is through `deposit` and `withdraw`. The type checker now rejects `const ba: BankAccount = { balance: -100 }`. Here's an example use of our new `BankAccount` type:
 
 
 ```typescript
@@ -401,7 +401,7 @@ test("a withdrawal beyond the balance is refused",
 );
 ```
 
-The invariant is no longer protected by _programmer discipline_. It is protected because the state cannot be reached in any other way. The operations and the balance co-exist inside the closure. Because only the operations are returned nothing outside can reach the balance:
+The operations and the balance co-exist inside the closure. Because only the operations are returned, nothing outside can reach the balance:
 
 ```ditaa
     
@@ -426,24 +426,24 @@ The invariant is no longer protected by _programmer discipline_. It is protected
 <details class="tooltip deep-dive">
 <summary>Course Preview: Does Software in Practice Enforce Security Invariants?</summary>
 
-This chapter has focused on how we can ensure that invariants are enforced in code. The examples we have are small, but even in this small example we see a real-world safety implication. Code runs on so many platforms and has access to so much of our data. How can we ensure that only code we expect to run runs on our machines, and how do we ensure that that code doesn't leak our information to people who shouldn't have it?
+This chapter has been about enforcing invariants in code. The examples are small, but they have a real-world safety implication. Code runs on so many platforms and has access to so much of our data. How do we ensure that only the code we expect runs on our machines, and that it doesn't leak our information to people who shouldn't have it?
 
-Unfortunately, a lot of real-world code _doesn't_ manage to enforce such invariants, leading to many security and privacy issues. If this is interesting to you from a technical standpoint, you may be interested in learning more about _computer security_, either through courses (CPSC 337, CPSC 541), or cyber-security competitions ([Maple Bacon Team](https://maplebacon.org/)). If you're interested in the societal implications, you may be interested in CPSC 430.
+Unfortunately, a lot of real-world code _doesn't_ manage to enforce such invariants, leading to many security and privacy issues. If the technical side interests you, look at the _computer security_ courses (CPSC 337, CPSC 541) or cyber-security competitions ([Maple Bacon Team](https://maplebacon.org/)). If the societal side does, look at CPSC 430.
 
 </details>
 
 
 ## Protecting Invariants Drives Design
 
-Looking at our designs in this chapter, we see that the invariants of our programs strongly influenced our program design:
+In this chapter, the invariant drove the design at every step:
 
 1. To ensure the invariant is established, we restricted creation of BankAccounts to a single constructor function.
 2. To ensure the invariant was preserved, we bound operations to the data, so that the functions, instead of the callers, maintained the invariant.
 3. To ensure that no one else could violate the invariant, we hid the state within a closure.
 
-The organisation of the code itself enforces the invariant. This is the first time we have seen an invariant shape the _design of a program_ rather than just _its documentation and tests_. Protecting invariants frequently drives how code is organised, as this makes the code safer, easier to understand, and easier to evolve.
+The organisation of the code itself enforces the invariant. This is the first time we have seen an invariant shape the _design of a program_ rather than just _its documentation and tests_. Protecting invariants frequently drives how code is organised, because code organised this way is safer and easier to change.
 
-Building objects out of closures works, but the support the language gives us for this task is minimal and the code can be hard to wrap your head around. In [Part 2](../part2/index), we will see that object-oriented programming provides direct language syntax for this pattern using constructors, methods, and fields that the language itself controls access to. The syntax will be new, but the idea is exactly what we have been supporting through closures in this chapter.
+Building objects out of closures works, but the support the language gives us for this task is minimal and the code can be hard to wrap your head around. In [Part 2](../part2/index), we will see that object-oriented programming provides direct language syntax for this pattern using constructors, methods, and fields that the language itself controls access to. The syntax will be new, but the idea is the one this chapter built by hand.
 
 <details class="tooltip exercise">
   <summary>Exercise: Character Health</summary>
