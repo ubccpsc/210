@@ -1,18 +1,18 @@
 # Arrays and Iteration
 
-Much of the data programs work with arrives as a _sequence_: the messages in an inbox, the transactions on an account, the students in a course, the readings from a sensor. Because sequences are so common, most programming languages provide a built-in data structure for them: the **array**, an ordered collection of elements that can be accessed by position and that knows its own size. C, Java, Rust, Python, and TypeScript all provide arrays (Python calls them lists), and an engineer moving between languages can rely on them being there.
+It is common for programs to work with data represented as a _sequence_. The messages in an inbox, the transactions on an account, the students in a course, the readings from a sensor all naturally lend themselves to be a sequence of items. Because sequences are so common, most programming languages provide a built-in data structure for them. This is called an **array**, an ordered collection of elements that can be accessed by position. C, Java, Rust, Python, and TypeScript all provide arrays (Python calls them lists), and every language has similar features for working with them.
 
-We have already built a sequence by hand. In [Using Types to Model Problems](./02_model-types) we defined a recursive `Playlist` and wrote a recursive function every time we wanted to count, total, or search it. That worked, but we had to re-write the same traversal pattern in every function. Patterns this common are exactly what languages provide explicit support for to make work easier.
+We have already hand-built a mechanism for tracking a sequence. In [Using Types to Model Problems](./02_model-types) we defined a recursive `Playlist` and wrote a recursive function every time we wanted to count, total, or search it. That worked, but we had to re-write the same traversal pattern in every function. Since sequences are so common, languages provide support for the most common traversal patterns.
 
-Arrays come with the traversal operations already written for transforming, selecting, and searching sequences. This chapter introduces arrays, those built-in operations, and then the general mechanism underneath them all: iteration.
+In TypeScript, arrays come with the traversal operations already written for transforming, selecting, and searching sequences. This chapter introduces arrays, those built-in operations, and then iteration, the general mechanism underneath them all.
 
 ## A Day of Temperature Readings
 
-We will work with a single running example throughout this chapter:
+This chapter uses a single running example:
 
 > As a weather-station operator, I want to summarise a day of hourly temperature readings, so that I can publish accurate daily reports without computing them by hand.
 
-Each reading records the hour it was taken and the temperature at that moment:
+Each weather reading records the hour it was taken and the temperature at that time. The day's weather data is a sequence of these readings.
 
 ```typescript
 type Reading = {
@@ -22,13 +22,12 @@ type Reading = {
 };
 ```
 
-A day's data is a sequence of these readings, which we will store in an array.
-
 ## Creating and Accessing Arrays
 
-An array type is written by adding `[]` to the element type: `Reading[]` is an array of `Reading` objects, and `number[]` is an array of numbers. An array is created with an **array literal**: the elements, separated by commas, between square brackets.
+An array is denoted by appending `[]` to the element type: `Reading[]` is an array of `Reading` objects. An array is created with an **array literal**: the elements, separated by commas, between square brackets.
 
 ```typescript
+// create an array containing 6 Reading elements
 const day: Reading[] = [
     { hour: 6,  tempCelsius: -4 },
     { hour: 9,  tempCelsius: -1 },
@@ -38,15 +37,14 @@ const day: Reading[] = [
     { hour: 21, tempCelsius: -2 }
 ];
 
-// creates an array with no elements
+// create an empty array
 const empty: number[] = [];
 ```
-
 
 <details class="tooltip ts-tips">
 <summary>Array Types and Literals</summary>
 
-The type `X[]` designates an array of elements of type `X`. `X[]` can also be written `Array<X>`; the two notations mean exactly the same type, and the second uses the generics syntax from [Chapter 2](./02_model-types). In this course we use the `X[]` form, which is shorter and is the form you will see most often in practice.
+The type `X[]` designates an array of elements of type `X`. `X[]` can also be written `Array<X>`. The two notations mean the same type, the second using the generics syntax from [Chapter 2](./02_model-types). In this course we use the shorter and more common `X[]` form.
 
 
 An array literal is an expression:
@@ -54,21 +52,19 @@ An array literal is an expression:
 [<expression-1>, <expression-2>, <expression-3>]
 ```
 
-which creates an array with `<expression-i>` as the ith-element. It can contain any number
+which creates an array with `<expression-i>` as the `i`-th element. It can contain any number of elements, including zero.
 
 </details>
 
 <details class="tooltip link-110">
 <summary>Lists in ISL</summary>
 
-The array literal plays the role of `list` from CPSC 110: `[ -4, -1, 3 ]` is the counterpart of `(list -4 -1 3)`. Underneath, ISL lists were built from `cons` cells, which is exactly the recursive structure we rebuilt as `LinkedList` in an earlier chapter. Arrays package the same idea as a single built-in type, with direct access to any position by index.
+The array literal plays the role of `list` from CPSC 110: `[ -4, -1, 3 ]` is the counterpart of `(list -4 -1 3)`. ISL lists were built from `cons` cells, which is exactly the recursive structure we rebuilt as `LinkedList` previously. Arrays package the same idea as a single built-in type, with direct access to any position by index.
 
 </details>
 
 
-Every element of an array has the same type, and the compiler enforces it: trying to put a `string` into a `Reading[]` is a type error, and anything you take _out_ of a `Reading[]` is known to be a `Reading`.
-
-Elements are accessed by their **index**, their position counting from zero, and the number of elements is available in the `length` property:
+The compiler enforces that every element of an array has the same type. Trying to put a `string` into a `Reading[]` is a type error, and anything you take _out_ of a `Reading[]` is guaranteed to be a `Reading`. Array elements are accessed by their **index**. This is represented by their position counting from zero. The number of elements in the array is available through its `length` property:
 
 ```typescript
 const first = day[0];        // { hour: 6, tempCelsius: -4 }
@@ -76,13 +72,7 @@ const second = day[1];       // { hour: 9, tempCelsius: -1 }
 const count = day.length;    // 6
 ```
 
-<details class="tooltip ts-tips">
-<summary>Accessing array elements with <code>[]</code></summary>
-
-Given an array `a`, the expression `a[i]` returns the `i`-th element in `a`, starting counting at 0.
-</details>
-
-In memory, `day` is a row of six cells, one per index. The cells do not contain the `Reading` objects themselves; each cell holds a _reference_ to a separate `Reading` that lives elsewhere. An index like `day[0]` names a cell and follows its reference to the object. (We will introduce _references_ in detail in [Chapter 6](./06_state-mutation).)
+The `day` array is represented in memory as a row of six cells, one per index. The cells do not contain the `Reading` objects themselves; each cell holds a _reference_ to a separate `Reading` that lives elsewhere. An index like `day[0]` identifies a memory location that contains a reference that points to where the object itself resides in memory. We will introduce _references_ in detail in [Chapter 6](./06_state-mutation).
 
 <!-- graph playground:
 hhttps://dreampuf.github.io/GraphvizOnline/?engine=dot
@@ -123,15 +113,12 @@ digraph readingArray {
 <!-- caption="Each cell holds a reference to a separate Reading object, which can be accessed by its index." -->
 
 
-
-
-
 <details class="tooltip deep-dive">
 <summary>The JSON Data Interchange Format</summary>
 
-Programs rarely keep their data to themselves. They save it to files, send it across the network to other machines, and exchange it with programs written in entirely different languages. To do any of that, the data has to be written down in a format that is agreed on ahead of time. One of the most commonly used formats is **JSON**, short for JavaScript Object Notation. You have already seen some JSON files in this course: `package.json` and `tsconfig.json` are both written in it.
+Programs frequently send and receive data. They save it to files, send it across the network to other machines, and exchange it with programs written in entirely different languages. To do any of that, the data has to be captured in a format that is agreed on ahead of time. A commonly used format is **JSON**, short for *J*ava*S*cript *O*bject *N*otation. You have already seen some JSON files in this course with different metadata files the learning activities (e.g., `package.json` and `tsconfig.json`).
 
-JSON is quick to learn because its syntax is almost exactly the object and array literals you have been writing in this chapter and the last. Once you can read a TypeScript literal, you can very nearly read JSON. Every piece of JSON is a single value, and every value is one of a small, fixed set of kinds. Four of them are the primitive values you already know, written just as they are in TypeScript:
+JSON's syntax is almost exactly the object and array literals you have been writing. Every JSON value is one of a small, fixed set of kinds. Four of them are the primitive values you already know, written just as they are in TypeScript:
 
 - `string`: always in double quotes: `"CPSC 210"`
 - `number`, with no distinction drawn between integers and decimals: `4`, `-273.15`
@@ -150,15 +137,15 @@ The other two kinds are containers that hold other values, which is what lets JS
 }
 ```
 
-Each entry has two parts separated by a colon. The name on the left, such as `"hour"`, is the **key**, and the value on the right is what is filed under that key. A key is always a string in double quotes. Within a single object each key is _unique_: a key is a label, and each label names exactly one value, so asking an object for the value under `"hour"` always has one unambiguous answer. (This pattern, a collection of unique keys that each map to a value, returns later under its own name; here it is just how an object is put together.)
+Each entry has two parts separated by a `:`. The name on the left, `"hour"`, is the **key**. The value on the right, `6`, is what is recorded for that key. A key is always a string. Each key is _unique_ within an object.
 
-**A JSON array** is an ordered list of values inside `[ ]`, just as in this chapter:
+**A JSON array** is an ordered list of values inside `[ ]`:
 
 ```json
 [ -4, -1, 3, 8, 2, -2 ]
 ```
 
-The values in an array need not be numbers. They can be any JSON value, including objects:
+The values in an array can be any JSON value, including objects:
 
 ```json
 [
@@ -168,14 +155,14 @@ The values in an array need not be numbers. They can be any JSON value, includin
 ]
 ```
 
-JSON is flexible because of its ability to nest data. The value filed under a key, or sitting in an array, may itself be an object or an array, and those may hold further objects and arrays, nested as deeply as the data requires. A full weather-station report might bring every kind together at once:
+JSON is flexible because values nest. The value filed under a key, or sitting in an array, may itself be an object or an array, and those may hold further objects and arrays. A full weather-station report might bring every kind together at once:
 
 ```json
 {
   "stationId": "YVR-2",
   "active": true,
   "location": {
-    "name": "Vancouver International",
+    "name": "Vancouver International Airport",
     "latitude": 49.19,
     "longitude": -123.18
   },
@@ -188,48 +175,32 @@ JSON is flexible because of its ability to nest data. The value filed under a ke
 }
 ```
 
-The whole document is one object. The value under `"location"` is a second object, nested inside the first. The value under `"readings"` is an array of objects, and inside one of those, `"note"` is `null` for the reading with no note and a string for the one that has it. The value under `"tags"` is an array of strings. Every value, at every depth, is one of the kinds above. That is the entirety of JSON: four primitive values, the object, and the array, combined without limit.
+The whole document is one object. The value under `"location"` is a second object, nested inside the first. The value under `"readings"` is an array of objects, and inside one of those, `"note"` is `null` for the reading with no note and a string for the one that has it. The value under `"tags"` is an array of strings. Every value, at every depth, is one of the kinds above. That is all of JSON: four primitive values, objects, and arrays, nested as required to describe data.
 
-JSON itself is text, and only text. A JSON document is a sequence of characters, whether it sits in a file or arrives over a network. It carries data and nothing else: no functions, no computation, no variables, and no way for one part to refer to another. The restriction is deliberate, and it is the reason JSON is so widely used. Because a JSON value is inert data in a notation that no single language owns, a program written in Python can produce it, a file can store it, and your TypeScript program can consume it, with the two sides needing to agree only on the shape of the data and not on a shared programming language. That independence, together with the fact that a person can open the text and read it, is why JSON has become the common format for configuration files and for web services.
+JSON only contains text. It cannot contain functions or variables. This simplicity is why JSON is so widely used. Because JSON is not tied to a specific language, a Python program can produce it, a file can store it, and your TypeScript program can consume it. The two sides only need to agree on the shape of the data. The readability of JSON data also makes it helpful for engineers as they can read the files without special tools.
 
-A few differences from a TypeScript literal can be tricky: In JSON, keys must be wrapped in double quotes (`"hour"`, never a bare `hour`), and strings must use double quotes, never single. JSON permits no trailing comma after the final entry, and no comments anywhere. And the only values allowed are the kinds above: there is no `undefined`, and no special form for dates or anything else, only the primitives, objects, and arrays.
-
-Because JSON is text, a program cannot work with it as values directly. The text has to be turned into real objects, arrays, and numbers first, and your own values turned back into text to send them out. One challenge with JSON is it usually originates in external systems (files, the network, provided as parameters from other code), and needs to be validated so we know what its actual type is. This challenge, and how we read and write JSON files will be covered explicitly in lab.
+Because JSON is text, a program cannot work with it as values directly. The text has to be turned into real objects, arrays, and numbers first, and your own values turned back into text to send them. One challenge with JSON is that it usually originates outside your program (a file, the network, another team's code), so it needs to be validated before its type can be trusted. That challenge, and how to read and write JSON files, is covered in lab.
 
 </details>
 
 ## The Built-In Array Operations
 
-Arrays come with _operations_ that cover the most common things a program does with a sequence. Each operation is a higher-order function that takes a function as its input. The input function describes what should happen to _one element_, and the operation applies that across the whole array for you.  We will often use arrow functions (lambdas), which we saw in [Chapter 1](./01_new-language), to specify those input functions.
+TypeScript provides _operations_ that cover the most common things a program does with a sequence. Each operation takes a function as its input. The input function describes what should happen to _one element_, and the operation applies the function across the whole array. The input functions will usually be declared with arrow functions (lambdas), which we saw in [Chapter 1](./01_new-language).
 
-The four operations we use most are `map`, `filter`, `reduce`, and `find`. These four operations capture some of the most common tasks we perform on arrays. `map` is used to uniformly transform every element of an array into a new array. `filter` returns a subset of an array. `find` locates one element in an array. `reduce` summarizes an array.
+The four most commonly-used operations are `map`, `filter`, `reduce`, and `find`. `map` transforms every element, `filter` keeps a subset, `find` locates one element, and `reduce` summarises the array.
 
 
 <details class="tooltip ts-tips">
 <summary>Calling Array Operations</summary>
 
-Given an array of name `a`, we will call operations with `a.operation_name(fun)`. This is because each operation (`map`, `filter`, `reduce`, and `find`) _belongs_ to arrays, similar to the functions as properties we saw in [Chapter 4](./04_maintaining-invariants). `fun` represents the input function that characterize the mapping/filter/reduction/find we should do. Usually we will specify it with an arrow function; `(elem: elemType) => <expression-that-we-want-to-derive-from-elem>`.
+Given an array `a`, we call an operation with `a.operation(fun)`. `fun` is the function that says what to do with each element, usually an arrow function: `(elem: ElemType) => <expression>`.
 
 </details>
-<!---- Already introduced in chapter 1
-<details class="tooltip ts-tips">
-<summary>Arrow Functions</summary>
-
-An **arrow function** is a compact way to write a function as a value. The parameters come first, then `=>`, then an expression whose value is returned automatically:
-
-```typescript
-(reading) => reading.tempCelsius > 0
-```
-
-This is a function that takes one parameter and returns a `boolean`. You have already seen the zero-parameter form: the `() =>` wrapper used by `checkExpect` and `checkError`. The parameter has no type annotation because TypeScript infers it: when an arrow function is passed to an array operation, the compiler already knows the element type of the array, so it knows `reading` is a `Reading`.
-
-</details>
----->
 
 <details class="tooltip link-110">
 <summary> <code>map</code>, <code>filter</code>, <code>foldr</code> </summary>
 
-Built-in sequence abstractions are not new to you: CPSC 110 introduced `map`, `filter`, and `foldr`, with `lambda` for writing the per-element function. The TypeScript versions are the same ideas with different syntax: the operation is called with dot notation on the array, and `lambda` becomes the arrow.
+CPSC 110 also had built-in sequence abstractions: `map`, `filter`, and `foldr`, with `lambda` for writing the per-element function. The TypeScript versions are the same ideas with different syntax: the operation is called with dot notation on the array, and `lambda` becomes the arrow.
 
 ```racket
 (map (lambda (r) (* r 2)) (list 1 2 3))     ; (list 2 4 6)
@@ -239,21 +210,21 @@ Built-in sequence abstractions are not new to you: CPSC 110 introduced `map`, `f
 
 </details>
 
-### Transforming Every Element with `map`
+### `map`: Transforming
 
-`map` applies a function to every element and returns a _new array_ of the results, in the same order. The original array is not changed. Our forecasters publish in Fahrenheit, so we convert every reading:
+`map` applies a function to every element and returns a _new array_ containing the results, in the same order. The original array is not changed. For example, our forecasters publish in Fahrenheit, so we convert every Celsius reading to Fahrenheit:
 
 ```typescript
 const fahrenheit: number[] = day.map((reading: Reading) => reading.tempCelsius * 9 / 5 + 32);
 // fahrenheit contains [24.8, 30.2, 37.4, 46.4, 35.6, 28.4]
 ```
 
-The result of a `map` always has the same length as the input; only the elements are transformed. Notice the types: mapping a `Reading[]` through a function that returns a `number` produces a `number[]`.
+The result of a `map` always has the same length as the input. Mapping a `Reading[]` through a function that returns a `number` produces a `number[]`.
 
 <details class="tooltip deep-dive">
-<summary>The Recursion <code>map</code> Replaces</summary>
+<summary>Replacing Recursion With <code>map</code></summary>
 
-For the recursive `LinkedList<T>` from the modelling chapter, the same transformation has to be written by hand. (The parameter `f` is typed with the same arrow used to write one: `(t: T) => U` is the type of a function from `T` to `U`.)
+For the recursive `LinkedList<T>` from [Chapter 2](./02_model-types), the same operation had to be written by hand. The parameter `f` has type `(t: T) => U`, which denotes a function converting from `T` to `U`.
 
 ```typescript
 function mapList<T, U>(list: LinkedList<T>, f: (t: T) => U): LinkedList<U> {
@@ -265,31 +236,31 @@ function mapList<T, U>(list: LinkedList<T>, f: (t: T) => U): LinkedList<U> {
 }
 ```
 
-If you compare this carefully with `day.map(f)`, you will see that `map` performs exactly the same steps; it just hides the traversal. You supply only the per-element transformation, and the structure-following work that this function spells out is done for you.
+Compared with `day.map(f)`, this performs the same steps; `map` just hides the traversal. You supply the per-element transformation, and the traversal is taken care of by the language.
 
 </details>
 
-### Keeping Some Elements with `filter`
+### `filter`: Selecting
 
-`filter` returns a new array containing only the elements for which the given function returns `true`. The report needs to know which hours were below freezing:
+`filter` returns a new array containing only the elements for which the given function returns `true`. For example, the report needs to know which hours were below freezing:
 
 ```typescript
 const freezing: Reading[] = day.filter((reading: Reading) => reading.tempCelsius < 0);
 // [{ hour: 6, tempCelsius: -4 }, { hour: 9, tempCelsius: -1 }, { hour: 21, tempCelsius: -2 }]
 ```
 
-A `filter` never changes the elements themselves; it only selects which ones appear in the result, so a `Reading[]` is filtered to a (possibly shorter) `Reading[]`.
+`filter` never changes the elements; it only selects which appear in the result, so a `Reading[]` filters to an often shorter `Reading[]`.
 
-### Combining Elements with `reduce`
+### `reduce`: Combining
 
-`map` and `filter` produce arrays; `reduce` collapses an array into a single value. It carries an **accumulator** through the array: for each element, a combining function takes the accumulator so far and the current element, and produces the next accumulator. `reduce` takes two arguments: the combining function, and the accumulator's starting value.
+`map` and `filter` produce arrays; `reduce` collapses an array into a single value. It carries an **accumulator** through the array: for each element, a combining function takes the accumulator's current value and the current element, and produces an updated accumulator. `reduce` takes two arguments: the combining function, and the accumulator's starting value. For example, if we wanted to know the sum of the Celsius values across all of the readings:
 
 ```typescript
 const totalCelsius: number = day.reduce((sum: number, reading: Reading) => sum + reading.tempCelsius, 0);
 // 6
 ```
 
-With `reduce` and `length` we can write, document, and test a summary function in the style of the previous chapters:
+With `reduce` and `length` we can write a summary function in the style of the previous chapters:
 
 ```typescript
 /**
@@ -310,20 +281,17 @@ function meanTemp(day: Reading[]): number {
 test("mean temperature over the day", checkExpect(() => meanTemp(day), 1));
 ```
 
-The precondition matters here in exactly the way the previous chapter described: `meanTemp` of an empty array would divide by zero, so the contract excludes that input.
 
-### Searching with `find`
+### `find`: Searching
 
-`find` returns the _first_ element for which the given function returns `true`. The report wants the first hour the temperature rose above freezing:
+`find` returns the _first_ element for which the given function returns `true`. If no element matches, `find` returns `undefined` as specified by its return type. For example, if we wanted to find the first hour the temperature rose above freezing:
 
 ```typescript
-const thaw: Reading = day.find((reading: Reading) => reading.tempCelsius > 0);
+const thaw: Reading | undefined = day.find((reading: Reading) => reading.tempCelsius > 0);
 // { hour: 12, tempCelsius: 3 }
 ```
 
-If no element matches, `find` returns `undefined`, and its return type says so: searching a `Reading[]` produces a `Reading | undefined`.
-
-This is a deliberate language design choice. Recall the two absence values from the modelling chapter: `null` is a deliberate "no value here" that we choose when designing our own types, while `undefined` is the language's own value for "nothing was provided". TypeScript's built-in operations consistently use `undefined` for their "not found" results, and `find` follows that convention. Either way the protection is the same: the union type forces every caller to consider the case where nothing matched.
+[Chapter 2](./02_model-types) introduced two absence values: `null`, which we choose when designing our own types, and `undefined`, the language's own value for "nothing was provided". TypeScript's built-in operations use `undefined` for "not found", and `find` follows that convention. The union type forces every caller to consider the case where nothing matched.
 
 ```typescript
 test("find returns undefined when nothing matches",
@@ -336,40 +304,39 @@ test("find returns undefined when nothing matches",
 
 ### The Function Argument
 
-In all the array operation examples above, we use an anonymous function with a single expression as body for the function argument. But this is not a restriction!
-
-As with anywhere you have a single-expression anonymous function, the function argument can also be an anonymous function with statements in the body:
+In the examples above, the function argument is always an anonymous function whose body is a single expression. It does not have to be. The function argument can be an anonymous function with statements in its body:
 
 ```typescript
 const totalTemps: number = day.reduce((sum: number, reading: Reading) => {
-	const total = sum + reading;
-	return total;
+    const total = sum + reading.tempCelsius;
+    return total;
 }, 0);
 ```
 
-..or the name of a function with the appropriate signature:
+or the name of a function with the right signature:
 
 ```typescript
-function add(x: number, y: number) {
-   const sum = x + y;
-   return sum;
+function addTemp(sum: number, reading: Reading): number {
+    return sum + reading.tempCelsius;
 }
 
-const totalTemps: number = day.reduce(add, 0);
+const totalTemps: number = day.reduce(addTemp, 0);
 ```
 
-Defining the function argument as a proper `function` can be helpful for clarity when the computation that is performed gets more complex (e.g., including multiple if statements).
+A named `function` is clearer when the computation gets more complex, for example when it needs several `if` statements. The name `addTemp` also tells the reader what the operation is for.
 
 
 ### Chaining Operations
 
-We can chain these operations , and we will frequently combine them to perform more complex tasks. Because `map` and `filter` return new arrays, the result of one operation can immediately feed the next.
-
-For instance, to take the mean of only the above-freezing temperatures:
+The array operations are chainable. Because `map` and `filter` return new arrays, the result of one can feed directly into the next. For example, to take the mean of only the above-freezing temperatures:
 
 ```typescript
-const aboveFreezing: Reading[] = day.filter((reading: Reading) => reading.tempCelsius > 0);
-const meanAbove: number = aboveFreezing.reduce((sum: number, reading: Reading) => sum + reading.tempCelsius, 0) / aboveFreezing.length;
+const aboveFreezing: Reading[] = day.filter(
+    (reading: Reading) => reading.tempCelsius > 0
+);
+const meanAbove: number = aboveFreezing.reduce(
+    (sum: number, reading: Reading) => sum + reading.tempCelsius, 0
+) / aboveFreezing.length;
 // 13 / 3
 ```
 
@@ -377,11 +344,9 @@ Each named operation tells the reader the shape of the step: a `filter` produces
 
 ## Writing Your Own Loops
 
-`map`, `filter`, `reduce`, and `find` are commonly used, but are also extremely prescriptive. `map` always produces one output per input; `filter` always visits every element and keeps the matches; `find` always stops at the first match. _Many_ computations fit one of those shapes, but not _all_ of them do.
+`map`, `filter`, `reduce`, and `find` are commonly used, but they are prescriptive. `map` always produces one output per input; `filter` always visits every element and keeps the matches; `find` always stops at the first match. While these are broadly useful, you will often need something that does not fit these operations.
 
-When a computation does not match a named pattern, for example because it relates elements to one another rather than examining each one on its own, we need the general mechanism that the built-in operations are themselves made of: a **loop**.
-
-The loop we use is the `for of` statement. It runs its body once for each element of an array, in order, binding the element to a name:
+When a computation does not match a named pattern, for example because it relates elements to one another rather than examining each one on its own, we need a general mechanism that the built-in operations are themselves made of: a **loop**. The loop we use is the `for of` statement. It runs its body once for each element of an array, in order, binding the element to a name:
 
 ```typescript
 for (const reading of day) {
@@ -392,33 +357,33 @@ for (const reading of day) {
 <details class="tooltip ts-tips">
 <summary><code>for of</code> loops</summary>
 
-The for of loop of form:
+A `for of` loop of the form:
 
 ```typescript
-for(<var-decl> of <iterable>){
+for(<var-declaration> of <iterable>){
    <statement-1>;
    <statement-2>;
 } 
 ```
 is a statement that executes as follows, for each element of `<iterable>`:
 
-1. assigns the element to the name declared by `<var-decl>`. I.e., if `<var-decl>` is `const x`, each element of iterable will be assigned to the name `x`.
-2. runs the statements in the body of the for loop (here, `<statement-1>; <statement-2>;`) in order
+1. Assigns the element to the name declared by `<var-declaration>`. That is, if `<var-declaration>` is `const x`, each element of iterable will be assigned to the name `x`.
+2. Runs the statements in the body of the for loop (here, `<statement-1>; <statement-2>;`) in order.
 
-This means the body of the `for of` loop will execute `n` times, where `n` is the number of elements in `<iterable>`. Since the `for of` loop is a statement, `for of` loops can be nested (i.e., `<statement-i>` can be another loop).
+This means the body of the `for of` loop will execute `n` times, where `n` is the number of elements in `<iterable>`. Since the `for of` loop is a statement, `for of` loops can be nested (for example, `<statement-i>` can be another loop).
 
 </details>
 
-Like the `if` statement from the first chapter, `for of` is a statement: it produces no value, it directs the flow of execution. This is a _new construct_ relative to CPSC 110, where every repetition was expressed with recursion.
+Like the `if` statement from the first chapter, `for of` is a statement: it produces no value; it only directs the flow of execution. This is a _new construct_ relative to CPSC 110.
 
 <details class="tooltip link-110">
 <summary>Loops Replace Recursive Traversal</summary>
 
-In CPSC 110 you traversed a list by calling the function again on `(rest lst)` until you reached `empty`. A `for of` loop performs the same traversal as a statement: visit each element in order, then stop. The traversal you used to spell out with a recursive call is performed by the statement itself.
+In CPSC 110 you traversed a list by calling the function again on `(rest lst)` until you reached `empty`. A `for of` loop performs the same traversal as a statement. The loop visits each element in order, then stops. The traversal you used to spell out with a recursive call is performed by the statement itself.
 
 </details>
 
-To see a loop doing what `find` does, here is a search written by hand:
+The loop below does what `find` does:
 
 ```typescript
 function firstAbove(day: Reading[], threshold: number): Reading | undefined {
@@ -431,9 +396,9 @@ function firstAbove(day: Reading[], threshold: number): Reading | undefined {
 }
 ```
 
-The `return` inside the loop body exits the whole function the moment a match is found, so later elements are never visited. This is exactly what `find` does for you: `find` is a loop someone else already wrote. The same is true of `map`, `filter`, and `reduce`. The built-in operations are not magic; they are packaged loops, and knowing how to write the loop means you can build the patterns the language did not provide.
+The `return` inside the loop body exits the whole function the moment a match is found, so later elements are never visited. This is exactly what `find` does. Knowing how to write the loop means you can build the patterns the language does not provide.
 
-Some questions cannot be answered by any of the named operations. Every operation above examines elements one at a time: the function you hand to `map`, `filter`, or `find` receives a single element and nothing else. Some questions are instead about how elements relate to _each other_. Suppose quality control asks: did the station ever report the same temperature at two different hours?
+Every operation above examines elements one at a time: the function you hand to `map`, `filter`, or `find` receives a single element and nothing else. Some questions are about how elements relate to _each other_. Suppose quality control asks: did the station ever report the same temperature at two different hours?
 
 ```typescript
 /**
@@ -457,7 +422,7 @@ function hasRepeatedTemperature(day: Reading[]): boolean {
 }
 ```
 
-In this example, loops nest: for each `first` reading, the inner loop walks the whole array looking for a _different_ hour (as expressed by the if) reporting the _same_ temperature. The comparison involves two elements at once: the named operations cannot express this, because the functions they take see one element at a time. _(It is technically possible to contort `find` into answering this, with one search nested inside another, but the result is much harder to read than the loop that says what it means.)_
+Here the loops nest: for each `first` reading, the inner loop walks the whole array looking for a _different_ hour (the outer `if`) reporting the _same_ temperature. The comparison involves two elements at once, which the named operations cannot express because their functions see one element at a time.
 
 ```typescript
 const repeats: Reading[] = [
@@ -475,16 +440,13 @@ test("a repeated temperature is detected",
 );
 ```
 
-Loops have a second strength we are not ready to use yet: values that change as the loop runs, allowing a running tally to be carried from one element to the next. Doing that requires changing existing values, which is the subject of the next chapter.
+Which should you use? Prefer the named operation whenever the task is exactly a transform (`map`), a selection (`filter`), a summary (`reduce`), or a first-match search (`find`). The operation tells every reader what the computation does, and it will be less error-prone than a hand-written loop.
 
-Should you use loops or built-in array operations?
-Prefer the named operation whenever the task is exactly a transform (`map`), a selection (`filter`), a summary (`reduce`), or a first-match search (`find`). The operation name tells every future reader what the computation does at a glance, and the traversal it performs has no room for the small mistakes a hand-written loop can contain.
-
-Write a loop when the computation does not fit a named pattern: when it relates elements to one another, like the repeated-temperature check, or when one pass must answer a question no single named operation can. The named operations say _what_; the loop is for when you must control _how_.
+In contrast, write a loop when the computation does not fit a named pattern: when it relates elements to one another, or when one pass must answer a question no single named operation can. The named operations say _what_ they are doing. Loops are for when you must control _how_ it is done.
 
 ## Reading and Writing JSON
 
-The tooltip earlier in this chapter described JSON as a notation: four kinds of primitive value, the object, and the array, written as text. Text is all it is, so a program cannot work with a JSON document directly. Two built-in functions convert between the notation and real TypeScript values.
+The JSON tooltip described a notation written as text. Because it is text, a program cannot work with a JSON document directly; two built-in functions convert between the notation and TypeScript values.
 
 `JSON.stringify` goes from a value to text. Give it any array, object, or primitive and it returns a string in JSON notation:
 
@@ -498,41 +460,33 @@ const text: string = JSON.stringify(day);
 // '[{"hour":6,"tempCelsius":-4},{"hour":12,"tempCelsius":3}]'
 ```
 
-The output is compact and awkward to read. When a person has to look at the result, as with a configuration file, a third argument asks for indentation:
+The output is compact and hard to read. When a person has to read it, as with a configuration file, a third argument adds indentation:
 
 ```typescript
 JSON.stringify(day, null, 4);   // the same data, indented by four spaces
 ```
 
-`JSON.parse` goes the other way, from text back to a value:
+`JSON.parse` transforms data the other way, from text back to a value:
 
 ```typescript
 const restored = JSON.parse(text);
 ```
 
-After that call, `restored` holds a real array of real objects. The elements are ordinary values, and every operation in this chapter works on them as usual.
+`restored` now holds an array of objects, which the named operations we have been discussing can act upon.
 
-Two cautions follow from JSON being nothing but text.
-
-The first is that _the conversion is lossy in one direction_. JSON has no notation for a date, for `undefined`, or for a function, so `JSON.stringify` has no way to record them. It does not complain; it drops them. A value that goes out and comes back is equal to the original only when everything in it was one of the kinds JSON can express.
-
-The second is that _`JSON.parse` cannot know what the text contains_. The text is not available until the program runs, so there is nothing for the compiler to inspect, and it cannot give the result a meaningful type. Writing an annotation does not fix this:
+Two cautions follow from JSON being nothing but text. The first is that _the conversion is lossy in one direction_. JSON has no notation for a date, `undefined`, or a function, so `JSON.stringify` drops them without complaint. A value that goes through `stringify` and back through `parse` equals the original only when everything in it was a kind JSON can express. The second is that _`JSON.parse` cannot know what the text contains_. The text is not available until the program runs, so the compiler cannot inspect it or give the result a meaningful type. An annotation does not fix this:
 
 ```typescript
 const readings: Reading[] = JSON.parse(text);   // hoped for, not checked
 ```
 
-The compiler accepts that line and will then check every later use of `readings` against a promise nobody verified. If the text came from a file somebody edited by hand, or from a program written by another team, or from a version of the format that has since changed, the values may be nothing like `Reading`. Nothing here will notice.
-
-For the moment, work with JSON you produced yourself, where the shapes are known because your own code wrote them. Data arriving from somewhere you do not control needs to be checked before it is trusted, and that is a large enough topic to have a chapter of its own in [Part 3](../part3/index).
+The compiler accepts that line and then checks every later use of `readings` against a type nobody verified. If the text came from a file somebody edited by hand, from another team's program, or from an older version of the format, the values may be nothing like `Reading`, and the compiler has no way to know. For now, work with JSON your own code produced, where the shapes are known. Data from somewhere you do not control must be checked before it is trusted; we will examine this in [Part 3](../part3/index).
 
 ## On Iteration
 
 Arrays give sequences built-in support in the language, and their operations package the traversals we used to write by hand: `map` to transform, `filter` to select, `reduce` to summarise, `find` to search, with `for of` underneath them all for the computations that fit no named pattern.
 
-Notice one property everything in this chapter shared: none of these operations changed `day`, our array of daily temperatures. Every `map` and `filter` produced a new array, every `reduce` produced a new value, and even our hand-written loops only read the elements they visited; the original readings were never touched. This reflects a general principle of program design that runs through this course: once a pattern is understood and reliable, it is packaged up so it never needs to be re-derived, and we get to focus on _what_ to compute instead of _how_ to traverse.
-
-What happens when programs _do_ change existing values, and why that calls for so much care, is the subject of the next chapter.
+One property everything in this chapter shared: none of these operations changed `day`, our array of daily temperatures. Every `map` and `filter` produced a new array, every `reduce` produced a new value, and even our hand-written loops only read the elements they visited; the original readings were never changed. What happens when programs _do_ change existing values, and why that calls for so much care, is the subject of the next chapter.
 
 <details class="tooltip exercise">
   <summary>Exercise: Summarising an Order</summary>
