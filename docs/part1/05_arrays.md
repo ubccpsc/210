@@ -113,76 +113,6 @@ digraph readingArray {
 <!-- caption="Each cell holds a reference to a separate Reading object, which can be accessed by its index." -->
 
 
-<details class="tooltip deep-dive">
-<summary>The JSON Data Interchange Format</summary>
-
-Programs frequently send and receive data. They save it to files, send it across the network to other machines, and exchange it with programs written in entirely different languages. To do any of that, the data has to be captured in a format that is agreed on ahead of time. A commonly used format is **JSON**, short for *J*ava*S*cript *O*bject *N*otation. You have already seen some JSON files in this course with different metadata files the learning activities (e.g., `package.json` and `tsconfig.json`).
-
-JSON's syntax is almost exactly the object and array literals you have been writing. Every JSON value is one of a small, fixed set of kinds. Four of them are the primitive values you already know, written just as they are in TypeScript:
-
-- `string`: always in double quotes: `"CPSC 210"`
-- `number`, with no distinction drawn between integers and decimals: `4`, `-273.15`
-- `boolean`: `true` or `false`
-- `null`, for the deliberate absence of a value: `null`
-
-The other two kinds are containers that hold other values, which is what lets JSON describe structured data.
-
-**A JSON object** groups related values together inside `{ }`:
-
-```json
-{
-  "hour": 6,
-  "tempCelsius": -4,
-  "freezing": true
-}
-```
-
-Each entry has two parts separated by a `:`. The name on the left, `"hour"`, is the **key**. The value on the right, `6`, is what is recorded for that key. A key is always a string. Each key is _unique_ within an object.
-
-**A JSON array** is an ordered list of values inside `[ ]`:
-
-```json
-[ -4, -1, 3, 8, 2, -2 ]
-```
-
-The values in an array can be any JSON value, including objects:
-
-```json
-[
-  { "hour": 6, "tempCelsius": -4 },
-  { "hour": 9, "tempCelsius": -1 },
-  { "hour": 12, "tempCelsius": 3 }
-]
-```
-
-JSON is flexible because values nest. The value filed under a key, or sitting in an array, may itself be an object or an array, and those may hold further objects and arrays. A full weather-station report might bring every kind together at once:
-
-```json
-{
-  "stationId": "YVR-2",
-  "active": true,
-  "location": {
-    "name": "Vancouver International Airport",
-    "latitude": 49.19,
-    "longitude": -123.18
-  },
-  "elevationMetres": 4,
-  "readings": [
-    { "hour": 6, "tempCelsius": -4, "note": null },
-    { "hour": 9, "tempCelsius": -1, "note": "frost reported" }
-  ],
-  "tags": [ "coastal", "automated" ]
-}
-```
-
-The whole document is one object. The value under `"location"` is a second object, nested inside the first. The value under `"readings"` is an array of objects, and inside one of those, `"note"` is `null` for the reading with no note and a string for the one that has it. The value under `"tags"` is an array of strings. Every value, at every depth, is one of the kinds above. That is all of JSON: four primitive values, objects, and arrays, nested as required to describe data.
-
-JSON only contains text. It cannot contain functions or variables. This simplicity is why JSON is so widely used. Because JSON is not tied to a specific language, a Python program can produce it, a file can store it, and your TypeScript program can consume it. The two sides only need to agree on the shape of the data. The readability of JSON data also makes it helpful for engineers as they can read the files without special tools.
-
-Because JSON is text, a program cannot work with it as values directly. The text has to be turned into real objects, arrays, and numbers first, and your own values turned back into text to send them. One challenge with JSON is that it usually originates outside your program (a file, the network, another team's code), so it needs to be validated before its type can be trusted. That challenge, and how to read and write JSON files, is covered in lab.
-
-</details>
-
 ## The Built-In Array Operations
 
 TypeScript provides _operations_ that cover the most common things a program does with a sequence. Each operation takes a function as its input. The input function describes what should happen to _one element_, and the operation applies the function across the whole array. The input functions will usually be declared with arrow functions (lambdas), which we saw in [Chapter 1](./01_new-language).
@@ -446,7 +376,77 @@ In contrast, write a loop when the computation does not fit a named pattern: whe
 
 ## Reading and Writing JSON
 
-The JSON tooltip described a notation written as text. Because it is text, a program cannot work with a JSON document directly; two built-in functions convert between the notation and TypeScript values.
+Programs frequently send and receive data. They save it to files, send it across the network to other machines, and exchange it with programs written in entirely different languages. To do any of that, the data has to be captured in a format that is agreed on ahead of time. A commonly used format is **JSON**, short for *J*ava*S*cript *O*bject *N*otation. You have already seen some JSON files in this course with different metadata files the learning activities (e.g., `package.json` and `tsconfig.json`).
+
+JSON's syntax is almost exactly the object and array literals you have been writing. Every JSON value is one of a small, fixed set of kinds. Four of them are the primitive values you already know, written just as they are in TypeScript:
+
+- `string`: always in double quotes: `"CPSC 210"`
+- `number`, with no distinction drawn between integers and decimals: `4`, `-273.15`
+- `boolean`: `true` or `false`
+- `null`, for the deliberate absence of a value: `null`
+
+The other two kinds are containers that hold other values, which is what lets JSON describe structured data.
+
+**A JSON object** groups related values together inside `{ }`:
+
+```json
+{
+  "hour": 6,
+  "tempCelsius": -4,
+  "freezing": true
+}
+```
+
+Each entry has two parts separated by a `:`. The name on the left, `"hour"`, is the **key**. The value on the right, `6`, is what is recorded for that key. A key is always a string. Each key is _unique_ within an object.
+
+**A JSON array** is an ordered list of values inside `[ ]`:
+
+```json
+[ -4, -1, 3, 8, 2, -2 ]
+```
+
+The values in an array can be any JSON value, including objects:
+
+```json
+[
+  { "hour": 6, "tempCelsius": -4 },
+  { "hour": 9, "tempCelsius": -1 },
+  { "hour": 12, "tempCelsius": 3 }
+]
+```
+
+JSON is flexible because values nest. The value filed under a key, or sitting in an array, may itself be an object or an array, and those may hold further objects and arrays. That is all of JSON: four primitive values, objects, and arrays, nested as required to describe data.
+
+<details class="tooltip deep-dive">
+<summary>A Complete JSON Document</summary>
+
+A full weather-station report brings every kind together at once:
+
+```json
+{
+  "stationId": "YVR-2",
+  "active": true,
+  "location": {
+    "name": "Vancouver International Airport",
+    "latitude": 49.19,
+    "longitude": -123.18
+  },
+  "elevationMetres": 4,
+  "readings": [
+    { "hour": 6, "tempCelsius": -4, "note": null },
+    { "hour": 9, "tempCelsius": -1, "note": "frost reported" }
+  ],
+  "tags": [ "coastal", "automated" ]
+}
+```
+
+The whole document is one object. The value under `"location"` is a second object, nested inside the first. The value under `"readings"` is an array of objects, and inside one of those, `"note"` is `null` for the reading with no note and a string for the one that has it. The value under `"tags"` is an array of strings. Every value, at every depth, is one of the kinds above.
+
+</details>
+
+JSON only contains text. It cannot contain functions or variables. This simplicity is why JSON is so widely used. Because JSON is not tied to a specific language, a Python program can produce it, a file can store it, and your TypeScript program can consume it. The two sides only need to agree on the shape of the data. The readability of JSON data also makes it helpful for engineers as they can read the files without special tools.
+
+The same property means a program cannot work with JSON as values directly. Two built-in functions convert between the notation and TypeScript values.
 
 `JSON.stringify` goes from a value to text. Give it any array, object, or primitive and it returns a string in JSON notation:
 
@@ -480,7 +480,7 @@ Two cautions follow from JSON being nothing but text. The first is that _the con
 const readings: Reading[] = JSON.parse(text);   // hoped for, not checked
 ```
 
-The compiler accepts that line and then checks every later use of `readings` against a type nobody verified. If the text came from a file somebody edited by hand, from another team's program, or from an older version of the format, the values may be nothing like `Reading`, and the compiler has no way to know. For now, work with JSON your own code produced, where the shapes are known. Data from somewhere you do not control must be checked before it is trusted; we will examine this in [Part 3](../part3/index).
+The compiler accepts that line and then checks every later use of `readings` against a type nobody verified. If the text came from a file somebody edited by hand, from another team's program, or from an older version of the format, the values may be nothing like `Reading`, and the compiler has no way to know. For now, work with JSON your own code produced, where the shapes are known. Data from somewhere you do not control must be checked before it is trusted; we will examine this in [Part 3](../part3/index). Reading and writing JSON _files_ is covered in lab.
 
 ## On Iteration
 
