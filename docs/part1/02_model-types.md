@@ -222,8 +222,6 @@ const song2: Song = {
 ```
 
 
-An object is an instance of its type, and each object is its own independent value. Below, `song1` and `song2` are two separate songs that share the `Song` type.
-
 <details class="tooltip ts-tips">
   <summary>Creating Object Values with Object Literals</summary>
 
