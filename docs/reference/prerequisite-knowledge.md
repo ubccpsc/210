@@ -1,33 +1,30 @@
 # What This Course Assumes You Know
 
-The main prerequisite for CPSC 210 is CPSC 110. This textbook is written with that prerequisite knowledge in mind. It does not re-teach that material, but it leans on it constantly: the chapters ahead assume you have designed data before writing code, derived a function's shape from the shape of its input, and written down what you expected a function to produce before you produced it. For students entering CPSC 210 without having taken CPSC 110, this chapter tries to bring that pre-requisite knowledge together for you to review in advance. We also hope having it here will help students who _did_ take CPSC 110 to review and reference their past knowledge and apply it to this course.
+The main prerequisites for CPSC 210 are CPSC 110 and CPSC 121. This textbook is written with that knowledge in mind. It does not re-teach that material, but it leans on it constantly: this textbook assumes you have designed data before writing code, derived a function's shape from the shape of its input, and written down what you expected a function to produce before you produced it. For students entering CPSC 210 without having taken CPSC 110, this page tries to bring that pre-requisite knowledge together for you to review in advance. We also hope having it here will help students who _did_ take CPSC 110 to review and reference their past knowledge and apply it to this course.
 
 Throughout the textbook, purple deep dives highlight links to prior knowledge. This chapter is an index to those call-outs, gathered before you need them rather than scattered across the textbook.
 
-What we are asking you to bring forward is a way of thinking rather than a language. CPSC 110 is taught in a set of teaching languages built on Racket, and the code in this chapter is written in them, but almost nothing we rely on is about how those languages are spelled. The ideas below are the part that matters, and each of them reappears in this course in a new language, TypeScript. If the notation in the examples is unfamiliar, there is a short guide to it near the end of this chapter; you can read the ideas first and look up the syntax afterwards.
+The main thing we are asking you to recall is a way of _thinking_ rather than _language syntax_. CPSC 110 is taught in a set of teaching languages built on Racket, and the code in this document is written in them. But the ideas are what matter.
 
 <details class="tooltip deep-dive">
 <summary>If You Came Through CPSC 103 and CPSC 107</summary>
 
-The two paths cover much the same ground and use different words for parts of it. CPSC 103 gives you the design recipes, data definitions, and testing discipline under the same names. CPSC 107 gives you the functional material: higher-order functions, closures, recursion over recursively defined data.
+The two paths cover much the same ground and use different words for parts of it. CPSC 103 provides the design recipes, data definitions, and testing discipline under the same names. CPSC 107 provides the functional material: higher-order functions, closures, recursion over recursively defined data. While the notation and syntax will differ, the important concepts are all the same.
 
-What differs is vocabulary and notation. This textbook's call-outs are written in the CPSC 110 teaching languages, so the code in them will look unfamiliar even where the concept is not. Read the prose in those call-outs and treat the Racket as illustration; nothing in the rest of the textbook requires you to write it.
 
 </details>
 
 ## Working Systematically
 
-CPSC 110's main claim is that getting from a problem statement to a working program is a process you can follow. When you are stuck, you ask what step you are on and what that step asks for next.
+CPSC 110's main claim is that getting from a problem statement to a working program is a process you can follow. When you are stuck, you ask what step you are on and what that step asks for next. This is operationalized around three activities:
 
-That process is made of three kinds of work, and the rest of this chapter is organised around them.
-
-_Describing._ Writing down what the program deals with and what it should do: what the information is, how it is represented, what must always be true of it, and what each function promises. None of it runs, but it determines what the code will look like.
+_Describing._ Writing down what the program deals with and what it should do: what the information is, how it is represented, what must always be true of it, and what each function promises.
 
 _Constructing._ Deriving the code from those descriptions. The shape of the data determines the shape of the function, so if you do not know how to start, the description tells you what the branches are.
 
-_Checking._ Confirming the result is right. Examples are written before the code they test, the cases to write come from the description, and you can follow a value through a program by hand.
+_Checking._ Confirming the result is right. Examples are written before the code they test, the cases to write come from the description, and you can follow a value through a program.
 
-The design recipes make these three routine. The **How to Design Functions** recipe, HtDF, is the clearest example. It looks like a list of six steps:
+The design recipes make these three activities second nature. The **How to Design Functions** recipe, HtDF, is the clearest example. It looks like a list of six steps:
 
 1. _Signature._ What types go in and what type comes out.
 2. _Purpose._ One line saying what the function produces, not how.
@@ -36,11 +33,11 @@ The design recipes make these three routine. The **How to Design Functions** rec
 5. _Template._ The skeleton, derived from the data definition of the input.
 6. _Body._ The implementation, filling in the template until the examples pass.
 
-But those six steps are only three kinds of work. Steps 1 and 2 describe. Step 4 checks. Steps 5 and 6 construct. Step 3 is scaffolding that keeps the file running while the rest is unfinished. The recipe alternates between the three: you say what the function does, you say how you will know it works, and then you build it.
+But those six steps are only three kinds of activities. Steps 1 and 2 _describe_. Step 4 _checks_. Steps 5 and 6 _construct_. Step 3 is scaffolding that keeps the file running while the rest is unfinished. In this process, the order matters. Each step can be answered using only what the earlier steps produced, so you never face the whole problem at once.
 
-The order matters too. Each step can be answered using only what the earlier steps produced, so you never face the whole problem at once.
+CPSC 210 does not grade you on following a recipe, and this textbook does not ask you to write out templates. What it does assume is that you have internalised what the recipes were for: _describe the thing before you build it, and let the description drive both the building and the checking._
 
-CPSC 210 does not grade you on following a recipe, and this textbook does not ask you to write out templates. What it does assume is that you have internalised what the recipes were for: _describe the thing before you build it, and let the description drive both the building and the checking._ Every part of this textbook is a variation on that. Part 1 describes data with types and behaviour with tests. Part 2 describes what a class promises before deciding how it delivers. Part 3 describes the contract a system publishes to people you will never meet.
+Every part of this textbook is a variation on that process. Part 1 describes data with types and behaviour with tests. Part 2 describes what a class promises before deciding how it delivers. Part 3 describes the contract a system publishes to people to use within their own systems.
 
 ## Describing: Saying What Before How
 
@@ -48,9 +45,9 @@ Everything in this section is something you write down before you write code: a 
 
 ### Modelling: From Information to Data
 
-CPSC 110 draws a distinction early and keeps it throughout: **information** is what exists in the problem domain, and **data** is how you represent it in the program. Getting from one to the other is **modelling**, and it is a design activity rather than a transcription step.
+CPSC 110 considers **information** is what exists in the problem domain, and **data** is how you represent it in the program. Moving from one to the other is **modelling**, and is a design activity.
 
-This matters because the same information can usually be represented in more than one way. A song's duration is three minutes and thirty seconds. You could model that as a count of seconds:
+This is important because information can usually be represented in multiple ways. For example, a song's duration is three minutes and thirty seconds. You could model that as a count of seconds:
 
 ```racket
 ;; Duration is Natural
@@ -67,33 +64,27 @@ or as minutes and seconds kept apart:
 (define D1 (make-duration 3 30))
 ```
 
-Both represent the same information, and neither is simply better. The first makes arithmetic trivial, since adding two durations is just `+`, but leaves display as work to do. The second reads well and makes display trivial, but every calculation has to normalise, and it allows values like `(make-duration 3 90)` that represent nothing at all.
+Both represent the same information. The first makes arithmetic trivial, since adding two durations is just `+`, but makes display harder. The second makes display trivial, but every calculation has to normalise times.
 
-That last point is important. The first model cannot express an invalid duration, since every natural number is a valid number of seconds. The second can, so it needs a rule, "seconds is under 60", which lives in the interpretation and nowhere else.
-
-This is what makes modelling design work. You are choosing which operations become easy, which become awkward, and which invalid values become possible. A representation that cannot express nonsense is usually worth the cost, and that idea runs through the textbook: [Using Types to Model Problems](../part1/02_model-types) asks how much of your intent a type can be made to carry, and Part 2 asks the same question of classes.
-
-The interpretation line records the model. `Natural` says which values are members; `interp. the length of a track in seconds` says what membership _means_. Without the second line, `210` is just a number, and the next person to read your code has to guess whether it is seconds, or milliseconds, or track number 210.
+This is what makes modelling design an explicit task. You choose which operations become easy, which become awkward, and which invalid values become possible. A representation that cannot express nonsense is usually worth the cost, and that idea runs through the textbook: [Using Types to Model Problems](../part1/02_model-types) asks how much of your intent a type can be made to check, and Part 2 asks the same question of classes.
 
 ### Describing a Class of Values
 
-The **How to Design Data** recipe, HtDD, is the systematic part of modelling. Different kinds of information call for different kinds of description, and CPSC 110 gives you a fixed set of forms to choose between. Recognising which form fits the information in front of you is the design decision; writing it down is bookkeeping.
+The **How to Design Data** recipe, HtDD, is the systematic part of modelling. Different kinds of information call for different kinds of description, and CPSC 110 gives you a fixed set of forms to choose between.
 
 - **Atomic data**, a single indivisible value: a number, a string, a boolean.
 - **Intervals**, an atomic type narrowed to a range, as in `Number[0, 10]`, or `Natural` for whole non-negative numbers.
 - **Enumerations**, a fixed and finite set of distinct values.
-- **Itemisations**, several cases of different kinds gathered into one definition. This becomes a **tagged union** in Part 1.
+- **Itemisations**, several cases of different kinds gathered into one definition. 
 - **Compound data**, several pieces of information that travel together and only make sense together, as with the `duration` structure above.
-- **Self-referential data**, a definition that mentions itself, which is how you describe information whose size you do not know in advance. A list of songs is either empty, or one song followed by a list of songs.
+- **Self-referential data**, a definition that mentions itself, which is how you describe information whose size you do not know in advance. 
 - **Mutual reference**, two or more definitions that refer to one another, as with a tree whose nodes hold lists of trees.
 
 Choosing the form is where you decide what the pieces of your problem are, which belong together, and which are the same thing in different states. Every one of these forms reappears in this textbook, usually with a type the compiler checks in place of a comment it ignores.
 
 ### Invariants: The Part the Language Did Not Check
 
-An **invariant** is a property that must hold for a value to be meaningful. If it does not hold, the value makes no sense: a late fee is never negative, a playlist always holds at least one track, a booking's start date never falls after its end date.
-
-Every program has invariants. What differs between languages is whether there is anywhere to write them down. In many languages there is not, so they end up in the author's head, in a comment nobody updates, or in defensive checks added after something went wrong. CPSC 110 gives them a place, and this textbook gives them two chapters.
+An **invariant** is a property that must hold for a value to be meaningful. If it does not hold, the value makes no sense.  Every program has invariants. What differs between languages is whether there is any way to explicitly capture them. In many languages there is not, so they end up in the author's head, in a comment, or in defensive checks added after something went wrong. CPSC 110 gives them a place, and in 210 they are covered in two chapters.
 
 In the teaching languages, invariants live in data definitions and signatures. An interval data definition states one directly:
 
@@ -106,31 +97,37 @@ The type is `Number`, and the meaningful subset is 0 to 10. Values outside that 
 
 A signature can state one too. Writing `Natural` rather than `Number` for a parameter is a **precondition**: the function is meaningful only for whole, non-negative inputs, and says nothing about what happens otherwise. The `seconds is under 60` clause in the duration model above is the same kind of statement, as is a definition saying that a playlist is never empty.
 
-Here is what matters most for CPSC 210: _nothing enforced any of it._
+Here is what matters most for CPSC 210: _nothing enforced the invariants._
 
-The teaching languages do not check interval definitions or preconditions. A `Fee` of `150` can be built. A `Natural` function can be called with `-3`. `(make-duration 3 90)` is a value the language accepts without complaint. Structures made with `define-struct` cannot be modified once built, so nothing corrupts a valid value later. But nothing validates one as it is created, and nothing hides its fields, so a caller can build a value that contradicts the interpretation written directly above it.
+The teaching languages do not check interval definitions or preconditions. A `Fee` of `150` can be built. A `Natural` function can be called with `-3`. `(make-duration 3 90)` is a value the language accepts without complaint.
 
-Invariants were therefore kept by discipline: building values only through your own helper functions, and respecting signatures the language treated as comments. That works for one author in one file. It stops working when a program has more code, more authors, or a longer life than one person can track.
+Structures made with `define-struct` cannot be modified once built, so nothing corrupts a valid value later. But nothing validates one as it is created either, so a caller can build a value that contradicts the interpretation written directly above it.
 
-Much of Part 1 and Part 2 is about what to do when that discipline is not enough. [Checking Invariants](../part1/03_checking-invariants) sorts out which constraints a type can now enforce and what to do about the rest, since a checked type still cannot express an interval, a non-empty list, or a relationship between two fields. [Maintaining Invariants](../part1/04_maintaining-invariants) routes creation through a constructor that validates. [Encapsulating What Varies](../part2/03_encapsulation) hides the representation so that outside code cannot reach past the operations you provide. Taken together, they trade programmer discipline for language enforcement.
+Invariants were therefore kept by discipline: building values only through your own helper functions, and respecting signatures the language treated as comments. That works for one author in one file but is insufficient when a program has more code, more authors, or a longer deployed life.
+
+Much of Part 1 and Part 2 is about what to do when that discipline is not enough:
+
+- [Checking Invariants](../part1/03_checking-invariants) sorts out which constraints a type can enforce and what to do about the rest. A checked type still cannot express an interval, a non-empty list, or a relationship between two fields.
+- [Maintaining Invariants](../part1/04_maintaining-invariants) routes creation through a constructor that validates.
+- [Encapsulating What Varies](../part2/03_encapsulation) hides the representation so that outside code cannot reach past the operations you provide.
+
+Taken together, they trade programmer discipline for language enforcement.
 
 ### Working on What You Cannot Finish Yet
 
-The **wish list** is a habit rather than a language feature. When a function needs a helper that does not exist, you write down the helper's signature and purpose, call it as though it were finished, and carry on with the function you set out to write.
+The _wish list_ is a habit, not a language feature. When a function needs a helper that does not exist, you write down the helper's signature and purpose, call it as though it were finished, and carry on with the function you set out to write.
 
-This lets you work at one level of detail at a time. It also means that while the helper is unwritten, its signature and purpose are all anyone can rely on: a contract standing in for an implementation.
+This lets you work on one detail at a time. It also means that while the helper is unwritten, its signature and purpose are all anyone can rely on: a contract standing in advance of an implementation.
 
 This textbook uses the idea in three ways. [Defining Boundaries with Interfaces](../part2/05_boundaries) makes that arrangement permanent and enforced. [Designing APIs to Provide Data and Services](../part3/03_api_design) turns the contract outward, to readers who are strangers rather than yourself an hour later. And [Adding New Features](../part3/06_new_features) uses it in reverse, as the discipline for reading an unfamiliar system.
 
 ## Constructing: From Description to Code
 
-Construction runs in two directions in CPSC 110. Usually it is top-down: a description you have already written determines the shape of the code, and you read that structure off rather than invent it. Sometimes it is bottom-up, when several functions differ in only one place and the common part is worth naming.
+Construction is usually top-down in CPSC 110: a description you have already written determines the shape of the code, and you read that structure  rather than inventing it. Sometimes it is bottom-up, when several functions differ in only one place and the common part is worth naming.
 
 ### The Shape of the Data Determines the Shape of the Code
 
-If you carry one technical idea forward from CPSC 110, we would like it to be this one.
-
-Once the data is described, the structure of a function that consumes it follows from that description. An itemisation with three cases becomes a body with three branches. A compound value becomes a body that pulls out the fields. A self-referential definition becomes a **natural recursion**: a call to the same function on the smaller part.
+This is the core technical idea we would like you to carry forward from CPSC 110. Once the data is described, the structure of a function that consumes it follows from that description. An itemisation with three cases becomes a body with three branches. A compound value becomes a body that pulls out the fields. A self-referential definition becomes a **natural recursion**: a call to the same function on the smaller part.
 
 ```racket
 ;; ListOfSong -> Natural
@@ -140,17 +137,19 @@ Once the data is described, the structure of a function that consumes it follows
         [else (+ 1 (count-songs (rest los)))]))
 ```
 
-The shape of that function was not chosen; it came from the shape of the data. A **template** is that skeleton, written down before you think about the specific problem. Two consequences follow:
+The shape of that function was not chosen; it came from the shape of the data. A **template** is that skeleton, written down before you think about the specific problem. This has two implications:
 
 The first is that structure is derivable. When you do not know how to start, look at the shape of what you are consuming; it will tell you what the branches are.
 
-The second is that the dependency runs both ways. If every function's shape comes from a data definition, then changing that definition means revisiting every function derived from it, however unrelated they are to your reason for the change. You felt this in CPSC 110 as tedium. In 210 it is one of the central concerns of the course, and we call it **coupling**. [Coupling and Dependencies](../part3/01_coupling) describes this effect, arriving between classes rather than between functions and data definitions.
+The second is that the dependency runs both ways. If every function's shape comes from a data definition, then changing that definition means revisiting every function derived from it, however unrelated they are to your reason for the change. 
+
+In CPSC 110 this was tedious. In CPSC 210 it is one of the central design concerns of the course, and we call it **coupling**. [Coupling and Dependencies](../part3/01_coupling) describes the same effect between classes rather than between functions and data definitions.
 
 ### Arbitrary-Sized Information
 
-How you use lists will be different in this course compared to CPSC 110. A list in the teaching languages is self-referential data: `empty`, or an element followed by a list. That description is why traversing one means recursion (handle the empty case, handle the first element, recur on the rest), and why there is no way to jump to the middle. The recursion was not a technique layered on top of lists; it was the shape of the data showing through.
+How you use lists will be different in this course than CPSC 110. A list in the teaching languages is self-referential data: `empty`, or an element followed by a list. That description is why traversing one means recursion (handle the empty case, handle the first element, recur on the rest), and why there is no way to jump to the middle. The recursion was the shape of the data showing through.
 
-CPSC 210 mostly uses arrays, which hold the same information but allow direct access to any position, and loops, which perform in one statement the traversal you used to spell out as a recursive call. Because that swap can make the underlying structure invisible, the recursive form is rebuilt explicitly as a `LinkedList` type in [Using Types to Model Problems](../part1/02_model-types) before [Arrays and Iteration](../part1/05_arrays) replaces it.
+CPSC 210 mostly uses arrays, which hold the same information but allow direct access to any position, and loops, which perform in one statement the traversal you used to spell out as a recursive call.
 
 ### Abstraction: Noticing Commonality
 
@@ -166,7 +165,7 @@ Two ideas come together here. The first is that a function can be a value: passe
 
 Part 2 is largely about abstraction, in a different form: instead of parameterising a function over an operation, you define an interface and let each implementation supply its own. The question is the same: what varies, and can it be named and extracted? The type-parameter idea returns as generics.
 
-### Scope, and Functions That Remember
+### Scope and Closures
 
 `local` introduces definitions visible only inside one expression:
 
@@ -179,37 +178,29 @@ Part 2 is largely about abstraction, in a different form: instead of parameteris
 
 The inner functions can see `n`, the parameter of the enclosing function, and they go on seeing it after `make-counter` has returned. A function bundled with the bindings it can see is a **closure**.
 
-`n` is reachable by `increment` and `get-count` and nothing else, so the only way to affect it is through the operations you provided. That is information hiding built out of scope, and the first way you had of making an invariant impossible to violate rather than merely documented. [Maintaining Invariants](../part1/04_maintaining-invariants) makes the comparison directly, and Part 2 builds classes on the same intuition.
+`n` is reachable by `increment` and `get-count` and nothing else, so the only way to change it is through the operations you provided. That is information hiding built out of scope, and the first way you had of making an invariant impossible to violate rather than merely documented. [Maintaining Invariants](../part1/04_maintaining-invariants) makes the comparison directly, and Part 2 builds classes on the same intuition.
 
 ## Checking: Knowing It Is Right
 
-Checking is not something that happens after the code is finished. Examples come before implementations, the cases to write come from the same descriptions that shaped the code, and raising an error is how a program reports a violated invariant. The teaching languages add one more thing: a program you can reason about by hand, one step at a time.
+Checking is not something that happens after the code is finished. Examples come before implementations, the cases to write come from the same descriptions that shaped the code, and raising an error is how a program reports a violated invariant.
 
 ### Testing Systematically
 
-Most people arriving at this course have written a test. Fewer have written one _before_ the code it tests, and fewer still have _derived_ a set of test cases from a description rather than thinking some up. Those last two are the habits CPSC 110 builds, and they are the ones this textbook assumes you bring.
+Most people arriving at this course have written a test. Fewer have written one _before_ the code it tests, and fewer still have _derived_ a set of test cases from a description rather than thinking some up. Three ideas sit underneath how we think about testing.
 
-Three ideas sit underneath that.
+_An expectation written as code is checked every time._ An expectation held in your head is checked once, manually. This much is common to any testing practice.
 
-_An expectation written as code is checked every time._ An expectation held in your head is checked once, badly, by you. This much is common to any testing practice.
-
-_Examples written first do work that examples written afterwards cannot._ Deciding what a function should produce, before deciding how it will produce it, forces you to understand the problem before you start thinking about your code. It also gives you a check that fails before the implementation exists, which is what makes it passing later mean something. A test written afterwards, against code you have just convinced yourself is correct, tends to encode what the code does rather than what it should do. This ordering is test-driven development under an earlier name.
+_Examples written first do work that examples written afterwards cannot._ Deciding what a function should produce, before deciding how it will produce it, forces you to understand the problem before you start thinking about your code. A test written afterwards, against code you have just convinced yourself is correct, tends to encode what the code does rather than what it should do. 
 
 _Which examples to write is a question with an answer._ This is the idea most easily missed, and the next section is about it.
 
 #### Where Examples Come From
 
-Test cases are derived, not invented. If you have previously chosen cases by intuition, or written tests until it felt like enough, this is where to slow down.
-
-The description of the data does the work. Each form of data definition says how many cases there are and where they sit:
+Test cases are derived, not invented. If you have previously chosen cases by intuition, or written tests until it felt like enough, this is where to slow down. The description of the data does the work. Each form of data definition says how many cases there are:
 
 - An _enumeration or itemisation_ needs an example per case. Three cases, three examples, and the count is checkable.
 - An _interval_ needs its edges. `Number[0, 10]` invites examples at 0 and at 10, because mistakes cluster at boundaries rather than in the comfortable middle.
 - _Self-referential data_ needs the base case and at least one recursive case, since those exercise the two branches the template produced.
-
-This is the same systematic reasoning that describing and constructing rely on. The description tells you what the cases are, so "have I tested enough?" becomes a question you can reason about instead of a guess.
-
-Invariants pay off a second time here, because the invariant on a function's input _defines_ the space the tests have to cover. Without `Fee is Number[0, 10]`, there is no way to tell whether a test at `-5` is a case you forgot or an input that means nothing.
 
 [Checking Invariants](../part1/03_checking-invariants) gives that reasoning its formal names: **equivalence class partitioning** and **boundary value analysis** are what "one per case" and "check the edges" become when stated precisely.
 
@@ -225,7 +216,7 @@ CPSC 110 also provides a family of checks, and the idea behind the family is tha
 (check-error (require-section cat "missing") "no section with id")
 ```
 
-That a number is close enough; that a value is one of several; that an expression must fail at all. Choosing the check that says what you mean matters most when a test fails, because the report then names the problem rather than showing an inequality you have to interpret. [Chapter 9](../part1/09_validation) reaches for a much larger vocabulary of the same kind, and goes on to ask how you judge whether a suite checks enough.
+A number is close enough; a value is one of several; an expression must fail. Choosing the check that says what you mean matters most when a test fails, because the report then names the problem rather than showing an inequality you have to interpret. [Chapter 9](../part1/09_validation) has a much larger vocabulary of the same kind, and goes on to ask how you judge whether a suite checks comprehensively enough.
 
 ### Signalling Failure
 
@@ -237,19 +228,75 @@ That a number is close enough; that a value is one of several; that an expressio
         [else (find-section catalogue id)]))
 ```
 
-Raising an error is often what a violated invariant deserves, and `check-error` was how you tested for it. TypeScript's `throw` is the same idea with more machinery around it: failures can be caught, they carry types, and deciding which failures deserve one is a design question rather than a reflex. [Designing for Failure](../part1/08_errors) takes that up.
+Raising an error is often what should happen when an invariant is violated, and `check-error` was how you tested for it. TypeScript's `throw` is the same idea with formal language-provided mechanisms: failures can be caught, they carry types, and deciding which failures deserve one is a design question rather than a reflex. [Designing for Failure](../part1/08_errors) covers this process.
 
 ### Reasoning About What a Program Does
 
-In the teaching languages, a name is bound once. `(define course-name "CPSC 110")` associates a name with a value, and nothing later can change it. That sounds like a restriction, but it has value: any name can be replaced by the value it stands for, anywhere, without changing what the program means. A program can therefore be understood by substitution, working outwards one step at a time, and that is exactly what DrRacket's stepper shows you. The stepper was a teaching tool, and it was also the first debugger you may have used: when a value came out wrong, stepping showed the point where it stopped being what you expected.
+In the teaching languages, a name is bound once. `(define course-name "CPSC 110")` associates a name with a value, and nothing later can change it. That sounds like a restriction, but it has value: any name can be replaced by the value it stands for, anywhere, without changing what the program means. A program can therefore be understood by substitution, one step at a time, and that is what DrRacket's stepper shows you.
 
-What the stepper taught you is valuable: when something is wrong, find the earliest point at which it is wrong, and look at what happened immediately before. [Debugging and Fault Localization](../part3/05_debugging) is that skill applied under harder conditions, where the program holds state, the stack is deep, and you have to choose where to look.
+The stepper was a teaching tool, and it was also the first debugger you may have used: when a value came out wrong, stepping showed the point where it stopped being what you expected.
 
-Giving up single binding is the most significant change in Part 1, which is why [Mutation and Side Effects](../part1/06_state-mutation) works through it slowly. Once a name can be reassigned, it can no longer be replaced by "its value", because which value it holds depends on where the program has got to. It also means a structure can be corrupted after it was built, which is why invariants need more protection here than a comment.
+[Debugging and Fault Localization](../part3/05_debugging) builds upon the stepper, applied under harder conditions, where the program holds state, the stack is deep, and you have to choose where to look.
+
+Giving up single binding is the most significant change in Part 1, which is why [Mutation and Side Effects](../part1/06_state-mutation) works through it slowly. Once a name can be reassigned, it can no longer be replaced by "its value", because which value it holds depends on where the program has got to.
+
+## Building on CPSC 121
+
+CPSC 110 gave you a process for building software. CPSC 121 gave you the vocabulary for stating precisely what must be true of a program and arguing that it stays true. This textbook uses that vocabulary throughout, but in English rather than notation, which makes the connection easy to miss.
+
+Seven ideas from CPSC 121 appear in this textbook, none under their CPSC 121 names.
+
+### An Invariant Is a Predicate
+
+The invariants in Part 1 are quantified statements, written in English. "No two readings share the same day and hour" is a claim about _all_ pairs of readings. "The collection contains no duplicates" says there is no such pair. A precondition is a predicate over a function's arguments, and a postcondition is a predicate over its result.
+
+Two points from CPSC 121 matter in practice. First, the negation of "every element satisfies P" is "some element does not satisfy P", not "every element fails P". Get this wrong and your checks and error messages report a different condition from the one that failed.
+
+Second, a constraint relating two fields, such as a booking whose start must not fall after its end, is a two-place predicate. It cannot be enforced by validating each field on its own.
+
+An invariant stated as a predicate can be asserted in a constructor and tested; a vague one cannot. [Checking Invariants](../part1/03_checking-invariants) and [Maintaining Invariants](../part1/04_maintaining-invariants) apply this directly.
+
+### Establishing and Preserving an Invariant Is an Induction
+
+[Maintaining Invariants](../part1/04_maintaining-invariants) states the rule in two parts: the invariant must be _established_ when a value is created, and every operation that produces a new value from an old one must _preserve_ it. It concludes that every value that ever exists is valid. That conclusion is an induction: construction is the base case, each operation is the inductive step, and the result holds for every state the program ever reaches, without listing them. This is why a few checks in a constructor are enough to guarantee a property for the lifetime of the program.
+
+The same argument appears in [Using Types to Model Problems](../part1/02_model-types), which observes that a recursion over a playlist terminates because every playlist ends in the empty case. That is structural induction: the argument follows how the data was built, and it holds because the data definition allows no other way to build it.
+
+In practice, this changes the question to ask when reviewing a class: not whether each method works, but whether any operation can break the invariant. One unguarded operation breaks the inductive step, and the guarantee fails for every state after it.
+
+### Choosing a Set Is a Modelling Decision
+
+A `Set` holds each value at most once and can tell you whether a value is in it. [Encapsulating What Varies](../part2/03_encapsulation) changes a guest list from an array to a `Set` because the class was maintaining a uniqueness invariant by hand, and a set enforces that on its own. So choosing between an array and a set is a modelling decision: are order and repetition part of the information, or just a side effect of how it is stored?
+
+Sets also underlie testing. Equivalence class partitioning in [Validating Behaviour](../part1/09_validation) divides the inputs into classes where any member is as good as any other. A partition is disjoint and covering: covering is why one input per class is enough, and disjointness is why the number of classes is the number of tests you need.
+
+### Every Condition Is a Proposition
+
+Every `if` tests a proposition, and compound conditions combine them with the connectives CPSC 121 gave truth tables for. This has two consequences.
+
+The first is negation. Rewriting `!(a && b)` as `!a || !b` is a logical equivalence, and getting it wrong still compiles and still returns a value, so the fault is easy to miss.
+
+The second is coverage. [Validating Behaviour](../part1/09_validation) asks for tests that reach every branch, and finding an input that reaches a branch means working backwards from its condition to values that make it true. When a branch is never taken, either no test tries those values or no such values exist.
+
+One difference from CPSC 121: TypeScript stops evaluating `&&` and `||` as soon as the result is known. Unlike in a truth table, the operands cannot be reordered freely; a check that a value exists must come before the use that depends on it.
+
+### Numbers Are Stored, and Storage Is Finite
+
+CPSC 121 covers how numbers are represented in binary. That is why `(11 / 20) * 100` evaluates to `55.00000000000001` in TypeScript: one fifth has no finite binary expansion, for the same reason one third has no finite decimal expansion, so the stored value differs from the exact value before any arithmetic happens. [Learning a New Programming Language](../part1/01_new-language) covers the consequences.
+
+### A Stateful Object Is a Machine With States
+
+CPSC 121 introduces finite automata: a finite set of states, transitions driven by input, and distinguished accepting states. An object that holds state has the same structure. [Asynchronous Effects and Time](../part1/07_async) has a direct example: a promise has exactly three states and settles once and only once. Fulfilled and rejected have no outgoing transitions, which is why a settled promise cannot change and why attaching a handler to one still works.
+
+The same view applies to the types in [Mutation and Side Effects](../part1/06_state-mutation) and Part 2. Ask which states a value can be in, which transitions are allowed, and which are one-way, and you get a diagram you can draw and check. An invariant, in these terms, says that no state outside the intended set is reachable.
+
+### Programs Run on a Machine
+
+The last part of CPSC 121 builds a working computer: memory, the fetch-decode-execute cycle, and Big-O notation for cost. CPSC 210 does no complexity analysis, but it does assume the model underneath: a program is instructions running against a memory hierarchy, and different operations cost wildly different amounts. [Asynchronous Effects and Time](../part1/07_async) depends on that: it traces a file read down through the runtime and the operating system and back. Asynchronous code exists because disk and network access are far slower than memory, so a program cannot afford to stop and wait.
 
 ## Reference
 
-Four things to consult rather than read through: how to read the notation in the examples above, what CPSC 110 covers that this course does not use, what changes in CPSC 210, and where each idea reappears.
+Things to consult rather than read through: how to read the notation in the examples above, what each prerequisite course covers that this textbook does not use, what changes in CPSC 210, and where each idea reappears.
 
 ### The Notation
 
@@ -278,29 +325,18 @@ TypeScript writes most operators between their operands instead. This is the fir
 
 _Numbers are exact._ Dividing two integers yields an exact rational: `(/ 35 50)` is `7/10`, not `0.7`, and multiplying that by `100` gives exactly `70`. TypeScript has a single `number` type that stores a binary approximation, so the order of your arithmetic starts to matter and equality on computed decimals stops being reliable. [Learning a New Programming Language](../part1/01_new-language) covers the consequences.
 
-### What CPSC 110 Covered That This Textbook Does Not Lean On
+### Shifts from CPSC 110
 
-CPSC 110 covers a good deal of material that CPSC 210 never uses directly. Knowing it will not hurt, and not remembering it will not hold you back:
-
-- _World programs_, `big-bang`, and the HtDW recipe.
-- _Generative recursion_ and the search problems built on it.
-- _Accumulators_ and _tail recursion_.
-- _Graphs_ and graph search.
-
-These are not omitted because they are not important. They are the algorithmic strand of CPSC 110, and it is CPSC 221 rather than this course that picks that material up. What CPSC 210 takes from CPSC 110 is the design perspective: modelling information before representing it, deriving code from that description, and deriving the tests from it as well.
-
-### What Actually Changes
-
-If it helps to know where the friction will be, these are the genuine shifts rather than the notational ones:
+There are some significant changes in how we think about computation in CPSC 210 compared to CPSC 110::
 
 - _Part of your description becomes enforced._ A type is checked before the program runs, so a whole class of mistake stops being possible. The invariants a type still cannot express, such as an interval, a non-empty list, or a relationship between two fields, are exactly what Part 1 and Part 2 spend their time protecting.
 - _Mutation exists._ Names can be reassigned and structures modified in place. This buys efficiency and expressiveness, and costs you both the ability to reason by substitution and the guarantee that a value built valid stays valid.
 - _Data arrives from outside._ In CPSC 110 every value your functions consumed was one your own code had built, usually a few lines earlier. Once data comes from a file, a service, or a person, a data definition is a hope until something checks it.
 - _Programs outlive the problem they were written for._ The design recipe assumed a fixed problem and delivered code already in a standard shape, so there was never anything to tidy up. Real systems change after they are written, and each change arrives without a recipe saying where it belongs. That is why Part 3 spends a chapter on putting a design back into a shape that fits what the system has since become.
 
-### Where Each Idea Returns
+### 110: Revisited
 
-| From CPSC 110 | Where the CPSC 210 textbook picks it up |
+| CPSC CPSC 110 Topic | CPSC 210 Topic Extension |
 | --- | --- |
 | Modelling information as data | [Using Types to Model Problems](../part1/02_model-types) |
 | Data definitions and their forms | [Using Types to Model Problems](../part1/02_model-types) |
@@ -333,61 +369,9 @@ If it helps to know where the friction will be, these are the genuine shifts rat
 | The stepper | [Debugging and Fault Localization](../part3/05_debugging) |
 | The wish list, in reverse | [Adding New Features](../part3/06_new_features) |
 
-## Building on CPSC 121
+### 121: Revisited
 
-CPSC 121 also underpins much of what CPSC 210 is about. CPSC 110 supplied a process for building software. CPSC 121 supplied the vocabulary for stating precisely what must be true of a program, and for arguing that it stays true. Both are used throughout this course. The difference is that the claims here are written in English rather than in notation, which is what makes the connection easy to miss.
-
-Seven ideas from CPSC 121 are used in this textbook, but none of them bear their CPSC 121 names.
-
-### An Invariant Is a Predicate
-
-The invariants Part 1 spends two chapters on are quantified statements written in prose. "No two readings share the same day and hour" is a claim about _all_ pairs of readings. "The collection contains no duplicates" denies that _some_ such pair exists. A precondition is a predicate over a function's arguments and a postcondition is a predicate over its result. Two points from CPSC 121 matter in practice: First, the negation of "every element satisfies P" is "some element does not satisfy P", not "every element fails P". Getting this wrong produces checks and error messages that report a different condition than the one that failed. Second, a constraint relating two fields, such as a booking whose start must not fall after its end, is a two-place predicate, so it cannot be enforced by validating each field on its own.
-
-An invariant stated as a predicate can be asserted in a constructor and tested but a vague one cannot. [Checking Invariants](../part1/03_checking-invariants) and [Maintaining Invariants](../part1/04_maintaining-invariants) apply this directly.
-
-### Establishing and Preserving an Invariant Is an Induction
-
-[Maintaining Invariants](../part1/04_maintaining-invariants) states the discipline in two parts: the invariant must be _established_ when a value is created, and every operation that produces a new value from an old one must _preserve_ it. It concludes that every value that ever exists is therefore valid. That conclusion is an induction. Construction is the base case, each operation is the inductive step, and the result holds for an unbounded number of states that are never enumerated. This is why a small number of checks in a constructor is enough to guarantee a property for the lifetime of the program.
-
-The same argument appears in [Using Types to Model Problems](../part1/02_model-types), which observes that a recursion over a playlist terminates because every playlist ends in the empty case. That is structural induction: the argument runs over how the data was built, and holds because the data definition admits no other way to build it. The practical consequence is which question to ask when reviewing a class. Not whether each method works, but whether any operation can violate an invariant. One unguarded operation breaks the inductive step, and the guarantee fails for every state after it.
-
-### Sets Are a Model, Not Just a Data Structure
-
-A `Set` holds each value at most once and answers membership queries. [Encapsulating What Varies](../part2/03_encapsulation) changes a guest list from an array to a `Set` because the class had a uniqueness invariant it was maintaining by hand; the set's own semantics enforce it instead. Choosing between an array and a set is therefore a modelling decision: whether order and multiplicity are part of the information being represented, or artifacts of how it is stored.
-
-Set vocabulary also underlies testing. **Equivalence class partitioning** in [Validating Behaviour](../part1/09_validation) divides the input space into classes in which any member is as good as any other. A partition is disjoint and covering. Covering is why one input per class is sufficient; disjointness is why the number of classes is the number of tests required.
-
-### Every Condition Is a Proposition
-
-Each conditional tests a proposition, and compound conditions combine propositions using the connectives CPSC 121 gave truth tables for. This has two consequences: The first is negation. Rewriting a negated compound condition is an application of a logical equivalence. An incorrect rewrite still compiles and still returns a value, so the resulting fault is easily missed. The second is coverage. [Validating Behaviour](../part1/09_validation) asks for tests that reach every branch of a function and reports branch coverage as the fraction reached. Determining which input reaches a given branch means working backwards from a boolean expression to an assignment that satisfies it. When a branch is never taken, the question is whether a satisfying assignment is untested or does not exist.
-
-One difference from CPSC 121's treatment is worth noting. TypeScript stops evaluating `&&` and `||` once the result is determined, so unlike the connectives in a truth table their operands cannot be reordered freely: a check that a value exists must precede the use that depends on it.
-
-### Numbers Are Stored, and Storage Is Finite
-
-CPSC 121 covers how numbers are represented in binary. TypeScript has a single `number` type that stores a binary approximation, and [Learning a New Programming Language](../part1/01_new-language) shows the consequence: `(11 / 20) * 100` evaluates to `55.00000000000001`. Its advice is to order arithmetic so that division comes last, and to avoid exact equality comparisons on computed decimals. The cause is representation. One fifth has no finite binary expansion, for the same reason one third has no finite decimal expansion, so the stored value differs from the exact value before any arithmetic is performed. The CPSC 110 teaching languages compute with exact rationals, where `(/ 35 50)` is `7/10`, so this behaviour is new in this course but not new in CPSC 121.
-
-### A Stateful Object Is a Machine With States
-
-CPSC 121 introduces finite automata: a finite set of states, transitions driven by input, and distinguished accepting states. An object that holds state has the same structure. [Asynchronous Effects and Time](../part1/07_async) contains a direct example. A promise has exactly three states, and its diagram is captioned to note that promises settle once and only once. Fulfilled and rejected are absorbing states with no outgoing transitions, which is why attaching a handler to an already-settled promise still works, and why a settled promise cannot change. The same view applies to types designed in [Mutation and Side Effects](../part1/06_state-mutation) and in Part 2. Asking which states a value can occupy, which transitions are legal, and which are one-way yields a finite description that can be drawn and checked. An invariant, stated this way, is the claim that no state outside the intended set is reachable.
-
-### Programs Run on a Machine
-
-The final modules of CPSC 121 assemble a working computer: memory, the fetch-decode-execute cycle, and Big-O notation for expressing cost. CPSC 210 performs no complexity analysis and does not use Big-O. It does assume the model underneath: a program is instructions executing against a memory hierarchy, and the costs of different operations differ by orders of magnitude. [Asynchronous Effects and Time](../part1/07_async) depends on that assumption. It traces a file read down through the runtime and the operating system and back. Asynchronous code exists because disk and network access are far slower than memory access, so blocking the program while waiting is not viable.
-
-### What CPSC 121 Covered That This Textbook Does Not Lean On
-
-As with CPSC 110, some CPSC 121 material is not directly used in CPSC 210 but is left for future Computer Science courses:
-
-- _Writing formal proofs._ Inductive and contrapositive reasoning are used throughout, as above, but no proof is written out formally.
-- _Regular expressions and their correspondence with automata._ The textbook does not require them, though you will meet them in real code eventually.
-- _Circuit-level and instruction-level detail._ CPSC 213 covers this, and this textbook points forward to it where references and pointers are introduced.
-- _Big-O and complexity analysis._ CPSC 221 develops this material.
-
-
-### Where Each Idea Returns
-
-| From CPSC 121 | Where the CPSC textbook picks it up |
+| CPSC 121 Topic | CPSC 210 Topic Extension |
 | --- | --- |
 | Predicate logic and quantified claims | [Checking Invariants](../part1/03_checking-invariants) |
 | Preconditions and postconditions as predicates | [Maintaining Invariants](../part1/04_maintaining-invariants) |
