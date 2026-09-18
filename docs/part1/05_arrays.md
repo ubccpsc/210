@@ -117,7 +117,7 @@ digraph readingArray {
 
 TypeScript provides _operations_ that cover the most common things a program does with a sequence. Each operation takes a function as its input. The input function describes what should happen to _one element_, and the operation applies the function across the whole array. The input functions will usually be declared with arrow functions (lambdas), which we saw in [Chapter 1](./01_new-language).
 
-The four most commonly-used operations are `map`, `filter`, `reduce`, and `find`. `map` transforms every element, `filter` keeps a subset, `find` locates one element, and `reduce` summarises the array.
+The four most commonly-used operations are `map`, `filter`, `reduce`, and `find`. `map` transforms every element, `filter` keeps a subset, `find` locates one element, and `reduce` summarises the array. A fifth, `toSorted`, puts the elements in order.
 
 
 <details class="tooltip ts-tips">
@@ -271,6 +271,48 @@ const meanAbove: number = aboveFreezing.reduce(
 ```
 
 Each named operation tells the reader the shape of the step: a `filter` produces a subset, a `map` produces transformed elements, a `reduce` produces one value. A chain of them reads as a short description of the computation.
+
+### `toSorted`: Ordering
+
+`toSorted` returns a _new array_ containing the same elements in a chosen order. Like `map` and `filter`, it leaves the original array unchanged. Its function argument is different from the others: a **comparator** takes _two_ elements and returns a number saying which should come first. A negative number means the first argument comes before the second, a positive number means it comes after, and zero means either order is fine (although the in-data order is what is used by default). For numbers, `a - b` orders ascending and `b - a` orders descending. For example, to list the day's readings coldest first:
+
+```typescript
+const coldestFirst: Reading[] = day.toSorted(
+    (a: Reading, b: Reading) => a.tempCelsius - b.tempCelsius
+);
+// hours 6, 21, 9, 18, 12, 15
+```
+
+```typescript
+test("readings ordered coldest first",
+    checkExpect(() => coldestFirst.map((reading: Reading) => reading.hour), [6, 21, 9, 18, 12, 15])
+);
+```
+
+When two elements compare as equal, `toSorted` keeps them in the order they had in the input. If that is not the order you want, the comparator needs a second rule for breaking ties, and a comparator with several rules is clearer as a named function. This one orders warmest first and, among equal temperatures, the earlier hour first:
+
+```typescript
+function warmerThenEarlier(a: Reading, b: Reading): number {
+    if (a.tempCelsius !== b.tempCelsius) {
+        return b.tempCelsius - a.tempCelsius;
+    }
+    return a.hour - b.hour;
+}
+
+const warmestFirst: Reading[] = day.toSorted(warmerThenEarlier);
+// hours 15, 12, 18, 9, 21, 6
+```
+
+Always pass a comparator. Called without one, `toSorted` converts each element to a string and orders those, so `[10, 9, 2].toSorted()` is `[10, 2, 9]`, because `"10"` comes before `"2"`.
+
+<!--
+<details class="tooltip ts-tips">
+<summary><code>sort</code> and <code>toSorted</code></summary>
+
+Arrays also have `sort`, which takes the same comparator but reorders the array _in place_ and returns that same array rather than a new one. `toSorted` was added to the language so that ordering could be done without changing anything, which is why this chapter uses it. In-place changes are the subject of the [next chapter](./06_state-mutation).
+
+</details>
+-->
 
 ## Writing Your Own Loops
 
@@ -484,14 +526,14 @@ The compiler accepts that line and then checks every later use of `readings` aga
 
 ## On Iteration
 
-Arrays give sequences built-in support in the language, and their operations package the traversals we used to write by hand: `map` to transform, `filter` to select, `reduce` to summarise, `find` to search, with `for of` underneath them all for the computations that fit no named pattern.
+Arrays give sequences built-in support in the language, and their operations package the traversals we used to write by hand: `map` to transform, `filter` to select, `reduce` to summarise, `find` to search, `toSorted` to order, with `for of` underneath them all for the computations that fit no named pattern.
 
-One property everything in this chapter shared: none of these operations changed `day`, our array of daily temperatures. Every `map` and `filter` produced a new array, every `reduce` produced a new value, and even our hand-written loops only read the elements they visited; the original readings were never changed. What happens when programs _do_ change existing values, and why that calls for so much care, is the subject of the next chapter.
+One property everything in this chapter shared: none of these operations changed `day`, our array of daily temperatures. Every `map`, `filter`, and `toSorted` produced a new array, every `reduce` produced a new value, and even our hand-written loops only read the elements they visited; the original readings were never changed. What happens when programs _do_ change existing values, and why that calls for so much care, is the subject of the next chapter.
 
 <details class="tooltip exercise">
   <summary>Exercise: Summarising an Order</summary>
 
-Practise this chapter's tools using `map`, `filter`, `reduce`, `find`, and a `for of` on a new collection.
+Practise this chapter's tools using `map`, `filter`, `reduce`, `find`, `toSorted`, and a `for of` on a new collection.
 
 > As an online shop, I want to summarise a customer's order, so that I can show line items, totals, and stock problems at a glance.
 
@@ -511,7 +553,8 @@ Write a small example `order` of three or four items to test against, then write
 2. `affordable(order: Item[], max: number): Item[]`; return the items whose `price` is at most `max`, <span class="hint">using `filter`.</span>
 3. `orderTotal(order: Item[]): number`; return the total cost, summing `price * quantity` across the order, <span class="hint">using `reduce`.</span>
 4. `firstOutOfStock(order: Item[]): Item | undefined`; return the first item with a `quantity` of 0, <span class="hint">using `find` (remember what `find` returns when nothing matches).</span>
-5. `hasDuplicateName(order: Item[]): boolean`; return `true` if any two items share the same `name`. <span class="hint">This one compares items to one another, which the named operations cannot express, so you will want to use a `for of` loop for this task.</span>
+5. `cheapestFirst(order: Item[]): Item[]`; return the items ordered by `price`, lowest first, and for equal prices by `name` alphabetically, <span class="hint">using `toSorted` with a comparator that has two rules; for strings, `a < b` tells you whether `a` comes first.</span>
+6. `hasDuplicateName(order: Item[]): boolean`; return `true` if any two items share the same `name`. <span class="hint">This one compares items to one another, which the named operations cannot express, so you will want to use a `for of` loop for this task.</span>
 
 Write a `test` holding a single `checkExpect` for each function against your example order, <span class="hint">including a case for `firstOutOfStock` where nothing is out of stock</span>.
 
