@@ -164,12 +164,11 @@ ISL used `check-expect` as a standalone expression at the top level of a file. T
 <details class="tooltip ts-tips">
 <summary>Running Tests</summary>
 
-`test`, `checkExpect`, and `checkError` are provided by the course toolkit; each test file imports them at the top of the file with:
+`test` and `checkExpect` are provided by the course toolkit; each test file imports them at the top of the file with:
 ```typescript
 import {
     test,
-    checkExpect,
-    checkError
+    checkExpect
 } from "@ubccpsc/210-toolkit/testing";
 ```
 
@@ -208,7 +207,7 @@ test("fee never exceeds the maximum",
 );
 ```
 
-The precondition also guides us towards situations that may not result in a valid output. Since the precondition says `daysLate >= 0`, what happens if we pass `-5` is undefined: the caller has broken their half of the bargain, and the function promises nothing in return. We'll return to what should happen when a precondition is violated anyway, and how to test for such erroneous behaviours, at the end of this chapter.
+The precondition also guides us towards situations that may not result in a valid output. Since the precondition says `daysLate >= 0`, what happens if we pass `-5` is undefined: the caller has broken their half of the bargain, and the function promises nothing in return. We return to what a function should do about inputs like this at the end of this chapter.
 
 To run these tests, `lateFee` must at least exist; otherwise the compiler will refuse to execute the program at all. So we begin with a **stub**: a function with the right signature that returns a clearly wrong value.
 
@@ -397,13 +396,11 @@ grace       accruing ( $0.50 / day )             capped ( $10 )
 ```
 <!-- caption="The three equivalence classes for daysLate." -->
 
-## Expected and Unexpected Errors
+## Successful and Erroneous Outcomes
 
-Not all failures are alike. Think about a bank account: an account whose balance is negative is in a state the system should never allow, so if one is ever observed, the program itself is broken. But a customer trying to withdraw more than their balance is not unusual at all; it is a normal interaction the design must anticipate.
+Every call to a function has one of two outcomes. A **successful outcome** is the one the function exists to produce. An **erroneous outcome** is any other result. Think about a bank account: a customer trying to withdraw more than their balance is not unusual at all; it is a normal interaction a robust design must anticipate. An erroneous outcome is not a bug. This foreseeable result belongs in the function's contract, so the caller knows it can happen and knows exactly what they will receive when it does. Because it is part of the contract, it is tested like every other clause.
 
-The first is an **unexpected error**: an invariant has been violated, and no further computation on that data can be trusted. The second is an **expected error**: an unsuccessful but entirely foreseeable outcome that belongs in the function's contract. The two kinds are handled differently, and tested differently.
-
-To see both kinds in one place, we extend the library example. The library allows each book loan to be renewed at most twice:
+To see both outcomes in one place, we extend the library example. The library allows each book loan to be renewed at most twice:
 
 ```typescript
 type Loan = {
@@ -413,43 +410,17 @@ type Loan = {
 };
 ```
 
-Trying to renew a loan that has no renewals remaining is an _expected_ error: it will happen at the front desk every day, and the contract should say exactly what the caller gets.
+Renewing a loan that still has renewals left is the successful outcome. Trying to renew a loan that has no renewals remaining is an erroneous outcome. But it is not rare, the contract should say exactly what the caller gets back when this occurs.
 
-How do we encode an expected error? We could encode the result as a `null` value: but `null` is not descriptive, and `null` is an overloaded concept in many languages. We could also model this expected error by returning `-1` (since that would never be a valid `lateFee` value anyways). But, this would open clients to simple unexpected math errors summing `lateFee` calls, if they were not careful and did not check if the return value is `-1` in their code.
+How do we encode an erroneous outcome? We could return `null`: but `null` is not descriptive, and `null` is an overloaded concept in many languages. We could return a special value, say a `Loan` whose `renewalsRemaining` is `-1`. But a special value is easy to mistake for a real one: a caller who forgets to check for `-1` carries on computing with a loan that does not exist, and nothing in the types warns them.
 
-So that we can be clear about the failure, and rely on the typechecker to check whether errors are correctly handled, we introduce a _result type_:
+So that we can be clear about the outcome, and rely on the type checker to check that both outcomes are handled, we introduce a _result type_:
 
 ```typescript
 type Result<T, E> = { ok: true, value: T } | { ok: false, error: E };
 ```
 
-`Result` is generic over two type parameters: `T` is the type of a successful value, and `E` is the type of the error. This is the same tagged-union idea from the previous chapter, with `ok` as the discriminator: a caller checks `ok` to learn whether it received a `value` or an `error`. We will express _expected_ errors with an error result type.
-
-By contrast: a `Loan` whose `renewalsRemaining` is `-1`, is an _unexpected_ error. No sequence of correct operations can produce it, so if `renewalsRemaining` is `-1`, something else has already gone wrong.
-
-We detect unexpected errors and signal them to our program using the `assert` function. These calls look like `assert(<condition>, <description>)`. When an **assert** fails, the program is immediately terminated with the provided description.
-
-<details class="tooltip ts-tips">
-<summary><code>assert</code></summary>
-
-Calling the `assert` function:
-```typescript
-assert(<condition>, <description>)
-```
-evaluates `<condition>`. If `<condition>` is true, the program continues to execute as if `assert` was not there. If `<condition>` is false, the program will terminate and print out `<description>`.
-
-A tricky thing about asserts: the `<condition>` describes what _should hold_, while `<description>`, which is only printed out when `<condition>` fails, usually describes what _did not_ hold.
-
-`assert` is not part of the TypeScript language itself. In this course we use the standard `assert` function provided by the Node runtime:
-
-```typescript
-import assert from "node:assert/strict";
-```
-
-Many TypeScript/JavaScript frameworks provide their own `assert`-like functions as well, and any of them serves the same role. By the end of [Part 2](../part2/index), you'll know how to implement `assert` yourself, so you'll be able to use this concept in whatever code you write.
-</details>
-
-The presence of assertions in the implementation like this can make the code much easier to write and debug, because your implementation can trust that the invariants are valid for the remainder of the function. This helps reduce defensive checks you might otherwise need to make in your code. `assert` also communicates to other developers that these are checks for valid input, rather than checks part of the core program logic.
+`Result` is generic over two type parameters: `T` is the type of a successful value, and `E` is the type of the error. This is the same tagged-union idea from the previous chapter, with `ok` as the discriminator: a caller checks `ok` to learn whether it received a `value` or an `error`. A successful outcome is an `ok: true` result carrying the value; an erroneous outcome is an `ok: false` result carrying an explanation. Because the function's return type is `Result<Loan, string>` rather than `Loan`, the compiler will not let a caller use the `value` without first checking `ok`, so the erroneous outcome cannot be overlooked by accident.
 
 ```typescript
 /**
@@ -465,11 +436,8 @@ The presence of assertions in the implementation like this can make the code muc
  * error explaining why the loan could not be renewed
  */
 function renew(loan: Loan): Result<Loan, string> {
-    assert(loan.renewalsRemaining >= 0, "Loan invariant violated: negative renewals");
-    assert(loan.renewalsRemaining <= 2, "Loan invariant violated: too many renewals");
-
     if (loan.renewalsRemaining === 0) {
-        // expected: running out of renewals is a normal outcome
+        // running out of renewals is an erroneous outcome the contract anticipates
         return { ok: false, error: "No further loan renewals available" };
     }
     return {
@@ -482,19 +450,7 @@ function renew(loan: Loan): Result<Loan, string> {
 }
 ```
 
-Note where the `assert` calls live: unlike `checkExpect`, which sits in `test/` and probes chosen inputs from the outside, `assert` sits in the source code in `src/` and is evaluated on _every_ execution of the function, whoever the caller is. Halting may seem drastic, but it is the right response to an impossible state.
-
-At the start of this chapter, we saw that operations built on a value whose invariant has failed quietly produce nonsense. For instance, `lateFee(5.5)` returns a value, even though late fees are only defined as whole numbers.  An assertion _stops_ the program at the _first sign of corruption_, before the nonsense can spread or be written somewhere permanent. This is the behaviour we deferred earlier in the chapter: when a caller _violates_ a precondition, an `assert` is how the function _refuses to continue_.
-
-<details class="tooltip deep-dive">
-<summary>Failing with User-Specified Inputs: Give More Detail</summary>
-
-One relaxation to the `assert` approach is for functions that take _user-specified input_. Rather than crashing, user-specified input is often explicitly validated and rejected as expected errors (because in practice, it is useful to expect users to do unreasonable things).
-
-For example, when you pass a TypeScript program with invalid syntax to `tsc`, it tells you where an error is, rather than raising an error that says only `SyntaxError`.
-</details>
-
-To write tests for errors, we must be clear about the difference between unexpected and expected errors. The expected error is a _documented outcome_: the postcondition names the exact value the caller receives (an `ok: false` result carrying the reason), so we test it with `checkExpect`, the same way we test every other clause of the contract:
+Both outcomes are _documented_ in the postcondition, and the postcondition names the exact value the caller receives in each case. So both are tested the same way, with `checkExpect`, exactly as we tested every clause of the `lateFee` contract:
 
 ```typescript
 const fresh: Loan = { title: "Clean Code", renewalsRemaining: 2 };
@@ -517,58 +473,34 @@ test("renewal is refused when no renewals remain",
 
 The values each check needs are named above the tests rather than inside them, because the body of a test case is a single check.
 
-The unexpected error has no value to compare against, because the correct behaviour is to not produce a value at all. For this we use `checkError`, which runs the function it is given and passes only if an error occurs; if the call completes normally, the test _fails_:
-
-```typescript
-const corrupted: Loan = { title: "Clean Code", renewalsRemaining: -1 };
-
-test("renew halts on a loan that violates the non-negative invariant",
-    checkError(() => renew(corrupted))
-);
-```
-
-<details class="tooltip ts-tips">
-<summary><code>checkError</code></summary>
-
-In
-```typescript
-checkError(() => <expression>);
-```
-the `() => <expression>` is an _anonymous function_, the same thunk `checkExpect` uses around the expression under test, written as a single expression with no braces so its value is returned implicitly. `checkError` executes that function and checks whether an error occurs during execution. If one does, `checkError` passes; if the call completes normally, `checkError` fails. The usual form is:
-```typescript
-checkError(() => functionUnderTest(arg1, arg2));
-```
-
-For example, in the above,
-```typescript
-checkError(() => renew(corrupted));
-```
-`checkError` calls `renew(corrupted)` and checks whether an error occurs. Note that it checks only _that_ an error occurred, not which one: in this course a `checkError` states that the call must fail, and the test's description records why.
-
-The wrapper is what makes this work. Were the call written directly as an argument, as in `checkError(renew(corrupted))`, `renew(corrupted)` would execute, and fail, while the arguments were being evaluated, before `checkError` was ever called, halting the entire execution of the test suite. Delaying the call until the check decides to run it is why both `checkExpect` and `checkError` take a function rather than a value.
-</details>
 <details class="tooltip link-110">
 <summary>Higher-Order Functions</summary>
 
-`checkExpect` and `checkError` are higher-order functions, so called because they take a function as an argument. You've seen this before, notably in `map`, `filter`, and `fold`.
+`checkExpect` is a higher-order function, so called because it takes a function as an argument. You've seen this before in CPSC 110, notably in `map`, `filter`, and `fold`.
 </details>
 
-In short:
+A refused renewal is not a malfunction; it is a specified result. The second test confirms that `renew` produces the result the contract specifies. There is nothing special about testing an erroneous outcome: if the contract describes the outcome, check the outcome.
 
-**Expected errors** should be tested analogously to how a user would interact with a function, which means we should use `checkExpect`: a refused renewal is not a malfunction but a specified result, and the contract tells you exactly what value to expect.
+### Precondition Violations
 
-**Unexpected errors** though are almost always the result of programming errors, which means validating them with `checkError` is more appropriate, since you're ensuring the program is refusing to process erroneous requests.
+What about a call that breaks the precondition: `renew` on a `Loan` whose `renewalsRemaining` is `-1`, or `lateFee(-5)`? These are neither successful nor erroneous outcomes, because the contract says nothing about them. The caller has broken their half of the bargain, and the function promises nothing in return. Our `lateFee` returns `1.75` for `lateFee(5.5)`, a number with no meaning under the policy, and this is not a defect in `lateFee`: `5.5` was never a permitted input. There is nothing to test, because there is no specified behaviour to test against.
 
-As a rule of thumb, if the specification describes the outcome, check the outcome; if the outcome should be impossible, check that the program halts.
+This is why the choice between a precondition and an erroneous outcome is a design decision. A precondition keeps a function simple, and is appropriate when every caller is code you control and can trust to respect the restriction. An erroneous outcome costs a check and a `Result`, and is appropriate when callers cannot be trusted to respect the restriction. This is especially important when a value arrives from somewhere you cannot trust: a user, a file, a network rather, or another system. In that case the restriction belongs in the contract: the function checks the input and returns `ok: false`, so the caller receives a clear result instead of a meaningless one. Whichever you choose, write it down: a restriction that appears in neither the precondition nor the postcondition protects no one.
+
+<details class="tooltip deep-dive">
+<summary>Failing with User-Specified Inputs: Give More Detail</summary>
+
+Functions that take _user-specified input_ should almost always report bad input as an erroneous outcome rather than rely on a precondition, because in practice it is useful to expect users to do unreasonable things. The error should also say enough to fix the problem. For example, when you pass a TypeScript program with invalid syntax to `tsc`, it tells you where the error is, rather than reporting only `SyntaxError`.
+</details>
 
 
-## Triangulating Quality: Type Checking, Testing, and Assertions
+## Triangulating Quality: Type Checking and Testing
 
 Types give us structure, but tests give us confidence. The type checker and the test suite operate at different times. The type checker works _statically_ on the source code, ruling out whole categories of invalid calls before the program runs. Tests work _dynamically_, checking specific behaviours by executing the function. They are complementary approaches: a program that passes every type check can still return the wrong value for a given input. But, a program that passes all its tests may still fail on an input the test suite did not evaluate. The combination is what gives confidence: types narrow the space of programs that can even be written, and tests validate that the program you wrote does what you intended.
 
-Documented invariants are the bridge between the two. The preconditions and postconditions in a function's doc comment record exactly the part of the specification the compiler cannot see, and they are exactly what the tests should check. Assertions add a third layer of protection: where types check structure before the program runs and tests probe chosen inputs from the outside, assertions watch the invariants from inside the implementation, on every execution.
+Documented invariants bridge between the two. The preconditions and postconditions in a function's doc comment record exactly the part of the specification the compiler cannot see, and they are exactly what the tests should check.
 
-An invariant that is written down can be turned into a test suite and into assertions; an invariant that lives only in someone's head cannot be checked by anything.
+An invariant that is written down can be turned into a test suite; an invariant that lives only in someone's head cannot be checked by anything.
 
 
 
@@ -585,6 +517,6 @@ The policy states that parking is free for the first hour; after that, each addi
 2. Derive the tests first. Use equivalence class partitioning to find the input classes the policy treats alike, and pick one representative of each. Then use boundary value analysis to add the edges: where the free hour ends, and where the cap is reached.
 3. Stub `parkingFee` so it returns a clearly wrong value, run your tests, and confirm they all fail.
 4. Implement `parkingFee`, run the tests again, and confirm they pass.
-5. Guard the precondition. Decide what should happen when the precondition is violated, for example <span class="hint">`parkingFee(-1)`</span>. Add an `assert` for it, and write a `checkError` test that confirms the violation is caught.
+5. Handle bad input. Decide what should happen when a caller supplies an input outside the precondition, for example <span class="hint">`parkingFee(-1)`</span>. Turn it into an erroneous outcome: change the return type to <span class="hint">`Result<number, string>`</span>, document the error in the contract, and write a `checkExpect` test that confirms `parkingFee(-1)` returns `ok: false`.
 
 </details>
