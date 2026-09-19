@@ -2,11 +2,9 @@
 
 Every function's contract describes what happens when the function works, and when it doesn't. A function that looks up a course section must also handle what happens when no such section exists; a function that enrols a student must handle what happens when a prerequisite is missing. Failures should be designed as deliberately as successes, so that a design offers a consistent, understandable failure model: one that stays out of the way when the system is working, but makes it hard to do the wrong thing when it is not.
 
-In [Chapter 3](./03_checking-invariants) we differentiated two kinds of failure. An **unexpected error** is one that should be impossible: an invariant has been violated, which means the program has a bug. We proactively detect these with `assert`, which stops the program the moment an impossible state appears, because no sensible computation can continue from corrupt data. These are often triggered only during development, because an implementation is typically strengthened to prevent precondition violations in deployed systems. 
+Every call to a function has one of two outcomes. A **successful outcome** is the one the function exists to produce: the section is found, the student is enrolled. An **erroneous outcome** is any other result: the section does not exist, a prerequisite is missing, a file is absent. An erroneous outcome is not a bug. It is a foreseeable result that belongs in the function's contract, so the caller knows it can happen and is responsible for dealing with it. Throughout this chapter we use _error_ and _failure_ interchangeably to mean an erroneous outcome.
 
-An **expected error** is a foreseeable, unsuccessful outcome that is not a bug at all: a section is full, a prerequisite is missing, a file is absent. Expected errors belong in the contract, and the caller is expected to deal with them. 
-
-This chapter dives deeper into expected errors: how a function communicates errors to its caller, and how the caller responds. There are two mechanisms in wide use. A function can _return_ its failure as an ordinary value, or it can _throw_ an exception that travels up the call stack until something handles it. Each mechanism has strengths and weaknesses. 
+This chapter is about erroneous outcomes: how a function communicates one to its caller, and how the caller responds. There are two mechanisms in wide use. A function can _return_ its failure as an ordinary value, or it can _throw_ an exception that travels up the call stack until something handles it. Each mechanism has strengths and weaknesses. 
 
 ## A Student Enrolling in Sections
 
@@ -40,7 +38,7 @@ Enrolling in a section can fail in two predictable ways: the section ID might no
 
 ## Returning Failure as a Value
 
-The first error-reporting mechanism was introduced in the [checking invariants chapter](./03_checking-invariants#expected-and-unexpected-errors): the failure is modelled as part of the return type, so that a function returns either a success or a failure, and the caller must check the returned value to determine the outcome. The `Result` type captured this as a tagged union.
+The first error-reporting mechanism was introduced in the [checking invariants chapter](./03_checking-invariants#successful-and-erroneous-outcomes): the failure is modelled as part of the return type, so that a function returns either a success or a failure, and the caller must check the returned value to determine the outcome. The `Result` type captured this as a tagged union.
 
 ```typescript
 type Result<T, E> =
@@ -254,9 +252,17 @@ function enrolAll(catalogue: Section[], student: Student, ids: string[]): Sectio
 Compare this with the `Result` version. The four lines of failure-forwarding are gone, and so is the interleaving: what remains reads as the plain success path, "find the section, check the prerequisite, add it to the list", with no error handling wedged between the steps. If `requireSection` throws on the third id, the `throw` abandons `requireSection`, abandons the loop in `enrolAll`, and abandons `enrolAll` itself, without any of them containing code to make that happen. The exception travels directly to the nearest enclosing handler.
 
 <details class="tooltip deep-dive">
-<summary><code>assert</code> Is an Exception</summary>
+<summary>Halting on a Bug with <code>assert</code></summary>
 
-The `assert` from Part 1 was not a separate mechanism; it is a `throw` we had not yet named. Conceptually it is just:
+Not every failure is an erroneous outcome that a contract anticipates. Sometimes a function discovers that an invariant it depends on has been violated: the program has reached a state that should have been impossible, which means there is a bug somewhere, and no sensible computation can continue from corrupt data. The conventional response is to halt. Node provides a helper called `assert` for exactly this, and you will meet it in [Part 2](../part2/index):
+
+```typescript
+import assert from "node:assert/strict";
+
+assert(count <= MAX_CAPACITY, "count exceeds capacity");
+```
+
+If the condition holds, `assert` does nothing. If it does not, the program stops with the message. `assert` is not a separate mechanism from the one in this chapter; it is a `throw` with a condition in front of it. Conceptually it is just:
 
 ```typescript
 function assert(condition: boolean, message: string): void {
@@ -266,7 +272,7 @@ function assert(condition: boolean, message: string): void {
 }
 ```
 
-The reason a failed assertion halts the program is that nothing ever catches it. An assertion guards an _unexpected_ error, an impossible state, and the right response to an impossible state is to stop, so we deliberately leave it uncaught and let it rise all the way out of the program. Everything in this chapter is the same mechanism, caught on purpose instead of left to halt the program.
+The reason a failed assertion halts the program is that nothing ever catches it. An assertion fires only on a bug, and the right response to a bug is to stop, so it is deliberately left uncaught and rises all the way out of the program. The errors in this chapter are different in kind. They are erroneous outcomes the contract anticipates, so they use the same mechanism but are caught on purpose instead of left to halt the program.
 
 </details>
 
@@ -592,9 +598,9 @@ Two development habits keep this in check. First, keep exceptions _rare_. Reserv
 
 ## Choosing Between Results and Exceptions
 
-We now have two ways to manage the same expected failure and need to make real design decisions about which to use.
+We now have two ways to communicate the same erroneous outcome and need to make real design decisions about which to use.
 
-A **returned** failure is _visible to the type checker_. It appears in the function's return type, and the compiler forces every caller to manage it. The cost is that every layer between detection and handling must examine the failure, and the interleaved checks can obscure the success path. Returning failure is the better choice when the failure is an ordinary, expected part of the operation that the _immediate_ caller should always deal with.
+A **returned** failure is _visible to the type checker_. It appears in the function's return type, and the compiler forces every caller to manage it. The cost is that every layer between detection and handling must examine the failure, and the interleaved checks can obscure the success path. Returning failure is the better choice when the failure is an ordinary, routine part of the operation that the _immediate_ caller should always deal with.
 
 A **thrown** failure _propagates itself_, which clarifies the common success path. The price is that the failure is invisible in the type: a function that throws looks, from its signature, just like one that always succeeds, so it is easy for a caller to forget that handling is needed. Throwing is the better choice when a failure should abort the current line of work and be dealt with somewhere well above, or when interleaving a `Result` through many layers would bury the logic.
 
@@ -609,7 +615,7 @@ Whatever the error mechanism, a few practices hold across all of them:
 
 ## Designing for Failure
 
-A well-designed abstraction handles failures as deliberately as it handles successes. Expected failures belong in the contract, and a function communicates them in one of two ways: by returning a value that the type checker forces callers to confront, or by throwing an exception that propagates on its own to a handler far above. Unexpected failures, the impossible states that signal bugs, are thrown by `assert` and left uncaught so the program halts at the first sign of corruption. The choice between returning and throwing is a design decision, weighing visibility in the types against the readability of the success path, and it is one you now have the vocabulary to make. So far we have been testing errors with `checkExpect` and `checkError`; [Chapter 9](./09_validation) introduces more expressive tools for asserting exactly how and why a piece of code fails. 
+A well-designed abstraction handles erroneous outcomes as deliberately as it handles successful ones. Erroneous outcomes belong in the contract, and a function communicates them in one of two ways: by returning a value that the type checker forces callers to confront, or by throwing an exception that propagates on its own to a handler far above. The choice between returning and throwing is a design decision, weighing visibility in the types against the readability of the success path, and it is one you now have the vocabulary to make. So far we have been testing errors with `checkExpect` and `checkError`; [Chapter 9](./09_validation) introduces more expressive tools for asserting exactly how and why a piece of code fails. 
 
 <details class="tooltip exercise">
   <summary>Exercise: Booking a Trip</summary>
