@@ -1,8 +1,6 @@
 # Maintaining Invariants
 
-The previous chapter placed invariants in documentation, tests, and assertions. These mechanisms _detect_ problems: tests probe chosen inputs, and assertions terminate the program when an impossible state is observed.
-
-But they cannot _prevent_ invalid values from being created. This chapter is about closing that gap: designing code so that invalid values cannot be created, rather than checking for them afterwards.
+The previous chapter described invariants in documentation and tests. Tests can _detect_ problems: they probe chosen inputs and report when a function's outcome is not the one its contract promised. But tests cannot _prevent_ invalid values from being created. This chapter is about designing code so that invalid values cannot be created, rather than checking for them afterwards.
 
 We will do this using only programming constructs you know from CPSC 110. The result is not standard TypeScript, and you may find it unwieldy. That is part of the point: it motivates the object-oriented programming in [Part 2](../part2/index).
 
@@ -35,7 +33,7 @@ function deposit(account: BankAccount, amount: number): BankAccount {
 }
 ```
 
-The `withdraw` function looks similar. Once the contracts are documented, tests can be derived from them, and assertions can guard the implementation. 
+The `withdraw` function looks similar. Once the contracts are documented, tests can be derived from them. 
 
 ## Valid Types, Invalid Values
 
@@ -64,22 +62,27 @@ To ensure the invariant is established, we write a function whose only job is to
 /**
  * Creates a new bank account holding balance dollars.
  *
- * Precondition: balance >= 0
- *
  * @param {number} balance the starting balance
- * @returns {BankAccount} a new account satisfying the invariant
+ * @returns {Result<BankAccount, string>} ok: true with a new account
+ * satisfying the invariant, or ok: false with "Account balance must not
+ * be negative" when balance < 0
  */
-function makeAccount(balance: number): BankAccount {
-  assert(balance >= 0, "Account balance must not be negative");
-  return { balance: balance };
+function makeAccount(balance: number): Result<BankAccount, string> {
+  if (balance < 0) {
+    return { ok: false, error: "Account balance must not be negative" };
+  }
+  return { ok: true, value: { balance: balance } };
 }
 ```
 
-A function like this is called a **constructor function**: it constructs values of a type, and it ensures the invariant is established. Every account the constructor returns is valid, and an attempt to create an invalid one halts immediately:
+A function like this is called a **constructor function**: it constructs values of a type, and it ensures the invariant is established. A negative starting balance is not a precondition here but an erroneous outcome: the request is refused, and no account is built. Every account the constructor does return is valid:
 
 ```typescript
 test("accounts cannot be created with a negative balance",
-    checkError(() => makeAccount(-100))
+    checkExpect(() => makeAccount(-100), {
+        ok: false,
+        error: "Account balance must not be negative"
+    })
 );
 ```
 
@@ -98,7 +101,7 @@ The main problem is that the data is reachable by anyone, so the operations can 
  * Invariant: balance >= 0
  */
 type BankAccount = {
-  deposit(amount: number): BankAccount;
+  deposit(amount: number): Result<BankAccount, string>;
   withdraw(amount: number): Result<BankAccount, string>;
   getBalance(): number;
 };
@@ -108,7 +111,7 @@ There is no `balance` field. The type of `BankAccount` now describes what an acc
 
 ```typescript
 // given an initialAccount of type BankAccount ...
-const funded = initialAccount.deposit(5);
+const deposited = initialAccount.deposit(5); // a Result<BankAccount, string>
 ```
 
 We have seen dot before. In [Chapter 2](./02_model-types) it read a property: `song1.title` selected the value stored under `title`. `initialAccount.deposit` selects the value stored under `deposit` in the same way, the only difference is that the value there is a function rather than a string or a number. The `(5)` that follows is an argument, just as in `letterGrade(85)`. 
@@ -217,30 +220,35 @@ const MAX_CAPACITY: number = 1000;
  * Invariant: the count must not exceed MAX_CAPACITY.
  */
 type Counter = {
-    increment(): Counter;
+    increment(): Result<Counter, string>;
     getCount(): number;
 }
 
 /**
  * Creates a counter holding the given count.
  *
- * Precondition: count <= MAX_CAPACITY
- *
  * @param {number} count the current count
- * @returns {Counter} a new Counter satisfying the invariant
+ * @returns {Result<Counter, string>} ok: true with a new Counter satisfying
+ * the invariant, or ok: false with "the venue is full" when count exceeds
+ * MAX_CAPACITY
  */
-export function makeCounter(count: number): Counter {
+export function makeCounter(count: number): Result<Counter, string> {
   // Establish the invariant: no counter exists without passing this check.
-  assert(count <= MAX_CAPACITY, "Invariant violation: Venue is full!");
+  if (count > MAX_CAPACITY) {
+    return { ok: false, error: "the venue is full" };
+  }
 
   // The functions below form a closure over count.
   return {
-    increment(): Counter {
-      return makeCounter(count + 1);
-    },
+    ok: true,
+    value: {
+      increment(): Result<Counter, string> {
+        return makeCounter(count + 1);
+      },
 
-    getCount(): number {
-      return count;
+      getCount(): number {
+        return count;
+      }
     }
   };
 }
@@ -252,7 +260,7 @@ The `export` in front of `makeCounter` marks it as available to code in other fi
 
 </details>
 
-This code both _establishes_ and _preserves_ the fire-safety invariant. The constructor function `makeCounter` establishes the invariant with its top-level assertion. Because `increment` produces its successor by calling `makeCounter` again, every state the counter ever occupies passes through that check. `increment` and `getCount` can see `count` through the closure, but there is no `count` property for anyone else to alter. The operations returned by the constructor are the only way to interact with the state, and they preserve the invariant.
+This code both _establishes_ and _preserves_ the invariant. The constructor function `makeCounter` establishes the invariant with its top-level check: a count over capacity is reported as an erroneous outcome, and no `Counter` is built. Because `increment` produces its successor by calling `makeCounter` again, every state the counter ever occupies passes through that same check, so `increment` does not need a check of its own. Both `increment` and `getCount` can see `count` through the closure, but there is no `count` property for anyone else to alter. The operations returned by the constructor are the only way to interact with the state.
 
 <details class="tooltip deep-dive">
 <summary>Every Operation Returns a New Value</summary>
@@ -265,9 +273,9 @@ This code both _establishes_ and _preserves_ the fire-safety invariant. The cons
 Let's write tests for `increment`:
 
 ```typescript
-const empty = makeCounter(0);
-const one = empty.increment();
-const two = one.increment();
+const empty = assertOk(makeCounter(0));
+const one = assertOk(empty.increment());
+const two = assertOk(one.increment());
 
 test("each click is counted", checkExpect(() => two.getCount(), 2));
 
@@ -275,14 +283,21 @@ test("the original counter is unchanged",
     checkExpect(() => empty.getCount(), 0)
 );
 
-const full = makeCounter(1000); // the venue is exactly at capacity
+const full = assertOk(makeCounter(1000)); // the venue is exactly at capacity
 
 test("the counter refuses to count past capacity",
-    checkError(() => full.increment())
+    checkExpect(() => full.increment(), { ok: false, error: "the venue is full" })
 );
 ```
 
-As in the previous chapter, the last test treats an increment at full capacity as an _unexpected_ error and halts. If turning people away at the door were a normal outcome the program should handle, `increment` would instead return a `Result`; which is right depends on the design you are building.
+<details class="tooltip ts-tips">
+<summary><code>assertOk</code></summary>
+
+The setup above needs the `Counter` inside each `Result`. The toolkit's `assertOk` takes a `Result` and returns its `value` when `ok` is `true`; if the `Result` is `ok: false`, the test fails and reports the error the `Result` carried. It lets a test indicate hat the step must succeed, and the test is only meaningful if it does. 
+
+</details>
+
+The last test treats an increment at full capacity as an erroneous outcome. The counter reports that it cannot count higher, and the caller decides what to do about it. The refusal comes from `makeCounter`, the same check that guards creation, which is why `increment` contains no check of its own.
 
 <details class="tooltip exercise">
   <summary>Exercise: Reflect on Closures</summary>
@@ -306,28 +321,28 @@ type Counter = {
 /**
  * Creates a counter holding the given count.
  *
- * Precondition: count <= MAX_CAPACITY
- *
  * @param {number} count the current count
- * @returns {Counter} a new Counter satisfying the invariant
+ * @returns {Result<Counter, string>} ok: true with a new Counter satisfying
+ * the invariant, or ok: false with "the venue is full" when count exceeds
+ * MAX_CAPACITY
  */
-function makeCounter(count: number): Counter {
+function makeCounter(count: number): Result<Counter, string> {
   // Establish the invariant: no counter exists without passing this check.
-  assert(count <= MAX_CAPACITY, "Invariant violation: Venue is full!");
-  return {n: count};
+  if (count > MAX_CAPACITY) {
+    return { ok: false, error: "the venue is full" };
+  }
+  return { ok: true, value: {n: count} };
 }
 
 /**
- * Creates a counter holding the given count.
+ * Counts one more person.
  *
- * Precondition: count < MAX_CAPACITY
- * Postcondition: count <= MAX_CAPACITY
- *
- * @param {Counter} the counter to increment
- * @returns {Counter} a new Counter satisfying the invariant
+ * @param {Counter} counter the counter to increment
+ * @returns {Result<Counter, string>} ok: true with a new Counter one higher,
+ * or ok: false with "the venue is full" when the counter is at capacity
  */
-function increment(counter: Counter): Counter {
-  return {n: counter.n + 1};
+function increment(counter: Counter): Result<Counter, string> {
+  return makeCounter(counter.n + 1);
 }
 ```
 </CollapsibleCode>
@@ -347,32 +362,41 @@ Let's now use closures to take advantage of removing the `balance` field (outsid
 /**
  * Creates a new bank account holding balance dollars.
  *
- * Precondition: balance >= 0
- *
  * @param {number} balance the starting balance
- * @returns {BankAccount} a new account satisfying the invariant
+ * @returns {Result<BankAccount, string>} ok: true with a new account
+ * satisfying the invariant, or ok: false with "Account balance must not
+ * be negative" when balance < 0
  */
-export function makeAccount(balance: number): BankAccount {
-  assert(balance >= 0, "Account balance must not be negative");
+export function makeAccount(balance: number): Result<BankAccount, string> {
+  if (balance < 0) {
+    return { ok: false, error: "Account balance must not be negative" };
+  }
 
   // The functions below form a closure over balance: each keeps
   // access to the balance of the makeAccount call that created it.
   return {
-    deposit(amount: number): BankAccount {
-      assert(amount > 0, "Amount must be greater than 0");
-      return makeAccount(balance + amount);
-    },
+    ok: true,
+    value: {
+      deposit(amount: number): Result<BankAccount, string> {
+        if (amount <= 0) {
+          return { ok: false, error: "Amount must be greater than 0" };
+        }
+        return makeAccount(balance + amount);
+      },
 
-    withdraw(amount: number): Result<BankAccount, string> {
-      assert(amount > 0, "Amount must be greater than 0");
-      if (amount > balance) {
-        return { ok: false, error: "Amount must not be greater than the current account balance" };
+      withdraw(amount: number): Result<BankAccount, string> {
+        if (amount <= 0) {
+          return { ok: false, error: "Amount must be greater than 0" };
+        }
+        if (amount > balance) {
+          return { ok: false, error: "Amount must not be greater than the current account balance" };
+        }
+        return makeAccount(balance - amount);
+      },
+
+      getBalance(): number {
+        return balance;
       }
-      return { ok: true, value: makeAccount(balance - amount) };
-    },
-
-    getBalance(): number {
-      return balance;
     }
   };
 }
@@ -380,14 +404,14 @@ export function makeAccount(balance: number): BankAccount {
 
 In our earlier designs, `deposit` and `withdraw` took the account as a parameter. These versions take none, because the operations know their balance: it is the `balance` of the `makeAccount` call that created it. Every call to `makeAccount` produces a fresh `balance` and three fresh functions closed over it, so two accounts never share state.
 
-`deposit` and `withdraw` do not build result objects by hand; they call `makeAccount` again with the new balance. Every account that ever exists in the program, including every intermediate state produced by an operation, has passed through `makeAccount` and its assertion. So the invariant is checked at creation and checked again on every change.
+On the successful path, `deposit` and `withdraw` do not build the new account, they call `makeAccount` again with the new balance. Every account that ever exists in the program, including every intermediate state produced by an operation, has passed through `makeAccount`. So the invariant is checked at creation and checked again on every change. A bad amount, which is an erroneous outcome, would be refused before any new account is requested.
 
 The structural change ensures that the invariant is _enforced by the programming language_ rather than by _programmer discipline_. There is no longer a `balance` property anywhere in the program for a client to read or forge. The only access to the balance is `getBalance`, and the only way to produce a new state is through `deposit` and `withdraw`. The type checker now rejects `const ba: BankAccount = { balance: -100 }`. Here's an example use of our new `BankAccount` type:
 
 
 ```typescript
-const account = makeAccount(0);
-const funded = account.deposit(5);
+const account = assertOk(makeAccount(0));
+const funded = assertOk(account.deposit(5));
 
 test("a deposit is reflected in the balance",
     checkExpect(() => funded.getBalance(), 5)
@@ -455,9 +479,9 @@ Practise this chapter's process on a new problem.
 A character's health has a current hit-point count and a maximum, and must always satisfy the invariant `0 <= hp <= maxHp`. A holder of a `Health` value should be able to apply damage, apply healing, read the current hit points, and ask whether the character is still alive, but should never be able to reach the underlying numbers directly.
 
 1. Define a `Health` type whose properties are _operations_, not data: <span class="hint">`damage(amount: number): Health`</span>, <span class="hint">`heal(amount: number): Health`</span>, <span class="hint">`getHp(): number`</span>, and <span class="hint">`isAlive(): boolean`</span>. There should be no `hp` or `maxHp` field on the type.
-2. Write a constructor function `makeHealth(maxHp: number, hp: number): Health` that _establishes_ the invariant with an `assert` <span class="hint">(reject a `maxHp` below 1, or an `hp` outside `0` to `maxHp`)</span> and hides `hp` and `maxHp` in a closure. Model it on `makeCounter`.
+2. Write a constructor function `makeHealth(maxHp: number, hp: number): Result<Health, string>` that _establishes_ the invariant by refusing an invalid request as an erroneous outcome <span class="hint">(reject a `maxHp` below 1, or an `hp` outside `0` to `maxHp`)</span> and hides `hp` and `maxHp` in a closure. Model it on `makeCounter`.
 3. Implement `damage` and `heal` so they _preserve_ the invariant: <span class="hint">damage never drops hit points below 0, and heal never raises them above `maxHp`</span>. Each should return a new `Health` produced by `makeHealth`, so the invariant is re-established on every change.
 4. Add a `newCharacter(maxHp: number): Health` helper that starts a character at full health.
-5. Write tests: <span class="hint">`checkExpect` that damage and heal land on the right hit points, including that they stop at 0 and at `maxHp`; and `checkError` that `makeHealth` rejects an invalid starting value such as `makeHealth(10, -1)`.</span>
+5. Write tests: <span class="hint">`checkExpect` that damage and heal land on the right hit points, including that they stop at 0 and at `maxHp`; and `checkExpect` that `makeHealth` returns `ok: false` for an invalid starting value such as `makeHealth(10, -1)`.</span>
 
 </details>
