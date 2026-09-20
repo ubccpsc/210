@@ -305,14 +305,21 @@ const warmestFirst: Reading[] = day.toSorted(warmerThenEarlier);
 
 Always pass a comparator. Called without one, `toSorted` converts each element to a string and orders those, so `[10, 9, 2].toSorted()` is `[10, 2, 9]`, because `"10"` comes before `"2"`.
 
-<!--
-<details class="tooltip ts-tips">
-<summary><code>sort</code> and <code>toSorted</code></summary>
+### `slice`: taking an ordered subset
 
-Arrays also have `sort`, which takes the same comparator but reorders the array _in place_ and returns that same array rather than a new one. `toSorted` was added to the language so that ordering could be done without changing anything, which is why this chapter uses it. In-place changes are the subject of the [next chapter](./06_state-mutation).
+`slice` returns an ordered subset of the array from an index `i` (inclusive) to an index `j` (exclusive):
 
-</details>
--->
+```typescript
+const temperatures: number[] = [6, 9, 8, 10, 10, 12, 13, 15, 10, 7, 5]
+```
+
+```typescript
+test("slicing takes all elements for i (inclusive) to j (exclusive)",
+    checkExpect(() => temperatures.slice(2, 6), [8, 10, 10, 12])
+);
+```
+
+Arrays contain many other useful operations. We won't document them all in this chapter!
 
 ## Writing Your Own Loops
 
