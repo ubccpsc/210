@@ -10,7 +10,7 @@ But the outside world has a property that nothing inside our programs has had so
 
 ## How Long Computers Wait
 
-Inside the processor, work is astonishingly fast: a simple operation takes around a nanosecond, a billionth of a second. Everything outside the processor is slower, and the further away the data lives, the worse it gets. The numbers are hard to feel at nanosecond scale, so the table below also shows each one rescaled, as if a single instruction took one second:
+Inside the processor, work is astonishingly fast. A simple operation takes around a nanosecond (that is, a billionth of a second). Everything outside the processor is slower, and the further away the data lives, the worse it gets. The numbers are hard to feel at nanosecond scale, so the table below also shows each one rescaled, as if a single instruction took one second:
 
 | Operation | Typical time | Scaled: if one instruction took 1 second |
 |---|---|---|
@@ -20,9 +20,9 @@ Inside the processor, work is astonishingly fast: a simple operation takes aroun
 | Reading from a spinning disk | 10 ms | ~4 months |
 | Cross-country network round trip | 150 ms | ~5 years |
 
-The pattern to take away: touching a disk or a network is not a little slower than computing, it is _millions of times_ slower. From the processor's point of view, asking a distant web service for the temperature and then waiting for the answer is like mailing a letter and standing motionless at the mailbox for five years.
+Touching a disk or a network is not a _little_ slower than computing, it is _millions of times_ slower. From the processor's point of view, asking a distant web service for the temperature and then waiting for the answer is like mailing a letter and standing motionless at the mailbox for five years.
 
-A call that waits like this is called **blocking**: the function does not return until the slow work finishes, and the program makes no progress of any kind in the meantime. For a program that has nothing else to do, blocking is merely wasteful. For most real programs, it is unacceptable: a program frozen for the duration of a network request cannot respond to its user, accept another request, or do any of the computation that is already ready to go.
+A call that waits like this is called **blocking**: the function does not return until the slow work finishes, and the program makes no progress of any kind in the meantime. For a program that has nothing else to do, blocking is merely _wasteful_. For most real programs, it is _unacceptable_: a program frozen for the duration of a network request cannot respond to its user, accept another request, or do any of the computation that is already ready to go.
 
 ## One Thread at a Time
 
@@ -32,7 +32,7 @@ Many languages (e.g., Java and Rust) let a program run several threads at once: 
 
 TypeScript makes a different trade. A TypeScript program runs on a single thread: exactly one statement is executing at any moment, ever. You never have to wonder whether some other thread changed an object between two of your statements, because there is no other thread. The model is simple to reason about and easy to use. The cost is a loss of flexibility.
 
-But a single thread sharpens the waiting problem. If the only thread blocks on a disk read, the entire program stands still; there is no second thread to carry on. So,  TypeScript provides a mechanism for a program to _start_ a slow operation, carry on with other work immediately, and come back to the result when it is ready. Computation that is set aside to run later like this is called **deferred computation**, and it is the central idea of this chapter.
+But a single thread makes the waiting problem much worse. If the only thread blocks on a disk read, the entire program stands still; there is no second thread to carry on. So,  TypeScript provides a mechanism for a program to _start_ a slow operation, carry on with other work immediately, and come back to the result when it is ready. Computation that is set aside to run later like this is called **deferred computation**, and it is the central idea of this chapter.
 
 <details class="tooltip deep-dive">
 <summary>Threads Elsewhere, and Why TypeScript Has One</summary>
