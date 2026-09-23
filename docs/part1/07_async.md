@@ -32,7 +32,7 @@ Many languages (e.g., Java and Rust) let a program run several threads at once. 
 
 TypeScript makes a different design decision. A TypeScript program runs on a single thread. Exactly one statement is executing at any moment. This means you never have to wonder whether some other thread changed an object between two of your statements. The model is simple to reason about and easy to use.
 
-But a single thread exposes us to the dilemma of waiting. If the only thread blocks while waiting for a file to be read from disk, the entire program appears to have hung. To get around this, TypeScript provides a mechanism for a program to _start_ a slow operation, carry on with other work immediately, and come back to the result when it is ready. Computation that is set aside to run later like this is called **deferred computation**, and it is the central idea of this chapter.
+But a single thread exposes us to the dilemma of waiting. If the only thread blocks while waiting for a file to be read from disk, the entire program appears to have hung. To get around this, TypeScript provides a mechanism for a program to _start_ a slow operation, carry on with other work immediately, and come back to the result when it is ready. Computation that is set aside to run later like this is called **deferred computation**.
 
 <details class="tooltip deep-dive">
 <summary>Threads Elsewhere, and Why TypeScript Has One</summary>
@@ -43,7 +43,7 @@ Rust goes further and uses its type system to prevent many of these errors stati
 
 Python technically allows multiple threads, but only one thread may make progress at once. If you're writing single-file Python code without `multiprocessing` or other Python multi-threaded libraries, when you make a network call or read a file, your code waits for the file to be read or the network call to finish. 
 
-JavaScript, the language TypeScript is built on, was designed for web browsers, where a page must stay responsive while images and data load. Its designers chose one thread plus deferred computation as a model that balanced understandability without the complexity of multi-threading. This has proven to be a durable choice and is the backbone of the bodern web.
+JavaScript, the language TypeScript is built on, was designed for web browsers, where a page must stay responsive while images and data load. Its designers chose one thread plus deferred computation as a model that balanced understandability without the complexity of multi-threading. This has proven to be a durable choice and is the architecture of many of the systems that run the modern web.
 
 </details>
 
