@@ -470,7 +470,7 @@ Here is a visual representation of this distinction:
 
 Mutation makes it newly important to know exactly where each variable exists, because every variable that can change is something a reader must keep track of. Where a variable exists is called its **scope**.
 
-TypeScript scopes variables using **block scope**: a variable exists from its declaration to the end of the block (the `{ ... }`) that encloses it, and outside that block the name is visible. The compiler enforces this statically:
+TypeScript scopes variables using **block scope**: a variable exists from its declaration to the end of the block (the `{ ... }`) that encloses it. The name is only visible inside that block. The compiler enforces this rule statically:
 
 ```typescript
 function describe(reading: Reading): string {
