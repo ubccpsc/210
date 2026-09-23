@@ -26,7 +26,7 @@ The design advice is the same for both kinds of APIs. Depend on what is document
 
 The last two rows deserve extra reflection. A library changes when _we_ upgrade it, so we choose the moment and can read its release notes first before we decide to upgrade. A web service changes when _they_ deploy, which may be during our lunch break, and the first sign is often a test failure or a support ticket.
 
-## A Tracker Across Several Carriers
+#### A Tracker Across Several Carriers
 
 We use one running example for this chapter and the rest of Part 3, following the same system as it is published, cleaned up, debugged, and extended.
 
@@ -44,7 +44,7 @@ type Shipment = {
 };
 ```
 
-## Data From Outside Has No Invariants
+## Data Without Invariants
 
 Everything in Parts 1 and 2 was built by code we controlled. A `GuestList` could only come from the `GuestList` constructor, which is what let the constructor establish an invariant and the class preserve it. When a value existed, something we wrote had vouched for it. A value that arrives from external code has no such history. We can't hold anybody responsible for it, no constructor of ours ran, and its type annotation is a claim rather than a fact. The carrier's response is a sequence of bytes that we hope describes a shipment. It might describe an error page, an older version of the format, or a shipment whose status is a word we have never seen.
 
@@ -124,7 +124,7 @@ The error is the feature. `unknown` forces the check that `any` allows you to sk
 
 </details>
 
-## Converting Instead of Claiming
+## Converting, Not Claiming
 
 The alternative to claiming is a function that takes `unknown` and returns either a value we can trust or an explanation of what was wrong. This is the `Result` type from the error handling chapter, used for exactly the job it was designed for:
 
@@ -192,7 +192,7 @@ That is the distinction worth holding on to. A claim used _instead of_ a check i
 
 </details>
 
-## The Same Job, From a Library
+## Using a Schema Library
 
 Look at `toShipment` again and notice how little of it is about shipments. Confirming that a value is an object, that a field is present, that it holds a string rather than a number, that the string is one of a permitted set: none of that knowledge belongs to parcel tracking. Write a second converter for a different type and almost every line will be the same shape with different names.
 
@@ -420,7 +420,7 @@ The practical rules: retry idempotent operations freely, retry non-idempotent op
 
 </details>
 
-## Isolating What You Do Not Control
+## Isolating Dependencies
 
 Everything so far has been about one call. The design question is where the calls are allowed to live.
 
@@ -555,7 +555,7 @@ test("the tracker reports the first carrier that recognises the number", async (
 
 This is the test double from the interfaces chapter, and an external service is the case that motivates it most clearly. The stub also reaches states the real thing will not produce on request: a carrier that times out, a carrier returning a status we do not recognise, every carrier failing at once. Those are the paths most likely to be wrong in production and least likely to be exercised by a test that calls a live service.
 
-## Working With an API You Did Not Write
+## Unfamiliar APIs
 
 The last skill is the one used before any of the code above gets written: working out what an unfamiliar API does.
 
@@ -576,7 +576,7 @@ This is the same rule the rest of this section argues for, applied to a new sour
 
 </details>
 
-## Consuming Deliberately
+#### Consuming Deliberately
 
 An API is a contract we depend on and do not control, and both halves of that description generate work for the client.
 

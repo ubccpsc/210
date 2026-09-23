@@ -6,7 +6,7 @@ This chapter judges code by something users never see: whether it can be worked 
 
 The chapter is organised around a single practical claim: _refactoring is most often performed in anticipation of bug-fixing or adding a new feature._ It is not tidying for its own sake, and it is not an activity scheduled for a quiet Friday. It is the step that decreases the total cost of an upcoming change, which is why it sits immediately before the chapters on debugging and on adding features, as it is often an intrinsic activity that is part of both.
 
-## A Tracker That Grew
+#### A Tracker That Grew
 
 The running example continues, some months on.
 
@@ -159,7 +159,7 @@ If the observed behaviour is in fact a bug, the characterisation test documents 
 
 </details>
 
-## A Catalogue of Small Changes
+## Common Refactorings
 
 Most refactoring is assembled from a small number of changes, each with a name. The names are standard across the industry, and most of them are recognised by editors and by anyone who has worked on a long-lived codebase.
 
@@ -304,7 +304,7 @@ _Do not refactor past the point where the upcoming change became easy._ The fini
 
 _Do not refactor and change behaviour in the same commit._ This is the same rule as before, from the other direction, and it is the one most often broken while a feature is half-written.
 
-## Refactoring as Preparation
+#### Refactoring as Preparation
 
 Internal quality is invisible until somebody needs to change something, and then it is the only thing that matters. It cannot be measured by the tools that measure correctness, which is why it degrades quietly in systems whose tests all pass.
 

@@ -8,7 +8,7 @@ This is the culmination of what Part 3 has been about. A request arrives for a s
 
 This chapter is mostly about a single observation: _how much a feature costs depends far less on the feature than on whether the design anticipated it_. Two requests of similar size, against the same system, can differ in the effort required to complete them by a factor of ten, and the difference is decided before either request arrives.
 
-## Two Requests
+#### Two Requests
 
 The tracker has been in production for a year, and two requests land in the same week.
 
@@ -18,7 +18,7 @@ The tracker has been in production for a year, and two requests land in the same
 
 Read as requirements, these are comparable. Each is one sentence, each is clearly worth doing, and a plan estimating both at a couple of days would look reasonable in a meeting. In reality, completing one of them will take a couple of hours. The other will not, and the reason has nothing to do with notifications being intrinsically harder than carriers.
 
-## What a Feature Request Contains
+## Feature Requests
 
 A request states a need. It is not a specification, and it is not a design, and treating it as either is the first way this work goes wrong.
 
@@ -71,7 +71,7 @@ Reading an unfamiliar system needs the same discipline in reverse. You will cons
 
 </details>
 
-## Finding the Extension Point
+## Extension Points
 
 With a model of the relevant parts, the design question is where the change belongs, and the useful form of that question is: _where did the existing design anticipate a change of this kind?_
 
@@ -116,9 +116,11 @@ Counted as a diff, that is one new file, one line added where the list of client
 
 That property was not created this week. It was created when somebody defined `CarrierClient` instead of calling carriers directly, and preserved when the refactoring chapter moved the status vocabulary back out of the middle of the system. Today's cheap change was paid for earlier.
 
-## When There Is No Extension Point
+## No Extension Point
 
 The notification request has no such landing place, and this is the ordinary case rather than the exception. No design anticipates everything, and a system that tried would be unusable.
+
+### Forcing the Change In
 
 The tracker has no notion of a shipment being _watched_ over time, no point at which "something happened to this parcel" is an event, and nowhere that a message could be sent from. There is one obvious way to force it in:
 
@@ -154,6 +156,8 @@ The value of keeping them apart is that queries become safe. A query can be call
 `locate` was a query. The change above made it a command that also answers, and the resulting hazards are the standard ones: a caller that refreshes the display now sends notifications, and a test that exercises lookups now has to think about mail. When a feature seems to require a query to start acting, that is usually a signal that the acting belongs somewhere else.
 
 </details>
+
+### Refactoring First
 
 The alternative is the sequence the refactoring chapter argued for: make the change easy, then make the easy change. That means two pieces of work in a deliberate order, with the first one adding no feature at all.
 
@@ -242,7 +246,7 @@ What matters is that the choice is visible. Taking the awkward route knowingly, 
 
 Counted as a diff, the notification is larger than the carrier was, and the difference is instructive. The carrier touched no existing file. The notification adds a new contract, edits `ParcelTracker` to announce through it, and changes every test that constructs a tracker. None of that is behaviour, which is why it belongs in its own commit: the feature itself is again one new file and one line of wiring.
 
-## Planning and Making the Change
+## Making the Change
 
 Both routes to the change now converge, and the shape of the whole job is visible:
 
@@ -277,7 +281,7 @@ Before touching anything, establish who else is affected. Other callers, other t
 
 While making the change, the habits are the ones the last two chapters established. Small commits with a passing suite at each one. Tests written first where doing so clarifies what the feature should do. A clean diff, with no incidental reformatting to hide the substance in. And documentation updated as part of the change, because a feature nobody can discover is not finished.
 
-## Knowing When A Feature Is Done
+## When a Feature Is Done
 
 "Done" is not "the code I wrote works", and the difference is where features get shipped half-finished.
 
@@ -289,7 +293,7 @@ While making the change, the habits are the ones the last two chapters establish
 
 That last criterion is the one that separates a feature that was added from a feature that was inserted. The tracker now has an observer extension point it did not have, so the next request of this kind is cheap. Had the notification been forced in as a parameter and a conditional, the system would have been slightly worse afterwards, and the following request slightly more expensive, which is the process by which a codebase becomes the one nobody wants to work in.
 
-## What This Was All For
+#### What This Was All For
 
 This is the end of the textbook, and it is worth revisiting what we've actually been learning here this term.
 

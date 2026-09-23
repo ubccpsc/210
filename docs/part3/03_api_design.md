@@ -186,7 +186,7 @@ The second is that it documents the order carriers are consulted, which is a pro
 
 Beyond the operations, a client needs guidance for getting started. Most people evaluating a library read one example and decide whether to keep going, so a README that answers what this is for, how to install it, and what a typical call looks like is doing more work than any individual signature. For a web service the same role is played by a written specification of the routes.
 
-## Compatible and Breaking Change
+## Breaking Changes
 
 A central skill of this chapter is judging, before shipping, whether a change will break an existing client. The broad shape is that widening what you accept and adding to what you return are safe, while narrowing, removing, or renaming are not:
 
@@ -256,7 +256,7 @@ The middle step is the one under pressure, and it is the one that cannot be comp
 
 The sharpest difference between the two kinds of API is who decides when to upgrade. A library client upgrades when they choose to, so old versions stay in use for years and a deprecation can be generous. A web service client is upgraded when _we_ deploy, whether they are ready or not, which is why services keep old versions running in parallel: it is the only way to give a client the choice that a library client has by default.
 
-## Designing a Web Service Surface
+## Web Service Surfaces
 
 Most of this chapter applies unchanged to a service. A few decisions have no library equivalent.
 
@@ -284,7 +284,7 @@ _Limits should be visible._ If calls are rate limited, a client can only respect
 
 Authentication is a real part of most published services and a large enough topic to leave to a later course. Treat it as a design surface rather than an implementation detail: who may call what is a decision about the contract, and it is made at the same time as everything else in this chapter.
 
-## An API Is a Promise
+#### An API Is a Promise
 
 Publishing changes what a design decision means. Inside a system we own, a decision is provisional and the cost of revising it is our own time. Published, it becomes a promise to people we will never meet, and the cost of revising it is theirs.Two properties follow:
 

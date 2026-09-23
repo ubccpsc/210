@@ -8,7 +8,7 @@ That distance between the report and where it manifests in the code is the reaso
 
 The claim of this chapter is that debugging is a process rather than a talent. It has four steps, each with techniques that can be learned: reproduce the failure, localize the fault, fix it, and validate that the fix worked and didn't introduce any other new defects. Engineers who are quick at debugging are usually not guessing better than everybody else; they are following those steps more systematically.
 
-## A Parcel That Was Never Delivered
+#### A Parcel That Was Never Delivered
 
 The running example continues.
 
@@ -149,7 +149,7 @@ Notice how far the search narrowed at each step. Reproduction removed the interf
 
 Notice where the fault came from. Nobody edited this code. The carrier introduced a status it had never sent before, and a substring test that had been correct for two years stopped being correct without anything in our repository changing. Faults do not have to be recent to surface, and "we did not change anything" is not evidence that the fault is elsewhere.
 
-## Tools
+## Debugging Tools
 
 Debugging tools mostly answer one of two questions: what is the state at this point, and how did control get here.
 
@@ -176,7 +176,7 @@ The second is to read the trace as a description of _how control arrived_, not o
 
 </details>
 
-## Fixing the Fault, Not the Symptom
+## Fixing the Fault
 
 Once the fault is found, the fix looks obvious, and that is where a second kind of mistake is available. Our parcel could be fixed like this:
 
@@ -251,7 +251,7 @@ The order of operations matters. Add the test and watch it fail _before_ applyin
 
 Then run the whole suite, not only the new test. This is the same argument the refactoring chapter made about restructuring, and it is the reason both chapters depend on [Chapter 9](../part1/09_validation): a suite is what converts "I believe this change is safe" into evidence.
 
-## Bug-Fixing in a Public API
+## Fixing a Public API
 
 A real challenge emerges when a bug is revealed in a public API, which you have users of. The fix is no longer only a correction; it is a change to a contract that other people have written code against, and everything from the API design chapter applies to it.
 
@@ -267,7 +267,7 @@ There is no single answer, but the options are limited and worth knowing:
 
 Severity overrides the calculus. A bug that loses data, exposes information, or lets someone do what they should not be able to do gets fixed immediately, and clients who depended on it are given no notice, because the alternative is worse. The Falador example above is that decision being made in real time: significant functionality was disabled within hours, and the more careful design came later.
 
-## Debugging Is a Process
+#### Debugging Is a Process
 
 The chain from a fault to a failure is what makes debugging hard, and every step in this chapter is a way of shortening it or searching it systematically. Reproduce, so that the failure is available on demand and small enough to reason about. Localize by hypothesis and by halving, rather than by changing code and hoping. Fix the fault at the level it lives, and ask why it was possible, because the answer is often a design improvement rather than only a correction. Validate with a test that was seen to fail first, and with a suite that guards everything else.
 

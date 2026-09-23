@@ -79,7 +79,7 @@ You saw this effect in CPSC 110, though not by name. A function's template was d
 
 </details>
 
-## Coupling as the Design Criterion
+## What Coupling Is
 
 **Coupling** is the degree to which one part of a system depends on another. Two classes are tightly coupled when a change to one is likely to force a change to the other, and loosely coupled when each can change without disturbing its neighbour.
 
@@ -274,7 +274,7 @@ account.withdraw(amount);
 
 The guideline is **Tell, Don't Ask**: tell an object what you need done and let it decide how, rather than asking for its state and deciding on its behalf. It is the same instinct behind the `PlayLog` design later in this chapter, where `PlayHistory` answers a question about the history instead of handing over its list for someone else to interpret. A method whose body is mostly other objects' getters is usually a method living in the wrong class.
 
-### Depending on More Than You Need
+### Depending on Too Much
 
 A dependency on a concrete class commits the dependent to everything that class encodes, and any way it might be changed in the future. `WeeklyRecap` declared its field as `Playlist`, so it inherited the whole of `Playlist`'s public surface as its potential exposure, when the operation it wanted was a single query.
 
@@ -284,7 +284,7 @@ Class extension is the tightest coupling the language offers, and it does not ap
 
 That is the reason composition is the default and extension is reserved for true _is-a_ relationships. A collaborator held as a field is reached only through its public methods, so its internals stay free to change; a base class is reached through inheritance, so its internals are part of what every subclass depends on.
 
-## Breaking Dependency Cycles
+## Dependency Cycles
 
 When A depends on B and B depends on A, neither class can be read, tested, or changed without the other, and the pair has become one unit, but with two names. The decomposition chapter made this point about ownership: `Playlist` holds `PlayHistory` because it needs to delegate recording, and giving `PlayHistory` a back-reference to `Playlist` would have bound the two together in both directions.
 
@@ -396,7 +396,7 @@ _Extract a third class._ When both classes are doing work that belongs to neithe
 
 Whichever route applies, the goal is the same: leave the compile-time dependencies pointing one way, so the graph reads as a hierarchy rather than a knot. A dependency graph without cycles can be understood one layer at a time, and any class in it can be lifted out for testing along with only the things beneath it.
 
-## Loosening Coupling for `WeeklyRecap`
+## Loosening `WeeklyRecap`
 
 To fix our coupling challenge, `WeeklyRecap` should say what it needs, and `PlayHistory` should answer that question itself rather than handing over its data for someone else to interpret.
 
@@ -515,6 +515,8 @@ Compare the two designs against the change that started this chapter. Adding tim
 
 Notice also which class the dependency now points to. `WeeklyRecap` does not depend on `PlayHistory`, and `PlayHistory` does not depend on `WeeklyRecap`; both depend on `PlayLog`, which has no implementation to change. Arranging dependencies so they point at abstractions rather than at concrete classes is the **Dependency Inversion Principle**, named at the end of [Part 2](../part2/index), and it is the structural habit that most reliably keeps coupling low.
 
+### Coupling in Tests
+
 Coupling shows up in the test suite before it shows up anywhere else, and a test that is hard to write is usually reporting a design problem rather than a testing problem. To test the original `WeeklyRecap`, you needed a real `Playlist`, which needed a real `PlayHistory`, which needed songs recorded through the playlist in the right order. The test dragged in three classes to check one string.
 
 The rewritten class needs none of that, because anything satisfying `PlayLog` will do:
@@ -537,7 +539,7 @@ test("the recap names the count and the most recent song", () => {
 
 This is the test double from the interfaces chapter, doing the same work for the same reason. The general rule is this: if a unit test requires you to construct a large part of the system, the class under test is coupled to a large part of the system, and no amount of test-writing skill will fix that from the outside.
 
-## When Coupling Is a Judgment Call
+## Judgment Calls
 
 Coupling always exists, and it is not a defect to be eliminated. A system with no dependencies among its parts is a system whose parts never work together. Every collaboration in a design is a dependency, and the arrows in the graph are what the system is made of.
 
@@ -547,7 +549,7 @@ There is also a trap in treating low coupling as a target on its own. Coupling b
 
 The same judgment applies as with decomposition. Adding an interface for every collaboration produces a system where every call passes through an abstraction and no reader can find the code that runs. An interface is worth defining when the dependency is likely to change, when a second implementation is plausible, or when a test needs a stand-in. When a class collaborates with one stable neighbour that no one expects to replace, depending on it directly is often the clearer choice.
 
-## Cohesion and Coupling Together
+## Cohesion and Coupling
 
 Both criteria aim to support a single higher-level idea. A **concern** is a single thing the system must address: a rule, a responsibility, a reason the code might one day have to change. **Separation of concerns** is the principle that each concern should have exactly one home in the design. The two ways a design can violate separation of concerns are exactly the two failures these chapters have been describing.
 
@@ -563,7 +565,7 @@ Of the two design failures, poor cohesion is the more common, and it tends to pr
 
 This is why coupling and cohesion are considered concurrently. The decomposition chapter asked where the boundaries should fall; this chapter asks how much traffic crosses them. A good boundary is one where both answers are favourable: everything on the inside serves one invariant, and everything crossing it is a small, stable contract. When you find yourself choosing between the two, the traffic across the boundary is the better guide, because it is what will inhibit you on future changes.
 
-## Designing for Low Coupling
+#### Designing for Low Coupling
 
 Low coupling is the property that lets a system be changed by someone who does not understand all of it. Each class depends on a small number of stable contracts, so a change has a boundary you can see, and the reasoning needed to make it safely fits in one person's head. That is what Part 3 is about: not building a system that works, which [Part 2](../part2/index) covered, but keeping one workable after the people who built it have moved on.
 
