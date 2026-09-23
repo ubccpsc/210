@@ -407,12 +407,12 @@ endif
 
 :Run finally, if present;
 
-if (caught?) then (yes)
-  :Execute the next statement;
-  stop
-else (no)
+if (thrown and not caught?) then (yes)
   :Exception propagates
   up the call stack;
+  stop
+else (no)
+  :Execute the next statement;
   stop
 endif
 
@@ -556,7 +556,7 @@ An exception is therefore a kind of **non-local return**. Where `return` exits t
 ```typescript
 function deep(): void {
     throw new Error("from deep");
-    // nothing after the throw in deep, middle, or shallow runs
+    // nothing after the throw runs in deep, in middle, or in shallow's try block
 }
 
 function middle(): void {
