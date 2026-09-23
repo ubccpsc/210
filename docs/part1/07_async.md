@@ -47,7 +47,7 @@ JavaScript, the language TypeScript is built on, was designed for web browsers, 
 
 </details>
 
-## Deferred Computation: Callbacks
+## Callbacks
 
 You have been using deferred computation since the first chapter of the book. Every test does it:
 
@@ -114,7 +114,7 @@ This design has two consequences. First, a callback is never interrupted partway
 
 
 
-## Promises: A Value That Does Not Exist Yet
+## Promises: A Future Value
 
 Callbacks defer computation, but they do not provide a way to return _results_. Reading a file produces the file's contents, and fetching from a web service produces a response. The program needs that value, but it will not exist until the slow operation finishes, and the program should not stop while it waits. TypeScript represents a result that will arrive later as an object called a **promise**.
 
@@ -428,7 +428,7 @@ The type annotation on `report` states _our expectation_, but the compiler canno
 
 The compiler's guarantees stop at the program's edge. Data arriving from outside should be _checked_ before the rest of the program relies on it, as the invariants chapters described. We will not write that checking here, but this boundary is where it belongs.
 
-## Waiting for Several Things at Once
+## Waiting in Parallel
 
 Everything so far has waited for one slow operation at a time. Real programs often need several. A weather station keeps a log per instrument, and a report needs all of them. A web page may need several answers from a service before it can display anything. The obvious way to read several files is a loop:
 
