@@ -1,6 +1,6 @@
 # Designing for Failure
 
-Every function's contract describes both what happens when the function works and what happens when it doesn't work. A function that looks up a course section must also handle what happens when the section doesn't exist, and a function that enrols a student in a course must handle what happens when they lack a required prerequisite. Failures must be designed as deliberately as successes, so that a design has a consistent failure model. This should enable error handling to stay out of the way when the system is working and makes it hard to do the wrong thing when it is not.
+Every function's contract describes both what happens when the function works and what happens when it doesn't work. A function that looks up a course section must also handle what happens when the section doesn't exist, and a function that enrols a student in a course must handle what happens when they lack a required prerequisite. Failures must be designed as deliberately as successes, so that a design has a consistent failure model. Error handling should then stay out of the way when the system is working, and make it hard to do the wrong thing when it is not.
 
 Every function call has one of two outcomes. A **successful outcome** is the one the function exists to produce, such as enrolling the student in a section. An **erroneous outcome** is any other result, such as a section that does not exist. Erroneous outcomes are not a bugs. They are foreseeable results that belongs in the function's contract, so the caller knows these outcomes can happen and can learn how they know when they have occurred. _Error_ and _failure_ are often used interchangeably to mean an erroneous outcome.
 
@@ -36,9 +36,9 @@ const student: Student = { id: "s1", completed: ["CPSC110"] };
 
 Enrolling in a section can fail in two predictable ways. The section might not exist in the catalogue, or the student might not have completed a required prerequisite. Our `student` can take `CPSC210` (its prerequisite `CPSC110` is complete) but not `CPSC213` (its prerequisite `CPSC210` is not).
 
-## Returning Failure as a Value
+## Returning a Failure Value
 
-The first mechanism for reporting errors was introduced in the [checking invariants chapter](./03_checking-invariants#successful-and-erroneous-outcomes). The failure is included in the return type, so a function returns either a success or a failure, and the caller must check the returned value to find out which. The `Result` type represents this as a tagged union.
+The first mechanism for reporting errors was introduced in the [checking invariants chapter](./03_checking-invariants#erroneous-outcomes). The failure is included in the return type, so a function returns either a success or a failure, and the caller must check the returned value to find out which. The `Result` type represents this as a tagged union.
 
 ```typescript
 type Result<T, E> =
@@ -605,7 +605,7 @@ Whatever the mechanism, a few practices always apply:
 - Do not use exceptions for ordinary control flow, only for real errors.
 - Check data as soon as it enters your program from a file, a network, or a user, turning it into either a trusted value or a clear error at the boundary.
 
-## Designing for Failure
+#### Designing for Failure
 
 A well-designed abstraction handles erroneous outcomes as deliberately as successful ones. Erroneous outcomes belong in the contract, and a function communicates them in one of two ways: by returning a value that the type checker makes callers handle, or by throwing an exception that propagates to a handler further up. Choosing between them means weighing visibility in the types against the readability of the success path. So far we have tested errors with `checkExpect` and `checkError`. [Chapter 9](./09_validation) introduces more precise tools for checking how and why a piece of code fails.
 

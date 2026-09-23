@@ -6,7 +6,7 @@ We have already hand-built a mechanism for tracking a sequence. In [Using Types 
 
 In TypeScript, arrays come with the traversal operations already written for transforming, selecting, and searching sequences. This chapter introduces arrays, those built-in operations, and then iteration, the general mechanism underneath them all.
 
-## A Day of Temperature Readings
+#### A Day of Temperature Readings
 
 This chapter uses a single running example:
 
@@ -22,7 +22,7 @@ type Reading = {
 };
 ```
 
-## Creating and Accessing Arrays
+## Creating and Using Arrays
 
 An array is denoted by appending `[]` to the element type: `Reading[]` is an array of `Reading` objects. An array is created with an **array literal**: the elements, separated by commas, between square brackets.
 
@@ -72,7 +72,7 @@ const second = day[1];       // { hour: 9, tempCelsius: -1 }
 const count = day.length;    // 6
 ```
 
-The `day` array is represented in memory as a row of six cells, one per index. The cells do not contain the `Reading` objects themselves; each cell holds a _reference_ to a separate `Reading` that lives elsewhere. An index like `day[0]` identifies a memory location that contains a reference that points to where the object itself resides in memory. We will introduce _references_ in detail in [Chapter 6](./06_state-mutation).
+The `day` array is represented in memory as a row of six cells, one per index. The cells do not contain the `Reading` objects themselves. Each cell holds a _reference_ to a separate `Reading` that lives elsewhere. An index like `day[0]` identifies a memory location that contains a reference that points to where the object itself resides in memory. We will introduce _references_ in detail in [Chapter 6](./06_state-mutation).
 
 <!-- graph playground:
 hhttps://dreampuf.github.io/GraphvizOnline/?engine=dot
@@ -113,7 +113,7 @@ digraph readingArray {
 <!-- caption="Each cell holds a reference to a separate Reading object, which can be accessed by its index." -->
 
 
-## The Built-In Array Operations
+## Array Operations
 
 TypeScript provides _operations_ that cover the most common things a program does with a sequence. Each operation takes a function as its input. The input function describes what should happen to _one element_, and the operation applies the function across the whole array. The input functions will usually be declared with arrow functions (lambdas), which we saw in [Chapter 1](./01_new-language).
 
@@ -166,7 +166,7 @@ function mapList<T, U>(list: LinkedList<T>, f: (t: T) => U): LinkedList<U> {
 }
 ```
 
-Compared with `day.map(f)`, this performs the same steps; `map` just hides the traversal. You supply the per-element transformation, and the traversal is taken care of by the language.
+This performs the same steps as `day.map(f)`, which hides the traversal. You supply the per-element transformation, and the traversal is taken care of by the language.
 
 </details>
 
@@ -179,11 +179,11 @@ const freezing: Reading[] = day.filter((reading: Reading) => reading.tempCelsius
 // [{ hour: 6, tempCelsius: -4 }, { hour: 9, tempCelsius: -1 }, { hour: 21, tempCelsius: -2 }]
 ```
 
-`filter` never changes the elements; it only selects which appear in the result, so a `Reading[]` filters to an often shorter `Reading[]`.
+`filter` never changes the elements. It only selects which appear in the result, so a `Reading[]` filters to an often shorter `Reading[]`.
 
 ### `reduce`: Combining
 
-`map` and `filter` produce arrays; `reduce` collapses an array into a single value. It carries an **accumulator** through the array: for each element, a combining function takes the accumulator's current value and the current element, and produces an updated accumulator. `reduce` takes two arguments: the combining function, and the accumulator's starting value. For example, if we wanted to know the sum of the Celsius values across all of the readings:
+`map` and `filter` produce arrays, while `reduce` collapses an array into a single value. It carries an **accumulator** through the array: for each element, a combining function takes the accumulator's current value and the current element, and produces an updated accumulator. `reduce` takes two arguments: the combining function, and the accumulator's starting value. For example, if we wanted to know the sum of the Celsius values across all of the readings:
 
 ```typescript
 const totalCelsius: number = day.reduce((sum: number, reading: Reading) => sum + reading.tempCelsius, 0);
@@ -305,7 +305,7 @@ const warmestFirst: Reading[] = day.toSorted(warmerThenEarlier);
 
 Always pass a comparator. Called without one, `toSorted` converts each element to a string and orders those, so `[10, 9, 2].toSorted()` is `[10, 2, 9]`, because `"10"` comes before `"2"`.
 
-### `slice`: taking an ordered subset
+### `slice`: Taking a Range
 
 `slice` returns an ordered subset of the array from an index `i` (inclusive) to an index `j` (exclusive):
 
@@ -319,11 +319,11 @@ test("slicing takes all elements for i (inclusive) to j (exclusive)",
 );
 ```
 
-Arrays contain many other useful operations. We won't document them all in this chapter!
+Arrays contain many other useful operations. This chapter does not cover them all.
 
 ## Writing Your Own Loops
 
-`map`, `filter`, `reduce`, and `find` are commonly used, but they are prescriptive. `map` always produces one output per input; `filter` always visits every element and keeps the matches; `find` always stops at the first match. While these are broadly useful, you will often need something that does not fit these operations.
+`map`, `filter`, `reduce`, and `find` are commonly used, but they are prescriptive. `map` always produces one output per input, `filter` always visits every element and keeps the matches, and `find` always stops at the first match. While these are broadly useful, you will often need something that does not fit these operations.
 
 When a computation does not match a named pattern, for example because it relates elements to one another rather than examining each one on its own, we need a general mechanism that the built-in operations are themselves made of: a **loop**. The loop we use is the `for of` statement. It runs its body once for each element of an array, in order, binding the element to a name:
 
@@ -353,7 +353,7 @@ This means the body of the `for of` loop will execute `n` times, where `n` is th
 
 </details>
 
-Like the `if` statement from the first chapter, `for of` is a statement: it produces no value; it only directs the flow of execution. This is a _new construct_ relative to CPSC 110.
+Like the `if` statement from the first chapter, `for of` is a statement. It produces no value and only directs the flow of execution. This is a _new construct_ relative to CPSC 110.
 
 <details class="tooltip link-110">
 <summary>Loops Replace Recursive Traversal</summary>
@@ -375,7 +375,7 @@ function firstAbove(day: Reading[], threshold: number): Reading | undefined {
 }
 ```
 
-The `return` inside the loop body exits the whole function the moment a match is found, so later elements are never visited. This is exactly what `find` does. Knowing how to write the loop means you can build the patterns the language does not provide.
+The `return` inside the loop body exits the whole function the moment a match is found, so later elements are never visited. This is what `find` does. Knowing how to write the loop means you can build the patterns the language does not provide.
 
 Every operation above examines elements one at a time: the function you hand to `map`, `filter`, or `find` receives a single element and nothing else. Some questions are about how elements relate to _each other_. Suppose quality control asks: did the station ever report the same temperature at two different hours?
 
@@ -419,13 +419,13 @@ test("a repeated temperature is detected",
 );
 ```
 
-Which should you use? Prefer the named operation whenever the task is exactly a transform (`map`), a selection (`filter`), a summary (`reduce`), or a first-match search (`find`). The operation tells every reader what the computation does, and it will be less error-prone than a hand-written loop.
+Which should you use? Prefer the named operation whenever the task is a transform (`map`), a selection (`filter`), a summary (`reduce`), or a first-match search (`find`). The operation tells every reader what the computation does, and it will be less error-prone than a hand-written loop.
 
 In contrast, write a loop when the computation does not fit a named pattern: when it relates elements to one another, or when one pass must answer a question no single named operation can. The named operations say _what_ they are doing. Loops are for when you must control _how_ it is done.
 
 ## Reading and Writing JSON
 
-Programs frequently send and receive data. They save it to files, send it across the network to other machines, and exchange it with programs written in entirely different languages. To do any of that, the data has to be captured in a format that is agreed on ahead of time. A commonly used format is **JSON**, short for *J*ava*S*cript *O*bject *N*otation. You have already seen some JSON files in this course with different metadata files the learning activities (e.g., `package.json` and `tsconfig.json`).
+Programs frequently send and receive data. They save it to files, send it across the network to other machines, and exchange it with programs written in other languages. To do any of that, the data has to be captured in a format that is agreed on ahead of time. A commonly used format is **JSON**, short for *J*ava*S*cript *O*bject *N*otation. You have already seen JSON in this course: the metadata files in the learning activities, such as `package.json` and `tsconfig.json`, are JSON files.
 
 JSON's syntax is almost exactly the object and array literals you have been writing. Every JSON value is one of a small, fixed set of kinds. Four of them are the primitive values you already know, written just as they are in TypeScript:
 
@@ -529,13 +529,13 @@ Two cautions follow from JSON being nothing but text. The first is that _the con
 const readings: Reading[] = JSON.parse(text);   // hoped for, not checked
 ```
 
-The compiler accepts that line and then checks every later use of `readings` against a type nobody verified. If the text came from a file somebody edited by hand, from another team's program, or from an older version of the format, the values may be nothing like `Reading`, and the compiler has no way to know. For now, work with JSON your own code produced, where the shapes are known. Data from somewhere you do not control must be checked before it is trusted; we will examine this in [Part 3](../part3/index). Reading and writing JSON _files_ is covered in lab.
+The compiler accepts that line and then checks every later use of `readings` against a type nobody verified. If the text came from a file somebody edited by hand, from another team's program, or from an older version of the format, the values may be nothing like `Reading`, and the compiler has no way to know. For now, work with JSON your own code produced, where the shapes are known. Data from somewhere you do not control must be checked before it is trusted, as [Part 3](../part3/index) describes. Reading and writing JSON _files_ is covered in lab.
 
-## On Iteration
+#### On Iteration
 
 Arrays give sequences built-in support in the language, and their operations package the traversals we used to write by hand: `map` to transform, `filter` to select, `reduce` to summarise, `find` to search, `toSorted` to order, with `for of` underneath them all for the computations that fit no named pattern.
 
-One property everything in this chapter shared: none of these operations changed `day`, our array of daily temperatures. Every `map`, `filter`, and `toSorted` produced a new array, every `reduce` produced a new value, and even our hand-written loops only read the elements they visited; the original readings were never changed. What happens when programs _do_ change existing values, and why that calls for so much care, is the subject of the next chapter.
+One property everything in this chapter shared: none of these operations changed `day`, our array of daily temperatures. Every `map`, `filter`, and `toSorted` produced a new array, every `reduce` produced a new value, and even our hand-written loops only read the elements they visited. The original readings were never changed. What happens when programs _do_ change existing values, and why that calls for so much care, is the subject of the next chapter.
 
 <details class="tooltip exercise">
   <summary>Exercise: Summarising an Order</summary>

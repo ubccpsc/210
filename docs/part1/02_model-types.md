@@ -2,7 +2,7 @@
 
 In the last chapter we used types to annotate individual values: a parameter was a `number`, a function returned a `string`, and the compiler checked that we used them consistently. These primitive types are enough when a program passes around single, unrelated values, but real information rarely arrives one value at a time.
 
-Consider a song. A song is not one value; it has its musical contents, as well as much associated metadata.
+Consider a song. A song is not one value. It has its musical contents and a lot of associated metadata.
 
 <details class="tooltip exercise">
 <summary> Exercise: What's in a song? </summary>
@@ -31,7 +31,7 @@ const courseName: string = "CPSC 210";
 const credits: number = 4;
 ```
 
-A name introduced with `const` cannot be reassigned to a different value later: `courseName` will always refer to that one string. Every value in this chapter is named with `const`; names whose values are meant to change come later, when we look at mutation.
+A name introduced with `const` cannot be reassigned to a different value later: `courseName` will always refer to that one string. Every value in this chapter is named with `const`. Names whose values are meant to change come later, when we look at mutation.
 
 <details class="tooltip ts-tips">
 <summary>Declaring Variables with <code>const</code></summary>
@@ -73,7 +73,7 @@ Note that in TypeScript, we add a type annotation that the compiler checks. Addi
 
 </details>
 
-## Modelling Information as Data
+## Modelling Data
 
 A **data definition** is a precise description of which values a type can express. As you design and interact with more software systems, you may grow to have your own process to derive these.
 
@@ -97,7 +97,7 @@ In CPSC 210, we won't grade you on following the systematic process described ab
 
 </details>
 
-## Example: Traffic Lights
+### Traffic Lights
 
 Consider the natural language description of traffic light data:
 
@@ -107,10 +107,10 @@ Let's apply our systematic process. One design is as follows:
 
 1. _Entities:_ the signal at an intersection.
 2. _Cases:_ it shows one of three colours: red, yellow, or green.
-3. _Information per case:_ none; a colour is a bare label that carries nothing beyond itself.
+3. _Information per case:_ none. A colour is a bare label that carries nothing beyond itself.
 4. _Translate:_ a value that is one of a fixed set of labels is exactly a _union_ of string literals.
 5. _Concrete examples:_ one valid colour, plus an invalid one to confirm the type is enforced.
-6. _Generalisation:_ none; a small enumeration stands on its own.
+6. _Generalisation:_ none. A small enumeration stands on its own.
 
 In this case, in step 4, we translate the data definition into the following typescript Type:
 
@@ -145,7 +145,7 @@ type HttpStatus = 200 | 301 | 404 | 500;
 
 </details>
 
-## Example: Shuffle Modes
+### Shuffle Modes
 
 > As a listener, I want to set playback to one of off, on, or repeat-one, so that I can control how my music is ordered.
 
@@ -165,7 +165,7 @@ const mode2: ShuffleMode = "repeat-album"; //error
 6. _Generalisation:_ nothing to generalize, all possible cases are expressed.
 
 
-## Example: Songs
+### Songs
 
 Let's move on to applying our systematic process to the song example we started with:
 
@@ -237,15 +237,15 @@ defines a value `v` of type `TypeName`, assigning each `prop_x` to the value got
 
 The TypeScript type checker will check that: (1) each `prop_x` is defined in `TypeName`'s definition, and (2) each `<expression-x>` is of the type that `prop_x` is declared to have in `TypeName`'s definition.
 
-Note a syntax difference between object values and object types; property definitions in object types are separated with semicolons, while they are separated with commas for object values.
+Note a syntax difference between object values and object types. In object types, properties are separated with semicolons, and in object values, with commas.
 
 </details>
 
 6. _Generalisation:_ A song is a single fixed shape, so there is nothing to generalise.
 
-### Reading an Object's Properties
+#### Reading an Object's Properties
 
-Creating an object stores its data; reading that data back out uses **dot notation**. To do this, write the object's name, followed by `.`, followed by a property name. This evaluates to the value held under that property:
+Creating an object stores its data, and reading that data back out uses **dot notation**. To do this, write the object's name, followed by `.`, followed by a property name. This evaluates to the value held under that property:
 
 ```typescript
 song1.title;           // evaluates to "Song A"
@@ -284,7 +284,7 @@ TypeScript uses the three notations for these tasks: the object type is the defi
 
 </details>
 
-## Example: Playlists
+### Playlists
 
 This example builds on the `Song` type from above:
 
@@ -294,7 +294,7 @@ This example builds on the `Song` type from above:
 
 2. _Cases:_ A playlist has two distinct cases: it is empty or non-empty.
 
-3. _Information per Case:_ The empty case needs no information; knowing that it is empty is the whole story. The non-empty case needs two things: its first song, and the rest of the playlist after that song. That last piece, the rest, is itself a playlist, so this definition is _recursive_.
+3. _Information per Case:_ The empty case needs no information beyond being empty. The non-empty case needs two things: its first song, and the rest of the playlist after that song. That last piece, the rest, is itself a playlist, so this definition is _recursive_.
 
 4. _Translate:_
 A playlist has cases, so we model it as a **tagged union**: a union of one type per case, where each case carries a shared **discriminator** property (here `kind`) set to a different constant. Checking the discriminator tells both us and the compiler which case we are in, and therefore which properties are available.
@@ -313,7 +313,7 @@ type NonEmptyPlaylist = {
 };
 ```
 
-`EmptyPlaylist` carries no song data; `NonEmptyPlaylist` carries the first `Song` and the rest of the playlist. The `rest` property has type `Playlist` again, and that self-reference is what lets one type describe a playlist of any length.
+`EmptyPlaylist` carries no song data, and `NonEmptyPlaylist` carries the first `Song` and the rest of the playlist. The `rest` property has type `Playlist` again, and that self-reference is what lets one type describe a playlist of any length.
 
 The self-reference makes a playlist a chain: each `songs` node holds one `Song` and points at the rest, until the chain ends in `empty`.
 
@@ -372,7 +372,7 @@ _Object-oriented programming_ offers a solution to this inelegance: we will get 
 </details>
 -->
 
-5. _Concrete Examples:_ With the type written, we build concrete examples from the songs we already have. If they are easy to construct, the design fits; if they are awkward, the model is probably too complicated. These examples also become the data our tests run against later.
+5. _Concrete Examples:_ With the type written, we build concrete examples from the songs we already have. If they are easy to construct, the design fits. If they are awkward, the model is probably too complicated. These examples also become the data our tests run against later.
 
 
 ```typescript
@@ -391,7 +391,7 @@ const twoTracks: Playlist = {
 };
 ```
 
-Because an object is a value like any other, `oneTrack` reuses the `empty` object we already named rather than building a fresh one; only the new node in `twoTracks` has to be written out.
+Because an object is a value like any other, `oneTrack` reuses the `empty` object we already named rather than building a new one, so only the new node in `twoTracks` has to be written out.
 
 6. _Generalisation:_ A playlist is one instance of a more general shape: a list of any element type. If a program needed lists of several different things, we would write that shape once and let it take the element type as a _type parameter_, written in angle brackets. A type parameter lets one definition serve many content types:
 
@@ -438,13 +438,13 @@ Type 'string' is not assignable to type 'Song'.
 
 </details>
 
-Use generics only when you see real duplication in your code; until then they add abstraction without benefit.
+Use generics only when you see real duplication in your code. Until then they add abstraction without benefit.
 
-## Functions Follow Data Shapes
+## Functions Follow Data
 
 With the data defined, writing functions over it is far less open-ended than it first appears, because the structure of the code will  mirror the structure of the data.
 
-The data definition provides a template: if the data has distinct cases, the function branches on the case; if the data is recursive, the function is recursive. This is why the modelling work pays off, as a precise data definition has already done much of the design of the functions that consume it.
+The data definition provides a template. If the data has distinct cases, the function branches on the case, and if the data is recursive, the function is recursive. A precise data definition has already done much of the design of the functions that consume it.
 
 <details class="tooltip link-110">
   <summary>Function Templates</summary>
@@ -497,7 +497,7 @@ test("a boolean is not a string",
 
 We do this because it is almost always the case that when we want a 2, we want the number 2, not the string "2", or we would have used "2".
 
-Some examples of why this can be confusing with non-strict equality (`==`) can be seen below. These unexpected values are never visible statically; they only surface when you run the program, which often leads to surprises. Because of this we will encourage you to always use `===` in this course.
+Some examples of why this can be confusing with non-strict equality (`==`) can be seen below. These results are not visible statically. They only appear when you run the program, which often leads to surprises. Because of this we will encourage you to always use `===` in this course.
 
 ```typescript
 test("a number loosely equals itself", checkExpect(() => 1 == 1, true));
@@ -540,7 +540,7 @@ function firstTitle(p: Playlist): string  {
 }
 ```
 
-### Recurring over the Structure
+### Recursing on the Structure
 
 A recursive data definition leads to a recursive function. The function handles the base case directly (an empty playlist) and the recursive case by combining the first element with the result of calling itself on the rest. Because every value ends in the empty case, the recursion is guaranteed to terminate.
 
@@ -601,7 +601,7 @@ function sum(tree: BinaryTree): number {
 
 ## What the Types Can Catch
 
-Modelling the data this way is not just tidy; it changes what can go wrong. Because the types describe the exact shape of the information, the compiler rejects code that does not respect that shape, and it does so before the program ever runs.
+Modelling the data this way changes what can go wrong. Because the types describe the exact shape of the information, the compiler rejects code that does not respect that shape, and it does so before the program ever runs.
 
 
 <!---- CL: dunno if you want to leave these as deep dives or just put them inline --->
@@ -652,11 +652,11 @@ test("a two-track playlist totals both durations",
 );
 ```
 
-These run the functions and confirm they produce the expected values. The compiler guarantees the shapes line up; `checkExpect` guarantees the answers are right.
+These run the functions and confirm they produce the expected values. The compiler checks that the shapes line up, and `checkExpect` checks that the answers are right.
 
 <!---- </details>--->
 
-## The Centrality of Abstraction
+#### The Centrality of Abstraction
 
 A precise data definition is the foundation everything else rests on. It catches mistakes early, it mirrors the structure of the problem, and it drives the structure of the code that consumes it: once the data is modelled, the functions largely follow its shape. In this chapter we followed one process across a sequence of examples, from a simple enumeration through a song to a recursive playlist, and then wrote functions whose shape follows the data's shape.
 

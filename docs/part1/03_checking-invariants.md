@@ -1,6 +1,6 @@
 # Checking Invariants
 
-In [Chapter 1](./01_new-language) we introduced the distinction between the _static_ and _dynamic_ views of a program. The compiler checks the static view: it reads your source code, analyses your types, and flags inconsistencies before the program runs. But a program that passes the type checker can still produce the wrong results. Types tell you what _kind_ of value a function returns; they do not tell you whether that value is _correct_.
+In [Chapter 1](./01_new-language) we introduced the distinction between the _static_ and _dynamic_ views of a program. The compiler checks the static view: it reads your source code, analyses your types, and flags inconsistencies before the program runs. But a program that passes the type checker can still produce the wrong results. Types tell you what _kind_ of value a function returns, but not whether that value is _correct_.
 
 The properties a correct program must maintain beyond its types are called **invariants**. This chapter is about working with them: what an invariant is, how to identify the invariants in a problem, how to record them in a function's documentation so they can be detected later, and how to test whether the invariant holds.
 
@@ -37,9 +37,9 @@ Invariants are everywhere once you look for them: durations are positive, percen
 
 <details class="tooltip deep-dive">
 <summary>Course Preview: Could We Statically Check Invariants?</summary>
-In the previous chapters, we saw how types allowed us to bring enforcement that in CPSC 110 we had to trust. In CPSC 210, invariants capture what we cannot check solely through types---unfortunately, those won't be statically enforceable. This is where we bring in dynamic checking of invariants, through testing.
+The previous chapters showed how types enforce what CPSC 110 could only trust. Invariants capture what types alone cannot check, and in this course they cannot be enforced statically. Instead, we check them dynamically, through testing.
 
-But some of the invariants we have aren't too complicated: if we can enforce that `x` is a `number` statically, why can we not enforce that `x > 10` statically? We won't cover that in CPSC 210, but if this question is interesting to you, you may be interesting in learning more about the fields of _formal verification_ (CPSC 513, 539S) and _programming languages_ (CPSC 311, 411, 509, 511) in the future.
+But some of the invariants we have aren't too complicated: if we can enforce that `x` is a `number` statically, why can we not enforce that `x > 10` statically? We won't cover that in CPSC 210, but if this question is interesting to you, you may be interested in learning more about the fields of _formal verification_ (CPSC 513, 539S) and _programming languages_ (CPSC 311, 411, 509, 511) in the future.
 </details>
 
 ## Identifying Invariants
@@ -48,7 +48,7 @@ At the function level, invariants attach in two places: to a function's inputs a
 
 > As the campus library, I want late fees computed from how many days late a book is returned, with a short grace period and a capped maximum, so that patrons are charged fairly and predictably.
 
-Concretely, the library's late-fee policy is: a book returned up to 2 days late incurs no fee; after that grace period, the fee is $0.50 for each additional day; and the total fee never exceeds $10.
+Concretely, the library's late-fee policy is that a book returned up to 2 days late incurs no fee. After that grace period, the fee is $0.50 for each additional day, and the total fee never exceeds $10.
 
 A function computing the fee will have this signature:
 
@@ -65,7 +65,7 @@ To identify these in your own functions, you need to examine the _gap_ between t
 - Identifying **preconditions**: For each parameter, ask: _of all the values this type allows, which are meaningful?_ Any restriction you state is a precondition. Look for ranges, wholeness, non-empty strings, and relationships between parameters (for example, `min <= max`).
 - Identifying **postconditions**: For the result, ask: _what can the caller rely on beyond the return type?_ Any guarantee you state is a postcondition.
 
-A useful invariant statement has three qualities. It is _precise_: terms must be backed by definitions; words like "valid" or "sensible" without qualification are not valuable. It is _testable_: you can programmatically validate whether the invariant is true. And it is _operational_: it is strong enough that an implementation can rely on it.
+A useful invariant statement has three qualities. It is _precise_: terms must be backed by definitions, and words like "valid" or "sensible" without qualification are not useful. It is _testable_: you can programmatically validate whether the invariant is true. And it is _operational_: it is strong enough that an implementation can rely on it.
 
 For example, consider the invariant stated as: `daysLate is reasonable`. This is not precise, testable, or operational: it cannot be checked or relied upon.
 
@@ -118,12 +118,12 @@ For function doc comments in this course, we'll use syntax that's consistent wit
 
 The `Precondition:` line restricts `daysLate` to the meaningful subset of `number`, and the clause "the total fee never exceeds $10" is a postcondition on the result.
 
-Together, a function's documented preconditions and postconditions are often called its **contract**: the caller promises the preconditions, and the function promises the postconditions in return. Writing the contract down is not bureaucracy; it is what makes the invariants detectable. The doc comment is where a test author will look to decide what to check, and as we will see below, every clause of a well-written contract becomes a test.
+Together, a function's documented preconditions and postconditions are often called its **contract**: the caller promises the preconditions, and the function promises the postconditions in return. Writing the contract down is what makes the invariants detectable. The doc comment is where a test author will look to decide what to check, and as we will see below, every clause of a well-written contract becomes a test.
 
 <details class="tooltip link-110">
 <summary>Invariants</summary>
 
-You wrote invariants in CPSC 110 too; they lived in your data definitions and signatures. A signature using `Natural` instead of `Number` was a precondition (whole and non-negative): the `daysLate` precondition above is exactly `Natural`. Likewise, an interval data definition like:
+You wrote invariants in CPSC 110 too, in your data definitions and signatures. A signature using `Natural` instead of `Number` was a precondition (whole and non-negative): the `daysLate` precondition above is exactly `Natural`. Likewise, an interval data definition like:
 
 ```racket
 ; Fee is Number[0, 10]
@@ -134,11 +134,11 @@ was an invariant statement: the type is Number, and the meaningful subset is 0 t
 
 </details>
 
-## Checking Invariants With Tests
+## Testing Invariants
 
 Tests are commonly kept separate from the code they validate. In all of the code we look at in this course, in line with common best practice, production code is stored in the `src/` directory and all tests are stored in the `test/` directory. The `test/` directory can contain any number of test files, often in 1:1 correspondence with the files being tested in `src/`.
 
-Within each test file is a number of individual test cases. Each test case has a name and a body. The name describes what the test is checking; the body is a single **assertion**. The `checkExpect` call we have been using in this course is an example of an **assertion**.
+Within each test file is a number of individual test cases. Each test case has a name and a body. The name describes what the test is checking, and the body is a single **assertion**. The `checkExpect` call we have been using in this course is an example of an **assertion**.
 
 In the contract above, the late fee grace period is two days long. A concrete test case that checks this, by ensuring that `lateFee(2)` returns `0`, looks like:
 
@@ -164,7 +164,7 @@ ISL used `check-expect` as a standalone expression at the top level of a file. T
 <details class="tooltip ts-tips">
 <summary>Running Tests</summary>
 
-`test` and `checkExpect` are provided by the course toolkit; each test file imports them at the top of the file with:
+`test` and `checkExpect` are provided by the course toolkit, and each test file imports them at the top of the file with:
 ```typescript
 import {
     test,
@@ -174,14 +174,14 @@ import {
 
 To run the tests, you can either open the testing feature within your IDE (we will demo this in class), or open the terminal view within your IDE (also an in-class demo) and execute `pnpm test`. The **terminal** is a text-based interface where you type commands to direct your computer to perform tasks for you, where the input and output are textual.
 
-When executed by either your IDE or your terminal command, the test framework executes every test case it can find in the `test/` directory. Passing test cases are printed in green; failing test cases are printed in red, along with what was expected and what was returned.
+When executed by either your IDE or your terminal command, the test framework executes every test case it can find in the `test/` directory. Passing test cases are printed in green, and failing test cases are printed in red, along with what was expected and what was returned.
 </details>
 
 ## The Testing Process
 
 So far we have treated tests as something you write for code that already exists. When you are learning, it is strongly recommended that you write the tests _first_. Writing tests first forces you to think about the expected behaviours of the **code under test**, that is the code your test case is validating, before you spend time implementing it.
 
-Having a precise set of input/output pairs is extremely helpful when you are implementing the code. Before writing the implementation you can execute your tests to confirm they fail; once the implementation has been correctly created, the tests should pass. Confirming that a test fails first is what makes its eventual pass a meaningful signal. A test that passes even when you haven't implemented the function is meaningless.
+A precise set of input/output pairs is very helpful when implementing the code. Before writing the implementation, run your tests to confirm they fail. Once the implementation has been correctly created, the tests should pass. Confirming that a test fails first is what makes its eventual pass a meaningful signal. A test that passes even when you haven't implemented the function is meaningless.
 
 For `lateFee` we are already in a position to do this. We have not written a line of the implementation, but the contract we documented above gives us everything we need: each clause from the function documentation becomes a test.
 
@@ -209,7 +209,7 @@ test("fee never exceeds the maximum",
 
 The precondition also guides us towards situations that may not result in a valid output. Since the precondition says `daysLate >= 0`, what happens if we pass `-5` is undefined: the caller has broken their half of the bargain, and the function promises nothing in return. We return to what a function should do about inputs like this at the end of this chapter.
 
-To run these tests, `lateFee` must at least exist; otherwise the compiler will refuse to execute the program at all. So we begin with a **stub**: a function with the right signature that returns a clearly wrong value.
+To run these tests, `lateFee` must at least exist, or the compiler will refuse to execute the program at all. So we begin with a **stub**: a function with the right signature that returns a clearly wrong value.
 
 ```typescript
 function lateFee(daysLate: number): number {
@@ -294,7 +294,7 @@ All five tests now pass:
 ✓ fee never exceeds the maximum
 ```
 
-Notice what did _not_ change: the tests. They were correct all along, because they were written from the specification, and so the requirement our implementation forgot had nowhere to hide. If we had written our tests _after_ the implementation, by reading our own code and checking that it does what it appears to do, we would probably not have thought to test the maximum: the first prototype of `lateFee` contained  no hint that a maximum should exist. Tests written first keep the specification in charge; tests written after tend to mirror the code, mistakes included.
+Notice what did _not_ change: the tests. They were correct all along, because they were written from the specification, and so the requirement our implementation forgot had nowhere to hide. If we had written our tests _after_ the implementation, by reading our own code and checking that it does what it appears to do, we would probably not have thought to test the maximum: the first prototype of `lateFee` contained no hint that a maximum should exist. Tests written first follow the specification, while tests written afterwards tend to mirror the code, mistakes included.
 
 
 <details class="tooltip ts-tips">
@@ -306,7 +306,7 @@ Notice what did _not_ change: the tests. They were correct all along, because th
 <details class="tooltip deep-dive">
 <summary>Tests as Executable Specifications</summary>
 
-A test suite written before the implementation acts as an _executable specification_: a precise, runnable description of the intended behaviour. This is more valuable than a written description alone, because the computer can check whether your implementation matches it, every time you run the suite.
+A test suite written before the implementation acts as an _executable specification_: a precise, runnable description of the intended behaviour. This is more useful than a written description alone, because the computer can check whether your implementation matches it, every time you run the suite.
 </details>
 
 <!--
@@ -319,11 +319,11 @@ The full process, then:
 5. Repeat until the suite passes.
 -->
 
-## Deriving Tests from the Specification
+## Deriving Tests
 
 We wrote the `lateFee` suite by instinct: read the specification, turn each clause into a test. That instinct served us well, but instinct alone does not tell you when a suite is _complete enough_. Two systematic techniques, **equivalence class partitioning** and **boundary value analysis**, turn that instinct into a method.
 
-### Equivalence Class Partitioning
+### Equivalence Classes
 
 The most direct way to choose test inputs is to divide the input space into **equivalence classes**: groups of inputs that the specification says should be handled the same way. You then choose at least one **representative**  from each class.
 
@@ -335,18 +335,18 @@ The `lateFee` specification divides its input into three classes:
 | Accruing | 3 to 21 | Fee grows by $0.50 per day |
 | Capped | 22 and up | Fee is exactly $10 |
 
-Note where the table begins: at 0, with no negative inputs anywhere. We got starting at 0 directly from `daysLate >= 0` in the precondition. The invariant we wrote in the doc comment defines the input space the suite must cover; without it, we would not know whether `lateFee(-5)` was a missing class or a meaningless input.
+Note where the table begins: at 0, with no negative inputs anywhere. We got starting at 0 directly from `daysLate >= 0` in the precondition. The invariant we wrote in the doc comment defines the input space the suite must cover. Without it, we would not know whether `lateFee(-5)` was a missing class or a meaningless input.
 
 Look back at the suite we wrote: it contains a representative from each class: `lateFee(0)` and `lateFee(2)` for the grace period, `lateFee(3)` and `lateFee(12)` for accrual, `lateFee(30)` for the cap. This suite caught our missing-maximum fault because it had a representative from the capped class, and that is precisely the class the implementation forgot.
 
-Within a class, one representative is as informative as another. `lateFee(12)` and `lateFee(15)` both exercise the accruing class; testing both adds almost no confidence beyond testing one. Counting tests is therefore a poor measure of a suite: a suite of `lateFee(5)`, `lateFee(8)`, and `lateFee(15)` has three checks but covers only one class, and would have passed our buggy, cap-free implementation without complaint. What matters is covering the _classes_, not accumulating checks.
+Within a class, one representative is as informative as another. `lateFee(12)` and `lateFee(15)` both exercise the accruing class, so testing both adds almost no confidence beyond testing one. Counting tests is therefore a poor measure of a suite: a suite of `lateFee(5)`, `lateFee(8)`, and `lateFee(15)` has three checks but covers only one class, and would have passed our buggy, cap-free implementation without complaint.
 
 <details class="tooltip deep-dive">
 <summary>Equivalence Classes are Only Derived From the Specification</summary>
 
 In [Chapter 1](./01_new-language), we defined a **branch** as the side of an if-statement that was taken when executed on an input. A **path** is the sequence of branches that are taken when a program executes on a given input.
 
-Two inputs belong to the same class when the _specification_ says they should behave the same way, not when they happen to take the same path through the code you wrote. In our buggy implementation, `lateFee(12)` and `lateFee(30)` took the same path through the code; classes derived from that implementation would have merged them, and the fault would have survived. Classes derived from the specification kept them apart, which is exactly why the fault was caught.
+Two inputs belong to the same class when the _specification_ says they should behave the same way, not when they happen to take the same path through the code you wrote. In our buggy implementation, `lateFee(12)` and `lateFee(30)` took the same path through the code, so classes derived from that implementation would have merged them, and the fault would have survived. Classes derived from the specification kept them apart, which is why the fault was caught.
 </details>
 
 ### Boundary Value Analysis
@@ -396,9 +396,9 @@ grace       accruing ( $0.50 / day )             capped ( $10 )
 ```
 <!-- caption="The three equivalence classes for daysLate." -->
 
-## Successful and Erroneous Outcomes
+## Erroneous Outcomes
 
-Every call to a function has one of two outcomes. A **successful outcome** is the one the function exists to produce. An **erroneous outcome** is any other result. Think about a bank account: a customer trying to withdraw more than their balance is not unusual at all; it is a normal interaction a robust design must anticipate. An erroneous outcome is not a bug. This foreseeable result belongs in the function's contract, so the caller knows it can happen and knows exactly what they will receive when it does. Because it is part of the contract, it is tested like every other clause.
+Every call to a function has one of two outcomes. A **successful outcome** is the one the function exists to produce. An **erroneous outcome** is any other result. Think about a bank account. A customer trying to withdraw more than their balance is not unusual, and the design must anticipate it. An erroneous outcome like this is not a bug. It is a foreseeable result that belongs in the function's contract, so the caller knows it can happen and what they will receive when it does. Because it is part of the contract, it is tested like every other clause.
 
 To see both outcomes in one place, we extend the library example. The library allows each book loan to be renewed at most twice:
 
@@ -410,7 +410,7 @@ type Loan = {
 };
 ```
 
-Renewing a loan that still has renewals left is the successful outcome. Trying to renew a loan that has no renewals remaining is an erroneous outcome. But it is not rare, the contract should say exactly what the caller gets back when this occurs.
+Renewing a loan that still has renewals left is the successful outcome. Trying to renew a loan that has no renewals remaining is an erroneous outcome. It happens often, so the contract should say exactly what the caller gets back.
 
 How do we encode an erroneous outcome? We could return `null`: but `null` is not descriptive, and `null` is an overloaded concept in many languages. We could return a special value, say a `Loan` whose `renewalsRemaining` is `-1`. But a special value is easy to mistake for a real one: a caller who forgets to check for `-1` carries on computing with a loan that does not exist, and nothing in the types warns them.
 
@@ -420,7 +420,7 @@ So that we can be clear about the outcome, and rely on the type checker to check
 type Result<T, E> = { ok: true, value: T } | { ok: false, error: E };
 ```
 
-`Result` is generic over two type parameters: `T` is the type of a successful value, and `E` is the type of the error. This is the same tagged-union idea from the previous chapter, with `ok` as the discriminator: a caller checks `ok` to learn whether it received a `value` or an `error`. A successful outcome is an `ok: true` result carrying the value; an erroneous outcome is an `ok: false` result carrying an explanation. Because the function's return type is `Result<Loan, string>` rather than `Loan`, the compiler will not let a caller use the `value` without first checking `ok`, so the erroneous outcome cannot be overlooked by accident.
+`Result` is generic over two type parameters: `T` is the type of a successful value, and `E` is the type of the error. This is the same tagged-union idea from the previous chapter, with `ok` as the discriminator: a caller checks `ok` to learn whether it received a `value` or an `error`. A successful outcome is an `ok: true` result carrying the value, and an erroneous outcome is an `ok: false` result carrying an explanation. Because the function's return type is `Result<Loan, string>` rather than `Loan`, the compiler will not let a caller use the `value` without first checking `ok`, so the erroneous outcome cannot be overlooked by accident.
 
 ```typescript
 /**
@@ -479,13 +479,13 @@ The values each check needs are named above the tests rather than inside them, b
 `checkExpect` is a higher-order function, so called because it takes a function as an argument. You've seen this before in CPSC 110, notably in `map`, `filter`, and `fold`.
 </details>
 
-A refused renewal is not a malfunction; it is a specified result. The second test confirms that `renew` produces the result the contract specifies. There is nothing special about testing an erroneous outcome: if the contract describes the outcome, check the outcome.
+A refused renewal is not a malfunction but a specified result. The second test confirms that `renew` produces the result the contract specifies. There is nothing special about testing an erroneous outcome: if the contract describes the outcome, check the outcome.
 
 ### Precondition Violations
 
 What about a call that breaks the precondition: `renew` on a `Loan` whose `renewalsRemaining` is `-1`, or `lateFee(-5)`? These are neither successful nor erroneous outcomes, because the contract says nothing about them. The caller has broken their half of the bargain, and the function promises nothing in return. Our `lateFee` returns `1.75` for `lateFee(5.5)`, a number with no meaning under the policy, and this is not a defect in `lateFee`: `5.5` was never a permitted input. There is nothing to test, because there is no specified behaviour to test against.
 
-This is why the choice between a precondition and an erroneous outcome is a design decision. A precondition keeps a function simple, and is appropriate when every caller is code you control and can trust to respect the restriction. An erroneous outcome costs a check and a `Result`, and is appropriate when callers cannot be trusted to respect the restriction. This is especially important when a value arrives from somewhere you cannot trust: a user, a file, a network rather, or another system. In that case the restriction belongs in the contract: the function checks the input and returns `ok: false`, so the caller receives a clear result instead of a meaningless one. Whichever you choose, write it down: a restriction that appears in neither the precondition nor the postcondition protects no one.
+This is why the choice between a precondition and an erroneous outcome is a design decision. A precondition keeps a function simple, and is appropriate when every caller is code you control and can trust to respect the restriction. An erroneous outcome costs a check and a `Result`, and is appropriate when callers cannot be trusted to respect the restriction. This is especially important when a value arrives from somewhere you cannot trust: a user, a file, a network, or another system. In that case the restriction belongs in the contract: the function checks the input and returns `ok: false`, so the caller receives a clear result instead of a meaningless one. Whichever you choose, write it down: a restriction that appears in neither the precondition nor the postcondition protects no one.
 
 <details class="tooltip deep-dive">
 <summary>Failing with User-Specified Inputs: Give More Detail</summary>
@@ -494,13 +494,13 @@ Functions that take _user-specified input_ should almost always report bad input
 </details>
 
 
-## Triangulating Quality: Type Checking and Testing
+#### Triangulating Quality: Type Checking and Testing
 
-Types give us structure, but tests give us confidence. The type checker and the test suite operate at different times. The type checker works _statically_ on the source code, ruling out whole categories of invalid calls before the program runs. Tests work _dynamically_, checking specific behaviours by executing the function. They are complementary approaches: a program that passes every type check can still return the wrong value for a given input. But, a program that passes all its tests may still fail on an input the test suite did not evaluate. The combination is what gives confidence: types narrow the space of programs that can even be written, and tests validate that the program you wrote does what you intended.
+The type checker and the test suite operate at different times. The type checker works _statically_ on the source code, ruling out whole categories of invalid calls before the program runs. Tests work _dynamically_, checking specific behaviours by executing the function. They are complementary approaches: a program that passes every type check can still return the wrong value for a given input. And a program that passes all its tests may still fail on an input the test suite did not evaluate. The combination is what gives confidence: types narrow the space of programs that can even be written, and tests validate that the program you wrote does what you intended.
 
 Documented invariants bridge between the two. The preconditions and postconditions in a function's doc comment record exactly the part of the specification the compiler cannot see, and they are exactly what the tests should check.
 
-An invariant that is written down can be turned into a test suite; an invariant that lives only in someone's head cannot be checked by anything.
+An invariant that is written down can be turned into a test suite, but one that lives only in someone's head cannot be checked by anything.
 
 
 
@@ -511,7 +511,7 @@ Practise this chapter's concepts on a new problem: write a contract, derive test
 
 > As a parking garage, I want to compute the parking fee by counting how many whole hours a car is parked, with a free first hour and a daily maximum, so that drivers are charged fairly and predictably.
 
-The policy states that parking is free for the first hour; after that, each additional hour costs $4; and the total never exceeds $24. The function will have the signature <span class="hint">`parkingFee(hours: number): number`</span>.
+Parking is free for the first hour. After that, each additional hour costs $4, and the total never exceeds $24. The function will have the signature <span class="hint">`parkingFee(hours: number): number`</span>.
 
 1. Write the contract. Document `parkingFee` with a doc comment giving its purpose, a precondition (<span class="hint">`hours` is a whole number and `hours >= 0`</span>), a postcondition (<span class="hint">the fee is between 0 and 24</span>), and `@param`/`@returns` lines.
 2. Derive the tests first. Use equivalence class partitioning to find the input classes the policy treats alike, and pick one representative of each. Then use boundary value analysis to add the edges: where the free hour ends, and where the cap is reached.

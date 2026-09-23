@@ -4,7 +4,7 @@ The previous chapter described invariants in documentation and tests. Tests can 
 
 We will do this using only programming constructs you know from CPSC 110. The result is not standard TypeScript, and you may find it unwieldy. That is part of the point: it motivates the object-oriented programming in [Part 2](../part2/index).
 
-## Initial Design with No Enforcement
+#### A Bank Account with No Enforcement
 
 We will build on the `BankAccount` design from the previous lecture activity. The design has a data type with an invariant, and some functions:
 
@@ -54,7 +54,7 @@ For an invariant to hold for the life of a program, two things must be true:
 
 If both are true, then every value that ever exists is valid: the first one was checked, and every subsequent value came from an operation that maintained the invariant. In the initial design, anyone could create an account by writing an object literal, so nothing ensures the invariant is _established_.
 
-## Controlling Creation with a Constructor Function
+## Constructor Functions
 
 To ensure the invariant is established, we write a function whose only job is to create valid accounts:
 
@@ -86,11 +86,11 @@ test("accounts cannot be created with a negative balance",
 );
 ```
 
-Accounts created with `makeAccount` satisfy the invariant. Unfortunately, the protection is only a convention. Nothing _forces_ a client to call `makeAccount`: the literal `{ balance: -100 }` still type checks. The same is true of `deposit` and `withdraw`; a client can skip them and write `{ balance: account.balance - 200 }`. The constructor function and the operations exist alongside data that remains open to everyone.
+Accounts created with `makeAccount` satisfy the invariant. Unfortunately, the protection is only a convention. Nothing _forces_ a client to call `makeAccount`: the literal `{ balance: -100 }` still type checks. The same is true of `deposit` and `withdraw`, since a client can skip them and write `{ balance: account.balance - 200 }`. The constructor function and the operations exist alongside data that remains open to everyone.
 
 The invariant is safe only if every engineer chooses to go through the right functions. This is the kind of _programmer discipline_ we have been trying to avoid relying on.
 
-## True Safety by Binding Operations to the Data
+## Binding Operations to Data
 
 The main problem is that the data is reachable by anyone, so the operations can be bypassed. To solve it, the data must be reachable only through operations that maintain the invariant. To do this, we need a new language feature: an object property that holds a function. We can define a `BankAccount` type whose properties are operations rather than data:
 
@@ -163,6 +163,8 @@ Removing the `balance` field solves the preservation problem: nobody outside can
 ## Hiding State with a Closure
 
 The initial balance arrives as the constructor function's parameter, and we can keep it there using a concept you've seen in CPSC 110. A function created inside another function keeps access to the enclosing function's parameters and definitions, even after the enclosing function has returned. A function that carries context like this is called a **closure**.
+
+### A Clicker Counter
 
 To (re-)introduce closures, we'll consider a problem simpler than the bank account:
 
@@ -256,7 +258,7 @@ export function makeCounter(count: number): Result<Counter, string> {
 <details class="tooltip ts-tips">
 <summary>The <code>export</code> Keyword</summary>
 
-The `export` in front of `makeCounter` marks it as available to code in other files; definitions without it, like `MAX_CAPACITY`, stay private to the file that contains them. Choosing what a file exports is another way to control what it exposes to clients.
+The `export` in front of `makeCounter` makes it available to code in other files, and definitions without it, like `MAX_CAPACITY`, stay private to the file that contains them. Choosing what a file exports is another way to control what it exposes to clients.
 
 </details>
 
@@ -265,7 +267,7 @@ This code both _establishes_ and _preserves_ the invariant. The constructor func
 <details class="tooltip deep-dive">
 <summary>Every Operation Returns a New Value</summary>
 
-`increment` does not change the account it was called on; it returns a new counter whose count is higher. This might seem indirect, but it is the only way we have to protect the counter from being altered. This is also the way every program in CPSC 110 worked.
+`increment` does not change the counter it was called on. It returns a new counter whose count is higher. This might seem indirect, but it is the only way we have to protect the counter from being altered. This is also the way every program in CPSC 110 worked.
 
 </details>
 
@@ -293,7 +295,7 @@ test("the counter refuses to count past capacity",
 <details class="tooltip ts-tips">
 <summary><code>assertOk</code></summary>
 
-The setup above needs the `Counter` inside each `Result`. The toolkit's `assertOk` takes a `Result` and returns its `value` when `ok` is `true`; if the `Result` is `ok: false`, the test fails and reports the error the `Result` carried. It lets a test indicate hat the step must succeed, and the test is only meaningful if it does. 
+The setup above needs the `Counter` inside each `Result`. The toolkit's `assertOk` takes a `Result` and returns its `value` when `ok` is `true`. If the `Result` is `ok: false`, the test fails and reports the error the `Result` carried. It lets a test state that a step must succeed, since the test is only meaningful if it does. 
 
 </details>
 
@@ -354,7 +356,7 @@ If you could tell TypeScript that `n` can only be changed by certain functions, 
 </details>
 
 
-## Using Closures to Protect BankAccount
+### Protecting `BankAccount`
 
 Let's now use closures to take advantage of removing the `balance` field (outsiders can't access it) while removing its disadvantage (operations can't access it). We create the three operations inside `makeAccount`, where `balance` is in scope, so each closes over it:
 
@@ -404,7 +406,7 @@ export function makeAccount(balance: number): Result<BankAccount, string> {
 
 In our earlier designs, `deposit` and `withdraw` took the account as a parameter. These versions take none, because the operations know their balance: it is the `balance` of the `makeAccount` call that created it. Every call to `makeAccount` produces a fresh `balance` and three fresh functions closed over it, so two accounts never share state.
 
-On the successful path, `deposit` and `withdraw` do not build the new account, they call `makeAccount` again with the new balance. Every account that ever exists in the program, including every intermediate state produced by an operation, has passed through `makeAccount`. So the invariant is checked at creation and checked again on every change. A bad amount, which is an erroneous outcome, would be refused before any new account is requested.
+On the successful path, `deposit` and `withdraw` do not build the new account themselves. They call `makeAccount` again with the new balance. Every account that ever exists in the program, including every intermediate state produced by an operation, has passed through `makeAccount`. So the invariant is checked at creation and checked again on every change. A bad amount, which is an erroneous outcome, would be refused before any new account is requested.
 
 The structural change ensures that the invariant is _enforced by the programming language_ rather than by _programmer discipline_. There is no longer a `balance` property anywhere in the program for a client to read or forge. The only access to the balance is `getBalance`, and the only way to produce a new state is through `deposit` and `withdraw`. The type checker now rejects `const ba: BankAccount = { balance: -100 }`. Here's an example use of our new `BankAccount` type:
 
@@ -457,7 +459,7 @@ Unfortunately, a lot of real-world code _doesn't_ manage to enforce such invaria
 </details>
 
 
-## Protecting Invariants Drives Design
+#### Protecting Invariants Drives Design
 
 In this chapter, the invariant drove the design at every step:
 

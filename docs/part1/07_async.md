@@ -24,11 +24,11 @@ Touching a disk or a network is not a little slower than computing, it is _milli
 
 A call that waits like this is called **blocking**. A blocked function does not return until the slow work finishes, and the program makes no progress of any kind while waiting. For a program that has nothing else to do, blocking is just a waste of resources. For most real programs though it is more than wasteful because a program frozen for the duration of a network request cannot respond to its user, accept another request, or get any other work done.
 
-## One Thread at a Time
+### One Thread at a Time
 
 What a program can do while it waits depends on the language's **threading model**. A **thread** is an independent sequence of executing statements.
 
-Many languages (e.g., Java and Rust) let a program run several threads at once. This means that one thread can block on the network while the others keep working. Using multiple threads is powerful, but also error-prone. The previous chapter showed how hard it is to reason about _one_ sequence of mutations. With _multiple_ threads mutating shared objects is even harder to do correctly.
+Many languages (e.g., Java and Rust) let a program run several threads at once. This means that one thread can block on the network while the others keep working. Multiple threads are useful, but error-prone. The previous chapter showed how hard it is to reason about _one_ sequence of mutations. With _multiple_ threads mutating shared objects, it is even harder.
 
 TypeScript makes a different design decision. A TypeScript program runs on a single thread. Exactly one statement is executing at any moment. This means you never have to wonder whether some other thread changed an object between two of your statements. The model is simple to reason about and easy to use.
 
@@ -37,7 +37,7 @@ But a single thread exposes us to the dilemma of waiting. If the only thread blo
 <details class="tooltip deep-dive">
 <summary>Threads Elsewhere, and Why TypeScript Has One</summary>
 
-In Java, creating a thread is a few lines of code. Large Java systems can run hundreds of them. Shared state means that programmers must coordinate every access to shared state; getting this wrong produces bugs that appear and vanish depending on timing (such problems include deadlocks and race conditions) which are among the hardest bugs to find and fix in code.
+In Java, creating a thread is a few lines of code. Large Java systems can run hundreds of them. Programmers must coordinate every access to shared state. Getting this wrong produces bugs such as deadlocks and race conditions, which appear and vanish depending on timing and are among the hardest bugs to find and fix.
 
 Rust goes further and uses its type system to prevent many of these errors statically. This is part of why Rust is considered safer than other languages. But the cost of this is that Rust is also harder to learn.
 
@@ -79,7 +79,7 @@ getting a mug ready
 kettle has boiled        <- printed ten seconds later
 ```
 
-The order is important here, and violates what our prior model of statements _executing in the order they appear in the file_. We've had this model of how code runs in every previous chapter.  `setTimeout` does not block the program and wait ten seconds; it _registers_ the callback and returns immediately, and the program continues to the next statement. Ten seconds later, when the timer expires, the callback executed.
+This order breaks the model we have used in every previous chapter, where statements _execute in the order they appear in the file_. `setTimeout` does not block the program and wait ten seconds. It _registers_ the callback and returns immediately, and the program continues to the next statement. Ten seconds later, when the timer expires, the callback runs.
 
 Asynchronous programming requires a mental shift. While source code lists statements top to bottom, _when_ each one runs is no longer the same as _where_ it was written. This further illustrates divergence between the static and dynamic views of the program. 
 
@@ -111,8 +111,6 @@ The runtime keeps a queue of callbacks that are ready to run, for example becaus
 This design has two consequences. First, a callback is never interrupted partway through, so no other code runs until it returns. This is what makes single-threaded programs simple to reason about. It also means a callback that computes for a long time freezes the rest of the program, because the loop cannot move on until the callback returns. Second, a timer duration such as `10000` means the callback is queued no earlier than ten seconds from now. If the thread is busy when the timer expires, the callback waits in the queue for its turn, so the event loop guarantees the order callbacks run in, but not their exact timing.
 
 </details>
-
-
 
 ## Promises: A Future Value
 
@@ -377,7 +375,7 @@ The function is annotated to return `Promise<number>`. However, the `return thre
 Should the return type of `slowlyReturnsThree` be `number` or `Promise<number>`? Explain why in your own words.
 </details>
 
-## Reading and Writing Files
+### Reading and Writing Files
 
 With `async` and `await`, we can now read and write files. Node, the runtime that executes our TypeScript programs, provides a standard library whose file-system module exports the two functions we will use: `readFile`, which delivers a file's contents, and `writeFile`, which replaces them. Both involve the disk latencies from the table at the start of this chapter, so both return promises.
 
@@ -403,7 +401,7 @@ Files on disk are stored as raw bytes. The second argument to `readFile` names t
 
 </details>
 
-## Calling Web Services
+### Calling Web Services
 
 The second capability this chapter introduces is calling web services. A **web service** is a program running on another machine that answers requests over the internet. You send it a request in the form of a URL, and it responds with data. The built-in function `fetch` makes the request and, because the network is slow, returns a promise.
 
@@ -428,7 +426,7 @@ The type annotation on `report` states _our expectation_, but the compiler canno
 
 The compiler's guarantees stop at the program's edge. Data arriving from outside should be _checked_ before the rest of the program relies on it, as the invariants chapters described. We will not write that checking here, but this boundary is where it belongs.
 
-## Waiting in Parallel
+### Waiting in Parallel
 
 Everything so far has waited for one slow operation at a time. Real programs often need several. A weather station keeps a log per instrument, and a report needs all of them. A web page may need several answers from a service before it can display anything. The obvious way to read several files is a loop:
 
@@ -544,7 +542,7 @@ Handling these failures well is the subject of the next chapter.
 
 For this chapter and its exercises, we will assume files exist and services answer. If your program crashes, read the error message and fix the bug it points to. The most common cause is a path or URL that is not quite right. At this stage, crashing immediately with a clear message is acceptable.
 
-## From Mechanics to Abstraction
+#### From Mechanics to Abstraction
 
 Mutation introduced state and time _inside_ the program. Asynchrony extends this to the world _outside_ the program, where data lives on disks and other machines and arrives only after a wait. TypeScript's model is single-threaded and deferred. Slow operations return promises, `await` collects their values while the thread does other work, and `async` marks every function that waits. With files and web services available, our programs can work with data from outside their own source code.
 
