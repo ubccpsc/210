@@ -1,16 +1,16 @@
 # Asynchronous Effects and Time
 
-The previous chapter ended with **side effects**: changes that reach beyond a function, and sometimes beyond the program entirely, to files, networks, and users. We saw how side effects significantly complicate the mental model we have of computation. This chapter introduces asynchronicity, which will further complicate the mental model.
+The previous chapter ended with **side effects**. These are changes that reach beyond a function, and often beyond the program entirely, to change something in the real world. In this chapter we will introduce asynchronicity, which will further complicate how we design our code, but specifically with the goal of enabling us to change state in the world.
 
-Programs become much more useful when they interact with the outside world. A weather station that can only summarise readings typed into its source code is a _calculator_. A weather station that can load a year of readings from a file, fetch the current conditions from a web service, and write its report somewhere permanent is a _system_. Most software needs require interacting with the outside world:
+Programs become much more useful when they interact with other programs and other users. A weather station that can only summarise readings typed into its source code is a calculator, but a weather station that can load a year of readings from a file, fetch the current conditions from a web service, and make a report accessible over the web is a system. Most software systems need to interact with the world to accomplish their tasks:
 
 > As a weather-station operator, I want to load past readings from a file and fetch current conditions from the regional service, so that my station can publish complete reports without my entering the data by hand.
 
-But the outside world has a property that nothing inside our programs has had so far: it is _slow_. It does not answer immediately. This chapter is about what programs do while they wait. The mechanics take some getting used to, but by the end you will be able to (1) read and write files and (2) call web-based services.  Those two capabilities are the foundation for almost everything programs do in practice.
+But the outside world operates at a different pace than a program on a single computer. External interaction does happen immediately. This chapter is about how to design programs that can deal with the slowness outside interaction entails. The mechanics are a little tricky, but enable you to both read and write files and call web-based services. Those two capabilities are the foundation for a broad collection of common computing tasks.
 
 ## How Long Computers Wait
 
-Inside the processor, work is astonishingly fast: a simple operation takes around a nanosecond, a billionth of a second. Everything outside the processor is slower, and the further away the data lives, the worse it gets. The numbers are hard to feel at nanosecond scale, so the table below also shows each one rescaled, as if a single instruction took one second:
+Computer processors are fast: a simple operation takes around a nanosecond. Everything outside the processor is slower, and the further away the data lives from the processor, the slower it gets. The table below gives a sense of how long an action would take if a single instruction on a local processor took one second.
 
 | Operation | Typical time | Scaled: if one instruction took 1 second |
 |---|---|---|
@@ -20,36 +20,36 @@ Inside the processor, work is astonishingly fast: a simple operation takes aroun
 | Reading from a spinning disk | 10 ms | ~4 months |
 | Cross-country network round trip | 150 ms | ~5 years |
 
-The pattern to take away: touching a disk or a network is not a little slower than computing, it is _millions of times_ slower. From the processor's point of view, asking a distant web service for the temperature and then waiting for the answer is like mailing a letter and standing motionless at the mailbox for five years.
+Touching a disk or a network is not a little slower than computing, it is _millions of times_ slower. From the processor's point of view, asking a distant web service for the temperature and then waiting for the answer robs it of time that could be better spent getting local work done.
 
-A call that waits like this is called **blocking**: the function does not return until the slow work finishes, and the program makes no progress of any kind in the meantime. For a program that has nothing else to do, blocking is merely wasteful. For most real programs, it is unacceptable: a program frozen for the duration of a network request cannot respond to its user, accept another request, or do any of the computation that is already ready to go.
+A call that waits like this is called **blocking**. A blocked function does not return until the slow work finishes, and the program makes no progress of any kind while waiting. For a program that has nothing else to do, blocking is just a waste of resources. For most real programs though it is more than wasteful because a program frozen for the duration of a network request cannot respond to its user, accept another request, or get any other work done.
 
 ## One Thread at a Time
 
 What a program can do while it waits depends on the language's **threading model**. A **thread** is an independent sequence of executing statements.
 
-Many languages (e.g., Java and Rust) let a program run several threads at once: one thread can block on the network while the others keep working. Using multiple threads is powerful... and famously difficult to use correctly. The previous chapter showed how hard it is to reason about _one_ sequence of mutations. With _multiple_ threads mutating shared objects at the same instant, through all the aliases references allow, it is even harder. Whole categories of bugs exist only in multi-threaded programs.
+Many languages (e.g., Java and Rust) let a program run several threads at once. This means that one thread can block on the network while the others keep working. Using multiple threads is powerful, but also error-prone. The previous chapter showed how hard it is to reason about _one_ sequence of mutations. With _multiple_ threads mutating shared objects is even harder to do correctly.
 
-TypeScript makes a different trade. A TypeScript program runs on a single thread: exactly one statement is executing at any moment, ever. You never have to wonder whether some other thread changed an object between two of your statements, because there is no other thread. The model is simple to reason about and easy to use. The cost is a loss of flexibility.
+TypeScript makes a different design decision. A TypeScript program runs on a single thread. Exactly one statement is executing at any moment. This means you never have to wonder whether some other thread changed an object between two of your statements. The model is simple to reason about and easy to use.
 
-But a single thread sharpens the waiting problem. If the only thread blocks on a disk read, the entire program stands still; there is no second thread to carry on. So,  TypeScript provides a mechanism for a program to _start_ a slow operation, carry on with other work immediately, and come back to the result when it is ready. Computation that is set aside to run later like this is called **deferred computation**, and it is the central idea of this chapter.
+But a single thread exposes us to the dilemma of waiting. If the only thread blocks while waiting for a file to be read from disk, the entire program appears to have hung. To get around this, TypeScript provides a mechanism for a program to _start_ a slow operation, carry on with other work immediately, and come back to the result when it is ready. Computation that is set aside to run later like this is called **deferred computation**.
 
 <details class="tooltip deep-dive">
 <summary>Threads Elsewhere, and Why TypeScript Has One</summary>
 
-In Java, creating a thread is a few lines of code, and large Java systems routinely run hundreds of them. The price is that any object reachable from two threads can be mutated by both at the same time, and the programmer must coordinate every such access; getting this wrong produces bugs that appear and vanish depending on timing, which are among the hardest in software to find.
+In Java, creating a thread is a few lines of code. Large Java systems can run hundreds of them. Shared state means that programmers must coordinate every access to shared state; getting this wrong produces bugs that appear and vanish depending on timing (such problems include deadlocks and race conditions) which are among the hardest bugs to find and fix in code.
 
-Rust goes further and uses its type system to prevent many of these errors statically. This is part of why Rust is considered safer than other languages... and harder to learn.
+Rust goes further and uses its type system to prevent many of these errors statically. This is part of why Rust is considered safer than other languages. But the cost of this is that Rust is also harder to learn.
 
-Python technically allows multiple threads, but only one thread may make progress at once. If you're writing single-file Python code without `multiprocessing` or other Python multi-threaded libraries, when you make a network call or read a file, your code waits for the file to be read or the network call to finish. You will see a lag between a print statement put before and after an `open(*)` call, if the file you're opening is big enough.
+Python technically allows multiple threads, but only one thread may make progress at once. If you're writing single-file Python code without `multiprocessing` or other Python multi-threaded libraries, when you make a network call or read a file, your code waits for the file to be read or the network call to finish. 
 
-JavaScript, the language TypeScript is built on, was designed for web browsers, where a page must stay responsive while images and data load. Its designers chose one thread plus deferred computation as a model that ordinary programmers could use without the hazards of multi-threading. That choice has proven good enough to run servers, editors, and most of the modern web.
+JavaScript, the language TypeScript is built on, was designed for web browsers, where a page must stay responsive while images and data load. Its designers chose one thread plus deferred computation as a model that balanced understandability without the complexity of multi-threading. This has proven to be a durable choice and is the backbone of the bodern web.
 
 </details>
 
 ## Deferred Computation: Callbacks
 
-You have been handing functions to other code to run later since the first chapter. Every test does it:
+You have been using deferred computation since the first chapter of the book. Every test does it:
 
 ```typescript
 test("longest freezing streak spans the early morning",
@@ -57,9 +57,9 @@ test("longest freezing streak spans the early morning",
 );
 ```
 
-The anonymous function `() => longestFreezingStreak(day)` is not executed where it is written. It is handed to `checkExpect`, which stores it and runs it later, when the test framework decides. A function passed somewhere else to be called later is a **callback**. The thunks we have been handing to `checkExpect` since the first chapter are callbacks of exactly this kind; a thunk is the special case that takes no parameters. Callbacks are how TypeScript expresses deferred computation.
+The anonymous function `() => longestFreezingStreak(day)` is not executed where it is written. It is handed to `checkExpect`, which stores it and runs it later, when the test framework decides. A function passed as a parameter to be called later is a **callback**. Callbacks are how TypeScript expresses deferred computation.
 
-The clearest way to _feel_ deferral is to slow it down to human speed. The built-in function `setTimeout` takes a callback and a duration in milliseconds, and arranges for the callback to run after that much time has passed:
+The clearest way to see a callback in action is to slow it down. The built-in function `setTimeout` takes a callback and a duration in milliseconds, and executes the callback sometime after the duration has passed:
 
 ```typescript
 console.log("starting the kettle");
@@ -79,18 +79,11 @@ getting a mug ready
 kettle has boiled        <- printed ten seconds later
 ```
 
-Read that order carefully, because it breaks our model that statements _execute in the order they appear in the file_. We've had this model of how code runs in every previous chapter.  `setTimeout` does not wait ten seconds; it _registers_ the callback and returns immediately, and the program continues to the next statement. Ten seconds later, when the timer expires, the callback runs. The program got a mug ready while the kettle boiled instead of standing in front of it.
+The order is important here, and violates what our prior model of statements _executing in the order they appear in the file_. We've had this model of how code runs in every previous chapter.  `setTimeout` does not block the program and wait ten seconds; it _registers_ the callback and returns immediately, and the program continues to the next statement. Ten seconds later, when the timer expires, the callback executed.
 
-Asynchronous programming requires a mental shift: source code still lists statements top to bottom, but _when_ each one runs is no longer the same as _where it is written_. The static and dynamic views of the program, which the first chapter introduced, have come apart in a new way: to know what this program does, you must now track _real time_ as well as state.
+Asynchronous programming requires a mental shift. While source code lists statements top to bottom, _when_ each one runs is no longer the same as _where_ it was written. This further illustrates divergence between the static and dynamic views of the program. 
 
-Timers are predicatable: you register their duration when you start them. But callbacks are typically used to allow programs to respond to _unpredictable_ events.
-
-
-Nowhere is this clearer than in a _user interface_ (UI). Suppose the weather station's display has a refresh button. The program cannot know when the button will be clicked, whether it will be clicked at all, or how many times. We could try continually checking whether the button is clicked, but this would either yield wasted computation (as we're continually checking), and we might not respond soon enough (if we only check every few seconds).
-
-<!---And the single thread must not sit in a loop asking "clicked yet?... clicked yet?... clicked yet?", because a thread that is spinning is just as occupied as a thread that is blocked: the display would freeze, unable to respond to anything else, while it watched one button. ---->
-
-Instead, to allow UIs to be responsive, the program registers a callback:
+Timers are predicatable: you register their duration when you start them. But callbacks are commonly used to allow programs to respond to unpredictable events. Nowhere is this clearer than in a user interface (UI). Suppose the weather station's display has a refresh button. The program cannot know when the button will be clicked, or even whether it will be clicked at all. We could try continually checking whether the button is clicked, but this would either yield wasted computation (as we're continually checking), and we might not respond soon enough (if we only check every few seconds). Instead, to allow UIs to be responsive, the program registers a callback:
 
 ```typescript
 // refreshButton is an object representing the on-screen button;
@@ -99,7 +92,7 @@ refreshButton.addEventListener("click", () => {
 });
 ```
 
-When the user clicks the refresh button, the runtime raises an **event** and places it on a queue; as soon as the thread is free, the queued callback runs. Every interaction in every user interface you have used works this way: clicks, keystrokes, touches, and window resizes are all events with callbacks registered to handle them, and between events the thread is free to do other work. This style is called **event-driven programming**, and callbacks are what make it possible: they let a program describe _what to do when something happens_ without ever asking _whether it has happened yet_.
+When the user clicks the refresh button, the runtime raises an **event** and places it on a queue; as soon as the thread is free, the queued callback runs. Every interaction in every user interface you have used works this way: clicks, keystrokes, touches, and window resizes are all events with callbacks registered to handle them, and between events the thread is free to do other work. This style is called **event-driven programming**, and callbacks are what make it possible. Callbacks let a program describe _what_ to do when something happens without ever asking _whether_ it has happened yet.
 
 <details class="tooltip deep-dive">
 <summary>Debugging with <code>console.log</code> or a Debugger?</summary>
