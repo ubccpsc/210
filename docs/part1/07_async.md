@@ -92,23 +92,23 @@ refreshButton.addEventListener("click", () => {
 });
 ```
 
-When the user clicks the refresh button, the runtime raises an **event** and places it on a queue; as soon as the thread is free, the queued callback runs. Every interaction in every user interface you have used works this way: clicks, keystrokes, touches, and window resizes are all events with callbacks registered to handle them, and between events the thread is free to do other work. This style is called **event-driven programming**, and callbacks are what make it possible. Callbacks let a program describe _what_ to do when something happens without ever asking _whether_ it has happened yet.
+When the user clicks the refresh button, the runtime raises an **event** and places it on a queue. As soon as the thread is free, the queued callback runs. User interfaces work this way: clicks, keystrokes, touches, and window resizes are all events with callbacks registered to handle them, and between events the thread is free to do other work. This style is called **event-driven programming**, and callbacks are what make it possible. Callbacks let a program describe _what_ to do when something happens without ever asking _whether_ it has happened yet.
 
 <details class="tooltip deep-dive">
 <summary>Debugging with <code>console.log</code> or a Debugger?</summary>
 
-`console.log` prints its argument to the terminal. Printing is itself a side effect: an observable change made to the world outside the program, and printing is a standard tool for watching a program's behaviour unfold in time. We use it in this chapter precisely because _when_ something happens has started to matter.
+`console.log` prints its argument to the terminal. Printing is itself a side effect, because it changes something outside the program. It is also a common way to watch the order in which a program works, which is why we use it in this chapter, now that _when_ something happens matters.
 
-That said, relying on `console.log` to diagnose complex problems breaks down as programs grow and become distributed. Your IDE's debugger is almost always a better choice than printing to the screen, as it lets you pause computation at any time and observe the current state of the whole program.
+Printing becomes less useful as programs grow and become distributed. Your IDE's debugger is usually a better choice, because it lets you pause the program at any point and inspect its whole state.
 
 </details>
 
 <details class="tooltip deep-dive">
 <summary>Behind the Scenes: The Event Loop</summary>
 
-The runtime keeps a queue of callbacks that are ready to run: a timer expired, a button was clicked, data arrived from a disk or a network. The single thread runs a permanent cycle called the **event loop**: it takes the callback at the front of the queue, runs it _to completion_, then checks the queue for any other waiting callbacks to execute. If the event loop queue is empty, the thread sleeps until something is added to the queue.
+The runtime keeps a queue of callbacks that are ready to run, for example because a timer expired, a button was clicked, or data arrived from a disk or a network. The single thread runs a continuous cycle called the **event loop**. It takes the callback at the front of the queue, runs it _to completion_, and then takes the next one. If the queue is empty, the thread sleeps until something is added.
 
-There are two consequences of this architecture. First, run-to-completion means a callback is never interrupted partway through: no other code runs until it returns. This is what makes single-threaded programs simple to reason about. But it is also an added responsibility, because a callback that computes for a long time freezes the rest of the program; the loop cannot move on until the callback returns. Second, a duration like the timer's `10000` means "queue this callback no earlier than ten seconds from now", not "run it at exactly that moment": if the thread is busy when the timer expires, the callback waits in the queue for its turn. The event loop guarantees order and progress, not precise timing.
+This design has two consequences. First, a callback is never interrupted partway through, so no other code runs until it returns. This is what makes single-threaded programs simple to reason about. It also means a callback that computes for a long time freezes the rest of the program, because the loop cannot move on until the callback returns. Second, a timer duration such as `10000` means the callback is queued no earlier than ten seconds from now. If the thread is busy when the timer expires, the callback waits in the queue for its turn, so the event loop guarantees the order callbacks run in, but not their exact timing.
 
 </details>
 
@@ -116,15 +116,15 @@ There are two consequences of this architecture. First, run-to-completion means 
 
 ## Promises: A Value That Does Not Exist Yet
 
-Callbacks defer computation, but they say nothing about _results_. Reading a file produces the file's contents; fetching from a web service produces a response. The program wants that value, the value will not exist until the slow operation finishes, and the program should not stand still in the meantime. TypeScript models a result-we-will-eventually-have in an object called a **promise**.
+Callbacks defer computation, but they do not provide a way to return _results_. Reading a file produces the file's contents, and fetching from a web service produces a response. The program needs that value, but it will not exist until the slow operation finishes, and the program should not stop while it waits. TypeScript represents a result that will arrive later as an object called a **promise**.
 
-A promise is a receipt. When you order at a busy coffee shop, you need not stand at the espresso machine until your drink is poured; you are handed a numbered receipt, after which you can go about your business. When your drink is ready, your number is called and you trade your receipt for your drink.
+A promise works like a ticket at a busy coffee shop. Instead of standing at the espresso machine until your drink is poured, you are handed a numbered ticket and can scroll your socials at a table. When your drink is ready, your number is called and you trade the ticket for the drink.
 
-A promise fills the same role: it is an ordinary object, returned to you _immediately_ by a slow operation, representing a value that will arrive later. Being an ordinary object, it can be stored in a variable, passed to a function, or placed in an array, like any other value.
+A promise is just an object that a slow operation returns _immediately_ with a the understanding that it will turn into a value later. Like any other value, it can be stored in a variable, passed to a function, or placed in an array.
 
-A promise's type says what it will eventually deliver: a `Promise<string>` will deliver a `string`, and a `Promise<Reading[]>` will deliver an array of readings. (This is the same generics notation that `LinkedList<T>` used in the modelling chapter: a promise _of_ something.)
+A promise's type says what it will eventually deliver. A `Promise<string>` will deliver a `string`, and a `Promise<Reading[]>` will deliver an array of readings. This is the same generic notation that `LinkedList<T>` used earlier.
 
-Promises have three possible states. Every promise begins as **pending**: the work is still underway. Each promise completes, or _settles_, in one of two ways: **fulfilled**, holding the delivered value, or **rejected**, holding an error that explains why the value could not be produced. The language maintains two invariants on every promise, and you can rely on them the way you rely on your own data invariants: a promise settles _at most once_, and once settled, its state and value _never change again_. A fulfilled promise is permanently fulfilled, and a rejected promise is permanently rejected.
+Promise objects have three possible states. Every promise begins as **pending**, while the work is still underway. When the work it was waiting for is done,the promise completes, or _settles_, in one of two ways. It can be **fulfilled**, holding the delivered value, or **rejected**, holding an error that explains why the value could not be produced. The language maintains two invariants on every promise. A promise settles _at most once_, and once settled, its state and value _never change_.
 
 ```graphviz
 digraph promiseStates {
@@ -148,9 +148,9 @@ digraph promiseStates {
 ```
 <!-- caption="Promise states. Promises settle once and only once." -->
 
-You will rarely create a promise yourself. Promises are what slow operations _give you_: the file-reading and web-fetching functions later in this chapter all return them.
+You will rarely create a promise yourself. Slow operations create them for you, and the file-reading and web-fetching functions later in this chapter all return them.
 
-Where you _will_ meet promises constantly is in return types. When a function's signature says it returns a `Promise<string>`, the signature is telling you two things: the call itself will return immediately, and what it returns will not yet contain the value you want. The promise comes back right away; the result is available when the promise settles later. Here is what happens when the promise itself is treated as the value:
+You will see promises often in return types. When a function's signature says it returns a `Promise<string>` you will know that the call will return immediately, but what it returns does not yet contain the value you want. That value will be available only when the promise settles. Here is what happens when the promise itself is treated as the value:
 
 ```typescript
 import { readFile } from "fs/promises";
@@ -159,7 +159,7 @@ const contents = readFile("report.txt", "utf8");  // returns immediately
 console.log(contents);  // prints "Promise { <pending> }", not the file's text
 ```
 
-`readFile` returns a `Promise<string>`, so `contents` holds a pending promise: at the moment the `console.log` runs, the disk has not had time to respond. The type checker knows this too. `contents` has the type `Promise<string>`, not `string`, so a slip like `contents.length` is a compile error: the type system will not let you use the receipt as if it were the value it stands for. What the type system cannot do is hand you the value early. Collecting the value is the next section's subject.
+`readFile` returns a `Promise<string>`, so `contents` holds a pending promise. When the `console.log` runs, the disk has not yet finished reading the file. The type checker knows this too. `contents` has the type `Promise<string>`, not `string`, so `contents.length` is a compile error. The type system will not let you use the promise as if it were the value it stands for. The next section shows how to get the value.
 
 <details class="tooltip deep-dive">
 <summary>Syntactic Sugar</summary>
@@ -175,16 +175,16 @@ is _syntactic sugar_ for
 
 Or, in TypeScript, the array type notation `number[]` is _syntactic sugar_ for `Array<number>`.
 
-You can understand the use of "sugar" to mean that this is syntax that figuratively "sweetens", i.e. eases or [makes less painful](https://www.merriam-webster.com/dictionary/sweeten), the use of the language.
+The term "sugar" refers to syntax that "sweetens", or [makes less painful](https://www.merriam-webster.com/dictionary/sweeten), the use of the language.
 
-Syntax that is _syntactic sugar_ can _always_ be rewritten in some other way in the language.
+Syntactic sugar can always be rewritten using other constructs in the language.
 
 </details>
 
 <details class="tooltip ts-tips">
 <summary>Collecting Promise Values with <code>.then</code></summary>
 
-Every promise carries a method named `then`, which accepts a callback; the promise runs that callback with the value once it is fulfilled:
+Every promise has a method named `then`, which accepts a callback. The promise calls that callback with the value once it is fulfilled:
 
 ```typescript
 readFile("report.txt", "utf8").then((contents) => {
@@ -192,7 +192,7 @@ readFile("report.txt", "utf8").then((contents) => {
 });
 ```
 
-This connects callbacks and promises: a promise is, underneath, an object that runs callbacks for you when its value arrives, and the `await` syntax in the next section is built on exactly this mechanism.
+This is how callbacks and promises connect. A promise is an object that runs callbacks for you when its value arrives, and the `await` syntax in the next section is built on this mechanism.
 
 We show `then` here so you will recognise it in documentation and in other people's code, but we will not use it in this course. `await` is a form of _syntactic sugar_ that expresses the same thing and is much more readable.
 
@@ -211,9 +211,9 @@ async function loadReport(): Promise<string> {
 }
 ```
 
-`await` takes a promise and produces the value it delivers. Above, `readFile(...)` is a `Promise<string>`, so `await readFile(...)` is a `string`. When execution reaches the `await`, the function pauses until the promise settles, and then continues with the value, on the very next line, as if the file's contents had been returned directly.
+`await` takes a promise and produces the value it delivers. Above, `readFile(...)` is a `Promise<string>`, so `await readFile(...)` is a `string`. When execution reaches the `await`, the function pauses until the promise settles, and then continues with the value as if the file's contents had been returned directly.
 
-The most important property of `await` is that _it pauses the function, not the program_. While `loadReport` is suspended at the `await`, the thread is free, and everything else the program has to do (timers, other deferred work, other paused functions whose promises have settled) keeps happening. An `await` is the program saying "wake me here when the value arrives", not "stand still until it does".
+The most important property of `await` is that _it pauses the function, not the program_. While `loadReport` is suspended at the `await`, the thread is free, and everything else the program has to do (timers, other deferred work, and other paused functions whose promises have settled) continues.
 
 <details class="tooltip ts-tips">
 <summary><code>await</code></summary>
@@ -223,17 +223,17 @@ The expression
 await <expression>
 ```
 
-where `<expression>` evaluates to a value of `Promise<T>` type, suspends execution until the promise resolves. If the promise settles successfully, `await <expression>` evaluates to the value the promise resolves to, and execution resumes from there. If the promise is rejected, execution resumes for the program to _throw an error_: more on that in the next chapter.
+where `<expression>` evaluates to a value of `Promise<T>` type, suspends execution until the promise settles. If the promise is fulfilled, `await <expression>` evaluates to the value it delivers, and execution resumes from there. If the promise is rejected, the `await` throws an error instead. The next chapter covers errors.
 </details>
 
-`async` communicates that a function may contain `await`, and it changes the function's return type: an `async` function always returns a _promise_ of its result. `loadReport` is declared to return `Promise<string>`, not `string`, even though its body returns a string. This is because `loadReport` cannot hand its caller a `string` immediately: it itself is waiting on `readFile`. And what should the caller of `loadReport` do while `loadReport` is waiting on `readFile`? The caller itself must await on `loadReport`.
+`async` marks a function that may contain `await`, and it changes the function's return type. An `async` function always returns a _promise_ of its result. `loadReport` is declared to return `Promise<string>`, not `string`, even though its body returns a string, because `loadReport` cannot give its caller a `string` immediately. It is itself waiting on `readFile`, so the caller of `loadReport` must in turn await `loadReport`.
 
-So the caller gets a receipt, and collects it the same way, with `await`. Asynchrony is contagious: a function that awaits must be `async`, so its callers await it and must themselves be `async`, all the way up the program.
+The caller gets a receipt and collects it the same way, with `await`. This means asynchrony spreads upward. A function that awaits must be `async`, so its callers await it and must themselves be `async`, all the way up the program.
 
 <details class="tooltip ts-tips">
 <summary><code>async</code></summary>
 
-The keyword `async` declares that a function will include some waiting on a promise.
+The keyword `async` declares that a function may wait on a promise.
 
 ```typescript
 async function f(x: X, y: Y, z: B): Promise<T> {
@@ -246,22 +246,20 @@ If an `await` expression appears in a function body, that function must be decla
 
 </details>
 
+`async` and `await` do not make anything run faster, and they do not create threads. There is still exactly one statement executing at any moment. They are a more readable syntax for deferred computation: the same deferral the `setTimeout` example performed with a callback, written so that the code reads top to bottom again.
 
-
-Be clear about what `async` and `await` are _not_. They do not make anything run faster, and they do not create threads; there is still exactly one statement executing at any moment. They are readable syntax for deferred computation: the same deferral the `setTimeout` example performed with a callback, but now written so that the code reads top to bottom again. The semantics did not change; the syntax did.
-
-While promises and `async`/`await` do not create threads, they take advantage of a deeper fact: the slow part of the work never needed our thread in the first place. When `readFile` starts, the request is handed down to the language runtime and the operating system, which carry the operation forward in the background whether our thread attends to it or not. Blocking was never _necessary_; it was our thread standing guard over work it could not help with. `await` is the program declining to stand guard: the thread spends the interval running whatever else is ready (or, in a user interface, staying responsive), and the paused function continues the moment its value arrives.
+Promises and `async`/`await` work because the slow part of the work never needed our thread. When `readFile` starts, the request is handed to the language runtime and the operating system, which carry out the operation in the background. Blocking was never necessary, because the thread could not help with that work anyway. With `await`, the thread spends the waiting time running whatever else is ready (or, in a user interface, staying responsive), and the paused function continues when its value arrives.
 
 <details class="tooltip deep-dive">
 <summary>Systems Details: Your Program, the Runtime, and the Operating System</summary>
 
-A TypeScript program is the top layer of a stack, and each layer below it does part of the waiting. Beneath your program sits the **runtime**. One of the most common runtimes is [Node](https://nodejs.org/), which executes your compiled code, operates the event loop described earlier in this chapter, and provides the functions the language itself does not have, including `setTimeout`, `readFile`, and `fetch`.
+A TypeScript program is the top layer of a stack, and each layer below it does part of the waiting. Beneath your program sits the **runtime**. One of the most common runtimes is [Node](https://nodejs.org/), which executes your compiled code, runs the event loop described earlier in this chapter, and provides functions the language itself does not have, including `setTimeout`, `readFile`, and `fetch`.
 
-Beneath the runtime sits the **operating system**, which manages the machine's hardware on behalf of all running programs at once. Nothing your program does touches a disk or a network card directly; requests are passed down this stack.
+Beneath the runtime sits the **operating system**, which manages the machine's hardware on behalf of all running programs at once. Your program never touches a disk or a network card directly. Its requests are passed down this stack.
 
-Follow one `readFile` all the way down: Your function calls `readFile`, the runtime asks the operating system for the file, and the operating system instructs the disk hardware to fetch the bytes, then turns to its other work. No one at any layer sits and watches: the request exists only as bookkeeping, an entry in a table recording who should be told when the bytes show up. When the disk finishes, it signals the operating system (using a mechanism called an interrupt), the operating system passes the data up to the runtime, and the runtime fulfills the promise and places your paused function on the event loop's queue. The next time the loop reaches it, your function resumes at the `await` with the value.
+Consider a single `readFile`. Your function calls `readFile`, the runtime asks the operating system for the file, and the operating system instructs the disk hardware to fetch the bytes, then turns to other work. No layer waits on the disk. The request exists only as an entry in a table recording who should be told when the bytes arrive. When the disk finishes, it signals the operating system (using a mechanism called an interrupt), the operating system passes the data up to the runtime, and the runtime fulfills the promise and places your paused function on the event loop's queue. The next time the loop reaches it, your function resumes at the `await` with the value.
 
-Following one `readFile` down the stack and back, with no layer standing still while the disk works:
+The same sequence as a diagram:
 
 ```plantuml
 @startuml
@@ -284,9 +282,9 @@ R --> F : resume the awaiting function
 ```
 <!-- caption="A file read passing down the runtime and operating system and back." -->
 
-Notice what this means about `await`: your paused function returns to execution through the very same queue that clicks and timer callbacks travel through. There is one loop, one thread, and one line to wait in, which is also why a long-running computation delays everything: file results, button clicks, and resumed functions all stand in the same queue behind it.
+A paused function resumes through the same queue that clicks and timer callbacks use. Everything shares that one queue, served by the one thread, which is why a long-running computation delays everything: file results, button clicks, and resumed functions all wait behind it.
 
-Everything that wants the thread waits in one queue, and the single thread takes them one at a time:
+Every kind of event waits in that queue:
 
 ```graphviz
 digraph eventLoop {
@@ -308,11 +306,11 @@ digraph eventLoop {
 ```
 <!-- caption="Every event waits in one queue, served by the single thread one at a time." -->
 
-This layered design is why a single thread is enough. The expensive waiting is done by hardware and the operating system, which are built for it and can juggle thousands of requests at once; the one thread in your program is reserved for the only thing that needs it: running your code. A Node-based web server handling thousands of simultaneous connections on a single thread is this stack working as intended.
+This layered design is why a single thread is enough. The waiting is done by the hardware and the operating system, which can handle thousands of requests at once, and your program's thread is used only for running your code. This is how a Node-based web server can handle thousands of simultaneous connections on a single thread.
 
 </details>
 
-Because the receipt is so easy to mistake for the value, one mistake dominates all others in asynchronous code: _calling a promise-returning function_ and _forgetting_ the `await`. Sometimes the type checker catches it, as the pending `console.log` example in the previous section showed. But when the result is not used at all, the types raise no objection: a bare `loadReport();` on its own line compiles cleanly, _starts_ the work, and continues past it without waiting, which is almost never what the surrounding code intends. The lint rules used in this course flag every call to a promise-returning function that is not awaited; when you see that warning, treat it as a bug report rather than a formality.
+The most common mistake in asynchronous code is calling a promise-returning function and forgetting the `await`. Sometimes the type checker catches it, as the `console.log` example in the previous section showed. But when the result is not used at all, the types raise no objection. A bare `loadReport();` on its own line compiles, starts the work, and continues without waiting, which is almost never what the surrounding code intends. The lint rules used in this course flag every call to a promise-returning function that is not awaited. When you see that warning, treat it as a bug.
 
 <details class="tooltip ts-tips">
 <summary>Testing <code>async</code> Functions</summary>
@@ -328,9 +326,9 @@ test("the report loads",
 );
 ```
 
-This is the first check we have written whose thunk has a body in braces. Until now every thunk has been a single expression, `() => <actual>`, which _implicitly returns_ its value. Here the check needs two steps, awaiting the report and then measuring it, and two statements cannot be written as one expression, so the thunk takes the block form instead.
+This is the first check we have written whose thunk has a body in braces. Until now every thunk has been a single expression, `() => <actual>`, which _implicitly returns_ its value. Here the check needs two steps, awaiting the report and then measuring it, so the thunk uses a block body instead.
 
-The braces change the rules, exactly as the arrow function tooltip in [Chapter 1](./01_new-language) described. A block body returns nothing implicitly, so the value the check compares must be handed back with an explicit `return`. Written without it:
+As the arrow function tooltip in [Chapter 1](./01_new-language) described, a block body returns nothing implicitly, so the value the check compares must be returned explicitly. Written without the `return`:
 
 ```typescript
 checkExpect(async () => {
@@ -339,11 +337,11 @@ checkExpect(async () => {
 }, true);
 ```
 
-the thunk computes the answer but does not return it, so `checkExpect` receives `undefined` and the test fails against `true`. Whenever you find you need braces, double check whether a `return` is needed; whenever a check fits in a single expression, prefer the brace-free form.
+the thunk computes the answer but does not return it, so `checkExpect` receives `undefined` and the test fails. Whenever you use braces, check whether a `return` is needed. When a check fits in a single expression, prefer the form without braces.
 
-`checkExpect` awaits whatever its function produces, so the test does not finish until every `await` inside it has delivered. Forgetting the `await` before an async call is the classic mistake: the check then compares a `Promise` object rather than the value it delivers, and fails confusingly.
+`checkExpect` awaits whatever its function produces, so the test does not finish until every `await` inside it has completed. If you forget the `await` before an async call, the check compares a `Promise` object rather than the value it delivers, and fails with a confusing message.
 
-The toolkit also provides `checkError`, which runs the function it is given and passes only if that call fails with an error instead of producing a value; [Chapter 8](./08_errors) looks at errors like these in depth. `checkError` awaits in the same way `checkExpect` does, and the slow operations in this chapter give it plenty to do: a file may not exist, and a service may not answer. An `async` function does not reject the promise at the point you call it; it returns a promise that _later_ rejects. The thunk's job is to hand that promise back to the check, which it does by awaiting it:
+The toolkit also provides `checkError`, which runs the function it is given and passes only if that call fails with an error instead of producing a value. [Chapter 8](./08_errors) covers errors in depth. `checkError` awaits in the same way `checkExpect` does, which matters for the slow operations in this chapter, since a file may not exist and a service may not answer. An `async` function does not fail at the point you call it. It returns a promise that _later_ rejects, and the thunk hands that promise back to the check by awaiting it:
 
 ```typescript
 test("reading a missing file rejects the promise",
@@ -353,7 +351,7 @@ test("reading a missing file rejects the promise",
 );
 ```
 
-In this case, `checkError` is able to check that the promise has rejected rather than fulfilled. `checkError` also knows if a function returns a promise, allowing the compact version from `checkExpect` to also be used:
+Here `checkError` checks that the promise rejected rather than fulfilled. Because `checkError` detects when a function returns a promise, the compact form also works:
 
 ```typescript
 test("reading a missing file rejects the promise",
@@ -381,7 +379,7 @@ Should the return type of `slowlyReturnsThree` be `number` or `Promise<number>`?
 
 ## Reading and Writing Files
 
-With `async` and `await` in hand, files are within reach. Node, the runtime that executes our TypeScript programs, provides a standard library, and its file-system module exports the two functions that matter most: `readFile`, which delivers a file's contents, and `writeFile`, which replaces them. Both operations involve the disk latencies from the table at the start of this chapter, and both therefore return promises.
+With `async` and `await`, we can now read and write files. Node, the runtime that executes our TypeScript programs, provides a standard library whose file-system module exports the two functions we will use: `readFile`, which delivers a file's contents, and `writeFile`, which replaces them. Both involve the disk latencies from the table at the start of this chapter, so both return promises.
 
 ```typescript
 import { readFile, writeFile } from "fs/promises";
@@ -396,7 +394,7 @@ async function archiveReport(): Promise<void> {
 }
 ```
 
-Two things stand out. First, the documentation says what the function _modifies_, exactly as the mutation chapter required: writing a file is a side effect, one that outlives not just the function but the entire program. Second, the order of the `await`s is important: `writeFile` cannot start until the contents have arrived, and the sequence of awaits expresses that dependency naturally. The function pauses at the first `await`, resumes when the contents arrive, pauses at the second, and resumes when the write completes; the program as a whole never stops.
+The documentation says what the function _modifies_, as the mutation chapter required. Writing a file is a side effect that outlives not just the function but the entire program. The order of the `await`s also matters. `writeFile` cannot start until the contents have arrived, and the sequence of awaits expresses that dependency. The function pauses at the first `await`, resumes when the contents arrive, pauses at the second, and resumes when the write completes. The rest of the program keeps running throughout.
 
 <details class="tooltip ts-tips">
 <summary>Text encoding (the <code>"utf8"</code> argument)</summary>
@@ -407,7 +405,7 @@ Files on disk are stored as raw bytes. The second argument to `readFile` names t
 
 ## Calling Web Services
 
-The network is the second of the two capabilities this chapter promised. A **web service** is a program, running on another machine, that answers requests over the internet: ask it a question shaped like a URL, and it answers with data. The built-in function `fetch` makes the request and, being a slow network operation, returns a promise.
+The second capability this chapter introduces is calling web services. A **web service** is a program running on another machine that answers requests over the internet. You send it a request in the form of a URL, and it responds with data. The built-in function `fetch` makes the request and, because the network is slow, returns a promise.
 
 Suppose the regional weather network runs a service that reports current conditions for any station. Asking it for our station's temperature looks like this:
 
@@ -424,15 +422,15 @@ async function currentTemperature(stationId: string): Promise<number> {
 }
 ```
 
-There are two `await`s because the answer arrives in stages: the first delivers the response once the service has begun answering, and `response.json()` delivers the response's _body_, parsed from text into an object, which can itself take time for a large reply. After the second `await`, `report` is an ordinary object, and the function reads a property from it like any other.
+There are two `await`s because the answer arrives in stages. The first delivers the response once the service has begun answering. The second, `response.json()`, delivers the response's _body_, parsed from text into an object, which can itself take time for a large reply. After the second `await`, `report` is an ordinary object.
 
-The type annotation on `report` is a statement of _our expectation_, not something the compiler can verify: the data was manufactured by another machine at runtime, and no type checker can see across a network. If the service changes its reply format, the program will compile cleanly and then misbehave when it runs.
+The type annotation on `report` states _our expectation_, but the compiler cannot verify it. The data was produced by another machine at runtime, and the type checker cannot see across a network. If the service changes its reply format, the program will still compile, but will misbehave when it runs.
 
-The compiler's guarantees stop at the program's edge. At the edges, the discipline from the invariants chapters takes over: data arriving from outside should be _checked_ before the rest of the program relies on it. We will not build that checking today, but you should notice the boundary it belongs on.
+The compiler's guarantees stop at the program's edge. Data arriving from outside should be _checked_ before the rest of the program relies on it, as the invariants chapters described. We will not write that checking here, but this boundary is where it belongs.
 
 ## Waiting for Several Things at Once
 
-Everything so far has waited for one slow thing at a time. Real programs rarely want that. A weather station keeps a log per instrument, and a report needs all of them; a service answers one question per request, and a page needs several answers before it can draw anything. The obvious way to read three files is a loop:
+Everything so far has waited for one slow operation at a time. Real programs often need several. A weather station keeps a log per instrument, and a report needs all of them. A web page may need several answers from a service before it can display anything. The obvious way to read several files is a loop:
 
 ```typescript
 /**
@@ -448,18 +446,18 @@ async function readAllInTurn(paths: string[]): Promise<string[]> {
 }
 ```
 
-This produces the right answer, but goes about it inefficiently. The `await` sits _inside_ the loop. This means the second read cannot begin until the first has finished, and the third waits on the second. At the SSD figure from the table at the start of this chapter, three reads take 450 µs instead of 150 µs, and nineteen station files take nineteen times the wait. Nothing about the files demanded this; they have nothing to do with one another.
+This produces the right answer, but inefficiently. The `await` is _inside_ the loop, so the second read cannot begin until the first has finished, and the third waits on the second. At the SSD figure from the table at the start of this chapter, three reads take 450 µs instead of 150 µs, and nineteen files take nineteen times as long. The files are independent of one another, so there is no need to read them one at a time.
 
-This is the earlier lesson going unused. The disk does the waiting, not our thread, and the operating system is perfectly capable of having several requests outstanding at once. The loop above declines to use that: it waits for each answer to come back before it will even ask the next question.
+Recall that the disk does the waiting, not our thread, and the operating system can handle several requests at once. The loop above does not take advantage of this, because it waits for each answer before sending the next request.
 
-The mistake is easier to see once you separate two things that `await` glues together:
+The problem is easier to see once you separate two things that `await` combines:
 
 * _Calling_ a promise-returning function _starts_ the work.
 * _Awaiting_ the promise _collects_ the result.
 
-`await readFile(...)` does both on one line. That is exactly what you want when the next step depends on the last, which is why `archiveReport` was written that way: the write genuinely could not start before the read finished. It is exactly what you do not want when the operations are independent, because it starts each one only after collecting the one before.
+`await readFile(...)` does both on one line. This is right when the next step depends on the previous one, which is why `archiveReport` was written that way: the write could not start before the read finished. When the operations are independent, it is wasteful, because each operation starts only after the previous result has been collected.
 
-So start them all first, then collect them all:
+Instead, we can start all the reads first, and then collect the results:
 
 ```typescript
 /**
@@ -471,7 +469,7 @@ async function readAll(paths: string[]): Promise<string[]> {
 }
 ```
 
-There is no `await` inside the `map`, and that is the whole trick. Each call to `readFile` starts a read and hands back its receipt immediately, so by the time `map` has finished walking the array, every read is already in flight and the disk is working on them together. `Promise.all` then takes that array of receipts and returns a single promise that delivers once the last of them has arrived.
+There is no `await` inside the `map`. Each call to `readFile` starts a read and returns its promise immediately, so by the time `map` finishes, every read has started and the disk is working on them together. `Promise.all` then takes that array of promises and returns a single promise that is fulfilled once all of them have been fulfilled.
 
 ```text
 readAllInTurn   |--A--|--B--|--C--|     450 µs
@@ -480,11 +478,11 @@ readAll         |--A--|                 150 µs
                 |--C--|
 ```
 
-The total wait becomes the _slowest_ of the operations rather than the _sum_ of them, and the gap widens with every file added.
+The total wait is now the time of the _slowest_ operation rather than the _sum_ of all of them, and the difference grows with every file added.
 
-Two properties of `Promise.all` matter here. The first is that it turns an array of promises into a promise of an array, `Promise<T>[]` into `Promise<T[]>`, and the results come back in the order you supplied them, not the order they finished. If `humidity.txt` is tiny and arrives first, it is still second in the returned array because it was second going in. You never have to sort answers back into place.
+`Promise.all` has two useful properties. First, it turns an array of promises into a promise of an array, `Promise<T>[]` into `Promise<T[]>`, and the results come back in the order you supplied them, not the order they finished. If the second file is small and arrives first, it is still second in the returned array.
 
-The second is that a fixed set of operations can be destructured, and the type checker tracks each position separately:
+Second, when there is a fixed set of operations, the result can be destructured, and the type checker tracks each position separately:
 
 ```typescript
 const [current, history, calibration]: [string, string, string] = await Promise.all([
@@ -494,16 +492,16 @@ const [current, history, calibration]: [string, string, string] = await Promise.
 ]);
 ```
 
-This approach is recommended whenever a function needs several particular files, or several particular service calls, before it can do anything at all: name them, start them together, and examine what comes back.
+This approach works well whenever a function needs several specific files or service calls before it can continue.
 
-_When one of them fails._ `Promise.all` rejects as soon as _any_ one of its promises rejects, reporting that rejection's reason and not waiting for the rest. The other operations are not cancelled; they continue, and their results are discarded. For this chapter's policy of files that exist and services that answer, this is the behaviour you want: if one required file is missing, the whole operation cannot proceed, and failing at once with the reason is more useful than pressing on. The next chapter takes up what to do about such failures. If you ever need every outcome rather than the first failure, `Promise.allSettled` waits for all of them and reports each one separately, but usually `Promise.all` is the default suggestion.
+_When one of them fails._ `Promise.all` rejects as soon as _any_ of its promises rejects, reporting that rejection's reason without waiting for the rest. The other operations are not cancelled. They continue, and their results are discarded. This is usually the behaviour you want: if one required file is missing, the whole operation cannot proceed, and failing immediately with the reason is more useful than continuing. The next chapter covers how to handle such failures. If you need every outcome rather than the first failure, `Promise.allSettled` waits for all of them and reports each one separately, but `Promise.all` is the usual default.
 
-_When a loop is right after all._ Concurrency is the right default only because these operations are independent. When each step actually depends on the one before, a sequential loop is correct and `Promise.all` would be wrong: you cannot start a request that needs the previous request's answer. Writing files one after another to the same place, or walking a service's pages where each reply names the next page, are both genuinely sequential.
+_When a loop is correct._ Running operations concurrently is only correct when they are independent. When each step depends on the one before, a sequential loop is correct and `Promise.all` would be wrong, because you cannot start a request that needs the previous request's answer. Writing to the same file several times in order, or reading a service's pages where each reply names the next page, are both sequential.
 
 <details class="tooltip ts-tips">
 <summary>The <code>noAwaitInLoops</code> lint rule</summary>
 
-The lint configuration used in this course reports `await` in a loop body as an error. The rule exists because the loop shape is almost always accidental: it is what you get by writing the synchronous version and then adding `await` where the compiler asked for it, and the resulting code is correct but needlessly slow in a way no test is likely to detect. Treat the error as a question rather than an instruction: ask whether iteration _n_ needs anything from iteration _n − 1_. If it does not, the loop wants to be `map` plus `Promise.all`.
+The lint configuration used in this course reports `await` in a loop body as an error. The rule exists because this pattern is usually accidental. It is what you get by writing the synchronous version and then adding `await` where the compiler asks for it, and the resulting code is correct but slow in a way tests rarely detect. When you see the error, ask whether iteration _n_ needs anything from iteration _n − 1_. If it does not, use `map` and `Promise.all` instead.
 
 </details>
 
@@ -532,7 +530,7 @@ async function versionTwo(): Promise<number> {
 ```
 
 1. Both return the same number. Which finishes sooner, and roughly by how much, if each read takes 150 µs?
-2. `versionTwo` has no loop, so the lint rule is silent about `versionOne` too. Is `versionOne` nevertheless the same mistake? Explain what makes the two equivalent.
+2. Neither function has a loop, so the lint rule is silent about both. Is `versionOne` nevertheless the same mistake as `readAllInTurn`? Explain what makes the two equivalent.
 3. In `versionTwo`, the three reads all start before the `await` on the line below them. What line does the first read actually start on?
 4. Suppose `b.txt` does not exist. In each version, does `a.txt` get read? Does `c.txt`?
 
@@ -540,15 +538,15 @@ async function versionTwo(): Promise<number> {
 
 ## When Slow Things Fail
 
-Everything in this chapter can fail in ways pure computation cannot: a file may not exist, a network may be down, a service may answer nonsense. This is what the rejected state of a promise is for, and when an `await`ed promise rejects, the error surfaces in your program at the `await`.
+The operations in this chapter can fail in ways pure computation cannot. A file may not exist, a network may be down, or a service may return malformed data. This is what the rejected state of a promise is for. When an awaited promise rejects, the error appears in your program at the `await`.
 
-Handling these failures well is complex: we will defer this subject to the next chapter, rather than compressing that complexity into a paragraph in this already-complex chapter.
+Handling these failures well is the subject of the next chapter.
 
-For this chapter and its exercises, the policy is simple: we will work with files that exist and services that answer. If your program crashes, read the message it crashed with and fix the bug it points at (the most common error is that a path or URL is not quite right). Crashing immediately with a clear message is acceptable behaviour for a program at this stage; handling failures more gracefully comes later.
+For this chapter and its exercises, we will assume files exist and services answer. If your program crashes, read the error message and fix the bug it points to. The most common cause is a path or URL that is not quite right. At this stage, crashing immediately with a clear message is acceptable.
 
 ## From Mechanics to Abstraction
 
-Mutation introduced state and time _inside_ the program. Asynchrony extends time to the world _outside_ the program: data lives on disks and on other machines, and arrives only after a wait. The program need not spend all that time standing still. The model TypeScript gives us is single-threaded and deferred: slow operations hand back promises, `await` collects their values while the lone thread stays busy, and `async` marks every function that participates. With files and web services available, our programs can act on data that comes from outside their own source code.
+Mutation introduced state and time _inside_ the program. Asynchrony extends this to the world _outside_ the program, where data lives on disks and other machines and arrives only after a wait. TypeScript's model is single-threaded and deferred. Slow operations return promises, `await` collects their values while the thread does other work, and `async` marks every function that waits. With files and web services available, our programs can work with data from outside their own source code.
 
 <details class="tooltip exercise">
   <summary>Exercise: A Journal on Disk</summary>
