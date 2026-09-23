@@ -32,7 +32,7 @@ Many languages (e.g., Java and Rust) let a program run several threads at once. 
 
 TypeScript makes a different design decision. A TypeScript program runs on a single thread. Exactly one statement is executing at any moment. This means you never have to wonder whether some other thread changed an object between two of your statements. The model is simple to reason about and easy to use.
 
-But a single thread exposes us to the dilemma of waiting. If the only thread blocks while waiting for a file to be read from disk, the entire program appears to have hung. To get around this, TypeScript provides a mechanism for a program to _start_ a slow operation, carry on with other work immediately, and come back to the result when it is ready. Computation that is set aside to run later like this is called **deferred computation**.
+But a single thread exposes us to the dilemma of waiting. If the only thread blocks while waiting for a file to be read from disk, the entire program appears to have hung. To get around this, TypeScript provides a mechanism for a program to _start_ a slow operation, carry on with other work immediately, and come back to the result when it is ready. Computation that is set aside to run later like this is called **deferred computation**, and it is the central idea of this chapter.
 
 <details class="tooltip deep-dive">
 <summary>Threads Elsewhere, and Why TypeScript Has One</summary>
