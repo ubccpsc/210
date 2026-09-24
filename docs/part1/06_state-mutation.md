@@ -190,7 +190,7 @@ Arrays are objects, and they mutate the same ways. Elements can be replaced thro
 
 ```typescript
 day.push({ hour: 22, tempCelsius: -3 });   // adds a seventh reading to the end
-const removed: Reading = day.pop();                 // removes that reading; day has six again
+const removed: Reading | undefined = day.pop();   // removes and returns that reading; day has six again
 day[0] = { hour: 5, tempCelsius: -6 };     // replaces the first element entirely
 day[1].tempCelsius = -2;                   // reaches into the second element and changes it
 ```
@@ -376,11 +376,6 @@ function calibrate(reading: Reading, offset: number): void {
 }
 
 const morning: Reading = { hour: 6, tempCelsius: -4 };
-
-test("collect the morning reading",
-	checkExpect(() => morning.tempCelsius, -4)
-);
-
 calibrate(morning, 1);
 
 test("calibrate changes the caller's object",
@@ -401,15 +396,10 @@ _3. Reassigning an object parameter: still invisible._  One tricky aspect of pas
 
 ```typescript
 function reset(reading: Reading): void {
-    reading = { hour: reading.hour, tempCelsius: 0 };  
+    reading = { hour: reading.hour, tempCelsius: 0 };
 }
 
 const evening: Reading = { hour: 21, tempCelsius: -2 };
-
-test("reset leaves the caller's object unchanged",
-	checkExpect(() => evening.tempCelsius, -2)
-);
-
 reset(evening); // reset redirected its local arrow only
 
 test("reset leaves the caller's object unchanged",

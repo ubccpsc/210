@@ -116,9 +116,9 @@ letterGrade(score: number): string
 The function signature:
 
 ```typescript
-fn(x: X, y: Y, b: Z): A
+fn(x: X, y: Y, z: Z): A
 ```
-defines a function with the name `fn`, with parameters: `x` of type `X`, `y` of type `Y`, and `b` of type `Z`. It also specifies that `fn` returns a value of type `A`. A function signature can have any number of parameters.
+defines a function with the name `fn`, with parameters: `x` of type `X`, `y` of type `Y`, and `z` of type `Z`. It also specifies that `fn` returns a value of type `A`. A function signature can have any number of parameters.
 
 Parameter types come after the parameter they type, separated by a `:`. The return type is placed after the parameter list, following a second `:`.
 </details>
@@ -147,7 +147,7 @@ But either way, ISL does not use the signature to check that `letter-grade` is i
 
 ```racket
 ; no error reported before running the program
-(letter-grade "Hello")  
+(letter-grade "Hello")
 ```
 
 </details>
@@ -279,7 +279,7 @@ if (grade >= 50) {
 A block statement is started by `{` and `}`. It groups together a list of statements:
 
 ```typescript
-{ 
+{
    <statement-1>;
    <statement-2>;
    <statement-3>;
@@ -326,7 +326,7 @@ if (<condition>) {
 
 There is one exception to this: we will allows `<else-statement>` to not be a block when it is another if statement. This allows us to create multi-condition statements, by chaining together `if-else` statements:
 
-```typescript 
+```typescript
 // else if version
 if (<condition-1>) {
    <cond-1-then-block-contents>
@@ -339,7 +339,7 @@ if (<condition-1>) {
 
 This `else if` syntax is clear enough that we don't add `{` around the second if statement. But the program would behave the same way if we did:
 
-```typescript 
+```typescript
 // nested ifs version
 if (<condition-1>) {
    <cond-1-then-block-contents>
@@ -347,7 +347,7 @@ if (<condition-1>) {
    if (<condition-2>) { // second if statement starts here
        <cond-2-then-block-contents>
    } else {
-   <cond-2-else-block-contents>
+       <cond-2-else-block-contents>
    }
 }
 ```
@@ -384,9 +384,9 @@ The `return` keyword is necessary to make functions in TypeScript return values.
 <details class="tooltip ts-tips">
 <summary><code>return</code> Statements</summary>
 
-`return <expression>;` evaluates the expression ` <expression>` to a value `v` (i.e., `2 + 3` to `5`), stops executing the function there, and returns this `v` to the caller of the function.
+`return <expression>;` evaluates the expression `<expression>` to a value `v` (i.e., `2 + 3` to `5`), stops executing the function there, and returns this `v` to the caller of the function.
 
-For instance, if `return <expression>;` is in the function `foo`, wherever the call `foo()` appears, when we execute `return  <expression>;` within `foo`, `foo` evaluates `<expression>` to `v`, and the call to `foo()` is then replaced with `v`.
+For instance, if `return <expression>;` is in the function `foo`, wherever the call `foo()` appears, when we execute `return <expression>;` within `foo`, `foo` evaluates `<expression>` to `v`, and the call to `foo()` is then replaced with `v`.
 
 The `return` statement only makes sense if it appears in a function definition (or method definition, which we'll see in [Part 2](../part2/index)).
 </details>
@@ -516,7 +516,7 @@ checkExpect(() => <actual>, <expected>);
 
 `<actual>` is an expression whose value you want to check. This is usually a call to the function under test, such as `letterGrade(88)`. It is wrapped in `() =>`, an _anonymous_ **arrow function** (a syntax we explain below), so that the expression is not evaluated where you write it: `checkExpect` decides when to run it. A parameterless function that wraps up a computation this way is called a **thunk**, programming jargon from the 1960s glossed as the past tense of _think_: an expression already thought about, set aside to be evaluated when it is needed. `<expected>` is the value you are claiming that expression should produce, such as `"A"`.
 
-Note that there are no braces around `<actual>`, and no `return` in front of it. This is deliberate. An arrow function written as `() => <expression>`, with no `{ }`, _implicitly returns_ the value of that single expression, so `() => letterGrade(88)` is a function that returns `"A"` when it is called. Adding braces would change the meaning: `() => { letterGrade(88) }` calls `letterGrade` and then returns nothing, so the check would compare `undefined` against `"A"` and fail. Write the thunk as a single expression with no braces, and the value flows to `checkExpect` on its own.
+Note that there are no braces around `<actual>`, and no `return` in front of it. This is deliberate. An arrow function written as `() => <expression>`, with no `{ }`, _implicitly returns_ the value of that single expression, so `() => letterGrade(88)` is a function that returns `"A"` when it is called. Adding braces would change the meaning: `() => { letterGrade(88) }` calls `letterGrade` and then returns nothing. The compiler rejects that check before it can run, because a thunk that returns nothing cannot be compared with `"A"`. Write the thunk as a single expression with no braces, and the value flows to `checkExpect` on its own.
 
 When the check runs, it calls the thunk and compares the value it returns against `<expected>`. If they are equal, the check passes. If they differ, the check fails and reports a message describing the expected behaviour that was violated, so you can see which expectation failed and what was produced instead.
 
@@ -537,7 +537,7 @@ test(<description>, checkExpect(() => <actual>, <expected>));
 
 `test` takes two arguments. `<description>` is a string that names the case, such as `"Score of 88 returns an A"`. It is printed in the test output, so it should state what the case checks. The second argument is the check that forms the body of the test. Each test case holds exactly one `checkExpect`, so a test that fails always names the single expectation that was violated.
 
-When the test suite is executed, each test file is executed top-to-bottom running each test in turn. If the check passes, the case passes. If it fails, the case fails, and the framework reports the case's description along with the message from the check that failed.
+When the test suite is executed, each test file is first run from top to bottom, which registers its test cases, and then the registered cases run in order. If the check passes, the case passes. If it fails, the case fails, and the framework reports the case's description along with the message from the check that failed.
 
 </details>
 
@@ -573,14 +573,14 @@ In this case the test would fail, because `letterGrade(95)` evaluates to `"A"` i
 Arrow functions have two forms. The first has a single expression in its body:
 
 ```typescript
-(x: X, y: Y, b: Z) => <return-exp>
+(x: X, y: Y, z: Z) => <return-exp>
 ```
-this defines an anonymous function with  3 parameters (`x`, `y`, `b` of types `X`, `Y`, `Z`), which, when called, evaluates the expression `<return-exp>` with the given argument values, and returns the resulting value. There is no `return` keyword here, and there are no braces: a single-expression arrow function _implicitly returns_ the value of its expression. This is the form the thunks we pass to `checkExpect` always take.
+this defines an anonymous function with 3 parameters (`x`, `y`, `z` of types `X`, `Y`, `Z`), which, when called, evaluates the expression `<return-exp>` with the given argument values, and returns the resulting value. There is no `return` keyword here, and there are no braces: a single-expression arrow function _implicitly returns_ the value of its expression. This is the form the thunks we pass to `checkExpect` always take.
 
 The second form has a block expression as its body:
 
 ```typescript
-(x: X, y: Y, b: Z) => {
+(x: X, y: Y, z: Z) => {
     <statement-1>;
     <statement-2>;
     <statement-3>;

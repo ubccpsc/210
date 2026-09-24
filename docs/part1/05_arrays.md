@@ -310,7 +310,7 @@ Always pass a comparator. Called without one, `toSorted` converts each element t
 `slice` returns an ordered subset of the array from an index `i` (inclusive) to an index `j` (exclusive):
 
 ```typescript
-const temperatures: number[] = [6, 9, 8, 10, 10, 12, 13, 15, 10, 7, 5]
+const temperatures: number[] = [6, 9, 8, 10, 10, 12, 13, 15, 10, 7, 5];
 ```
 
 ```typescript
@@ -339,10 +339,10 @@ for (const reading of day) {
 A `for of` loop of the form:
 
 ```typescript
-for(<var-declaration> of <iterable>){
-   <statement-1>;
-   <statement-2>;
-} 
+for (<var-declaration> of <iterable>) {
+    <statement-1>;
+    <statement-2>;
+}
 ```
 is a statement that executes as follows, for each element of `<iterable>`:
 
@@ -523,7 +523,7 @@ const restored = JSON.parse(text);
 
 `restored` now holds an array of objects, which the named operations we have been discussing can act upon.
 
-Two cautions follow from JSON being nothing but text. The first is that _the conversion is lossy in one direction_. JSON has no notation for a date, `undefined`, or a function, so `JSON.stringify` drops them without complaint. A value that goes through `stringify` and back through `parse` equals the original only when everything in it was a kind JSON can express. The second is that _`JSON.parse` cannot know what the text contains_. The text is not available until the program runs, so the compiler cannot inspect it or give the result a meaningful type. An annotation does not fix this:
+Two cautions follow from JSON being nothing but text. The first is that _the conversion is lossy in one direction_. JSON has no notation for a date, `undefined`, or a function. `JSON.stringify` turns a date into a string, and leaves out object properties whose value is `undefined` or a function, without complaint. A value that goes through `stringify` and back through `parse` equals the original only when everything in it was a kind JSON can express. The second is that _`JSON.parse` cannot know what the text contains_. The text is not available until the program runs, so the compiler cannot inspect it or give the result a meaningful type. An annotation does not fix this:
 
 ```typescript
 const readings: Reading[] = JSON.parse(text);   // hoped for, not checked

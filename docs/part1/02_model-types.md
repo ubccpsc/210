@@ -160,7 +160,7 @@ type ShuffleMode = "off" | "on" | "repeat-one";
 5. _Concrete examples:_ again, we will have one correct and one incorrect mode:
 ```typescript
 const mode: ShuffleMode = "on"; // ok
-const mode2: ShuffleMode = "repeat-album"; //error
+const mode2: ShuffleMode = "repeat-album"; // error: "repeat-album" is not a ShuffleMode
 ```
 6. _Generalisation:_ nothing to generalize, all possible cases are expressed.
 
@@ -196,7 +196,7 @@ To express a type that groups multiple pieces of data together, we use _object t
 type TypeName = {
   prop_1: Type1;
   prop_2: Type2;
-  prop_3: Type3; 
+  prop_3: Type3;
 };
 ```
 declares a type `TypeName` which has 3 pieces of data. Each piece of data has a name (`prop_x` above) and a type (`TypeX`) above.
@@ -323,7 +323,6 @@ digraph Playlist {
 
   n1 [shape = record, label = "<k> songs | <f> first: Song | <r> rest: Playlist"];
   n2 [shape = record, label = "<k> songs | <f> first: Song | <r> rest: Playlist"];
-  e  [shape = record, label = "empty"];
 
   s1 [shape = note, label = "Song A"];
   s2 [shape = note, label = "Song B"];
@@ -488,30 +487,26 @@ test("equal strings are equal",
     checkExpect(() => "cpsc210" === "cpsc210", true)
 );
 
-test("a number is not a string", checkExpect(() => 1 === "1", false));
-
-test("a boolean is not a string",
-    checkExpect(() => true === "true", false)
-);
+1 === "1";        // compile error: the types 'number' and 'string' have no overlap
+true === "true";  // compile error: the types 'boolean' and 'string' have no overlap
 ```
 
-We do this because it is almost always the case that when we want a 2, we want the number 2, not the string "2", or we would have used "2".
+A value of one type is never strictly equal to a value of another, and when TypeScript can see that the types differ, as in the last two lines, it rejects the comparison before the program runs. We do this because it is almost always the case that when we want a 2, we want the number 2, not the string "2", or we would have used "2".
 
-Some examples of why this can be confusing with non-strict equality (`==`) can be seen below. These results are not visible statically. They only appear when you run the program, which often leads to surprises. Because of this we will encourage you to always use `===` in this course.
+Non-strict equality (`==`) converts its operands to a common type before comparing them, which can be confusing:
 
 ```typescript
 test("a number loosely equals itself", checkExpect(() => 1 == 1, true));
-
-test("a number loosely equals a string", checkExpect(() => 1 == "1", true));
 
 test("a boolean loosely equals itself",
     checkExpect(() => true == true, true)
 );
 
-test("a boolean loosely equals a number",
-    checkExpect(() => true == 1, true)
-);
+1 == "1";   // compile error in TypeScript
+true == 1;  // compile error in TypeScript
 ```
+
+TypeScript rejects the last two lines because it can see that the types differ. When the types are not known in advance, for example for data read from a file or a network, `==` still converts the values when the program runs, and the result is often a surprise. Because of this, always use `===` in this course. The course's lint rules report every use of `==` as an error.
 </details>
 
 The same idea holds for a tagged union, but we branch on `kind`. After the check, the matching case's properties are available and read with dot notation, so `p.first.title` selects the first song, then its title:
@@ -530,12 +525,12 @@ Checking the discriminator also unlocks the case's data. This is called **type n
 
 
 ```typescript
-function firstTitle(p: Playlist): string  {
+function firstTitle(p: Playlist): string {
   if (p.kind === "empty") {
     // Error: Property 'first' does not exist on type 'EmptyPlaylist'
-    return p.first.title; 
+    return p.first.title;
   } else {
-    return p.first.title; 
+    return p.first.title;
   }
 }
 ```

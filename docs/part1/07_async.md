@@ -234,8 +234,8 @@ The caller gets a receipt and collects it the same way, with `await`. This means
 The keyword `async` declares that a function may wait on a promise.
 
 ```typescript
-async function f(x: X, y: Y, z: B): Promise<T> {
-      // function body must return a T 
+async function f(x: X, y: Y, z: Z): Promise<T> {
+      // function body must return a T
       // or a Promise<T>
 }
 ```
@@ -308,7 +308,7 @@ This layered design is why a single thread is enough. The waiting is done by the
 
 </details>
 
-The most common mistake in asynchronous code is calling a promise-returning function and forgetting the `await`. Sometimes the type checker catches it, as the `console.log` example in the previous section showed. But when the result is not used at all, the types raise no objection. A bare `loadReport();` on its own line compiles, starts the work, and continues without waiting, which is almost never what the surrounding code intends. The lint rules used in this course flag every call to a promise-returning function that is not awaited. When you see that warning, treat it as a bug.
+The most common mistake in asynchronous code is calling a promise-returning function and forgetting the `await`. Sometimes the type checker catches it, for example when the promise is assigned to a variable declared as `string`. Sometimes the mistake only shows up when the program runs, as in the `console.log` example in the previous section, which printed a pending promise instead of the file's text. When the result is not used at all, the types raise no objection. A bare `loadReport();` on its own line compiles, starts the work, and continues without waiting, which is almost never what the surrounding code intends.
 
 <details class="tooltip ts-tips">
 <summary>Testing <code>async</code> Functions</summary>
@@ -335,9 +335,9 @@ checkExpect(async () => {
 }, true);
 ```
 
-the thunk computes the answer but does not return it, so `checkExpect` receives `undefined` and the test fails. Whenever you use braces, check whether a `return` is needed. When a check fits in a single expression, prefer the form without braces.
+the thunk computes the answer but does not return it. The compiler rejects this call before the test can run: a thunk that returns nothing can only be compared with nothing, so the error points at `true`, saying that a `boolean` is not assignable to `void`. Whenever you use braces, check whether a `return` is needed. When a check fits in a single expression, prefer the form without braces.
 
-`checkExpect` awaits whatever its function produces, so the test does not finish until every `await` inside it has completed. If you forget the `await` before an async call, the check compares a `Promise` object rather than the value it delivers, and fails with a confusing message.
+`checkExpect` awaits whatever its function produces, so the test does not finish until every `await` inside it has completed. This also means `checkExpect(() => loadReport(), expected)` works without an `await`, because the check awaits the promise the thunk returns. Inside a block body, though, each async call still needs its own `await`. Without it, the next line works with a promise rather than the value it delivers.
 
 The toolkit also provides `checkError`, which runs the function it is given and passes only if that call fails with an error instead of producing a value. [Chapter 8](./08_errors) covers errors in depth. `checkError` awaits in the same way `checkExpect` does, which matters for the slow operations in this chapter, since a file may not exist and a service may not answer. An `async` function does not fail at the point you call it. It returns a promise that _later_ rejects, and the thunk hands that promise back to the check by awaiting it:
 
@@ -362,11 +362,12 @@ test("reading a missing file rejects the promise",
 <details class="tooltip exercise">
 <summary>Check your Understanding of <code>async</code></summary>
 
-Consider the following piece of code:
+Consider the following piece of code. It uses the promise-returning version of `setTimeout` from Node's `timers/promises` module, which waits the given number of milliseconds and then fulfills with the given value:
 ```typescript
+import { setTimeout } from "timers/promises";
 
 async function slowlyReturnsThree(): Promise<number> {
-    const three: number = await setTimeout(() => 3, 10000);
+    const three: number = await setTimeout(10000, 3);
     return three;
 }
 ```

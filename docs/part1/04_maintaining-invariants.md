@@ -126,21 +126,21 @@ So far, every object property we have used has held a data value: `song.title` h
 A property can also hold a _function_. In particular:
 ```typescript
 type T = {
-  foo(x: X, b: Y): Z;
+  foo(x: X, y: Y): Z;
 };
 ```
-declares a function property `foo` on the type `T`. `foo` takes two parameters, `x` and `b`, of types `X` and `Y`, and returns a value of type `Z`.
+declares a function property `foo` on the type `T`. `foo` takes two parameters, `x` and `y`, of types `X` and `Y`, and returns a value of type `Z`.
 
 In an object literal, the property is written like a function declaration without the `function` keyword:
 ```typescript
 {
-  foo(x: X, b: Y): Z {
-     // statements to
+  foo(x: X, y: Y): Z {
+    // statements that compute and return a Z
   }
 };
 ```
 
-If `t` is of type `T`, we can call the function property `foo` with dot notation: `t.foo(an_x, a_b)`.
+If `t` is of type `T`, we can call the function property `foo` with dot notation: `t.foo(an_x, a_y)`.
 
 We will revisit what it means for behaviour to belong to data like this when we introduce object-oriented programming in [Part 2](../part2/index).
 
@@ -209,6 +209,8 @@ Note the `local` is not strictly necessary. We could put lambdas directly in `ma
            (make-counter-interface (lambda () (make-counter (+ n 1))) (lambda () n))]))
 ```
 But, you might find this version without `local` a little less readable.
+
+One difference from the ISL you used: `increment` and `get-count` take no arguments, and ISL requires every function to have at least one parameter. These examples need Advanced Student Language, which allows functions with no parameters.
 </details>
 
 We already know all the syntax we need to create closures in TypeScript: function declarations, object literals, and functions as object properties. Let's put these together to write a constructor function that returns a `Counter` whose functions close over the current count, protecting the fire-safety invariant:
@@ -222,9 +224,9 @@ const MAX_CAPACITY: number = 1000;
  * Invariant: the count must not exceed MAX_CAPACITY.
  */
 type Counter = {
-    increment(): Result<Counter, string>;
-    getCount(): number;
-}
+  increment(): Result<Counter, string>;
+  getCount(): number;
+};
 
 /**
  * Creates a counter holding the given count.
@@ -295,7 +297,7 @@ test("the counter refuses to count past capacity",
 <details class="tooltip ts-tips">
 <summary><code>assertOk</code></summary>
 
-The setup above needs the `Counter` inside each `Result`. The toolkit's `assertOk` takes a `Result` and returns its `value` when `ok` is `true`. If the `Result` is `ok: false`, the test fails and reports the error the `Result` carried. It lets a test state that a step must succeed, since the test is only meaningful if it does. 
+The setup above needs the `Counter` inside each `Result`. The toolkit's `assertOk` takes a `Result` and returns its `value` when `ok` is `true`. If the `Result` is `ok: false`, `assertOk` throws an error that includes the error the `Result` carried. Here it is called outside any test, so a failure stops the whole file before any of its tests run. It lets a test state that a step must succeed, since the test is only meaningful if it does. 
 
 </details>
 
@@ -317,8 +319,8 @@ const MAX_CAPACITY: number = 1000;
  * Invariant: the count must not exceed MAX_CAPACITY.
  */
 type Counter = {
-    n: number;
-}
+  n: number;
+};
 
 /**
  * Creates a counter holding the given count.
@@ -333,7 +335,7 @@ function makeCounter(count: number): Result<Counter, string> {
   if (count > MAX_CAPACITY) {
     return { ok: false, error: "the venue is full" };
   }
-  return { ok: true, value: {n: count} };
+  return { ok: true, value: { n: count } };
 }
 
 /**

@@ -107,12 +107,12 @@ For function doc comments in this course, we'll use syntax that's consistent wit
  *
  * Precondition: list any preconditions
  * Postcondition: list any postconditions
- * 
+ *
  * @param {typeofParam1} param1Name a description of param1Name's purpose
  * @param {typeofParam2} param2Name a description of param2Name's purpose
  * @returns {typeofReturn} describe what the return value expresses
  */
- function foo(param1Name: typeofParam1, param2Name: typeofParam2): typeofReturn
+function foo(param1Name: typeofParam1, param2Name: typeofParam2): typeofReturn
 ```
 </details>
 
@@ -450,7 +450,7 @@ function renew(loan: Loan): Result<Loan, string> {
 }
 ```
 
-Both outcomes are _documented_ in the postcondition, and the postcondition names the exact value the caller receives in each case. So both are tested the same way, with `checkExpect`, exactly as we tested every clause of the `lateFee` contract:
+Both outcomes are _documented_ in the postcondition, and the postcondition says what the caller receives in each case. So both are tested the same way, with `checkExpect`, exactly as we tested every clause of the `lateFee` contract:
 
 ```typescript
 const fresh: Loan = { title: "Clean Code", renewalsRemaining: 2 };
