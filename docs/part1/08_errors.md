@@ -1,10 +1,10 @@
 # Designing for Failure
 
-Every function's contract describes both what happens when the function works and what happens when it doesn't work. A function that looks up a course section must also handle what happens when the section doesn't exist, and a function that enrols a student in a course must handle what happens when they lack a required prerequisite. Failures must be designed as deliberately as successes, so that a design has a consistent failure model. Error handling should then stay out of the way when the system is working, and make it hard to do the wrong thing when it is not.
+Every function's contract describes both what happens when the function works and what happens when it doesn't work. A function that looks up a course section must also say what happens when the section doesn't exist, and a function that enrols a student in a course must say what happens when they lack a required prerequisite. Failures must be designed as deliberately as successes, so that a design has a consistent failure model. Error handling should then stay out of the way when the system is working, and make it hard to do the wrong thing when it is not.
 
-Every function call has one of two outcomes. A **successful outcome** is the one the function exists to produce, such as enrolling the student in a section. An **erroneous outcome** is any other result, such as a section that does not exist. Erroneous outcomes are not a bugs. They are foreseeable results that belongs in the function's contract, so the caller knows these outcomes can happen and can learn how they know when they have occurred. _Error_ and _failure_ are often used interchangeably to mean an erroneous outcome.
+Recall from [Chapter 3](./03_checking-invariants#erroneous-outcomes) that every function call has either a **successful outcome**, such as enrolling the student in a section, or an **erroneous outcome**, such as a section that does not exist. An erroneous outcome is not a bug. It belongs in the function's contract, so the caller knows it can happen and how to tell when it has. _Error_ and _failure_ are often used interchangeably to mean an erroneous outcome.
 
-This chapter is about how a function communicates an erroneous outcome to its caller. There are two commonly-used mechanisms for communicating failures. A function can _return_ its failure as an ordinary value, or it can _throw_ an exception that travels up the call stack until something handles it. Each error-signalling approach has strengths and weaknesses.
+This chapter is about how a function communicates an erroneous outcome to its caller. There are two common mechanisms. A function can _return_ its failure as an ordinary value, or it can _throw_ an exception that travels up the call stack until something handles it. Each has strengths and weaknesses.
 
 #### A Student Enrolling in Sections
 
@@ -12,7 +12,7 @@ This chapter will use a running example:
 
 > As a registration system, I want to enrol a student in a chosen set of sections and report the first problem I encounter, so that the student knows exactly what needs fixing.
 
-We model a subset of this problem: a catalogue of sections, each listing the prerequisite courses they require, and a student with a record of the courses they have already completed. A section with no prerequisites lists an empty `prerequisite` array.
+We model a subset of this problem: a catalogue of sections, each listing the courses it requires first, and a student with a record of the courses they have already completed. A section with no prerequisites has an empty `prerequisite` array.
 
 ```typescript
 type Section = {
@@ -42,8 +42,8 @@ The first mechanism for reporting errors was introduced in the [checking invaria
 
 ```typescript
 type Result<T, E> =
-  | { ok: true, value: T }
-  | { ok: false, error: E };
+  | { ok: true; value: T }
+  | { ok: false; error: E };
 ```
 
 Each function returns a `Result`. The success case holds the section, and the failure case holds a message explaining what went wrong.
@@ -84,7 +84,7 @@ function checkPrerequisite(student: Student, section: Section): Result<Section, 
 }
 ```
 
-The primary benefit of this approach is that the failure is captured by the type. A caller of `findSection` receives a `Result<Section, string>`, not a `Section`, so the compiler will not let them access `.value` without first checking `.ok`. The type checker forces the caller to deal with the error case.
+The main benefit of this approach is that the failure is part of the type. A caller of `findSection` receives a `Result<Section, string>`, not a `Section`, so the compiler will not let them access `.value` without first checking `.ok`.
 
 Since the returned failure is an ordinary value, it can be tested like any other value:
 
@@ -115,7 +115,7 @@ test("a missing prerequisite returns a failure value",
 
 ### The Cost of Interleaving
 
-This mechanism imposes a cost on every caller. The function's return value cannot be used directly. Every caller must first check `.ok`, and only once it has confirmed success may it access `.value`. Even a single call is wrapped in a check, so the handling of the failure case is interleaved with the code that handles the success paths. The function below enrols a student in _several_ sections. The error handling design in the functions above mean `enrolAll` spends most of its implementation managing failures:
+This mechanism imposes a cost on every caller. The function's return value cannot be used directly. Every caller must first check `.ok`, and only once it has confirmed success may it access `.value`. Even a single call is wrapped in a check, so the code that handles failure is interleaved with the code that handles success. The function below enrols a student in _several_ sections. Because of the error handling design in the functions above, `enrolAll` spends most of its implementation managing failures:
 
 ```typescript
 /**
@@ -144,9 +144,9 @@ function enrolAll(catalogue: Section[], student: Student, ids: string[]): Result
 }
 ```
 
-Of the eight lines in this function, four exist only to detect a failure and return it. `enrolAll` cannot do anything useful about an unknown section or a missing prerequisite. Only whatever called `enrolAll` can respond, perhaps by showing the student an error message. But `enrolAll` still has to unpack each `Result` and return it again, only to pass the failure back to its caller.
+Of the nine lines in the loop, six exist only to detect a failure and return it. `enrolAll` cannot do anything useful about an unknown section or a missing prerequisite. Only whatever called `enrolAll` can respond, perhaps by showing the student an error message. But `enrolAll` still has to check each `Result` and hand any failure back to its caller.
 
-This makes the function harder to read. The success path (often called the _happy path_), which runs almost every time, is just a simple sequence consisting of "find the section, check the prerequisite, add it to the list". In the design above, that sequence is broken up by a failure check between each step. This is the cost of returning failure as a value. Every layer between the function that _detects_ a problem and the function that _handles_ it must manage the failure, and that handling gets in the way of reading the function's main logic. When detection and handling are next to each other this might be OK, but when handling is far from where the failure arises, exceptions can be more appropriate.
+This makes the function harder to read. The success path (often called the _happy path_), which runs almost every time, is three steps: "find the section, check the prerequisite, add it to the list". In the design above, a failure check sits between each step. This is the cost of returning failure as a value. Every layer between the function that _detects_ a problem and the function that _handles_ it must manage the failure, and that handling gets in the way of reading the function's main logic. When detection and handling are next to each other this might be OK, but when handling is far from where the failure arises, exceptions can be more appropriate.
 
 <details class="tooltip deep-dive">
 <summary>Other Ways to Return Failures as Values</summary>
@@ -156,7 +156,44 @@ This makes the function harder to read. The success path (often called the _happ
 
 ## Throwing an Exception
 
-Another error-handling mechanism that does not encode the error in the return type is exceptions. When an error is encountered, we **throw** an **exception** by executing a `throw` statement. Throwing an exception immediately abandons the rest of the current function and hands the exception to that function's caller. If the caller does not handle it, the exception is handed to _its_ caller, and so on up the call stack.
+The second mechanism, exceptions, keeps the error out of the return type. When an error is encountered, we **throw** an **exception** by executing a `throw` statement. Throwing an exception immediately abandons the rest of the current function and hands the exception to that function's caller. If the caller does not handle it, the exception is handed to _its_ caller, and so on up the call stack.
+
+<details class="tooltip deep-dive">
+<summary>What Is a Call Stack?</summary>
+
+When one function calls another, the caller pauses partway through and waits for the called function to return before continuing. The called function may call a third, which pauses it in turn. At any moment there is a chain of paused functions, each waiting on the one it called. That chain is the **call stack**.
+
+It is called a stack because it grows and shrinks at one end only, like a stack of plates. Consider:
+
+```typescript
+function a(): void {
+    b();                      // a pauses here while b runs
+    console.log("a is done");
+}
+
+function b(): void {
+    c();                      // b pauses here while c runs
+    console.log("b is done");
+}
+
+function c(): void {
+    console.log("c is running");
+}
+
+a();
+```
+
+<!-- RTH: consider replacing this with a diagram, although it is a classic sidebar for this course  -->
+
+Calling `a` adds a frame for `a` to the stack. `a` calls `b`, adding a frame for `b` on top, and `b` calls `c`, adding `c`. The stack is now `a`, then `b`, then `c`, with `c` on top. When `c` returns, its frame is removed and `b` resumes. When `b` returns, its frame is removed and `a` resumes. Each function returns control to the point in its caller where it paused, so the output is:
+
+```
+c is running
+b is done
+a is done
+```
+
+</details>
 
 <details class="tooltip ts-tips">
 <summary><code>throw</code> Syntax</summary>
@@ -171,10 +208,10 @@ function attempt(): void {
 }
 ```
 
-If `(A)` runs and the `throw` is reached, `(B)` never runs. A `throw` leaves the function immediately, much as `return` does, with two differences. First, the exception carries an error rather than an ordinary value, and the caller does not receive that error as a result. Second, the exception error travels up the chain of callers, as described above.
+If `(A)` runs and the `throw` is reached, `(B)` never runs. A `throw` leaves the function immediately, much as `return` does, with two differences. First, the exception carries an error rather than an ordinary value, and the caller does not receive that error as a result. Second, the exception travels up the chain of callers, as described above.
 </details>
 
-When `requireSection` finds that the section does not exist, it can `throw new Error(...)` to signal this to its callers. The function also no longer returns a `Result`. It returns a `Section`, the value from the successful path. Finally, the `@throws` annotation in the function's documentation tells callers what errors to expect.
+`requireSection` is a throwing version of `findSection`. When the section does not exist, it signals this to its callers with `throw new Error(...)`. It no longer returns a `Result`. It returns a `Section`, the value from the successful path. The `@throws` annotation in its documentation tells callers what errors to expect.
 
 ```typescript
 /**
@@ -194,7 +231,7 @@ function requireSection(catalogue: Section[], id: string): Section {
 }
 ```
 
-Communicating errors with exceptions is not unique to TypeScript. The same mechanism, with slightly different syntax, appears in Java, C++, C#, and Python (where the keywords are `try` and `except`), among many others, so what you learn here applies in those languages too.
+Communicating errors with exceptions is not unique to TypeScript. The same mechanism, with slightly different syntax, appears in Java, C++, C#, and Python (where `raise` and `except` take the place of `throw` and `catch`), among many others, so what you learn here applies in those languages too.
 
 Here is the rest of our example:
 
@@ -237,12 +274,12 @@ function enrolAll(catalogue: Section[], student: Student, ids: string[]): Sectio
 }
 ```
 
-Compare this with the `Result` version. The four lines of failure-forwarding are gone. What remains is the success path, "find the section, check the prerequisite, add it to the list", with no error handling between the steps. If `requireSection` throws on the third id, the `throw` abandons `requireSection`, the loop in `enrolAll`, and `enrolAll` itself, without any of them containing code to make that happen. The exception goes directly to the nearest enclosing handler.
+Compare this with the `Result` version. The six lines of failure-forwarding are gone. What remains is the success path, "find the section, check the prerequisite, add it to the list", with no error handling between the steps. If `requireSection` throws on the third id, the `throw` abandons `requireSection`, the loop in `enrolAll`, and `enrolAll` itself, without any of them containing code to make that happen. The exception goes directly to the nearest enclosing handler.
 
 <details class="tooltip deep-dive">
 <summary>Halting on a Bug with <code>assert</code></summary>
 
-Not every failure is an erroneous outcome that a contract anticipates. Sometimes a function discovers that an invariant it depends on has been violated. The program has reached a state that should have been impossible, which means there is a bug somewhere. A common response is to halt.
+Not every failure is an erroneous outcome that a contract anticipates. Sometimes a function discovers that an invariant it depends on has been violated. The program has reached a state that should have been impossible, which means there is a bug somewhere. A common response is to halt with **`assert`**:
 
 ```typescript
 import assert from "node:assert/strict";
@@ -250,7 +287,7 @@ import assert from "node:assert/strict";
 assert(count <= MAX_CAPACITY, "count exceeds capacity");
 ```
 
-If the condition holds, `assert` does nothing. If it does not, the program stops with the message. `assert` is not a separate mechanism from the one in this chapter. It is a `throw` guarded by a condition. Conceptually it is just:
+If the condition holds, `assert` does nothing. If it does not, `assert` throws an error with the message, which normally stops the program. `assert` is not a separate mechanism from the one in this chapter. It is a `throw` guarded by a condition. Conceptually it is just:
 
 ```typescript
 function assert(condition: boolean, message: string): void {
@@ -260,7 +297,7 @@ function assert(condition: boolean, message: string): void {
 }
 ```
 
-A failed assertion halts the program only on a bug, and the right response to a bug is to stop. The errors in this chapter are different. They are erroneous outcomes the contract anticipates.
+An assertion should fail only when there is a bug, and the right response to a bug is to stop. The errors in the rest of this chapter are outcomes the contract anticipates, which callers are expected to handle.
 
 </details>
 
@@ -282,9 +319,9 @@ You raised errors in CPSC 110 with `error`, which stopped the program with a mes
 
 ## Catching an Exception
 
-A thrown exception is handled with a `try`/`catch` statement. Code that might throw goes in the `try` block, and the code that is run if an exception is thrown by code within the `try` block goes in the `catch` block.
+A thrown exception is handled with a `try`/`catch` statement. Code that might throw goes in the `try` block. The code to run if it throws goes in the `catch` block.
 
-For example, the `enrolStudent` function needs to handle the situation where `enrolAll` fails:
+For example, `enrolStudent` handles a failure from `enrolAll`:
 
 ```typescript
 function enrolStudent(catalogue: Section[], student: Student, ids: string[]): void {
@@ -301,7 +338,7 @@ function enrolStudent(catalogue: Section[], student: Student, ids: string[]): vo
 <details class="tooltip ts-tips">
 <summary><code>try/catch</code> Syntax</summary>
 
-Code that might throw, and for which a thrown error can be handled, goes in the `try` block. If it throws, control jumps to the `catch` block, which receives the thrown error. In the abstract:
+If code in the `try` block throws, control jumps to the `catch` block, which receives the thrown error. In the abstract:
 
 ```typescript
 try {
@@ -316,7 +353,7 @@ If `(A)` runs to completion without throwing, the `catch` block `(B)` is skipped
 
 </details>
 
-A thrown failure interrupts execution rather than coming back as a returned value, so we cannot inspect it with `checkExpect`. Instead, we use `checkError`, which runs the code you give it and passes only if that code throws.
+A thrown failure interrupts execution rather than coming back as a returned value, so we cannot inspect it with `checkExpect`. Instead, we use `checkError`, which runs the code it is given and passes only if that code throws.
 
 ```typescript
 test("an unknown section throws",
@@ -357,23 +394,23 @@ function checkError(thunk: () => void): () => void {
 }
 ```
 
-This has two consequences. First, `checkError` takes a function, the `() =>` thunk, rather than a value, as `checkExpect` does. It must run your code inside its own `try`/`catch` so it can observe whether an exception is thrown. Passing it `enrolAll(...)` directly would run that call first, and the exception would escape before `checkError` ever got control. Second, `checkError` does not perform the check itself. It _returns_ the function that will, which is the function we pass to `test` as the body of the test case.
+This has two consequences. First, like `checkExpect`, `checkError` takes a function (the `() =>` thunk) rather than a value. It must run your code inside its own `try`/`catch` so it can observe whether an exception is thrown. Passing it `enrolAll(...)` directly would run that call first, and the exception would escape before `checkError` ever got control. Second, `checkError` does not perform the check itself. It _returns_ the function that will, which is the function we pass to `test` as the body of the test case.
 
 </details>
 
 <details class="tooltip deep-dive">
 <summary>Checked and Unchecked Exceptions</summary>
 
-Languages differ in how much they ask of a caller. TypeScript uses **unchecked exceptions**. A function's type says nothing about what it might throw, and the compiler never forces a caller to handle a possible exception. The signature  `attempt(): void` provides no clues that it can throw an exception.
+Languages differ in how much they ask of a caller. TypeScript uses **unchecked exceptions**. A function's type says nothing about what it might throw, and the compiler never forces a caller to handle a possible exception. The signature `attempt(): void` gives no sign that it can throw an exception.
 
-Some languages, like Java, offer **checked exceptions**, which must be declared in the signature. The compiler forces every caller either to catch the exception or to declare that it will pass it up the call stack so a failure cannot be forgotten.
+Some languages, like Java, offer **checked exceptions**, which must be declared in the signature. The compiler forces every caller either to catch the exception or to declare that it will pass it up the call stack, so a failure cannot be forgotten.
 
-The `Result` type from earlier in this chapter provides the same _checked_ property in an unchecked language. Because the failure is in the return type, the compiler forces callers deal with errors.
+The `Result` type from earlier in this chapter gives the same _checked_ property in a language whose exceptions are unchecked. Because the failure is in the return type, the compiler forces callers to deal with it.
 </details>
 
 ### The `finally` Block
 
-A `try` may be followed by a `finally` block. A `catch` runs only when the `try` throws, but a `finally` runs on every path out of the `try`, whether it finished normally or threw. This is important because some actions need to be performed in both success and error paths. Opening a file, for instance, returns a _handle_, a token the operating system grants so the program can read and write that file. Handles are finite, so whether a task finishes in success or failure, the handle must close the file. If a program keeps opening files and never closing them, it eventually runs out of handles causing a fault known as a _resource leak_.
+A `try` may be followed by a `finally` block. A `catch` runs only when the `try` throws, but a `finally` runs on every path out of the `try`, whether it finished normally or threw. Some actions must happen on both paths. Opening a file, for instance, returns a _handle_, a token the operating system grants so the program can read and write that file. Handles are finite, so whether the task succeeds or fails, the program must close the file to give the handle back. A program that keeps opening files and never closing them eventually runs out of handles. This fault is called a _resource leak_.
 
 Exceptions make leaks more likely. If a `throw` interrupts the work between opening a resource and closing it, the closing line is one of the statements that gets abandoned, and the resource is leaked. A `finally` block prevents this, because it runs on the throwing path as well as the normal one.
 
@@ -434,12 +471,12 @@ try {
 // (C)
 ```
 
-If `(A)` runs to completion, `(B)` runs and then control continues at `(C)`. If `(A)` throws, `(B)` still runs, and then the exception continues up the call stack, so `(C)` is not reached but the cleanup in `(B)` still happens. A `finally` may also follow a `catch`, written `try { ... } catch (error) { ... } finally { ... }`, in which case the `finally` runs after the `try` and any `catch`, again on every path.
+If `(A)` runs to completion, `(B)` runs and then control continues at `(C)`. If `(A)` throws, `(B)` still runs, and then the exception continues up the call stack, so `(C)` is not reached. A `finally` may also follow a `catch`, written `try { ... } catch (error) { ... } finally { ... }`, in which case the `finally` runs after the `try` and any `catch`, again on every path.
 </details>
 
 ### Recovering or Reporting
 
-`try`/`catch` makes **recovery** possible: catching a failure and adapting computation so the task can continue sensibly despite the encountered problem. Suppose a student gives a preferred section and a backup to use if the preferred one is unavailable. The handler does not care _why_ the preferred section could not be used, only that it could not. So a rational recovery would be to catch the failure and try the backup instead:
+`try`/`catch` makes **recovery** possible. A handler recovers when it catches a failure and adapts so the task can continue. Suppose a student gives a preferred section and a backup to use if the preferred one is unavailable. The handler does not care _why_ the preferred section could not be used, only that it could not. A sensible recovery is to catch the failure and try the backup:
 
 ```typescript
 function sectionOrBackup(catalogue: Section[], preferredId: string, backupId: string): Section {
@@ -475,15 +512,15 @@ This shorter form can be helpful whenever the handler ignores the error's detail
 
 </details>
 
-In practice, many errors are not recoverable. Often the most a handler can do is _detect_ the failure, report it, and stop the operation that cannot proceed. `enrolStudent` is typical. It cannot supply a missing prerequisite, so it catches the error, reports it, and abandons the enrolment. That is still valuable, because the alternatives, letting the exception halt the whole program or failing without saying what went wrong, are both worse. Catching an error to report it and stop one operation is a common and legitimate use of `try`/`catch`, even when no recovery is possible.
+In practice, many errors cannot be recovered from. Often the most a handler can do is report the failure and stop the operation that cannot proceed. `enrolStudent` is typical. It cannot supply a missing prerequisite, so it catches the error, reports it, and abandons the enrolment. This is still a legitimate use of `try`/`catch`. The alternatives are to let the exception halt the whole program or to fail without saying what went wrong, and both are worse.
 
-An important antipattern for exceptions is to catch an error and silently discard it. An empty `catch` block turns a visible failure into a wrong answer that is impossible to see. If you cannot recover and cannot usefully report, it is almost always better to let the exception propagate up the callstack.
+An important antipattern for exceptions is to catch an error and silently discard it. An empty `catch` block turns a visible failure into a wrong answer with no sign of what went wrong. If you cannot recover and cannot usefully report, it is almost always better to let the exception propagate up the call stack.
 
 ### Exception Propagation
 
-One feature that differentiates exceptions from `return` is that the function that _detects_ a problem and the function that _handles_ it can be oblivious about each other and the functions between them do not need to contain error-handling code.
+With exceptions, the function that _detects_ a problem and the function that _handles_ it need not know about each other, and the functions between them need no error-handling code.
 
-Consider the unknown-section failure. `enrolStudent` calls `enrolAll`, which calls `requireSection`. This notices the bad id and throws. The exception then travels back through that chain. It leaves `requireSection`, passes through `enrolAll`, and arrives at the `try` in `enrolStudent`, where it is caught:
+Consider the unknown-section failure. `enrolStudent` calls `enrolAll`, which calls `requireSection`. `requireSection` notices the bad id and throws. The exception then travels back through that chain. It leaves `requireSection`, passes through `enrolAll`, and arrives at the `try` in `enrolStudent`, where it is caught:
 
 ```plantuml
 @startuml
@@ -510,46 +547,12 @@ end note
 ```
 <!-- caption="An exception rising from requireSection to the handler in enrolStudent." -->
 
-`enrolAll` is on the path but does not take part in handling the exception. It neither checks for the error nor forwards it, because propagation is automatic. The `Result` version had to do this forwarding manually.
-
-This is why the success path stayed focused. The intermediate layers do not need error-handling code, because an exception they do not catch passes straight through them. The further apart detection and handling are, the more forwarding code this saves.
+`enrolAll` is on the path but does not take part in handling the exception. It neither checks for the error nor forwards it, because propagation is automatic. The `Result` version had to do this forwarding by hand, and the further apart detection and handling are, the more forwarding code exceptions save.
 
 <details class="tooltip deep-dive">
-<summary>What Is a Call Stack?</summary>
+<summary>Non-Local Returns</summary>
 
-When one function calls another, the caller pauses partway through and waits for the called function to return before continuing. The called function may call a third, which pauses it in turn. At any moment there is a chain of paused functions, each waiting on the one it called. That chain is the **call stack**.
-
-It is called a stack because it grows and shrinks at one end only, like a stack of plates. Consider:
-
-```typescript
-function a(): void {
-    b();                      // a pauses here while b runs
-    console.log("a is done");
-}
-
-function b(): void {
-    c();                      // b pauses here while c runs
-    console.log("b is done");
-}
-
-function c(): void {
-    console.log("c is running");
-}
-
-a();
-```
-
-<!-- RTH: consider replacing this with a diagram, although it is a classic sidebar for this course  -->
-
-Calling `a` adds a frame for `a` to the stack. `a` calls `b`, adding a frame for `b` on top, and `b` calls `c`, adding `c`. The stack is now `a`, then `b`, then `c`, with `c` on top. When `c` returns, its frame is removed and `b` resumes. When `b` returns, its frame is removed and `a` resumes. Each function returns control to the point in its caller where it paused, so the output is:
-
-```
-c is running
-b is done
-a is done
-```
-
-A normal `return` pops the top off this stack. It hands a value to the immediate caller and removes one frame. A `throw` is different. It removes frames from the stack successively _until_ it finds a `try`/`catch`, discarding each paused function without resuming it. This is why an exception can surface far from where it was thrown.
+A normal `return` pops the top frame off the call stack. It hands a value to the immediate caller and removes one frame. A `throw` is different. It removes frames from the stack one at a time _until_ it finds a `try`/`catch`, discarding each paused function without resuming it. So an exception can surface far from where it was thrown.
 
 An exception is therefore a kind of **non-local return**. Where `return` exits to the function that invoked it, a `throw` can exit many levels at once:
 
@@ -574,7 +577,7 @@ function shallow(): void {
 }
 ```
 
-Calling `shallow` prints only `caught in shallow`. The `throw` in `deep` skips the rest of `deep`, all of `middle`, and the rest of the `try` in `shallow`, and lands in its `catch`. Two functions were abandoned partway through. Although a `throw` _can_ be used to jump out of deeply nested code like this, it should only be used for real errors, never as a shortcut for leaving nested calls.
+Calling `shallow` prints only `caught in shallow`. The `throw` in `deep` skips the rest of `deep`, all of `middle`, and the rest of the `try` in `shallow`, and lands in its `catch`. Two functions were abandoned partway through.
 
 </details>
 
@@ -584,23 +587,24 @@ The ability to jump across the call stack reduces error-handling code, but it is
 
 Recall that the **static view** is the program as written, and the **dynamic view** is how that program runs on one particular execution. A `throw` and a `try`/`catch` are both visible in the static view. You can read in the source that a function _might_ throw and that some caller _might_ catch. What you cannot read is the connection between the two. Neither the `throw` nor the `catch` names the other, and which `catch` handles a given `throw` is decided only at run time, by the call stack that exists when the exception is raised.
 
-As a result, you can no longer understand a function by reading it alone. Normally you read a function together with the contracts of the functions it calls, and everything you need is local. Exceptions break this in both directions. The error a function raises may be handled far above it, by code it does not know about. And an error might propagate to it, raised in code deep below something it called. Look again at the `deep`, `middle`, and `shallow` example above. `middle` neither throws nor catches, yet it is on the path of an exception, and reading `middle` on its own gives no sign that it takes part in a failure raised in `deep` and handled in `shallow`. This _non-locality_ keeps the success path clean, but makes failure behaviour hard to trace.
+Without exceptions, you can understand a function by reading it together with the contracts of the functions it calls, and everything you need is local. Exceptions break this in both directions. The error a function raises may be handled far above it, by code it does not know about. And an error raised deep below something it calls may pass through it. Look again at the `deep`, `middle`, and `shallow` example above. `middle` neither throws nor catches, yet it is on the path of an exception, and reading `middle` on its own gives no sign that it takes part in a failure raised in `deep` and handled in `shallow`. This _non-locality_ keeps the success path clean, but makes failure behaviour hard to trace.
 
 Two habits keep this in check. First, keep exceptions _rare_ by reserving them for errors, so that the places where control can jump are few. Second, _document_ what each function throws, and under what conditions, in its contract.
 
 ## Results or Exceptions?
 
-We now have two ways to communicate erroneous outcomes, and need to decide which to use.
+With two ways to communicate erroneous outcomes, each design has to choose between them.
 
 A **returned** failure is _visible to the type checker_. It appears in the function's return type, and the compiler forces every caller to handle it. The cost is that every layer between detection and handling must examine the failure, and the checks can obscure the success path. Returning failure is the better choice when the failure is a routine part of the operation that the _immediate_ caller should always deal with.
 
 A **thrown** failure _propagates on its own_, which keeps the success path clear. The cost is that the failure is invisible in the type. A function that throws has the same signature as one that always succeeds, so it is easy for a caller to forget that handling is needed. Throwing is the better choice when a failure should abort the current operation and be handled much further up, or when passing a `Result` through many layers would obscure the logic.
 
-Where to let an exception propagate is as much a design decision as when to throw one. A function that encounters an error it cannot meaningfully address should not catch it. It is often right to let the exception propagate to a function that has the context to recover or report. A practical rule is to catch where the program knows what to do. A command-line tool might catch at the top level and print the message, and a web server might catch per request and return an error response.
+Where to catch an exception is as much a design decision as when to throw one. A function that cannot do anything useful about an error should let it propagate to a function that has the context to recover or report. A practical rule is to catch where the program knows what to do. A command-line tool might catch at the top level and print the message, and a web server might catch per request and return an error response.
 
 Within a codebase, _consistency_ matters as much as any individual choice. Consistent error handling is easier to use correctly than a mix where every function does something different.
 
 Whatever the mechanism, a few practices always apply:
+
 - Never silently discard an error.
 - Do not use exceptions for ordinary control flow, only for real errors.
 - Check data as soon as it enters your program from a file, a network, or a user, turning it into either a trusted value or a clear error at the boundary.
@@ -625,15 +629,20 @@ function bookFlight(route: string): string { /* ... */ }
 function bookHotel(city: string): string { /* ... */ }
 function bookCar(city: string): string { /* ... */ }
 
+// Cancel a booking made earlier, given its confirmation code.
+function cancelFlight(code: string): void { /* ... */ }
+function cancelHotel(code: string): void { /* ... */ }
+
 // Books all three, stopping at the first failure and reporting it to the caller.
 function bookTrip(route: string, city: string): Trip { /* ... */ }
 ```
 
-1. Decide whether each step should _return_ its failure as a value or _throw_ it, and justify the choice using this chapter's trade-offs. <span class="hint">`bookTrip` only orchestrates the steps, and has nothing useful to do about a failure itself.</span>
+1. Decide whether each step should _return_ its failure as a value or _throw_ it, and justify the choice using this chapter's trade-offs. <span class="hint">`bookTrip` only orchestrates the steps. Apart from undoing its own partial work, it has nothing useful to do about a failure.</span>
 2. Implement the failure signalling in the three step functions, and document it in each contract <span class="hint">(with `@throws` or in the return type)</span>.
 3. Write `bookTrip` <span class="hint">so that its success path reads as the three bookings in sequence,</span> <span class="hint">then add a single handler in a caller that reports the first failure.</span>
-4. Write tests that validate your design: <span class="hint">one where every booking succeeds</span>, <span class="hint">and one for each way a step can fail</span>. <span class="hint">Use `checkExpect` for successful results and `checkError` for failures</span>.
+4. A failure partway through leaves the trip partly booked. If `bookHotel` fails, the flight has already been booked. Change `bookTrip` so that when a later step fails, it cancels the bookings already made and still reports the failure to its caller. <span class="hint">With exceptions, catch the error in `bookTrip`, cancel what was booked, and re-throw it with `throw error`.</span> <span class="hint">A `finally` block is the wrong tool here, because it would also cancel a trip that succeeded.</span>
+5. Write tests that validate your design: <span class="hint">one where every booking succeeds</span>, <span class="hint">and one for each way a step can fail</span>. <span class="hint">Use `checkExpect` for successful results and `checkError` for failures</span>.
 
-As you work, notice how far the detection of a failure (inside `bookCar`, for example) is from where it is handled (in the caller of `bookTrip`). The larger that distance, the stronger the case for exceptions.
+As you work, compare how far the detection of a failure (inside `bookCar`, for example) is from where it is handled (in the caller of `bookTrip`). The larger that distance, the stronger the case for exceptions.
 
 </details>

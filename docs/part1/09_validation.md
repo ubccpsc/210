@@ -2,7 +2,7 @@
 
 A function's contract states what it _should_ do. A test shows what it _does_ for a chosen input.
 
-The earlier chapters tested with `checkExpect` and `checkError`. These functions were a deliberately simple stand-in for the assertions used by real test frameworks. We will use `expect` for the remainder of the course. This is the assertion vocabulary provided by the [Chai](https://www.chaijs.com/) library that the [vitest](https://vitest.dev/) test runner (and many other testing frameworks) is built on.
+The earlier chapters tested with `checkExpect` and `checkError`. These functions were a deliberately simple stand-in for the assertions used by real test frameworks. For the rest of the course we use `expect`, the assertion vocabulary of the [Chai](https://www.chaijs.com/) library. The [Vitest](https://vitest.dev/) test runner includes Chai's `expect`, as do many other test frameworks.
 
 The change is more than syntax. `checkExpect` could only compare for equality, and only reported failure in terms of that comparison. `expect` offers a family of assertion operators, each stating a different kind of expectation and, when it fails, reporting a message that describes the nature of the failure. A test case is also now a function body that you write, so it can build the values it needs, contain multiple assertions, and drive code that takes more than one step to set up.
 
@@ -20,27 +20,6 @@ test("no fee at the grace boundary", () => {
 });
 ```
 
-<details class="tooltip deep-dive">
-  <summary>Behaviour-Driven Development (BDD)</summary>
-
-In the abstract, our assertions look like:
-
-```typescript
-expect(<the value under test>).to.<assertion>;
-expect(<the value under test>).to.<assertion>(<expected value>);
-```
-
-Most assertions take an expected value in parentheses. A few, such as existence checks, are written as a property with no parentheses. The words in between, `to`, `be`, and `have` only exist to make the assertion more natural to read.
-
-Chai's `expect` is a **behaviour-driven development** (BDD) assertion library. BDD is a style of testing that describes what code should do in language _close to ordinary prose_, so a test reads as a statement of _behaviour_ rather than a low-level comparison.
-
-For example, the assertion 
-```typescript
-expect(() => requireSection(catalogue, "NOPE")).to.throw("no section with id NOPE");
-```
-is more verbose than our `checkError` before, but it reads _almost_ the same as the English sentence it stands for. If the test description is also clear, the whole test case is a readable description of the behaviour it checks. This lets a test suite serve as documentation of what the code is meant to do, which is why Chai favours a longer, readable form over a terse one.
-</details>
-
 Errors translate just as directly. Recall `requireSection` from the previous chapter, which throws when no section matches the requested id. `checkError` ran a function and passed if it threw, and `expect(...).to.throw` does the same:
 
 ```typescript
@@ -55,9 +34,62 @@ test("an unknown section throws", () => {
 });
 ```
 
-As with `checkExpect` and `checkError`, the call under test is wrapped in `() =>` so that `expect` can run it and observe the throw, rather than receiving an error that has already escaped. 
+As with `checkExpect` and `checkError`, the call under test is wrapped in `() =>` so that `expect` can run it and observe the throw, rather than receiving an error that has already escaped.
+
+<details class="tooltip ts-tips">
+<summary>When do we need to add <code>() =></code>?</summary>
+
+In most assertions the argument to `expect` is a value, but for `to.throw` it is a function call wrapped in `() =>`. This is because `to.throw` must observe the _execution_ of the function to see whether it throws. It cannot examine a return value, because a function that throws has no return value (recall [Chapter 8](./08_errors)).
+
+If you can write:
+```typescript
+const v = f();
+expect(v).[...]
+```
+then you can write
+
+```typescript
+expect(f()).[...]
+```
+
+Any assertion (like `throw`) that must _observe the execution of f_ needs to be wrapped. Without the wrapper, the assertion cannot work:
+
+```typescript
+const v = f();                  // if f throws, the test stops here, before expect runs
+expect(v).to.throw("error");    // otherwise v is f's result, not a function expect can run
+```
+
+With the wrapper, `expect` receives the function itself, runs it, and observes the throw:
+
+```typescript
+expect(() => f()).to.throw("error");
+```
+</details>
 
 `to.throw` is also more precise than `checkError`. It takes the message we expect the failure to carry, and passes only if the thrown error's message contains it. A `checkError` test written with one failure in mind would still pass if a different failure happened. A `to.throw` test with a message does not.
+
+<details class="tooltip deep-dive">
+  <summary>Behaviour-Driven Development (BDD)</summary>
+
+In the abstract, our assertions look like:
+
+```typescript
+expect(<the value under test>).to.<assertion>;
+expect(<the value under test>).to.<assertion>(<expected value>);
+```
+
+Most assertions take an expected value in parentheses. A few, such as existence checks, are written as a property with no parentheses. The words in between, such as `to`, `be`, and `have`, only make the assertion read more naturally.
+
+Chai's `expect` is a **behaviour-driven development** (BDD) assertion library. BDD is a style of testing that describes what code should do in language _close to ordinary prose_, so a test reads as a statement of _behaviour_ rather than a low-level comparison.
+
+For example, the assertion
+
+```typescript
+expect(() => requireSection(catalogue, "NOPE")).to.throw("no section with id NOPE");
+```
+
+is longer than the `checkError` version, but it reads _almost_ the same as the English sentence it stands for. If the test description is also clear, the whole test case is a readable description of the behaviour it checks. A test suite written this way also documents what the code is meant to do. Chai favours a longer, readable form over a terse one for this reason.
+</details>
 
 <!--
 <details class="tooltip ts-tips">
@@ -91,10 +123,9 @@ expect({ id: "CPSC210" }).to.deep.equal({ id: "CPSC210" }); // passes: same cont
 <details class="tooltip link-110">
 <summary>A Family of Checks</summary>
 
-CPSC 110 already had more than one kind of check. Alongside `check-expect` you used `check-within` for numbers that need only be close, `check-member-of` for a value that must be one of several, `check-range` for a number in an interval, and `check-error` for an expression that must signal an error. Chai offers a larger set built on the same idea. `check-within` becomes `to.be.closeTo`, `check-member-of` becomes `to.be.oneOf`, and `check-error` becomes `to.throw`.
+CPSC 110 already had more than one kind of check. Alongside `check-expect` you used `check-within` for numbers that need only be close, `check-member-of` for a value that must be one of several, `check-range` for a number in an interval, and `check-error` for an expression that must signal an error. Chai offers a larger set built on the same idea. `check-within` becomes `to.be.closeTo`, `check-member-of` becomes `to.be.oneOf`, `check-range` becomes `to.be.within`, and `check-error` becomes `to.throw`.
 
 </details>
-
 
 ### A Vocabulary of Assertions
 
@@ -129,36 +160,6 @@ AssertionError: expected [ 'CPSC213' ] to include 'CPSC210'
 
 With a specific operator, a failing test reports the cause of the failure.
 
-<details class="tooltip ts-tips">
-<summary>When do we need to add <code>() =></code>?</summary>
-
-Above, the argument to `expect` is usually a variable, but for `to.throw` it is a function call wrapped in `() =>`. This is because `to.throw` must observe the _execution_ of the function to see whether it throws. It cannot examine a return value, because a function that throws has no return value (recall [Chapter 8](./08_errors)).
-
-If you can write:
-```typescript
-const v = f();
-expect(v).[...]
-```
-then you can write
-
-```typescript
-expect(f()).[...]
-```
-
-Any assertion (like `throw`) that must _observe the execution of f_ needs to be wrapped. Without the wrapper, the assertion cannot work:
-
-```typescript
-const v = f();                  // if f throws, the test stops here, before expect runs
-expect(v).to.throw("error");    // otherwise v is f's result, not a function expect can run
-```
-
-With the wrapper, `expect` receives the function itself, runs it, and observes the throw:
-
-```typescript
-expect(() => f()).to.throw("error");
-```
-</details>
-
 <!--
 <details class="tooltip deep-dive">
 <summary>What Developers Write in Practice</summary>
@@ -169,7 +170,7 @@ These categories are not arbitrary. A study of 33,873 assertions drawn from 105 
 
 ## Richer Test Cases
 
-Moving from `checkExpect` to `expect` is more than a syntax change. It lets us write richer test cases. Consider the second argument to `test` in `test("no fee at the grace boundary", () => {expect(lateFee(2)).to.equal(0);});`. It is a function. `checkExpect` hid this: `checkExpect(...)` built the function that `test` would call to carry out the check.
+The second argument to `test` has always been a function. `checkExpect` hid this, because `checkExpect(...)` built the function that `test` would call to carry out the check.
 
 For the rest of the course we will write that function ourselves:
 
@@ -181,11 +182,11 @@ test(<description>, () => {
 
 The description is unchanged, but the body is now an ordinary arrow function with a block body, so it can hold any number of statements. (As [Chapter 1](./01_new-language) described, a block body returns nothing implicitly. A test body has nothing to return anyway, because the runner judges the case by whether an assertion inside it failed.) This removes three restrictions of the earlier form:
 
-1. _A test case can hold as many assertions as the behaviour needs._ We had one check per test case because the check _was_ the test body, not because a good test has only one check. With a block body, a test can state several expectations about a single result. This helps pinpoint what is wrong with our code. By ordering assertions from general to specific, a failure tells us the _kind_ of fault, not just that there is one. You may still write one assertion per test case, but it is now a choice rather than a limitation.
+1. _A test case can hold as many assertions as the behaviour needs._ We had one check per test case because the check _was_ the test body, not because a good test has only one check. With a block body, a test can state several expectations about a single result, which helps pinpoint what is wrong (see [Richer Failures](#richer-failures)). You may still write one assertion per test case, but it is now a choice rather than a limitation.
 
-2. _Setup belongs inside the case._ In earlier chapters, a check was a single call `checkExpect(() => <actual>, <expected>)`, so any values the check needed had to be declared above the tests, at the top level of the file. Everything declared there is visible to every later test. If one of those values is _mutable_ ([Chapter 6](./06_state-mutation)), changes made by one test are visible to every later test, and the suite can pass or fail depending on the order its cases run in. With a block body, each test case can hold its own `const` and `let` declarations, building only the values it needs without affecting other tests.
+2. _Setup belongs inside the case._ In earlier chapters, a check was a single call `checkExpect(() => <actual>, <expected>)`, so the values a check needed were usually declared above the tests, at the top level of the file. Everything declared there is shared by every test in the file. If one of those values is _mutable_ ([Chapter 6](./06_state-mutation)), a change made by one test is seen by the tests that run after it, and the suite can pass or fail depending on the order its cases run in. With a block body, each test case can hold its own `const` and `let` declarations, building only the values it needs without affecting other tests.
 
-3. _Code under test can be driven through several steps._ We have seen that a `checkExpect` thunk could hold more than one statement, but it still had to reduce all the computation to one final value to check. A test body has no such limit. It can construct a value, configure it, exercise it, and assert at any point along the way, choosing a different operator for each assertion. Real tests needs this because the behaviour under test is not reachable until the value has been built up through several steps.
+3. _Code under test can be driven through several steps._ We have seen that a `checkExpect` thunk could hold more than one statement, but it still had to reduce all the computation to one final value to check. A test body has no such limit. It can construct a value, configure it, exercise it, and assert at any point along the way, choosing a different operator for each assertion. Real tests need this because the behaviour under test is not reachable until the value has been built up through several steps.
 
 ## Richer Failures
 
@@ -267,7 +268,7 @@ test("a student who finished first year can take CPSC210", () => {
 });
 ```
 
-This assertion is correct and will catch any fault. But consider what it tells you when it fails. The report says only that one array did not deeply equal another, and leaves you to compare them yourself. Did the function return `undefined`? An array of the wrong length? The right length but the wrong section? The right section with the wrong prerequisites? Every one of those faults produces a very similar error message.
+This assertion is correct, and it fails if the result is wrong in any way. But consider what it tells you when it fails. The report says only that one array did not deeply equal another, and leaves you to compare them yourself. Did the function return `undefined`? An array of the wrong length? The right length but the wrong section? The right section with the wrong prerequisites? Every one of those faults produces a very similar error message.
 
 With a block body, we do not need to rely on a single assertion. We can get more precise failure messages by thinking about the different ways `eligibleSections` can fail, and writing a _sequence_ of assertions that catches each one, ordered from the most general to the most specific:
 
@@ -284,7 +285,7 @@ test("a student who finished first year can take CPSC210", () => {
 });
 ```
 
-Only the last assertion is strictly necessary. If it passes, every assertion above it must pass too, and if any of them would fail, the last one would fail as well.
+Only the last assertion is strictly necessary. If it passes, every assertion above it must pass too.
 
 The benefit appears when a test fails. Each kind of fault now trips a different, earlier assertion, and the _first_ failure names the problem:
 
@@ -296,17 +297,17 @@ expected [ 'CPSC213' ] to include 'CPSC210'       // returned the wrong section
 
 Only a result that exists, is an array of the right length, and contains the expected id, but still differs somewhere in its contents, reaches the final `deep.equal`. With the general checks first, the earliest failure is always the most fundamental one, so you learn the _kind_ of mistake before its details.
 
-You need not attach five assertions to every test, because redundant checks clutter a test without adding meaning. Layering is worthwhile when a value is structured enough that a _bare equality failure_ is hard to read, or when a function makes several independent guarantees worth checking separately. For the example above, we might skip the `to.exist` assertion and the one using `map`. The aim is not more assertions but more _informative_ ones.
+You need not attach five assertions to every test, because redundant checks clutter a test without adding meaning. Layering is worthwhile when a value is structured enough that a _bare equality failure_ is hard to read, or when a function makes several independent guarantees worth checking separately. For the example above, we might skip the `to.exist` assertion and the one using `map`.
 
 As in software design more broadly, test design rarely has a single right answer. `expect` lets you write several assertions per test, and you decide when that is worth doing.
 
 ## Partitioning
- 
-A test case has three parts: constructing inputs, exercising the code with those inputs, and asserting that it behaves as expected. We have discussed richer assertions. Now we turn to choosing inputs.
+
+A test case has three parts: constructing inputs, exercising the code with those inputs, and asserting that it behaves as expected. The sections above covered assertions. This section covers choosing inputs.
 
 In [Chapter 3](./03_checking-invariants), we divided a function's input space into equivalence classes, grouping the inputs the specification treats alike, and tested one representative of each. We also looked closely at the boundaries between these equivalence classes.
 
-These techniques are the basis of input selection. But once a function's inputs and outputs are more complex than a single number, the input classes are defined over combinations of fields rather than ranges. We can also do the same thing by analyzing the output and partitioning on its classes as well.
+These techniques are the basis of input selection. But once a function's inputs and outputs are more complex than a single number, the input classes are defined over combinations of fields rather than ranges. We can also partition the output into classes.
 
 For the rest of the chapter we test a video streaming service, whose main function has both an input and an output worth partitioning.
 
@@ -392,11 +393,12 @@ const catalogue: Title[] = [
     { id: "t3", published: true,  tier: "premium", regions: ["CA"] }
 ];
 ```
-which includes a published free title licensed in two regions, an unpublished free title, and a published premium title.
+
+The catalogue has a published free title licensed in two regions, an unpublished free title, and a published premium title.
 
 ### Partitioning Inputs
 
-`playableTitles` does not take a number. It takes a whole `Viewer` and a `catalogue`, and its input classes are not numeric ranges but _relationships_ between fields. We can divide the viewer input into classes such as:
+`playableTitles` does not take a number. It takes a whole `Viewer` and a `catalogue`, and its input classes depend on _relationships_ between their fields, such as whether the viewer's region is one a title is licensed in. We can divide the viewer input into classes such as:
 
 | Class | Representative viewer |
 |---|---|
@@ -450,7 +452,7 @@ Partitioning the input tells you which situations to give a function, and partit
 
 ## White-Box Testing
 
-All the techniques so far are forms of **black-box testing**, where tests are derived by treating the function under test as a box whose contents we cannot see. We derived them from a specification, without looking at the function's implementation.
+All the techniques so far are forms of **black-box testing**, where tests are derived from the specification, treating the function under test as a box whose contents we cannot see.
 
 Once an implementation exists, we can look inside. **White-box testing** derives tests from the _code as written_. We read the code and ask whether our tests _exercise_ everything it does.
 
@@ -498,13 +500,13 @@ test("every branch of canPlay is exercised", () => {
 });
 ```
 
-These five calls to `canPlay` run every branch at least once, so every part of `canPlay` is executed by some test.
+These five calls run every branch of `canPlay` at least once.
 
 ### Code Coverage
 
 The white-box view also gives a natural measure of how thorough a test suite is. **Code coverage** measures how much of the code the suite executes.
 
-A commonly-used form is **branch coverage**: the fraction of branches run by at least one test. The five cases above execute all five branches of `canPlay`, for 100% branch coverage. Without the two premium-title cases, coverage falls to three of five branches, and branches 3 and 4 are never run. Measuring coverage points out the parts of your code your tests do not reach.
+A common form is **branch coverage**: the fraction of branches run by at least one test. The five cases above execute all five branches of `canPlay`, for 100% branch coverage. Without the two premium-title cases, coverage falls to three of five branches, and branches 3 and 4 are never run. Measuring coverage points out the parts of your code your tests do not reach.
 
 But full coverage does not mean the code is correct. Suppose an earlier version of `canPlay` had never checked regional licensing:
 
@@ -523,9 +525,9 @@ function canPlay(viewer: Viewer, title: Title): boolean {
 }
 ```
 
-This version has four branches. A suite that checks an unpublished title, a premium title for a premium viewer, a premium title for a free viewer, and a published free title gets 100% coverage. But the code is wrong: a free title that is not licensed in the viewer's region is judged playable.
+This version has four branches. A suite that checks an unpublished title, a premium title for a premium viewer, a premium title for a free viewer, and a published free title gets 100% coverage. But the code is wrong: a title that is not licensed in the viewer's region can be judged playable.
 
-Coverage cannot reveal this fault, because the problem is not an _untested_ branch but a _missing_ one. Coverage measures the code you wrote, and cannot tell you that more code is needed to meet the specification. White-box testing _supplements_ black-box testing but never _replaces_ it, because only the specification says what the code ought to do.
+Coverage cannot reveal this fault, because the problem is a _missing_ branch. Coverage measures the code you wrote, and cannot tell you that the specification needs more. White-box testing _supplements_ black-box testing but never _replaces_ it, because only the specification says what the code ought to do.
 
 <details class="tooltip deep-dive">
 <summary>Other Forms of Code Coverage</summary>
@@ -576,15 +578,15 @@ function canPlay(viewer: Viewer, title: Title): boolean {
 
 The assumption is wrong: `t2` is not published, yet it is now judged playable. The change looks harmless, and a quick manual check on a published title would pass. The test suite catches it immediately. The test `"a free viewer sees published, licensed, non-premium titles"` expects exactly one title, and the changed version returns two, `t1` and `t2`, so its `to.have.length(1)` assertion fails.
 
-So far, the tests you have written helped you get an implementation right. Catching regressions is their second job, and over the life of a program it is the more important one. Re-running the whole suite after every change, even one that looks harmless, is what makes it safe to keep changing a program, and the effort of writing tests is repaid each time someone touches the code.
+So far, the tests you have written helped you get an implementation right. Catching regressions is their second job, and over the life of a program it is the more important one. Re-running the whole suite after every change, even one that looks harmless, makes it safe to keep changing a program, and the effort of writing tests is repaid each time someone touches the code.
 
 #### Validating with Confidence
 
-Each technique in this chapter checks something different. The type checker rules out malformed programs before they run, and tests show that the program does what its contract promises when it runs. Layered assertions make a failing test explain the fault, partitioning inputs and outputs makes a passing suite meaningful, coverage shows the code the suite does not reach, and re-running the suite on every change keeps a correct program correct. No one technique is enough on its own. Used together, they give us good reason to believe a program honours its contract.
+The type checker rules out malformed programs before they run, and tests show that the program does what its contract promises when it runs. Each testing technique in this chapter checks something different. Layered assertions make a failing test explain the fault. Partitioning inputs and outputs makes a passing suite meaningful. Coverage shows the code the suite does not reach. Re-running the suite on every change keeps a correct program correct. No one technique is enough on its own. Used together, they give us good reason to believe a program honours its contract.
 
-This closes Part 1. You now understand the mechanics of modelling a problem with types, writing contracts and tests that validate behaviour, maintaining invariants, managing state, and changing data in the outside world.
+This closes Part 1, which covered modelling a problem with types, writing contracts and tests, maintaining invariants, managing state, interacting with the outside world, and designing for failure.
 
-So far, every program we have seen has been small enough for one person to hold in their head. [Part 2](../part2/index) looks at what happens when programs and teams grow beyond what one person can manage, and we can no longer rely on one programmer's discipline to maintain invariants. [Chapter 4](./04_maintaining-invariants) showed one way to maintain invariants, but with very little support from the programming language. Building large code bases requires new abstractions and more support from the language.
+[Chapter 4](./04_maintaining-invariants) maintained invariants with very little support from the programming language. That works while a program is small enough for one person to hold in their head. [Part 2](../part2/index) looks at what happens when programs and teams grow beyond what one person can manage, and we can no longer rely on one programmer's discipline to maintain invariants. Large codebases need new abstractions and more support from the language.
 
 <details class="tooltip exercise">
   <summary>Exercise: Validating a Shipping Calculator</summary>
@@ -630,8 +632,8 @@ Design the tests before writing them. Work through:
 
 1. _Equivalence classes._ Group the weights the specification treats alike, and choose one representative from each, for both standard and express shipping.
 2. _Boundary values._ <span class="hint">The tier edges (1kg, 5kg, 20kg) and the lower limit (0kg) are where off-by-one mistakes hide.</span> Decide which values just inside, on, and just outside each boundary a thorough suite should include.
-3. _Outputs._ Confirm each distinct cost the function can produce<span class="hint"> , and that express is exactly double the standard rate for the same weight.</span>
-4. _Exceptions._ The contract names two ways the function throws. Assert each with <span class="hint"> `expect(() => ...).to.throw(...)`.</span>
+3. _Outputs._ Confirm each distinct cost the function can produce<span class="hint">, and that express is exactly double the standard rate for the same weight</span>.
+4. _Exceptions._ The contract names two ways the function throws. Assert each one<span class="hint"> with `expect(() => ...).to.throw(...)`</span>.
 
 Fill in the cases below, adding or removing rows so that every class, boundary, and exception above is represented:
 
