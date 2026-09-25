@@ -2,23 +2,22 @@
 
 In the last chapter we used types to annotate individual values: a parameter was a `number`, a function returned a `string`, and the compiler checked that we used them consistently. These primitive types are enough when a program passes around single, unrelated values, but real information rarely arrives one value at a time.
 
-Consider a song. A song is not one value. It has its musical contents and a lot of associated metadata.
+Consider a song. A song is not one value. It has its musical content and a lot of metadata associated with it.
 
 <details class="tooltip exercise">
 <summary> Exercise: What's in a song? </summary>
 
-Take a minute to think about what a song _is_. What core data and metadata might you associate with a song? Does this change based on the application that consumes the song? (e.g., what if the song-playing application is individual vs. multiple users can interact with the same song?)
+Take a minute to think about what a song _is_. What core data and metadata might you associate with a song? Does this change based on the application that consumes the song? (For example, does it matter whether one person uses the application, or many users can interact with the same song?)
 
 The data we choose to associate with a song below is _one example_ of how we might represent a song, but it's not the _only correct_ representation of a song.
 
 </details>
 
-
-For instance, a song has _at least_ a title, an artist, and a duration. This data only means something when associated to the _same_ song. With only primitive types we would carry these as three separate values and have to remember, everywhere, that they belong to the same song. Nothing would stop us from pairing one song's title with another's duration, or forgetting the duration entirely, or passing an _artist_ where a _title_ was expected (both are strings, so the compiler would stay silent). The information has a _shape_, and primitive annotations cannot capture it.
+For instance, a song has _at least_ a title, an artist, and a duration. These facts only mean something together, when they describe the _same_ song. With only primitive types we would carry these as three separate values and have to remember, everywhere, that they belong to the same song. Nothing would stop us from pairing one song's title with another's duration, or forgetting the duration entirely, or passing an _artist_ where a _title_ was expected (both are strings, so the compiler would stay silent). The information has a _shape_, and primitive annotations cannot capture it.
 
 Other information cannot be expressed with primitives at all. A playlist is either _empty_ or _a song followed by another playlist_. This spells out two distinct cases, and the playlist can be any length. No single `number` or `string` means "either nothing, or a song and then more songs."
 
-This chapter introduces the tools to describe information like this: **compound types** that group related values into one, model alternatives as distinct cases, and capture self-referential structure. Writing such a description down as a **data definition** does two things at once: it gives the program a shape to follow, and it lets the compiler hold us to that shape, catching whole classes of mistakes before the program runs.
+This chapter introduces the tools to describe information like this: **compound types** that group related values into one, unions that model alternatives as distinct cases, and self-reference for recursive structure. Writing such a description down as a **data definition** gives the program a shape to follow. It also lets the compiler hold us to that shape, catching whole classes of mistakes before the program runs.
 
 This is the data-definition design you practised in CPSC 110, now written directly in the language and checked by the compiler.
 
@@ -40,42 +39,38 @@ The syntax
 ```typescript
 const x: T = e
 ```
-declares a variable `x` of type `T` and initialises it to the value that expression `e` evaluates to. Variables declared with `const` cannot be reassigned to different values later. Also, you cannot use `const` to declare the same variable multiple times.
+declares a variable `x` of type `T` and initialises it to the value that expression `e` evaluates to. Variables declared with `const` cannot be reassigned to different values later. You also cannot use `const` to declare the same variable twice.
 
 As with other one-line statements, we will put a semicolon `;` after it when writing it in programs.
 </details>
 
-
-Two values matter from the start because they stand for the _absence_ of a value: `null` and `undefined`. `null` represents a deliberate "no value here", such as the result of a lookup that finds nothing. `undefined` is the value a name has when nothing has been assigned to it yet. Each is its own type, and both become useful in combination with other types, as we will see when a function may or may not find a result.
-
-```typescript
-const noMatch: null = null;
-const notSet: undefined = undefined;
-```
-
 <details class="tooltip link-110">
   <summary><code>const</code> vs <code>define</code></summary>
 
-Where in ISL, you wrote
+In ISL, you wrote
+
 ```racket
 (define course-name "CPSC 210")
 ```
- to bind a name to a value, in Typescript we would write the same binding as
- ```typescript
- const courseName: string = "CPSC 210";
- ```
-Note that in TypeScript, we add a type annotation that the compiler checks. Adding this extra information is marginally more work, but it allows the compiler to check basic bugs for us. For instance:
 
- ```typescript
- // static error: Type 'string' is not assignable to type 'number'
- const courseNum: number = "210";
- ```
+to bind a name to a value. In TypeScript, the same binding is
+
+```typescript
+const courseName: string = "CPSC 210";
+```
+
+The TypeScript version adds a type annotation that the compiler checks. This is slightly more work, but it lets the compiler catch basic bugs for us. For instance:
+
+```typescript
+// static error: Type 'string' is not assignable to type 'number'
+const courseNum: number = "210";
+```
 
 </details>
 
 ## Modelling Data
 
-A **data definition** is a precise description of which values a type can express. As you design and interact with more software systems, you may grow to have your own process to derive these.
+A **data definition** is a precise description of which values a type can express. As you design more software systems, you may develop your own process for deriving them.
 
 To get you started in this course, we propose a systematic process to turn a natural-language description of a problem into a type. The main steps are:
 
@@ -86,14 +81,14 @@ To get you started in this course, we propose a systematic process to turn a nat
 5. Write concrete examples to check your model.
 6. Look for generalisation.
 
-The rest of this chapter works through this process on the examples below, from the simplest to the most involved. As we go we will meet the building blocks TypeScript provides for specifying types: _primitive values_ for atomic facts, _literal union_ for fixed choices, types that _group_ related values together, and _self-reference_ for recursive structure.
+The rest of this chapter works through this process on the examples below, from the simplest to the most involved. As we go we will meet the building blocks TypeScript provides for specifying types: _primitive values_ for atomic facts, _unions of literals_ for fixed choices, types that _group_ related values together, and _self-reference_ for recursive structure.
 
 <details class="tooltip link-110">
   <summary>Types and Data Definitions</summary>
 
 This is the data-definition step of the design recipe from CPSC 110. There you described a class of values in a comment before writing any function. In CPSC 210, you'll write a similar description as a type the compiler can enforce, rather than a comment it ignores.
 
-In CPSC 210, we won't grade you on following the systematic process described above: its purpose is to provide you with a process to tackle a design problem when you are initially stuck.
+We won't grade you on following the process described above. Its purpose is to give you a way into a design problem when you are stuck.
 
 </details>
 
@@ -112,7 +107,7 @@ Let's apply our systematic process. One design is as follows:
 5. _Concrete examples:_ one valid colour, plus an invalid one to confirm the type is enforced.
 6. _Generalisation:_ none. A small enumeration stands on its own.
 
-In this case, in step 4, we translate the data definition into the following typescript Type:
+In step 4, we translate the data definition into the following TypeScript type:
 
 ```typescript
 type TrafficLight = "red" | "green" | "yellow";
@@ -125,8 +120,6 @@ const light: TrafficLight = "red";   // ok
 const broken: TrafficLight = "blue"; // error: "blue" is not a TrafficLight
 ```
 
-
-
 <details class="tooltip ts-tips">
   <summary>Union of Literals</summary>
 
@@ -135,7 +128,7 @@ A union of literal values expresses that variables of that type can take on _exa
 ```typescript
 type TypeName = v_1 | v_2 | v_3;
 ```
-expresses that values of type `TypeName` can take on exactly the values `v_1`, or `v_2`, or `v_3`.  There can be as many primitive values `v_i` as you want.
+expresses that values of type `TypeName` can take on exactly the values `v_1`, or `v_2`, or `v_3`. There can be as many literal values `v_i` as you want.
 
 Above we used strings, but numbers work as literals too, so the same idea models any fixed set of values:
 
@@ -145,26 +138,6 @@ type HttpStatus = 200 | 301 | 404 | 500;
 
 </details>
 
-### Shuffle Modes
-
-> As a listener, I want to set playback to one of off, on, or repeat-one, so that I can control how my music is ordered.
-
-1. _Entities:_ the shuffle mode
-2. _Cases:_ off, on, or repeat-one
-3. _Information per case:_ information is totally encoded by the cases.
-4. _Translate:_ again, we can use a union of literals:
-```typescript
-type ShuffleMode = "off" | "on" | "repeat-one";
-```
-
-5. _Concrete examples:_ again, we will have one correct and one incorrect mode:
-```typescript
-const mode: ShuffleMode = "on"; // ok
-const mode2: ShuffleMode = "repeat-album"; // error: "repeat-album" is not a ShuffleMode
-```
-6. _Generalisation:_ nothing to generalize, all possible cases are expressed.
-
-
 ### Songs
 
 Let's move on to applying our systematic process to the song example we started with:
@@ -173,9 +146,9 @@ Let's move on to applying our systematic process to the song example we started 
 
 1. _Entities:_ the only entity here is a _song_.
 2. _Cases:_ A song has just one case: every song has the same shape, so there are no alternatives to distinguish.
-3. _Information per Case:_ for the natural language description above, what is relevant is that a song carries three facts: a `title`, an `artist`, and a duration in seconds.
+3. _Information per Case:_ the description says a song carries three facts: a `title`, an `artist`, and a duration in seconds.
 4. _Translate:_
-A song's facts belong together, so we describe their shape with a **type**, which lists named properties and their types. It helps to keep two words apart: a _type_ describes a shape, but it is not itself a value. `Song` is the shape.
+A song's facts belong together, so we describe their shape with an **object type**, which lists named properties and their types. A type describes a shape, but it is not itself a value. `Song` is the shape, and the songs themselves come in step 5.
 
 <!--- , listing the properties directly between braces; there is no `makeSong` function to call.--->
 ```typescript
@@ -186,7 +159,7 @@ type Song = {
 };
 ```
 
-The type cannot express that a duration must be positive, so we record that constraint in a comment and rely on tests to enforce it.
+The type cannot express that a duration must be positive, so we record that constraint in a comment. Chapters [3](./03_checking-invariants) and [4](./04_maintaining-invariants) show how to check and enforce constraints like this one.
 
 <details class="tooltip ts-tips">
   <summary>Grouping Values Together with Object Types</summary>
@@ -199,11 +172,9 @@ type TypeName = {
   prop_3: Type3;
 };
 ```
-declares a type `TypeName` which has 3 pieces of data. Each piece of data has a name (`prop_x` above) and a type (`TypeX`) above.
+declares a type `TypeName` which has 3 pieces of data. Each piece of data has a name (`prop_x`) and a type (`TypeX`).
 
 </details>
-
-
 
 5. _Concrete Examples:_ An actual song is an _object_: a value that has that shape, an _instance_ of the type. We create an object by writing an _object literal_. Below, `song1` and `song2` are two separate songs that share the `Song` type.
 
@@ -221,7 +192,6 @@ const song2: Song = {
 };
 ```
 
-
 <details class="tooltip ts-tips">
   <summary>Creating Object Values with Object Literals</summary>
 
@@ -233,11 +203,11 @@ const v: TypeName = {
   prop_3: <expression-3>
 };
 ```
-defines a value `v` of type `TypeName`, assigning each `prop_x` to the value gotten from evaluating `<expression-x>`. There can be any number of property-expression pairs, but they should be in sync with the type.
+defines a value `v` of type `TypeName`, setting each `prop_x` to the value of `<expression-x>`. There can be any number of property-expression pairs, but they must match the type.
 
 The TypeScript type checker will check that: (1) each `prop_x` is defined in `TypeName`'s definition, and (2) each `<expression-x>` is of the type that `prop_x` is declared to have in `TypeName`'s definition.
 
-Note a syntax difference between object values and object types. In object types, properties are separated with semicolons, and in object values, with commas.
+Object types and object values differ in one piece of syntax. In object types, properties are separated with semicolons, and in object values, with commas.
 
 </details>
 
@@ -280,7 +250,7 @@ The name after each dot is fixed in the source and checked against the type of t
 
 The object type we used to define `Song` plays the role of a structure definition. In CPSC 110 you would have defined such a struct with `(define-struct song (title artist duration))`, made an instance with `(make-song title artist duration)`, and read a field with a generated accessor, `(song-title s)`.
 
-TypeScript uses the three notations for these tasks: the object type is the definition, the object literal makes an instance directly, and dot notation reads a field, so `(song-title s)` becomes `s.title`.
+TypeScript uses three notations for these tasks: the object type is the definition, the object literal makes an instance directly, and dot notation reads a field, so `(song-title s)` becomes `s.title`.
 
 </details>
 
@@ -339,7 +309,7 @@ digraph Playlist {
 <details class="tooltip ts-tips">
   <summary>Tagged Unions</summary>
 
-Previously we saw _unions of literals_. **Tagged unions** have similar syntax, but bind together various type names, rather than literal values:
+Previously we saw _unions of literals_. **Tagged unions** have similar syntax, but combine type names rather than literal values:
 
 ```typescript
 type UnionType = Type1 | Type2 | Type3;
@@ -355,9 +325,9 @@ type Type1 = {
 };
 ```
 
-`kind` should map to a specific primitive value `v_1`, while the other properties should map to types. The `kind` is the "tag" in _tagged union_.
+The type of `kind` is a single literal `v_1`, different in each case, while the other properties can have any type. The `kind` is the "tag" in _tagged union_.
 
-To relate to a prior concept, you can understand the type of the `kind` property of any value of `UnionType` to be a union of literals. However, we know more than that: we know that `kind` is a specific one of those literals for each option in the tagged union.
+Across the whole `UnionType`, the type of `kind` is a union of literals. Within each case, `kind` is one specific literal, which is what lets a check on `kind` identify the case.
 </details>
 
 <!-- RTH: don't like this foreshadowing; we can re-add it if we think it's important
@@ -372,7 +342,6 @@ _Object-oriented programming_ offers a solution to this inelegance: we will get 
 -->
 
 5. _Concrete Examples:_ With the type written, we build concrete examples from the songs we already have. If they are easy to construct, the design fits. If they are awkward, the model is probably too complicated. These examples also become the data our tests run against later.
-
 
 ```typescript
 const empty: Playlist = { kind: "empty" };
@@ -390,7 +359,7 @@ const twoTracks: Playlist = {
 };
 ```
 
-Because an object is a value like any other, `oneTrack` reuses the `empty` object we already named rather than building a new one, so only the new node in `twoTracks` has to be written out.
+Because an object is a value like any other, `oneTrack` and `twoTracks` reuse the `empty` object we already named rather than building a new one.
 
 6. _Generalisation:_ A playlist is one instance of a more general shape: a list of any element type. If a program needed lists of several different things, we would write that shape once and let it take the element type as a _type parameter_, written in angle brackets. A type parameter lets one definition serve many content types:
 
@@ -405,11 +374,11 @@ A playlist would then be a `LinkedList<Song>` and a leaderboard a `LinkedList<nu
 <details class="tooltip ts-tips">
   <summary>Generic Types</summary>
 
-In a type definition, `type TypeName<T,S,R> = ...`, the names in angle brackets (i.e., `T`, `S`, `R`) are **type variables**. While regular program variables take on concrete _values_, type variables take on _types_.  These can then be used in the definition of `TypeName` as stand-in for a particular type. A type definition can have any number of type variables (`LinkedList` above has only 1)
+In a type definition, `type TypeName<T,S,R> = ...`, the names in angle brackets (here `T`, `S`, and `R`) are **type variables**. While regular program variables take on concrete _values_, type variables take on _types_. They can be used in the definition of `TypeName` as stand-ins for particular types. A type definition can have any number of type variables (`LinkedList` above has one).
 
 We call `TypeName<T,S,R>` a **generic type** when it has any type variable in its definition.
 
-Note that while we have been using `<` to indicate when code can be filled in with various syntactical constructs, `<expression>` capturing all types of expressions (e.g., `3`, `3 + 2`, `foo(3)`), in generics, `<` is concrete, necessary syntax.
+So far, angle brackets such as `<expression>` have marked a place in a code pattern where something can be filled in, such as any expression (`3`, `3 + 2`, `foo(3)`). In a generic type, the angle brackets are real TypeScript syntax.
 
 For the `LinkedList` example above, the compiler will ensure we are correctly populating the list based on its type:
 
@@ -441,7 +410,7 @@ Use generics only when you see real duplication in your code. Until then they ad
 
 ## Functions Follow Data
 
-With the data defined, writing functions over it is far less open-ended than it first appears, because the structure of the code will  mirror the structure of the data.
+With the data defined, writing functions over it is far less open-ended than it first appears, because the structure of the code will mirror the structure of the data.
 
 The data definition provides a template. If the data has distinct cases, the function branches on the case, and if the data is recursive, the function is recursive. A precise data definition has already done much of the design of the functions that consume it.
 
@@ -455,9 +424,9 @@ We won't strictly enforce a template step in CPSC 210. But, if you find yourself
 
 ### Branching on the Case
 
-When data has multiple cases, a function analyses which case it has and responds to each. We do this with a compound `if`/`else` chain: one branch per case, testing the value itself for a _union of literals_, and the value of the _discriminator_ for a _tagged union_.
+When data has multiple cases, a function analyses which case it has and responds to each. We do this with an `if`/`else` chain: one branch per case, testing the value itself for a _union of literals_, and the value of the _discriminator_ for a _tagged union_.
 
-An `if`/`else` chain over a union of literals, has one branch per value:
+An `if`/`else` chain over a union of literals has one branch per value:
 
 ```typescript
 function action(light: TrafficLight): string {
@@ -471,12 +440,12 @@ function action(light: TrafficLight): string {
 }
 ```
 
-The comparisons above use `===` to test a value against each literal. This is the first time we compare values, so we should be precise about what `===` means.
+The comparisons above use `===` to test a value against each literal. This is the first time we have compared values for equality.
 
 <details class="tooltip ts-tips">
 <summary>Evaluating Equality with <code>===</code></summary>
 
-There are several ways to evaluate equality with differing amounts of rigour in TypeScript. We will _always_ use `===` (often called _triple equals_) in CPSC 210. Using this operator ensures that two values are ***strictly equal***. Here are some examples.
+TypeScript has several equality operators, with differing amounts of rigour. We will _always_ use `===` (often called _triple equals_) in CPSC 210. Using this operator ensures that two values are ***strictly equal***. Here are some examples.
 
 ```typescript
 test("a number equals itself", checkExpect(() => 1 === 1, true));
@@ -491,7 +460,7 @@ test("equal strings are equal",
 true === "true";  // compile error: the types 'boolean' and 'string' have no overlap
 ```
 
-A value of one type is never strictly equal to a value of another, and when TypeScript can see that the types differ, as in the last two lines, it rejects the comparison before the program runs. We do this because it is almost always the case that when we want a 2, we want the number 2, not the string "2", or we would have used "2".
+A value of one type is never strictly equal to a value of another, and when TypeScript can see that the types differ, as in the last two lines, it rejects the comparison before the program runs. Comparing a number with a string is almost always a mistake, so TypeScript reports it.
 
 Non-strict equality (`==`) converts its operands to a common type before comparing them, which can be confusing:
 
@@ -521,8 +490,14 @@ function firstTitle(p: Playlist): string | null {
 }
 ```
 
-Checking the discriminator also unlocks the case's data. This is called **type narrowing**: once you have tested that `p.kind === "songs"`, the compiler knows that `p.first` and `p.rest` exist and lets you use them, while preventing you from accessing properties the other case does not have. For instance, the following code would not pass the type checker:
+An empty playlist has no first title, so `firstTitle` returns `null`. TypeScript has two values that stand for the _absence_ of a value. `null` represents a deliberate "no value here", such as the result of a lookup that finds nothing. `undefined` is the value a name has when nothing has been assigned to it yet. Each is its own type, and both are useful in combination with other types. The return type `string | null` says that `firstTitle` produces either a title or nothing.
 
+```typescript
+const noMatch: null = null;
+const notSet: undefined = undefined;
+```
+
+Checking the discriminator also unlocks the case's data. This is called **type narrowing**: once you have tested that `p.kind === "songs"`, the compiler knows that `p.first` and `p.rest` exist and lets you use them, while preventing you from accessing properties the other case does not have. For instance, the following code would not pass the type checker:
 
 ```typescript
 function firstTitle(p: Playlist): string {
@@ -541,8 +516,7 @@ A recursive data definition leads to a recursive function. The function handles 
 
 The same template solves a whole family of problems: counting elements, accumulating a total, and building a new structure all share the shape "handle empty, otherwise combine `first` with the recursion on `rest`."
 
-
-Here are some functions counting accumulating over a playlist:
+Here are two functions that count and accumulate over a playlist:
 
 ```typescript
 function countSongs(p: Playlist): number {
@@ -562,7 +536,7 @@ function totalDuration(p: Playlist): number {
 }
 ```
 
-Building a new playlist from an old one, here keeping only the longer songs:
+The same template builds a new playlist from an old one, here keeping only the longer songs:
 
 ```typescript
 function keepLongSongs(p: Playlist, minSeconds: number): Playlist {
@@ -597,7 +571,6 @@ function sum(tree: BinaryTree): number {
 ## What the Types Can Catch
 
 Modelling the data this way changes what can go wrong. Because the types describe the exact shape of the information, the compiler rejects code that does not respect that shape, and it does so before the program ever runs.
-
 
 <!---- CL: dunno if you want to leave these as deep dives or just put them inline --->
 
@@ -653,7 +626,7 @@ These run the functions and confirm they produce the expected values. The compil
 
 #### The Centrality of Abstraction
 
-A precise data definition is the foundation everything else rests on. It catches mistakes early, it mirrors the structure of the problem, and it drives the structure of the code that consumes it: once the data is modelled, the functions largely follow its shape. In this chapter we followed one process across a sequence of examples, from a simple enumeration through a song to a recursive playlist, and then wrote functions whose shape follows the data's shape.
+A precise data definition is the foundation everything else rests on. It catches mistakes early, mirrors the structure of the problem, and drives the structure of the code that consumes it. In this chapter we followed one modelling process from a simple enumeration, through a song, to a recursive playlist, and the functions over each followed the shape of the data.
 
 From here, Part 1 builds directly on this work: using generic types such as arrays and promises, deriving tests from the structure of data, and leaning further on the type checker. In [Part 2](../part2/index), when we move to _object-oriented programming_, the _tagged unions_ you wrote here become class hierarchies. The underlying ideas will carry over even as the syntax changes.
 
@@ -666,7 +639,7 @@ Let's apply the process from this chapter to a new problem, then write functions
 
 A journey is either _arrived_ (there are no more legs) or a _leg_: a single mode of travel, a duration in minutes, and the rest of the journey after it. The mode of travel is one of `"walk"`, `"bus"`, `"train"`, or `"bike"`.
 
-1. Model the data. Following the process, write a `Mode` type <span class="hint">as a restricted value (a union of the four literals),</span> and a `Journey` type <span class="hint">as a tagged union with a `kind` discriminator, one case for _arrived_ and one for a _leg_.</span> <span class="hint">Notice that `Journey` has the same shape as `Playlist`: an empty case, and a "first thing plus the rest" case.</span>
+1. Model the data. Following the process, write a `Mode` type <span class="hint">as a restricted value (a union of the four literals),</span> and a `Journey` type <span class="hint">as a tagged union with a `kind` discriminator, one case for _arrived_ and one for a _leg_.</span> <span class="hint">`Journey` has the same shape as `Playlist`: an empty case, and a "first thing plus the rest" case.</span>
 2. Write two example journeys: one that is only _arrived_, and one with at least two legs.
 3. Following the shape of the data, write `totalMinutes(journey: Journey): number`, <span class="hint">using case analysis on `kind` and recursion on the rest.</span>
 4. Write `usesTransit(journey: Journey): boolean`, <span class="hint">which is `true` when any leg travels by `"bus"` or `"train"`.</span>

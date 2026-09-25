@@ -6,7 +6,7 @@ We will do this using only programming constructs you know from CPSC 110. The re
 
 #### A Bank Account with No Enforcement
 
-We will build on the `BankAccount` design from the previous lecture activity. The design has a data type with an invariant, and some functions:
+We start from a simple `BankAccount` design, with a data type that has an invariant and some functions:
 
 ```typescript
 /**
@@ -33,7 +33,7 @@ function deposit(account: BankAccount, amount: number): BankAccount {
 }
 ```
 
-The `withdraw` function looks similar. Once the contracts are documented, tests can be derived from them. 
+The `withdraw` function looks similar. Once the contracts are documented, tests can be derived from them.
 
 ## Valid Types, Invalid Values
 
@@ -45,7 +45,7 @@ const account: BankAccount = { balance: -100 }; // passes the type checker
 
 This is the same issue we encountered with the `Song` whose duration was `-30`: the object has the right _shape_, so the static check passes, but its _meaning_ is incorrect.
 
-However, nothing about the `BankAccount` type connects it to `deposit` and `withdraw`. We can build any object literal with a `balance` property and call it a `BankAccount`, whether the invariant remains true or not.
+Nothing about the `BankAccount` type connects it to `deposit` and `withdraw`. We can build any object literal with a `balance` property and call it a `BankAccount`, whether the invariant remains true or not.
 
 For an invariant to hold for the life of a program, two things must be true:
 
@@ -75,7 +75,7 @@ function makeAccount(balance: number): Result<BankAccount, string> {
 }
 ```
 
-A function like this is called a **constructor function**: it constructs values of a type, and it ensures the invariant is established. A negative starting balance is not a precondition here but an erroneous outcome: the request is refused, and no account is built. Every account the constructor does return is valid:
+A function like this is called a **constructor function**: it constructs values of a type, and it ensures the invariant is established. Here a negative starting balance is an erroneous outcome. The request is refused, and no account is built. Every account the constructor does return is valid:
 
 ```typescript
 test("accounts cannot be created with a negative balance",
@@ -92,7 +92,7 @@ The invariant is safe only if every engineer chooses to go through the right fun
 
 ## Binding Operations to Data
 
-The main problem is that the data is reachable by anyone, so the operations can be bypassed. To solve it, the data must be reachable only through operations that maintain the invariant. To do this, we need a new language feature: an object property that holds a function. We can define a `BankAccount` type whose properties are operations rather than data:
+The main problem is that the data is reachable by anyone, so the operations can be bypassed. To solve it, the data must be reachable only through operations that maintain the invariant. To do this, we need a feature we have not yet used in TypeScript: an object property that holds a function. We can define a `BankAccount` type whose properties are operations rather than data:
 
 ```typescript
 /**
@@ -107,16 +107,16 @@ type BankAccount = {
 };
 ```
 
-There is no `balance` field. The type of `BankAccount` now describes what an account _can do_ rather than what it stores. A holder of a `BankAccount` can deposit, withdraw, and observe the balance (`getBalance`), and that is all. Each of these operations can be invoked with dot notation:
+There is no `balance` field. The `BankAccount` type now describes what an account _can do_ rather than what it stores. A holder of a `BankAccount` can deposit, withdraw, and observe the balance (`getBalance`), and that is all. Each of these operations can be invoked with dot notation:
 
 ```typescript
 // given an initialAccount of type BankAccount ...
 const deposited = initialAccount.deposit(5); // a Result<BankAccount, string>
 ```
 
-We have seen dot before. In [Chapter 2](./02_model-types) it read a property: `song1.title` selected the value stored under `title`. `initialAccount.deposit` selects the value stored under `deposit` in the same way, the only difference is that the value there is a function rather than a string or a number. The `(5)` that follows is an argument, just as in `letterGrade(85)`. 
+We have seen dot before. In [Chapter 2](./02_model-types) it read a property: `song1.title` selected the value stored under `title`. `initialAccount.deposit` selects the value stored under `deposit` in the same way. The only difference is that the value there is a function rather than a string or a number. The `(5)` that follows is an argument, just as in `letterGrade(85)`.
 
-The difference is _which_ function you get. A free-standing `deposit(account, 5)` is one function shared by every caller, which is why it has to be told which account to act on. `initialAccount.deposit` is the function belonging to this _specific_ account, so it operates on that account's balance. A caller cannot point it at a different account.
+What matters is _which_ function you get. A free-standing `deposit(account, 5)` is one function shared by every caller, which is why it has to be told which account to act on. `initialAccount.deposit` is the function belonging to this _specific_ account, so it operates on that account's balance. A caller cannot point it at a different account.
 
 <details class="tooltip ts-tips">
 <summary>Functions as Properties</summary>
@@ -158,7 +158,7 @@ CPSC 110 allowed a similar approach. A structure's fields could hold functions, 
 ```
 </details>
 
-Removing the `balance` field solves the preservation problem: nobody outside can reach `balance`. But it introduces a logic problem. The operations themselves can no longer access a `balance` field either, which they need to do their job. We need a `balance` that only the operations can reach.
+Removing the `balance` field solves the preservation problem: nobody outside can reach `balance`. But it introduces a new problem. The operations themselves can no longer access a `balance` field either, which they need to do their job. We need a `balance` that only the operations can reach.
 
 ## Hiding State with a Closure
 
@@ -208,7 +208,7 @@ Note the `local` is not strictly necessary. We could put lambdas directly in `ma
         [else
            (make-counter-interface (lambda () (make-counter (+ n 1))) (lambda () n))]))
 ```
-But, you might find this version without `local` a little less readable.
+You might find this version without `local` a little less readable, though.
 
 One difference from the ISL you used: `increment` and `get-count` take no arguments, and ISL requires every function to have at least one parameter. These examples need Advanced Student Language, which allows functions with no parameters.
 </details>
@@ -273,7 +273,6 @@ This code both _establishes_ and _preserves_ the invariant. The constructor func
 
 </details>
 
-
 Let's write tests for `increment`:
 
 ```typescript
@@ -297,16 +296,16 @@ test("the counter refuses to count past capacity",
 <details class="tooltip ts-tips">
 <summary><code>assertOk</code></summary>
 
-The setup above needs the `Counter` inside each `Result`. The toolkit's `assertOk` takes a `Result` and returns its `value` when `ok` is `true`. If the `Result` is `ok: false`, `assertOk` throws an error that includes the error the `Result` carried. Here it is called outside any test, so a failure stops the whole file before any of its tests run. It lets a test state that a step must succeed, since the test is only meaningful if it does. 
+The setup above needs the `Counter` inside each `Result`. The toolkit's `assertOk` takes a `Result` and returns its `value` when `ok` is `true`. If the `Result` is `ok: false`, `assertOk` throws an error that includes the error the `Result` carried. Here it is called outside any test, so a failure stops the whole file before any of its tests run. It states that a setup step must succeed, since the tests that use its result are only meaningful if it does.
 
 </details>
 
-The last test treats an increment at full capacity as an erroneous outcome. The counter reports that it cannot count higher, and the caller decides what to do about it. The refusal comes from `makeCounter`, the same check that guards creation, which is why `increment` contains no check of its own.
+The last test treats an increment at full capacity as an erroneous outcome. The counter reports that it cannot count higher, and the caller decides what to do about it.
 
 <details class="tooltip exercise">
   <summary>Exercise: Reflect on Closures</summary>
 
-Compare the closure above to an implementation of `Counter` without them:
+Compare the closure above to an implementation of `Counter` without closures:
 
 <CollapsibleCode>
 
@@ -357,10 +356,9 @@ If you could tell TypeScript that `n` can only be changed by certain functions, 
 <!-- rth: this is all about pre-casting to objects and visibility: if n were private, we'd be set -->
 </details>
 
-
 ### Protecting `BankAccount`
 
-Let's now use closures to take advantage of removing the `balance` field (outsiders can't access it) while removing its disadvantage (operations can't access it). We create the three operations inside `makeAccount`, where `balance` is in scope, so each closes over it:
+Closures let us keep the advantage of removing the `balance` field (outsiders can't reach it) without its disadvantage (the operations can't reach it either). We create the three operations inside `makeAccount`, where `balance` is in scope, so each closes over it:
 
 ```typescript
 /**
@@ -406,12 +404,15 @@ export function makeAccount(balance: number): Result<BankAccount, string> {
 }
 ```
 
-In our earlier designs, `deposit` and `withdraw` took the account as a parameter. These versions take none, because the operations know their balance: it is the `balance` of the `makeAccount` call that created it. Every call to `makeAccount` produces a fresh `balance` and three fresh functions closed over it, so two accounts never share state.
+In our earlier designs, `deposit` and `withdraw` took the account as a parameter. These versions take none, because the operations know their balance: it is the `balance` of the `makeAccount` call that created them. Every call to `makeAccount` produces a fresh `balance` and three fresh functions closed over it, so two accounts never share state.
 
 On the successful path, `deposit` and `withdraw` do not build the new account themselves. They call `makeAccount` again with the new balance. Every account that ever exists in the program, including every intermediate state produced by an operation, has passed through `makeAccount`. So the invariant is checked at creation and checked again on every change. A bad amount, which is an erroneous outcome, would be refused before any new account is requested.
 
-The structural change ensures that the invariant is _enforced by the programming language_ rather than by _programmer discipline_. There is no longer a `balance` property anywhere in the program for a client to read or forge. The only access to the balance is `getBalance`, and the only way to produce a new state is through `deposit` and `withdraw`. The type checker now rejects `const ba: BankAccount = { balance: -100 }`. Here's an example use of our new `BankAccount` type:
+The structural change ensures that the invariant is _enforced by the programming language_ rather than by _programmer discipline_. There is no longer a `balance` property anywhere in the program for a client to read or forge. The only access to the balance is `getBalance`, and the only way to produce a new state is through `deposit` and `withdraw`. The type checker now rejects `const ba: BankAccount = { balance: -100 }`.
 
+Because the type checker compares only shapes, a client could still write its own object literal with these three functions and call it a `BankAccount`. But that object was not made by `makeAccount`, and it cannot reach the balance of any real account.
+
+Here is an example that uses our new `BankAccount` type:
 
 ```typescript
 const account = assertOk(makeAccount(0));
@@ -429,7 +430,7 @@ test("a withdrawal beyond the balance is refused",
 );
 ```
 
-The operations and the balance co-exist inside the closure. Because only the operations are returned, nothing outside can reach the balance:
+The operations and the balance coexist inside the closure. Because only the operations are returned, nothing outside can reach the balance:
 
 ```ditaa
     
@@ -460,12 +461,11 @@ Unfortunately, a lot of real-world code _doesn't_ manage to enforce such invaria
 
 </details>
 
-
 #### Protecting Invariants Drives Design
 
 In this chapter, the invariant drove the design at every step:
 
-1. To ensure the invariant is established, we restricted creation of BankAccounts to a single constructor function.
+1. To ensure the invariant is established, we routed the creation of every `BankAccount` through a single constructor function.
 2. To ensure the invariant was preserved, we bound operations to the data, so that the functions, instead of the callers, maintained the invariant.
 3. To ensure that no one else could violate the invariant, we hid the state within a closure.
 
@@ -482,10 +482,10 @@ Practise this chapter's process on a new problem.
 
 A character's health has a current hit-point count and a maximum, and must always satisfy the invariant `0 <= hp <= maxHp`. A holder of a `Health` value should be able to apply damage, apply healing, read the current hit points, and ask whether the character is still alive, but should never be able to reach the underlying numbers directly.
 
-1. Define a `Health` type whose properties are _operations_, not data: <span class="hint">`damage(amount: number): Health`</span>, <span class="hint">`heal(amount: number): Health`</span>, <span class="hint">`getHp(): number`</span>, and <span class="hint">`isAlive(): boolean`</span>. There should be no `hp` or `maxHp` field on the type.
+1. Define a `Health` type whose properties are _operations_, not data: <span class="hint">`damage(amount: number): Result<Health, string>`</span>, <span class="hint">`heal(amount: number): Result<Health, string>`</span>, <span class="hint">`getHp(): number`</span>, and <span class="hint">`isAlive(): boolean`</span>. There should be no `hp` or `maxHp` field on the type.
 2. Write a constructor function `makeHealth(maxHp: number, hp: number): Result<Health, string>` that _establishes_ the invariant by refusing an invalid request as an erroneous outcome <span class="hint">(reject a `maxHp` below 1, or an `hp` outside `0` to `maxHp`)</span> and hides `hp` and `maxHp` in a closure. Model it on `makeCounter`.
-3. Implement `damage` and `heal` so they _preserve_ the invariant: <span class="hint">damage never drops hit points below 0, and heal never raises them above `maxHp`</span>. Each should return a new `Health` produced by `makeHealth`, so the invariant is re-established on every change.
-4. Add a `newCharacter(maxHp: number): Health` helper that starts a character at full health.
-5. Write tests: <span class="hint">`checkExpect` that damage and heal land on the right hit points, including that they stop at 0 and at `maxHp`; and `checkExpect` that `makeHealth` returns `ok: false` for an invalid starting value such as `makeHealth(10, -1)`.</span>
+3. Implement `damage` and `heal` so they _preserve_ the invariant: <span class="hint">damage never drops hit points below 0, and heal never raises them above `maxHp`</span>. Each should return the result of calling `makeHealth` with the new hit points, so the invariant is re-established on every change, as `increment` did for the counter. <span class="hint">Refuse a negative `amount` as an erroneous outcome, as `deposit` and `withdraw` do.</span>
+4. Add a `newCharacter(maxHp: number): Result<Health, string>` helper that starts a character at full health.
+5. Write tests. <span class="hint">Unwrap the setup values with `assertOk`, as the counter tests did. Use `checkExpect` to confirm that damage and heal land on the right hit points, including that they stop at 0 and at `maxHp`, and that `makeHealth` returns `ok: false` for an invalid starting value such as `makeHealth(10, -1)`.</span>
 
 </details>

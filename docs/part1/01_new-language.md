@@ -2,7 +2,7 @@
 
 This chapter introduces TypeScript, the language we use for the rest of the course. Much of CPSC 110 carries over. What is new is mostly a matter of how things are written down and how much the language checks for you.
 
-To make the transition concrete, we scaffold from the teaching languages you learned in 110. Each new concept is related back to the idea it corresponds to in the teaching languages, and the differences are called out as they arise. The next language you learn may offer no such scaffolding, and that is fine. Having built these comparisons once, you will know which questions to ask of any new language. If you came from another language this still applies, and if that language was Python, the notion of **types** will be new to you as well.
+To make the transition concrete, we scaffold from the teaching languages you learned in 110. Each new concept is related back to the idea it corresponds to in the teaching languages, and the differences are called out as they arise. The next language you learn may offer no such scaffolding, and that is fine. Having built these comparisons once, you will know which questions to ask of any new language. If you came from another language this still applies, and if that language was Python, **types** that are checked before the program runs may be new to you as well.
 
 For brevity's sake, we'll use the term ISL ([Intermediate Student Language with Lambdas](https://docs.racket-lang.org/htdp-langs/intermediate-lam.html)) as shorthand for the teaching languages used in CPSC 110. Many ISL features are also present in BSL ([Beginner Student Language](https://docs.racket-lang.org/htdp-langs/beginner.html)).
 
@@ -10,7 +10,7 @@ For brevity's sake, we'll use the term ISL ([Intermediate Student Language with 
 
 Every software system is written in a programming language, and every language has to provide the same handful of basic capabilities: ways to name values, to make decisions, to repeat work, and to describe the data the program operates on.
 
-The most obvious way languages differ is **syntax**. Syntax represents the required formatting and structure you must follow to express your thoughts in a way the computer can understand.
+The most obvious way languages differ is **syntax**. Syntax is the set of rules for how a program must be written so that the computer can read it.
 
 <details class="tooltip link-110">
 <summary>A Difference in Syntax: Prefix vs Infix</summary>
@@ -29,12 +29,12 @@ In TypeScript we write:
 
 While the characters are different (syntax), both have exactly the same meaning. In programming languages, we call that meaning _semantics_.
 
-More precisely, we would call any syntax where the operator appears before the operands `(+ 2 3)` or `+ 2 3` _prefix_ syntax. When the operator appears between the operands, such as `2 + 3`, we call this _infix_ syntax.
+Syntax where the operator appears before the operands, as in `(+ 2 3)` or `+ 2 3`, is called _prefix_ syntax. When the operator appears between the operands, as in `2 + 3`, it is called _infix_ syntax.
 
-In ISL, _all_ syntax was prefix. In TypeScript, most basic operations (e.g., addition, comparison) are written in infix syntax.
+In ISL, _all_ syntax was prefix. In TypeScript, most basic operations (such as addition and comparison) are written in infix syntax.
 </details>
 
-A more important way languages differ though is in the _mechanisms the language enforces for you_. A language can check things about your program before it ever runs, or it can leave those checks to you.
+A more important difference is what the language _enforces for you_. A language can check things about your program before it ever runs, or it can leave those checks to you.
 
 Enforcement mechanisms are where TypeScript differs most from ISL. TypeScript makes **types** an explicit, checked part of the program, and it analyses and transforms your source code with a **compiler** before the program executes. The compiler catches many common programming mistakes and makes it easier to build large systems.
 
@@ -42,7 +42,7 @@ Another big difference is that TypeScript primarily expresses control flow using
 
 ## Quick Primer on Functions
 
-Functions provide a basic unit for containing functionality within a program. Function declarations are straightforward:
+Functions are the basic unit for organising the code in a program. A function declaration looks like this:
 
 ```typescript
 function letterGrade() {
@@ -65,7 +65,7 @@ In ISL you documented type information as comments. A function's signature, like
 <details class="tooltip ts-tips">
   <summary>Basic Types: <code>number</code>, <code>string</code>, and <code>boolean</code></summary>
 
-TypeScript provides several basic types to describe individual values. Three of the most common are `number`, `string`, and `boolean`. `number` is the standard numeric type that can be used for both integer (e.g., `3`) and floating point (e.g., `3.14`) values. `string` describes textual data. String values are enclosed in either single quotes `'CPSC'` or double quotes `"CPSC"`, although it is best practice to be consistent about the kind of quote used in a program. `boolean` has two values, `true` and `false`.
+TypeScript provides several basic types to describe individual values. Three of the most common are `number`, `string`, and `boolean`. `number` is the standard numeric type, used for both integer (such as `3`) and floating point (such as `3.14`) values. `string` describes textual data. String values are enclosed in either single quotes `'CPSC'` or double quotes `"CPSC"`, although it is best practice to be consistent about the kind of quote used in a program. `boolean` has two values, `true` and `false`.
 
 As the course progresses we will examine a few more basic types, and will spend considerable time describing how to design and construct complex types.
 </details>
@@ -91,21 +91,37 @@ Two of them behave differently from their ISL counterparts, and both differences
 
 `*`, `/`, and `%` are evaluated before `+` and `-`, as in ordinary arithmetic, so `2 + 3 * 4` is `14`. Use parentheses wherever the grouping would otherwise be easy to misread.
 
-Because a `number` is stored as a binary approximation, arithmetic on decimal values can produce results that are slightly off from the exact answer. We return to that, and to what it means when comparing computed values, later in this chapter.
-
 </details>
 
+<details class="tooltip link-110">
+<summary>Exact Numbers in ISL, Inexact Numbers in TypeScript</summary>
+
+In ISL, dividing two integers gives an _exact_ rational number. `(/ 35 50)` is exactly `7/10`, and `(* (/ 35 50) 100)` is exactly `70`. Racket keeps the fraction rather than converting it to a decimal, so arithmetic on whole numbers stays exact however you order the operations.
+
+TypeScript has a single `number` type, and it stores values as a binary approximation of the decimal you wrote. Most decimals cannot be represented exactly in binary, in the same way that `1/3` cannot be written exactly as a decimal:
+
+```typescript
+(11 / 20) * 100;    // 55.00000000000001, not 55
+(29 / 50) * 100;    // 57.99999999999999, not 58
+```
+
+Two consequences follow, and both apply to any language that stores numbers this way:
+
+- Order your arithmetic so that division comes last. `(11 * 100) / 20` gives exactly `55`, because the multiplication happens while the values are still whole numbers.
+- Be careful comparing computed decimal values for exact equality. A test that expects `(11 / 20) * 100` to equal `55` fails, even though the difference is tiny.
+
+</details>
 
 In TypeScript you annotate each value with its type _directly in the code_, and the language checks those annotations for you when you invoke the compiler. This does two things:
 
 - First, the type communicates _intent_: a well-chosen type tells the next reader exactly which kinds of values are valid.
-- Second, the type is _enforced_ by a **type checker** within the compiler. The compiler will report a wrong type of value as an error, rather than leaving it for you to discover the bug when you run the program. A whole category of mistakes is caught before the program runs.
+- Second, the type is _enforced_ by a **type checker** within the compiler. The compiler reports a value of the wrong type as an error, so you do not have to discover the bug by running the program.
 
 <!--- NOTE arguments and parameters are covered in 110: https://cs110.students.cs.ubc.ca/reference/glossary.html --->
 
-Extending our `letterGrade` example above, we will add the ability to pass in a numerical `score` out of 100 that we want to calculate the corresponding letter grade for. Recall that the named inputs a function declares (such as `score`) are its **parameters**, and the actual values passed in when it is called are its **arguments**.
+We now extend `letterGrade` to take a numeric `score` out of 100 and produce the matching letter grade. Recall that the named inputs a function declares (such as `score`) are its **parameters**, and the actual values passed in when it is called are its **arguments**.
 
-The following declares the function `letterGrade`, which takes a single parameter called `score` that must be a `number`. Further, the function returns a value that is always a `string`:
+The following signature says that `letterGrade` takes a single parameter called `score` that must be a `number`, and always returns a `string`:
 
 ```typescript
 letterGrade(score: number): string
@@ -123,7 +139,7 @@ defines a function with the name `fn`, with parameters: `x` of type `X`, `y` of 
 Parameter types come after the parameter they type, separated by a `:`. The return type is placed after the parameter list, following a second `:`.
 </details>
 
-Note that the type checker _only_ helps where types are _written down_. In TypeScript we type the inputs and output of every function: each parameter gets a type, and so does the return value. These are the same places you would have written type comments in ISL.
+The type checker works from the types you write down, along with the types it can infer from them. In this course we write a type for the inputs and output of every function. Each parameter gets a type, and so does the return value. These are the same places you would have written type comments in ISL.
 
 <details class="tooltip link-110">
 <summary>Signatures in ISL</summary>
@@ -154,16 +170,16 @@ But either way, ISL does not use the signature to check that `letter-grade` is i
 
 ## Compiling and Checking
 
-In CPSC 110, DrRacket executed your program the moment you pressed `Run`. TypeScript adds a step that must be performed before your code can be executed. Before your program runs, it is analysed and transformed by a **compiler**, a program called `tsc`.
+In CPSC 110, DrRacket executed your program the moment you pressed `Run`. TypeScript adds a step before your code runs. The program is first analysed and transformed by a **compiler**, a program called `tsc`.
 
 <!--- : that (1) checks your source code and ensures that the types are used consistently, then (2) transforms your input code into executable output code. --->
 
-In particular, at the start of compilation, `tsc` invokes a type checker, whose job is to check whether your program is consistent with the declared types (i.e., has no **type errors**). If `tsc` finds a type error, it reports an error that you _must_ fix before your code can be executed.
+At the start of compilation, `tsc` invokes a type checker, whose job is to check whether your program is consistent with the declared types (that is, has no **type errors**). If `tsc` finds a type error, it reports it. Treat a program with type errors as broken, and fix every error the compiler reports before you run the code. Some tools, such as the test runner, will still run a program that has type errors, but its types no longer tell you anything about how it behaves.
 
 <details class="tooltip ts-tips">
   <summary>Anatomy of a Type Error</summary>
 
-Here are a few lines of code that call the `letterGrade` function signature we described above, and whether the compiler would allow them or they would result in an error:
+Here are a few lines of code that call the `letterGrade` function whose signature we described above, and whether the compiler would allow them or they would result in an error:
 
 ```typescript
 letterGrade(85);        // ok: 85 is a number
@@ -179,14 +195,10 @@ The compiler will tell you both where the error is and what is wrong with your c
 (B) Argument of type 'boolean' is not assignable to parameter of type 'number'.
 ```
 
-The computer will not be able to execute the program until the invalid calls to `letterGrade` are fixed.
+Fix both calls before you run the program.
 </details>
 
-This changes when errors in your program are surfaced to you. In ISL and other dynamically-typed languages (e.g. Python), a type mistake surfaces _while the program runs_, and only if you happened to execute code that hits that type mistake. These are **runtime** errors, because they happen at the _time_ the program _runs_. Sometimes you'll see the term **dynamic**: this means the same thing as **runtime**.
-
-In TypeScript, the `tsc` compiler checks your types _first_, before execution. Any type errors in your _entire program_ are flagged to you to fix before your code can execute. This is what it means for types to catch bugs "before runtime": the compiler catches them before you run your program. We call these errors, and any other errors that are flagged _before running_ the program, **static** errors.
-
-The compiler sits between the source you write and the program that runs, and it is where static errors are caught before anything executes:
+The compiler sits between the source you write and the program that runs, and it is where type errors are caught before anything executes:
 
 ```plantuml
 @startuml
@@ -216,25 +228,24 @@ endif
 <details class="tooltip deep-dive">
   <summary>Tools for Writing Source Code</summary>
 
-Because the compiler is now part of how you write code, you should write TypeScript in an Integrated Development Environment (**IDE**) rather than a plain text editor. Visual Studio Code is a free IDE you can download, and will be used for both the midterms and final exam, so getting used to that one would be a good idea. But you can also use other IDEs like WebStorm (which is free for students as well).
+Because the compiler is now part of how you write code, you should write TypeScript in an Integrated Development Environment (**IDE**) rather than a plain text editor. Visual Studio Code is a free IDE, and it is the one used on the midterms and the final exam, so it is a good one to learn. You can also use other IDEs, such as WebStorm (also free for students).
 
-An IDE runs the language's type checker continuously in the background as you type and shows each error in place, on the line that caused it, the moment it appears. You no longer have to run `tsc` by hand and read through a list of errors. You see the same static checks where you are working, which gives you faster feedback as you write your code. Live type checking is the feature that matters most to us today, but as the course continues we will engage with other features within the IDE as well.
+An IDE runs the language's type checker continuously in the background as you type and shows each error in place, on the line that caused it, the moment it appears. You no longer have to run `tsc` by hand and read through a list of errors. You see the same static checks where you are working, which gives you faster feedback as you write your code. Live type checking is the feature that matters most for now, but as the course continues we will engage with other features within the IDE as well.
 </details>
 
 ## Control Flow Statements
 
+Most programming languages have two main kinds of construct: expressions and statements. ISL is built almost entirely from **expressions**. Every chunk of ISL code is evaluated to produce a value, and that value is passed into the expression that contains it.
 
-There are two main kinds of syntax in all programming languages: expressions and statements. ISL is built almost entirely from **expressions**. Every chunk of ISL code is evaluated to produce a value, and that value is passed into the expression that contains it.
+TypeScript has expressions too, but it adds a second kind of construct: the **statement**. A statement does not evaluate to a value. It performs an action, such as making a decision or returning from a function. Often this action changes the program's **state**, which includes the names that are defined (such as variable or function names) and the values those names take on. A TypeScript program is written as a sequence of statements that run in order.
 
-TypeScript has expressions too, but it adds a second kind of construct: the **statement**. A statement does not evaluate to a value. It performs an action, such as making a decision or returning from a function. Often this action can change program **state**: _state_ includes the names that are defined (e.g., variable or function names), and the values those names take on. A TypeScript program is written as a sequence of statements that run in order.
-
-We saw one type of statement already: the function definition. Today we will introduce two more kinds of statements.
+We have already seen one kind of statement, the function declaration. This section introduces two more.
 
 ### `if` Statements
 
-The `if` statement chooses whether to run a block of code based on a condition. Unlike ISL's `cond`, it does not evaluate to a value, it only directs which code runs. The `if` statement is the most basic **control flow** statement in most languages. By directing how the program executes, the `if` controls the flow of execution.
+The `if` statement chooses whether to run a block of code based on a condition. Unlike ISL's `cond`, it does not evaluate to a value. It only directs which code runs. Statements that direct which code runs next are called **control flow** statements, and `if` is the most basic one in most languages.
 
-A basic if block is shown below. If the condition `grade >= 50` is `true`, the code labelled `// (A)` will execute. If the condition `grade >= 50` is `false`, the code labelled `// (B)` will execute.
+A basic `if` statement is shown below. If the condition `grade >= 50` is `true`, the code labelled `// (A)` will execute. If the condition `grade >= 50` is `false`, the code labelled `// (B)` will execute.
 
 <!--- not talking about executing stuff after the if statement, because it kind of conflicts with returns ---->
 
@@ -250,12 +261,11 @@ if (grade >= 50) {
 
 <!--- A contiguous sequence of expressions and statements that will always execute in order in a programming language is known as a **block**. In TypeScript, these represent statements between a `{` until the next branch statement (e.g, `if`) is encountered, or a closing `}` is encountered. This means that several statements could be included at `(A)`, and all would be executed in order if `<condition>` were `true`. ---->
 
-Right now `(A)` and `(B)` are comments rather than concrete code, and they stand for any sequence of statements. The curly braces `{}` designate a **block**, which can contain a sequence of statements. This means that several statements could be included at `// (A)`, or `// (B)`. We'll give a concrete example once we introduce another type of statement.
+Right now `(A)` and `(B)` are comments rather than concrete code, and they stand for any sequence of statements. The curly braces `{}` designate a **block**, which can contain a sequence of statements. So several statements could go at `// (A)` or `// (B)`. We'll give a concrete example once we introduce another type of statement.
 
-The two sides of the if statement are referred to as **branches**.
-When, in a certain run, the if condition (`grade >= 50` above) evaluates to true and we execute `// (A)`, we call this taking the **then-branch**. On the other hand, when the if condition (`grade >= 50` above) evaluates to false and we execute `// (B)`, we call this taking the **else-branch**.
+The two sides of the `if` statement are called **branches**. When the condition (`grade >= 50` above) evaluates to true and we execute `// (A)`, the run takes the **then-branch**. When the condition evaluates to false and we execute `// (B)`, the run takes the **else-branch**.
 
-It is common enough that we only want to execute code if a condition is true that an alternative version of `if` has no `else` statement:
+Often we only want to run code when a condition is true. In that case the `else` can be left out:
 
 ```typescript
 if (grade >= 50) {
@@ -272,11 +282,10 @@ if (grade >= 50) {
 }
 ```
 
-
 <details class="tooltip ts-tips">
 <summary><code>if</code> Statements and Block Statements</summary>
 
-A block statement is started by `{` and `}`. It groups together a list of statements:
+A block statement starts with `{` and ends with `}`. It groups together a list of statements:
 
 ```typescript
 {
@@ -295,7 +304,7 @@ if (<condition>)
    <then-statement>
 ```
 
-where `<condition>` is an expression that evaluates to a boolean, and `<then-statement>` is another statement. If `<condition>` is true, `<then-statement>` will be run, otherwise, it will be skipped. The parentheses around `<condition>` are _necessary_.
+where `<condition>` is an expression that evaluates to a boolean, and `<then-statement>` is another statement. If `<condition>` is true, `<then-statement>` runs. Otherwise, it is skipped. The parentheses around `<condition>` are _necessary_.
 
 While technically `<then-statement>` need not be a block, in this class we will always make it a block statement, as this improves clarity:
 
@@ -324,7 +333,7 @@ if (<condition>) {
 }
 ```
 
-There is one exception to this: we will allows `<else-statement>` to not be a block when it is another if statement. This allows us to create multi-condition statements, by chaining together `if-else` statements:
+There is one exception. We allow `<else-statement>` to be another `if` statement without a block around it. This lets us chain `if-else` statements to test several conditions in turn:
 
 ```typescript
 // else if version
@@ -356,8 +365,7 @@ Again, this is only a difference in _syntax_.
 
 </details>
 
-
-`if` statements can also be chained to ensure subsequent conditions hold before directing the control flow of the program. Let's use this to build up our `letterGrade` function:
+A chain of `if` statements tests its conditions one after another until one holds. Let's use this to build up our `letterGrade` function:
 
 ```typescript
 function letterGrade(score: number): string {
@@ -375,22 +383,21 @@ function letterGrade(score: number): string {
 }
 ```
 
-In the code above once a true branch of one of the `if` statements is taken, no other code is executed. We've written what we intend in each branch, but how do we say what the function should evaluate to in TypeScript?
+In the code above, once one condition is true and its branch runs, none of the other branches run. We've written what we intend in each branch, but how do we say what the function should evaluate to in TypeScript?
 
 ### `return` Statements
 
-The `return` keyword is necessary to make functions in TypeScript return values.  The `return` statement hands a value back to whoever called the function and stops the function there.
+A TypeScript function returns a value only through a `return` statement. The **`return`** statement hands a value back to whoever called the function and stops the function there.
 
 <details class="tooltip ts-tips">
 <summary><code>return</code> Statements</summary>
 
-`return <expression>;` evaluates the expression `<expression>` to a value `v` (i.e., `2 + 3` to `5`), stops executing the function there, and returns this `v` to the caller of the function.
+`return <expression>;` evaluates the expression `<expression>` to a value `v` (for example, `2 + 3` to `5`), stops executing the function there, and returns this `v` to the caller of the function.
 
-For instance, if `return <expression>;` is in the function `foo`, wherever the call `foo()` appears, when we execute `return <expression>;` within `foo`, `foo` evaluates `<expression>` to `v`, and the call to `foo()` is then replaced with `v`.
+For instance, if the function `foo` contains `return <expression>;`, then when that statement runs, `foo` evaluates `<expression>` to `v`, and the call `foo()` is replaced with `v`.
 
 The `return` statement only makes sense if it appears in a function definition (or method definition, which we'll see in [Part 2](../part2/index)).
 </details>
-
 
 The simplest example of a return statement is in the function `getString` below, which always returns the string `"STRING"`:
 
@@ -400,8 +407,7 @@ function getString(): string {
 }
 ```
 
-To finish `letterGrade` and specify what `letterGrade` should evaluate to, we'll need to add `return` statements to the body.
-
+To finish `letterGrade`, we add a `return` statement to each branch:
 
 ```typescript
 function letterGrade(score: number): string {
@@ -421,11 +427,10 @@ function letterGrade(score: number): string {
 
 Each `return` exits the function immediately, so the order of the checks matters: a score of 95 is caught by the first `if` and never reaches the others.
 
-
 <details class="tooltip link-110">
 <summary><code>if</code> vs <code>cond</code> vs the Ternary (<code>?</code>) Operator</summary>
 
-`if` operates very similarly to `cond`.
+`if` works much like `cond`.
 
 An equivalent ISL function to `letterGrade` looks like:
 
@@ -441,9 +446,9 @@ An equivalent ISL function to `letterGrade` looks like:
     [else "F"]))
 ```
 
-the TypeScript version says the same thing with statements: each `cond` clause becomes an `if` whose body returns that clause's value, and `else` becomes the final `return`. The behaviour is identical. What changed is that you spell out the control flow step-by-step rather than as a single expression.
+The TypeScript version says the same thing with statements: each `cond` clause becomes an `if` whose body returns that clause's value, and `else` becomes the final `return`. The behaviour is identical. What changed is that you spell out the control flow step-by-step rather than as a single expression.
 
-The core difference between `if` and `cond` is that `cond` is an expression: `cond` evaluates to one value. The bodies of the functions you defined in ISL contained a single expression `e` (above,`e` is the `cond` expression) and `(letter-grade 87)` evaluates `e` with `87` in the place of `score`.
+The core difference between `if` and `cond` is that `cond` is an expression: `cond` evaluates to one value. The bodies of the functions you defined in ISL contained a single expression `e` (above, `e` is the `cond` expression) and `(letter-grade 87)` evaluates `e` with `87` in the place of `score`.
 
 In TypeScript, a function body is not a single expression: it is a list of statements which will be run in order. TypeScript functions will not return a value unless they are told to by a `return` statement. Later, we'll see that we might want to write functions that have no `return` statements at all.
 
@@ -456,7 +461,6 @@ Unlike an `if` statement, the `<then-expression>` and `<else-expression>` in the
 
 </details>
 
-
 <details class="tooltip exercise">
 <summary>Exercise: <code>{}</code> for clarity</summary>
 
@@ -465,12 +469,12 @@ In this class, we will use block statements as the statement after any `if` cond
 Consider the following piece of code:
 ```typescript
 function toPassFail(s: number): string {
-    if (s > 0) 
-        if (s > 50) 
+    if (s > 0)
+        if (s > 50)
           return "PASS";
-        if (s <= 50) 
+        if (s <= 50)
           return "FAIL";
-    else 
+    else
           return "NEGATIVE";
 
 }
@@ -480,30 +484,31 @@ function toPassFail(s: number): string {
 3. Execute `toPassFail(i)` for each input `i` you've decided on. Does its return value match your prediction? Why or why not?
 </details>
 
-
 ## Static and Dynamic Views
 
 There are two natural perspectives through which you can view any program. The **static** view is what you see when you look at your source code. It is fixed text sitting in a file, and it can be read and analysed _without being executed_. Types you write down in a function signature are static, as is the overall structure of your code. The compiler works entirely in this static world, and it can check your types before the program runs.
 
 But we do not just write programs for them to sit as text on a filesystem. We write programs to do things, which gives rise to the **dynamic** view of the program. When the code _executes_, it is run on some actual _inputs_, which cause variables in the code to take on different values, and control flow statements to follow different branches. Which branch an `if` takes, what a variable holds at a given moment, and how many times a piece of code runs are dynamic facts, decided as the program runs and often different from one run to the next.
 
-Keeping these two views apart is useful because different kinds of problems appear in each. The compiler can rule out a whole class of mistakes statically, just by reading the text, but it cannot know what will happen once the program runs on a given input. That is why static checking, however good, never removes the need to run and test a program, a theme we will return to throughout the course.
+The two views also explain when errors appear. In ISL and other dynamically-typed languages (such as Python), a type mistake surfaces _while the program runs_, and only if you happened to execute code that hits that type mistake. These are **runtime** errors, because they happen at the _time_ the program _runs_. You will also see them called **dynamic** errors.
+
+In TypeScript, the `tsc` compiler checks the types of your _entire program_ first, before any of it runs. This is what it means for types to catch bugs "before runtime". We call these errors, and any other errors reported _before running_ the program, **static** errors.
+
+Keeping these two views apart is useful because different kinds of problems appear in each. The compiler can rule out a whole class of mistakes statically, just by reading the text, but it cannot know what will happen once the program runs on a given input. So static checking, however good, never removes the need to run and test a program. We return to this theme throughout the course.
 
 ## Testing the Dynamic View
 
-
 While the TypeScript compiler checks the static view of the program, we need to check the dynamic view ourselves. We do this through a process called _testing_.
 
-In Part 1 of this course, we will use a `checkExpect`, a function call that can validate whether the actual output of a function aligns with its expected output when it is executed. A check is always given a name and handed to `test`, which registers it with the testing framework. For example, to ensure that `letterGrade(88)` evaluates to `"A"`, we can write the following test:
-
+In Part 1 we test with `checkExpect`, a function that runs an expression and checks whether its value matches the value we expect. A check is always given a name and handed to `test`, which registers it with the testing framework. For example, to ensure that `letterGrade(88)` evaluates to `"A"`, we can write the following test:
 
 ```typescript
 test("Score of 88 returns an A", checkExpect(() => letterGrade(88), "A"));
 ```
 
-This cannot be checked statically, so we must run the test to check the program's behaviour. If the call and the expected value evaluate to the same value the check passes. If they differ, the check fails with an error that describes the expected behaviour that was violated.
+This cannot be checked statically, so we must run the test to check the program's behaviour. If the call produces the expected value, the check passes. If they differ, the check fails with an error that describes the expected behaviour that was violated.
 
-TypeScript does not natively have a `checkExpect`, we have built the utility to better align with 110 and require less syntax than most test approaches.
+TypeScript has no built-in `checkExpect`. We built it for this course to match CPSC 110 and to need less syntax than most testing libraries.
 
 <details class="tooltip ts-tips">
 <summary>Anatomy of a <code>checkExpect</code></summary>
@@ -520,7 +525,7 @@ Note that there are no braces around `<actual>`, and no `return` in front of it.
 
 When the check runs, it calls the thunk and compares the value it returns against `<expected>`. If they are equal, the check passes. If they differ, the check fails and reports a message describing the expected behaviour that was violated, so you can see which expectation failed and what was produced instead.
 
-A `checkExpect` only does anything when it is executed, which makes it a _dynamic_ check: it reports nothing about the program until the program runs, unlike the type checker, which works on the static text. A check never runs on its own, either: it must be placed inside a named test case, which the testing framework runs for us.
+A `checkExpect` only does anything when it is executed, which makes it a _dynamic_ check: it reports nothing about the program until the program runs, unlike the type checker, which works on the static text. A check also never runs on its own. It must be placed inside a named test case, which the testing framework runs for us.
 
 </details>
 
@@ -541,25 +546,6 @@ When the test suite is executed, each test file is first run from top to bottom,
 
 </details>
 
-<details class="tooltip link-110">
-<summary>Exact Numbers in ISL, Inexact Numbers in TypeScript</summary>
-
-In ISL, dividing two integers gives an _exact_ rational number. `(/ 35 50)` is exactly `7/10`, and `(* (/ 35 50) 100)` is exactly `70`. Racket keeps the fraction rather than converting it to a decimal, so arithmetic on whole numbers stays exact however you order the operations.
-
-TypeScript has a single `number` type, and it stores values as a binary approximation of the decimal you wrote. Most decimals cannot be represented exactly in binary, in the same way that `1/3` cannot be written exactly as a decimal:
-
-```typescript
-(11 / 20) * 100;    // 55.00000000000001, not 55
-(29 / 50) * 100;    // 57.99999999999999, not 58
-```
-
-Two consequences follow, and both apply to any language that stores numbers this way:
-
-- Order your arithmetic so that division comes last. `(11 * 100) / 20` gives exactly `55`, because the multiplication happens while the values are still whole numbers.
-- Be careful comparing computed decimal values for exact equality. A test whose check is `checkExpect(() => (11 / 20) * 100, 55)` fails, even though the computed value is not visibly different from `55`.
-
-</details>
-
 Suppose we had a more fine-grained expectation of how letter grades should be computed and wrote the following test:
 
 ```typescript
@@ -575,9 +561,10 @@ Arrow functions have two forms. The first has a single expression in its body:
 ```typescript
 (x: X, y: Y, z: Z) => <return-exp>
 ```
-this defines an anonymous function with 3 parameters (`x`, `y`, `z` of types `X`, `Y`, `Z`), which, when called, evaluates the expression `<return-exp>` with the given argument values, and returns the resulting value. There is no `return` keyword here, and there are no braces: a single-expression arrow function _implicitly returns_ the value of its expression. This is the form the thunks we pass to `checkExpect` always take.
 
-The second form has a block expression as its body:
+This defines an anonymous function with 3 parameters (`x`, `y`, `z` of types `X`, `Y`, `Z`), which, when called, evaluates the expression `<return-exp>` with the given argument values, and returns the resulting value. There is no `return` keyword here, and there are no braces: a single-expression arrow function _implicitly returns_ the value of its expression. This is the form the thunks we pass to `checkExpect` always take.
+
+The second form has a block as its body:
 
 ```typescript
 (x: X, y: Y, z: Z) => {
@@ -587,11 +574,9 @@ The second form has a block expression as its body:
 }
 ```
 
-which can contain any number of statements. The braces mark the difference: once a body is a block, nothing is returned implicitly, so to return a value the `return` statement must be used. Writing `() => { letterGrade(88) }` therefore returns nothing at all, which is why the checks in this course are written without braces.
-
+which can contain any number of statements. The braces mark the difference: once a body is a block, nothing is returned implicitly, so to return a value the `return` statement must be used.
 
 </details>
-
 
 <details class="tooltip link-110">
 <summary>Lambdas</summary>
@@ -603,21 +588,22 @@ You have seen anonymous functions before: in CPSC 110 they were called **lambda 
 ```
 
 TypeScript's arrow syntax does the same job: `(n) => n > 5` means the same thing as `(lambda (n) (> n 5))`. The `() =>` in the check above is a lambda that takes no parameters, like `(lambda () ...)`. The expression under test is wrapped in an anonymous function so that it can be handed to `checkExpect` and executed later, just as `filter` decided when to call your lambda.
+
+A function like `checkExpect` or `filter`, which takes another function as an argument, is called a **higher-order function**. You used several in CPSC 110, including `map`, `filter`, and `foldr`.
 </details>
 
 #### Learning New Languages
 
 Learning TypeScript is not starting over. The way you design data, break a problem into functions, and reason about behaviour is the same as in CPSC 110.
 
-What is new is mostly _enforcement_ and _form_. In terms of _enforcement_, we write types into the program and `tsc` checks them, rather than leaving them in an unchecked comment. In terms of _form_, we write conditional control flow  with statements like `if` and `return`, rather than as a single `cond` expression.
+What is new is mostly _enforcement_ and _form_. In terms of _enforcement_, we write types into the program and `tsc` checks them, rather than leaving them in an unchecked comment. In terms of _form_, we write conditional control flow with statements like `if` and `return`, rather than as a single `cond` expression.
 
-Mapping constructs in a new language back to the ideas you already know from prior languages is what makes new programming languages quick to pick up. While this transition can be tricky this first time, with each subsequent language you learn, it will be easier and easier.
-
+Mapping a new language's constructs back to ideas you already know makes the language quicker to pick up. The first transition can be tricky, and each later one gets easier.
 
 <details class="tooltip exercise">
   <summary>Exercise: Battery Status</summary>
 
-_Note: End-of-chapter exercises will contain hints hidden like so: <span class="hint">hello I'm a hint!</span>. In general, these hints hide _design decisions_ which, by the end of the course, we expect you to be able to make on your own. However, if you are going through the exercise for the first time and want coding practice, you can reveal the hints._
+_Note: End-of-chapter exercises will contain hints hidden like so: <span class="hint">hello I'm a hint!</span>. In general, these hints hide design decisions that, by the end of the course, we expect you to be able to make on your own. However, if you are going through the exercise for the first time and want coding practice, you can reveal the hints._
 
 Put this chapter's pieces together on a new problem: a typed function, an `if`/`return` chain, and a test.
 
@@ -625,7 +611,7 @@ Put this chapter's pieces together on a new problem: a typed function, an `if`/`
 
 Write a function called `batteryStatus` that turns a battery percentage number into a status string. The function should return `"critical"` for numbers below 10, `"low"` from 10 up to (but not including) 30, `"ok"` from 30 up to 80, and `"full"` for 80 or above.
 
-1. Write the function signature, <span class="hint">naming the parameter `percent` with the type `number`; the function should specify `string` for the return type.</span>
+1. Write the function signature, <span class="hint">naming the parameter `percent` with the type `number`, and using `string` as the return type.</span>
 2. Implement the body <span class="hint">with a chain of `if` / `else if` / `else` statements,</span> <span class="hint">each branch `return`ing the right status.</span> The order of the statements will matter here!
 3. Write one `test` per status, each holding a single `checkExpect`, choosing one representative percentage per case. Predict each result before running the tests, then run them.
 4. What does the compiler report if you call `batteryStatus("low")`? Decide before you try it, then confirm.
