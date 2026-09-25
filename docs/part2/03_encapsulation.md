@@ -1,8 +1,10 @@
 # Encapsulating What Varies
 
-Much of [Part 1](../part1/index) was concerned with invariants: the properties a value must satisfy to be meaningful and the preconditions and postconditions that make up a function's contract (an approach sometimes called **design by contract**). Those approaches describe and detect invariant violations, but cannot prevent them. A documented invariant is a promise, and the rest of the program is free to break it: the object `{ renewalsRemaining: -1 }` satisfies the `Loan` type and simultaneously violates the `Loan` invariant, and the compiler will not object. Classes provide a mechanism for starting to close this gap through the constructor, which provides a single, controlled path for building an object. But a constructor only controls how an object begins. If a class's fields are accessible to anywhere else in a program, any code holding the object can read and write to them directly, and the invariant the constructor established can be undone. A careful constructor is not enough on its own.
+Much of [Part 1](../part1/index) was concerned with invariants: the properties a value must satisfy to be meaningful, and the preconditions and postconditions that make up a function's contract (an approach sometimes called **design by contract**). These describe and detect invariant violations, but cannot prevent them. A documented invariant is a promise that the rest of the program is free to break. The object `{ renewalsRemaining: -1 }` satisfies the `Loan` type but violates the `Loan` invariant, and the compiler will not object.
 
-**Encapsulation** closes the gap by hiding a class's representation so that the invariant cannot be broken by external code. The data becomes accessible only to the class's own methods, which are designed to maintain the invariant. This is **information hiding**, and TypeScript's access modifiers make it more than a polite request: where [Part 1](../part1/index) could only write a comment asking other code to leave a field alone, now the compiler can enforce it. This chapter covers the mechanism (`private`, `public`, and `readonly`), the process of deciding what to hide, and how this improves the design of the overall system.
+Classes begin to close this gap through the constructor, a single, controlled path for building an object. But a constructor only controls how an object begins. If a class's fields are accessible from elsewhere in a program, any code holding the object can read and write them directly, and undo the invariant the constructor established.
+
+**Encapsulation** closes the gap by hiding a class's representation, so that external code cannot break the invariant. The data becomes accessible only to the class's own methods, which are designed to maintain it. This is **information hiding**, and TypeScript's access modifiers let the compiler enforce it, where in [Part 1](../part1/index) we could only write a comment asking other code to leave a field alone. This chapter covers the mechanism (`private`, `public`, and `readonly`), how to decide what to hide, and how hiding improves the design of the overall system.
 
 #### A Guest List That Must Stay Valid
 
@@ -10,7 +12,7 @@ We will work with one running example throughout this chapter.
 
 > As an event organiser, I want a guest list that never holds the same guest twice and never exceeds the venue's capacity, so that check-in stays accurate and the room stays within its limit.
 
-The list has two invariants: no guest appears more than once, and the number of guests never exceeds the capacity. Using the mechanisms we have already learned, this would look like:
+The list has two invariants: no guest appears more than once, and the number of guests never exceeds the capacity. With the mechanisms we already have, it looks like this:
 
 ```typescript
 class GuestList {
@@ -24,7 +26,7 @@ class GuestList {
 }
 ```
 
-The constructor starts an empty list, which satisfies both invariants. But the code does not continually enforce them. Any reference to a `GuestList` can write to the fields directly:
+The constructor starts with an empty list, which satisfies both invariants, but nothing enforces them afterwards. Any code with a reference to a `GuestList` can write to the fields directly:
 
 ```typescript
 const list = new GuestList(2);
@@ -35,7 +37,7 @@ list.invited.push("carol"); // three guests in a list of capacity two
 list.capacity = -1;         // and now the capacity is meaningless
 ```
 
-Every line type-checks. A comment such as `// invariant: no duplicates, at most capacity` records the rule, exactly as in [Part 1](../part1/index), but a comment cannot prevent the offending lines above from being written. And an invariant that can be so easily violated is not an invariant at all, since no caller could depend on it being true.
+Every line type-checks. A comment such as `// invariant: no duplicates, at most capacity` records the rule, as in [Part 1](../part1/index), but cannot prevent the lines above from being written. An invariant that can be violated this easily gives callers nothing to depend on.
 
 ## Hiding the Representation
 
@@ -61,9 +63,9 @@ list.invited.push("alice"); // compile error: 'invited' is private
 list.capacity = -1;         // compile error: 'capacity' is private
 ```
 
-The representation is now encapsulated within `GuestList`. The only code that can touch `invited` and `capacity` is the code we write inside `GuestList`, which means we are responsible for keeping the invariants true, and know they cannot be broken by external code. Information hiding has become a boundary the compiler checks rather than a convention we hope callers respect.
+The representation is now encapsulated within `GuestList`. The only code that can touch `invited` and `capacity` is the code inside `GuestList`, so we are responsible for keeping the invariants true, and we know external code cannot break them. Information hiding is now a boundary the compiler checks rather than a convention we hope callers respect.
 
-External code is prohibited by the compiler from accessing the private fields:
+The compiler prevents external code from accessing the private fields:
 
 ```graphviz
 digraph encapsulation {
@@ -83,14 +85,14 @@ digraph encapsulation {
   client -> capacity [label = "Compile Error", color = "red", style = dashed];
 }
 ```
-<!-- caption="External code may call the public methods but not reach the private fields." -->
+<!-- caption="External code cannot reach the private fields." -->
 
 <details class="tooltip ts-tips">
 <summary><code>public</code>, <code>private</code>, and <code>readonly</code></summary>
 
 Both fields _and_ methods can be marked with a visibility modifier:
 
-- `public` is the default: the member is accessible everywhere. Methods that callers are meant to use are public.
+- `public` is the default, and means the member is accessible everywhere. Methods that callers are meant to use are public.
 - `private` restricts the member to the class body. Hide the representation by marking fields `private`.
 - `readonly` allows a field to be assigned only where it is declared or in the constructor, never afterwards. A `GuestList`'s capacity is fixed once the list exists, so it should be `private readonly`:
 
@@ -98,20 +100,20 @@ Both fields _and_ methods can be marked with a visibility modifier:
 private readonly capacity: number;
 ```
 
-`readonly` and `private` provide different constraints: `private` controls _who_ can touch a field, `readonly` controls _when_ it can change. A field can be both.
+`readonly` and `private` are different constraints. `private` controls _who_ can touch a field, and `readonly` controls _when_ it can change. A field can be both.
 
 </details>
 
 <details class="tooltip deep-dive">
 <summary><code>private</code> Is Checked at Compile Time</summary>
 
-TypeScript's `private` is enforced by the compiler and then erased: it is a rule about your source code, not a lock that exists while the program runs. JavaScript has a separate feature, fields whose names begin with `#`, that stay private at runtime as well. This course uses TypeScript's `private` throughout; you do not need `#` names. The practical point is the same either way: code outside the class is not permitted to reach the representation.
+TypeScript's `private` is enforced by the compiler and then erased, so it is a rule about your source code, not a lock that exists while the program runs. JavaScript has a separate feature, fields whose names begin with `#`, that stay private at runtime as well. This course uses TypeScript's `private` throughout, and you do not need `#` names. Either way, code outside the class cannot reach the representation.
 
 </details>
 
-## Establishing and Preserving the Invariant
+## Maintaining the Invariant
 
-Because the representation is private, the constructor is the only way to bring a `GuestList` into existence, which makes it the natural place to establish the invariant, and, as the error handling chapter showed, to throw when the input cannot be turned into a valid object. The version above still accepts invalid input: `new GuestList(-1)` produces a list whose capacity can never be met. The constructor should reject input it cannot turn into a valid object:
+Because the representation is private, the constructor is the only way to create a `GuestList`, which makes it the natural place to establish the invariant and, as the error handling chapter showed, to throw when the input cannot be turned into a valid object. The version above still accepts invalid input: `new GuestList(-1)` produces a list whose capacity can never be met. The constructor should reject it:
 
 <CollapsibleCode>
 
@@ -144,7 +146,7 @@ class GuestList {
 
 </CollapsibleCode>
 
-A validating constructor guarantees the object _starts_ valid. Keeping it valid as it changes is the job of the methods, and it is a rule with no exceptions: every method that touches the representation must leave the invariant true. Adding a guest is the case that puts both invariants at risk:
+A validating constructor guarantees the object _starts_ valid. Keeping it valid as it changes is the job of the methods, and there are no exceptions: every method that touches the representation must leave the invariant true. Adding a guest puts both invariants at risk:
 
 ```typescript
 /**
@@ -163,7 +165,7 @@ add(guestId: string): void {
 }
 ```
 
-The duplicate invariant is protected by the early return: inviting someone already present changes nothing. The capacity invariant is protected by the `assert`: the method's contract places the responsibility for checking space on the caller, who is expected to call `isFull` first, so reaching `add` on a full list is a programmer error, and we halt on it. The supporting methods are small, and each reports on the state without exposing it:
+The early return protects the duplicate invariant, because inviting someone already present changes nothing. The `assert` protects the capacity invariant. The method's contract makes the caller responsible for checking space by calling `isFull` first, so reaching `add` on a full list is a programmer error, and the method halts. The supporting methods are small, and each reports on the state without exposing it:
 
 ```typescript
 isInvited(guestId: string): boolean {
@@ -179,8 +181,7 @@ size(): number {
 }
 ```
 
-This captures the essence of encapsulation. In [Part 1](../part1/index) an invariant was documented and checked after the fact. Here, the constructor establishes it and every method preserves it, while the private representation guarantees that no other path exists. The invariant has gone from a property we _hoped held_ to one that _always holds_.
-
+In [Chapter 3](../part1/03_checking-invariants), an invariant was documented and then checked by tests. Here, the constructor establishes it, every method preserves it, and the private representation means no other code can change the state, so the invariant always holds.
 
 ```graphviz
 digraph encapsulation {
@@ -192,17 +193,17 @@ digraph encapsulation {
     style = filled;
     color = "#eef3ff";
     invited  [shape = record, label = "private invited: string[];"];
-    capacity [shape = record, label = "private capacity: number;"];
+    capacity [shape = record, label = "private readonly capacity: number;"];
     add      [shape = box, style = rounded, label = "add(..)"];
     isFull   [shape = box, style = rounded, label = "isFull(): boolean"];
-    isInvited   [shape = box, style = rounded, label = "isInvited(name: string): boolean"];
+    isInvited   [shape = box, style = rounded, label = "isInvited(guestId: string): boolean"];
     size   [shape = box, style = rounded, label = "size(): number"];
     add -> invited [style = dashed];
     isFull -> capacity [style = dashed];
   }
 
   client [shape = box, label = "External Code"];
-  
+
   client -> add    [label = "Allowed"];
   client -> isFull    [label = "Allowed"];
   client -> isInvited [label = "Allowed"];
@@ -218,13 +219,13 @@ digraph encapsulation {
 <details class="tooltip link-110">
 <summary>Invariants in CPSC 110</summary>
 
-The structures you built with `define-struct` in CPSC 110 were immutable: once made, their fields never changed, so no later code could mutate one into an invalid state. But nothing checked an invariant when a structure was built, and nothing hid its fields, so a caller could still construct a structure that violated the interpretation written in its data definition. Keeping structures valid was a matter of discipline, of always building them through your own helper functions. Encapsulation makes that discipline something the language enforces: a validating constructor for how objects begin, and a hidden representation for how they change.
+The structures you built with `define-struct` in CPSC 110 were immutable. Once made, their fields never changed, so no later code could mutate one into an invalid state. But nothing checked an invariant when a structure was built, and nothing hid its fields, so a caller could still construct a structure that violated the interpretation in its data definition. Keeping structures valid was a matter of discipline, of always building them through your own helper functions. Encapsulation lets the language enforce that discipline, with a validating constructor for how objects begin and a hidden representation for how they change.
 
 </details>
 
 ### When References Escape
 
-A caller often needs to _see_ the guests, to print them at the door or count them by hand. An accessor that hands the list back looks harmless:
+A caller often needs to _see_ the guests, to print them at the door or count them. An accessor that returns the list looks harmless:
 
 ```typescript
 guests(): string[] {
@@ -232,7 +233,7 @@ guests(): string[] {
 }
 ```
 
-This compiles, and `private` is still on the field, yet the invariant is no safer than before. The method returns the very array the object stores, so a caller now holds a reference straight into the private representation:
+This compiles, and `private` is still on the field, yet the invariant is no safer than before. The method returns the same array the object stores, so a caller now holds a reference into the private representation:
 
 ```typescript
 const list = new GuestList(2);
@@ -243,7 +244,7 @@ everyone.push("bob");
 everyone.push("carol"); // and now over capacity
 ```
 
-No method of `GuestList` was called to break the invariant, and no `private` rule was violated; the array _escaped_. `private` prevented external code from directly accessing the `invited` field, the `guests()` method exposed the field to callers. The fix is to hand back a copy:
+No method of `GuestList` was called to break the invariant, and no `private` rule was violated. The array _escaped_. `private` prevented external code from accessing the `invited` field directly, but `guests()` handed callers a reference to the same array. The fix is to return a copy:
 
 ```typescript
 guests(): string[] {
@@ -251,16 +252,16 @@ guests(): string[] {
 }
 ```
 
-The array returned by `guests()` is now a separate array from the field within `GuestList`. Returning a copy of internal data rather than the data itself is called **defensive copying**. Forgetting to make defensive copies is one of the most common ways to violate encapsulation, because the unsafe version looks correct and passes every test that does not specifically try to mutate the result.
+The array returned by `guests()` is now separate from the field inside `GuestList`. Returning a copy of internal data rather than the data itself is called **defensive copying**. Forgetting to make defensive copies is one of the most common ways to break encapsulation, because the unsafe version looks correct and passes every test that does not specifically try to mutate the result.
 
 <details class="tooltip deep-dive">
 <summary>Copies and Shared References</summary>
 
-A variable holding an array or object does not hold the data; it holds a reference to data that lives elsewhere. Assigning or returning that variable copies the reference, not the data, so two names end up pointing at the same array, and a change through one is visible through the other. `slice()` (for arrays) builds a new array, which is why returning `this.invited.slice()` is safe.
+As [Chapter 6](../part1/06_state-mutation#copies-and-references) described, returning an array returns a reference to it, not a copy of its data. `slice()` builds a new array, which is why returning `this.invited.slice()` is safe.
 
-There is a depth limit worth knowing. `slice()` makes a **shallow copy**: a new array whose elements are the same references as the original's. For an array of strings that is completely safe, because strings cannot be mutated. For an array of objects it is not: the copy is a new array, but its elements are the same objects, so a caller could still reach through and mutate one of them.
+Copies have a depth limit. `slice()` makes a **shallow copy**, a new array whose elements are the same references as the original's. For an array of strings that is safe, because strings cannot be mutated. For an array of objects it is not. The copy is a new array, but its elements are the same objects, so a caller could still reach through and mutate one of them.
 
-Conversely, a **deep copy** duplicates the structure all the way down: a new array whose elements are themselves new copies, and so on through any objects those elements contain, so that the copy shares nothing with the original. Nothing a caller does to a deep copy can be seen through the original, which is exactly the guarantee a shallow copy fails to provide. The cost is that the computational time and memory required for a deep copy grows with the size of the structure rather than with the length of the outer array. Also, what exactly a deep copy is is not always well defined: a structure that refers back to itself has no terminal condition, so a deep copy of it needs special handling to terminate.
+A **deep copy** duplicates the structure all the way down: a new array whose elements are themselves new copies, and so on through any objects those elements contain, so that the copy shares nothing with the original. Nothing a caller does to a deep copy is visible through the original, which is the guarantee a shallow copy does not provide. The cost is that the time and memory a deep copy needs grow with the size of the whole structure, not just the length of the outer array. A deep copy is also not always well defined: copying a structure that refers back to itself would never finish without special handling.
 
 Both kinds have a standard form. For an array, `slice()` makes the shallow copy, and the built-in `structuredClone` makes the deep one:
 
@@ -274,18 +275,17 @@ shallow[0].seat = 99; // original[0].seat is now 99 too
 deep[0].seat = 42;    // original is unaffected
 ```
 
-For a plain object rather than an array, `Object.assign({}, original)` is the shallow copy; `structuredClone` is the deep copy either way.
+For a plain object rather than an array, `Object.assign({}, original)` makes the shallow copy, and `structuredClone` makes the deep copy.
 
-`structuredClone` walks the structure itself, and it tracks what it has already visited, so the self-referencing case above copies correctly. It copies data, not behaviour: it will refuse to clone a function, and an object built from a class comes back as a plain object with the same fields but none of its methods.
+`structuredClone` tracks what it has already visited, so it copies the self-referencing case above correctly. It copies data, not behaviour. It refuses to clone a function, and an object built from a class comes back as a plain object with the same fields but none of its methods.
 
-When the elements are themselves mutable, you therefore need either a deep copy or elements that cannot be changed, which is the subject of the next chapter.
-
+When the elements are themselves mutable, you need either a deep copy or elements that cannot be changed. The next chapter covers the second option.
 
 </details>
 
-## Changing the Representation
+## Changing Representations
 
-Maintaining the duplicate invariant by hand, an `includes` check in `add` and a rebuild in any removal, is work the standard library can do for us. A `Set` holds each value at most once by construction. Because the representation is private, we can switch to it without any caller being able to observe the difference:
+Maintaining the duplicate invariant by hand, with an `includes` check in `add` and a rebuild in any removal, is work the standard library can do for us. A `Set` holds each value at most once by construction. Because the representation is private, we can switch to it without any caller being able to tell:
 
 <CollapsibleCode>
 
@@ -340,35 +340,34 @@ class GuestList {
 
 </CollapsibleCode>
 
-Every public method has the same name, the same parameters, and the same return type as before. Code written against the array version keeps working without a single change, because from the outside there _is_ no change: the public shape is identical. We replaced the internal data structure and rewrote the method bodies, and all of it stayed inside the boundary that `private` creates. In addition, the `Set` makes the duplicate invariant _structural_: the representation is now incapable of holding a duplicate at all, rather than relying on `add` to check.
+Every public method from the array version has the same name, parameters, and return type as before, and `remove` is now a single call to `delete`. Code written against the array version keeps working without a single change, because from the outside nothing has changed. We replaced the internal data structure and rewrote the method bodies, all inside the boundary that `private` creates. The `Set` also makes the duplicate invariant _structural_. The representation cannot hold a duplicate at all. `add` still returns early for a guest who is already invited, but now only so that inviting that guest again to a full list is not treated as an error.
 
 <details class="tooltip deep-dive">
 <summary>Built-in Encapsulated Types</summary>
 
-The `Set` we used is itself an encapsulated type: you use it through methods like `add`, `has`, `delete`, and `size`, never touching how it stores its elements. The standard collections are worth knowing precisely because they are the representations you will most often hide inside your own classes, and they are examples of an internal choice you can change without leaking.
+The `Set` we used is itself an encapsulated type. You use it through methods like `add`, `has`, `delete`, and `size`, without seeing how it stores its elements. Two built-in collections are the representations you will most often hide inside your own classes:
 
-- `Array`. An `Array` holds a linear sequence of elements. You have written arrays with the syntactic sugar `string[]`. They can also be constructed explicitly with `new Array<string>()`, which produces the same kind of value as `[]` typed as `string[]`. An array keeps its elements in insertion order and allows access by position, but testing whether it contains a value scans the whole sequence, and it can hold duplicates.
-- `Set`. A `Set` holds each value at most once. Build one with `new Set<string>()`; adding a value it already contains does nothing. There is no literal shorthand, so a `Set` must be created with `new`. A set tests membership and enforces uniqueness quickly, which is why we used it above, but it offers no access by position: you can ask whether a value is present, never for the element at a given index.
-- `Map`. A `Map` associates keys with values, for example `new Map<string, number>()` to count tickets per guest. Its core methods are `set`, `get`, `has`, and `delete`, and it reports its entry count through `.size`. Like `Set`, it has no literal form and requires `new`. A map looks a value up by its key quickly and accepts keys of any type, but it carries more overhead than a plain array or object and is the wrong choice when you need only an ordered list or a set of bare values.
+- `Set`. A `Set` holds each value at most once. Build one with `new Set<string>()`, since there is no literal shorthand. Adding a value it already contains does nothing. A set checks membership quickly, but it has no access by position.
+- `Map`. A `Map` associates keys with values, for example `new Map<string, number>()` to count tickets per guest. Its core methods are `set`, `get`, `has`, and `delete`, and `.size` reports its number of entries. Its keys can be of any type, and it iterates its entries in the order they were inserted.
 
-A plain object can also serve as a key-to-value table, what is often called a dictionary. Using an _index signature_, the type `{ [guestId: string]: number }` reads as "any string key maps to a number":
+A plain object can also serve as a small table from string keys to values. Its type is written with an _index signature_: `{ [guestId: string]: number }` reads as "any string key maps to a number":
 
 ```typescript
 const tickets: { [guestId: string]: number } = {};
 tickets["alice"] = 2;
 ```
 
-A plain-object dictionary and a `Map` overlap, but differ in ways that decide between them. A plain object's keys are always strings; a `Map`'s keys may be of any type. A `Map` iterates its entries in the order they were inserted, and can report its size directly, while a plain object can do neither. Use a `Map` when you need keys that are not strings, a reliable iteration order, or a running size; use a dictionary for a small, fixed-shape, string-keyed record.
+Use a `Map` instead when you need keys that are not strings, a reliable iteration order, or a running size. A plain object is the better fit for a small, fixed-shape, string-keyed record.
 
 </details>
 
 ## Choosing What to Expose
 
-Information hiding is not only about marking fields `private`; it is about keeping the public side of a class small and behavioural. Every public member is a promise to callers, so the fewer and the more stable they are, the more freedom the class keeps for itself. Three habits help:
+Information hiding is not only about marking fields `private`. It is also about keeping the public side of a class small and focused on behaviour. Every public member is a promise to callers, so the fewer and more stable they are, the more freedom the class keeps to change. Three habits help:
 
 - _Expose behaviour, not data._ `add`, `remove`, `isInvited`, and `size` say what a guest list _does_. We never exposed `invited`, so the data is reachable only in the controlled ways those methods allow.
-- _Hide likely change._ The choice between an array and a `Set` was precisely such a decision, and hiding it is what made the change painless. Anything you expose, you may later have to keep working.
-- _Minimal public exposure._ Add a public method when a caller needs the behaviour, not in anticipation of one that might.
+- _Hide decisions that are likely to change._ The choice between an array and a `Set` was one, and hiding it is what made the change easy. Anything you expose, you may have to keep working later.
+- _Keep the public surface minimal._ Add a public method when a caller needs the behaviour, not in anticipation of one that might.
 
 <details class="tooltip ts-tips">
 <summary>Accessors with <code>get</code></summary>
@@ -381,7 +380,7 @@ get count(): number {
 }
 ```
 
-A caller writes `list.count`, with no parentheses, but the body still runs, so it can return a computed or read-only view without exposing a field. There is a matching `set` accessor for assignment. Accessors are a convenience for presenting derived values; they are not a way around encapsulation, since a `get` with no `set` is read-only by design.
+A caller writes `list.count`, with no parentheses, but the body still runs, so it can return a computed or read-only value without exposing a field. There is a matching `set` accessor for assignment. Accessors are a convenience for presenting derived values, not a way around encapsulation: a `get` with no `set` is read-only.
 
 </details>
 
@@ -414,15 +413,17 @@ test("the array from guests() cannot change the list", () => {
 
 </CollapsibleCode>
 
-This is black-box testing by construction: with the representation hidden, there is nothing left to test but behaviour. It also reveals a design pressure worth naming. An object is testable exactly to the extent that its important behaviour is observable through its public surface. If a `GuestList` could fall into an invalid state but offered no way to observe its contents, no test could catch the fault. Designing for testability means giving callers, and therefore tests, enough public behaviour to confirm the invariant holds, without exposing the representation that would let them break it. The third test above is only possible because `guests()` and `size()` together let us observe that the escape attempt failed.
+This is black-box testing by construction. With the representation hidden, all a test can check is behaviour. It also shows a design pressure. An object is testable only to the extent that its important behaviour is observable through its public methods. If a `GuestList` could fall into an invalid state but offered no way to observe its contents, no test could catch the fault. Designing for testability means giving callers, and therefore tests, enough public behaviour to confirm the invariant holds, without exposing the representation that would let them break it. The third test above is only possible because `guests()` and `size()` together let us observe that the escape attempt failed.
 
-Encapsulation and testing are often in tension. Encapsulation hides the representation; a test wants to confirm that the representation is being maintained correctly. A test cannot read a `private` field to check the invariant, and most of the time that is exactly right: you confirm behaviour through the public methods, as we did when testing `GuestList`. Occasionally, though, the public surface is too minimal to test against effectively, which will require some design changes to overcome.
+### Designing for Testability
 
-A test needs two things of the object under test. **Controllability** is the ability to configure an object into the state a test wants to examine: can the test construct the object and call the methods needed to reach that state? **Observability** is the ability to see enough of the outcome to judge whether it was successful: can the test read back what it needs to tell success from failure? Encapsulation can weaken both. If the only way to reach an interesting state is a long and awkward sequence of calls, the object is hard to control; if a method changes internal state but exposes nothing about it, the object is hard to observe.
+Encapsulation and testing are often in tension. Encapsulation hides the representation, but a test wants to confirm that the representation is maintained correctly. A test cannot read a `private` field to check the invariant, and most of the time that is right: you check behaviour through the public methods, as we did for `GuestList`. Occasionally, though, the public methods are too limited to test effectively, and the design needs to change.
 
-When a test cannot control or observe what it needs, the fix is almost always a change to the design, not to blindly break the encapsulation. Small, behavioural additions to the public surface are usually effective: an observation method that reports a meaningful, derived fact about the state, or a constructor that builds the object directly in a useful starting configuration. `size()` and `isInvited()` already play this role for `GuestList`; they are what made the duplicate-invariant test possible without exposing `invited`. The constraint is that these additions expose behaviour through _derived facts_, never the raw representation. A getter that returned the private array would restore observability and destroy encapsulation at the same time, handing back the very reference the class works to protect.
+A test needs two things from the object under test. **Controllability** is the ability to put an object into the state a test wants to examine: can the test construct the object and call the methods needed to reach that state? **Observability** is the ability to see enough of the outcome to judge it: can the test read back what it needs to tell success from failure? Encapsulation can weaken both. If the only way to reach an interesting state is a long, awkward sequence of calls, the object is hard to control. If a method changes internal state but exposes nothing about it, the object is hard to observe.
 
-So testability is not at odds with encapsulation when the two are designed together. A class that is hard to test is often telling you something useful: either it maintains an invariant with no observable consequence, which is worth questioning, or its public surface has a genuine gap that real callers will feel too. Designing for controllability and observability, through a minimal behavioural interface rather than exposed fields, is part of encapsulation done well.
+When a test cannot control or observe what it needs, the fix is almost always a change to the design, not a break in encapsulation. Small, behavioural additions to the public methods usually work: an observation method that reports a meaningful, derived fact about the state, or a constructor that builds the object directly in a useful starting configuration. `size()` and `isInvited()` already do this for `GuestList`, and they are what made the duplicate-invariant test possible without exposing `invited`. The constraint is that these additions expose _derived facts_, never the raw representation. A getter that returned the private array would restore observability but destroy encapsulation, handing back the same reference the class works to protect.
+
+Testability and encapsulation do not conflict when they are designed together. A class that is hard to test often points to a design problem. Either it maintains an invariant with no observable consequence, which is worth questioning, or its public methods have a real gap that callers will also run into. Designing for controllability and observability, through a small behavioural interface rather than exposed fields, is part of encapsulating well.
 
 <details class="tooltip deep-dive">
   <summary>Evolving a Design for Testability</summary>
@@ -451,11 +452,11 @@ class LoginThrottle {
 }
 ```
 
-The invariant is sound and the representation is properly hidden, yet the class is hard to test on both fronts.
+The invariant is sound and the representation is hidden, yet the class is hard to test in both ways.
 
-It is hard to **control**, because the lock duration is measured against `Date.now()`, read from inside the class. A test can drive it to the locked state easily enough, with three calls to `recordFailure`, but a test for _the lock expiring_ would have to wait thirty real seconds. The time source is baked in, so a test cannot move the clock.
+It is hard to **control**, because the lock duration is measured against `Date.now()`, which is read inside the class. A test can drive it to the locked state with three calls to `recordFailure`, but a test for the lock _expiring_ would have to wait thirty real seconds. The time source is fixed, so a test cannot move the clock.
 
-It is hard to **observe**, because nothing reports the throttle's state. A test can learn whether the account is locked only by calling `checkAccess` and catching its throw, and it cannot see the failure count at all, so it cannot confirm that a count below three leaves the account open.
+It is hard to **observe**, because nothing reports the throttle's state. A test can learn whether the account is locked only by calling `checkAccess` and catching its error, and it cannot see the failure count at all, so it can check whether the account is locked yet but not how many failures have been recorded.
 
 Three small changes fix this without weakening encapsulation. First, for controllability, take the current time as a parameter rather than reading it from a global clock:
 
@@ -486,23 +487,23 @@ failureCount(): number {
 }
 ```
 
-A test can now assert the lock state directly instead of probing it with a `try`/`catch`, and can check the failure count after a sequence of attempts. Crucially, neither method exposes the representation: `isLocked` returns a boolean computed from the time, not the raw `lockedUntil` timestamp, and `failureCount` returns a number, not a window into how the class stores its state. The throttle became controllable and observable, and a later change to how it tracks the lock would still be invisible to every caller.
+A test can now check the lock state directly instead of probing it with a `try`/`catch`, and can check the failure count after a sequence of attempts. Neither method exposes the representation. `isLocked` returns a boolean computed from the time, not the raw `lockedUntil` timestamp, and `failureCount` returns a number, not the structure the class stores it in. The throttle is now controllable and observable, and a later change to how it tracks the lock would still be invisible to every caller.
 
 </details>
 
-## Designing for Encapsulation
+#### Designing for Encapsulation
 
-This chapter's example followed a process you can reuse when designing any class:
+This chapter's example followed a process you can reuse for any class:
 
 1. _Name the invariant_, and choose a `private` representation that can express it.
 2. _Establish the invariant in the constructor_, rejecting input it cannot satisfy.
 3. _Expose a small set of methods_ that each preserve the invariant, returning copies so the representation cannot escape.
 
-This results in an object that can only be constructed in a valid state, stays valid through use, and cannot leak the internals that would let someone else violate the invariant.
+The result is an object that can only be constructed in a valid state, stays valid through use, and does not leak the internals that would let someone else violate the invariant.
 
-This design discipline has many benefits. Because nothing outside the class can break its invariant, you can confirm that invariant by reading a single class. Because callers depend only on the public methods, the representation is free to change, as the move from an `Array` to a `Set` showed, and internal changes stay internal. That stable surface also lets a team build against a class while its internals are still being worked out, as long as the public methods maintain their signatures. And because far less code can put the object into a bad state, there are far fewer places for bugs to hide. Encapsulation is the point where the invariants of [Part 1](../part1/index) stop being promises and become guarantees.
+This has several benefits. Because nothing outside the class can break its invariant, you can confirm the invariant by reading a single class. Because callers depend only on the public methods, the representation is free to change, as the move from an `Array` to a `Set` showed, and internal changes stay internal. Stable public methods also let a team build against a class while its internals are still being written, as long as the method signatures stay the same. And because far less code can put the object into a bad state, there are far fewer places for bugs to hide. With encapsulation, the invariants of [Part 1](../part1/index) are no longer only documented but enforced.
 
-Hiding the representation made it free to change, and the move from an `Array` to a `Set` exercised that freedom without disturbing a single caller. The next chapter takes up that freedom directly: what a safe change rests on, how a class can give the freedom away without noticing, and how much further it extends than the representation alone.
+The next chapter looks at that freedom to change more closely: what a safe change depends on, how a class can give the freedom away without noticing, and how far it extends beyond the representation.
 
 <details class="tooltip exercise">
   <summary>Exercise: Encapsulating a Leaderboard</summary>
@@ -525,7 +526,7 @@ class Leaderboard {
 }
 ```
 
-The class works, but its encapsulation is weak. Reason about it along three dimensions:
+The class works, but its encapsulation is weak. Consider it along three dimensions:
 
 1. _Visibility._ Which members should be `private`, and what can external code currently do to `entries` that it should not be able to?
 2. _Return types._ `topScores` returns `Entry[]`. What could a caller do with that value to corrupt the leaderboard, and how would you prevent it? Separately, what does exposing the `Entry` type commit you to that a more behavioural return type would not?

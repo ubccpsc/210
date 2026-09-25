@@ -1,11 +1,10 @@
 # Defining Boundaries with Interfaces
 
-The last two chapters took two commitments away from a class: how it stores its data, and what type of members it holds. One commitment has survived every design we have written. A variable is declared `GuestList`, a parameter is typed `GuestList`, and the code around it is bound to that one class even though it touches nothing except the public methods. The representation is hidden; the class itself is not.
+The last two chapters removed two commitments from a class: how it stores its data, and what type of members it holds. One commitment remains in every design we have written. A variable is declared `GuestList`, a parameter is typed `GuestList`, and the code around it depends on that one class even though it uses only the public methods. The representation is hidden, but the class itself is not.
 
-An **interface** is an abstraction that enables classes to be hidden as well. It is a named type that lists a set of operations and says nothing about which specific class provides them. Code written against an interface depends only on the operations it names, so any class that provides those operations can be used, and the specific class that is used can change without the calling code being modified. This is the abstraction boundary in its purest form: a contract that records what is promised and deliberately omits everything about how the promise is kept.
+An **interface** lets the class be hidden as well. It is a named type that lists a set of operations and says nothing about which class provides them. Code written against an interface depends only on the operations it names, so any class that provides those operations can be used, and the class can change without the calling code being modified.
 
-
-This chapter introduces interfaces: the `interface` keyword and what belongs in one, how a class commits to an interface with `implements`, the difference between the type a variable is declared with and the type of the object that is behind it at run time, and why depending on an interface rather than a concrete class is one of the most useful decisions in a design. It is also the foundation for the two chapters that follow, on polymorphism and on extending a system without modifying it.
+This chapter covers the `interface` keyword and what belongs in an interface, how a class commits to an interface with `implements`, the difference between the type a variable is declared with and the type of the object it holds at run time, and why depending on an interface rather than a concrete class is one of the most useful decisions in a design. It is also the foundation for the next two chapters, on polymorphism and on extending a system without modifying it.
 
 #### A Channel as a Contract
 
@@ -13,7 +12,9 @@ We use one running example across this chapter and the next two: a small system 
 
 > As a monitoring system, I want to deliver an alert over each configured channel, so that the code that raises an alert never changes when a new channel is added.
 
-Email and SMS differ in almost every respect, but for the purpose of raising an alert they have exactly one thing in common: each can deliver a message. That single shared capability, and nothing else, is what the alerting code should depend on. An interface lets us write that capability down as a type.
+Email and SMS differ in almost every respect, but for raising an alert they have one thing in common: each can deliver a message. That shared capability is all the alerting code should depend on, and an interface lets us write it down as a type.
+
+## Declaring an Interface
 
 An interface declares a name and a list of method signatures:
 
@@ -45,35 +46,21 @@ interface Notifier {
 }
 ```
 
-`Notifier` contains a single method signature and no fields. This is intentional: an interface describes the operations a caller may invoke but never its state or representation. Where the encapsulation chapter chose which methods a class exposes, an interface takes that public surface and gives it a name of its own, detached from any class.
+`Notifier` contains a single method signature and no fields. This is intentional, because an interface describes the operations a caller may invoke, never the state or representation behind them. The encapsulation chapter chose which methods a class exposes. An interface takes that public surface and gives it a name of its own, separate from any class.
 
-```plantuml
-@startuml
-
-hide empty members
-skinparam groupInheritance 2
-
-interface Notifier
-
-Notifier : +send(message: string): void
-
-@enduml
-```
-<!-- caption="Notifier interface." -->
-
-Because an interface is a contract that one body of code implements and another depends on, it is documented with care. Every member is part of a promise that callers rely on and implementers must keep, so the documentation that was good practice for a function is closer to essential for an interface.
+Because an interface is a contract that one body of code implements and another depends on, it should be documented carefully. Every member is part of a promise that callers rely on and implementers must keep, so documentation that was good practice for a function is close to essential for an interface.
 
 <details class="tooltip ts-tips">
 <summary><code>interface</code> Versus <code>type</code></summary>
 
-You have used `type` since [Part 1](../part1/index) to name unions and the shapes of data, and TypeScript will in fact let you describe an object's shape with either `type` or `interface`. The convention this course follows is to use an `interface` for a contract that classes implement and callers depend on, and `type` for unions (`"red" | "green" | "yellow"`) and for naming the shape of plain data. Use `interface` when several classes will commit to the same set of operations; use a `type` alias when you are giving a name to a structure.
+You have used `type` since [Part 1](../part1/index) to name unions and the shapes of data, and TypeScript lets you describe an object's shape with either `type` or `interface`. This course uses an `interface` for a contract that classes implement and callers depend on, and `type` for unions (`"red" | "green" | "yellow"`) and for the shape of plain data. Use `interface` when several classes will commit to the same set of operations, and a `type` alias when you are naming a structure.
 
 </details>
 
 <details class="tooltip link-110">
 <summary>Contracts Before Implementations</summary>
 
-You relied on contracts without implementations in CPSC 110. When a function needed a helper you had not written yet, you recorded the helper's signature and purpose and called it straight away, trusting that contract while its body was still an entry on a wish list. An interface makes that arrangement permanent and enforced: it records the signatures a caller may rely on, and the compiler guarantees that an implementation exists and matches. Depending on what a piece of code promises, rather than on how it works, is an idea you have used since your first weeks of programming.
+You relied on contracts without implementations in CPSC 110. When a function needed a helper you had not written yet, you recorded the helper's signature and purpose and called it right away, trusting that contract while its body was still on your wish list. An interface makes that arrangement permanent and checked. It records the signatures a caller may rely on, and the compiler guarantees that an implementation exists and matches.
 
 </details>
 
@@ -87,9 +74,9 @@ class <ClassName> implements <InterfaceName> {
 }
 ```
 
-The compiler then checks that the class provides every operation the interface declares, with compatible signatures; if it does not, the class does not compile. `implements` is therefore a promise the language holds the class to. Two classes can keep the `Notifier` promise in completely different ways:
+The compiler then checks that the class provides every operation the interface declares, with compatible signatures, and the class does not compile if it does not. `implements` is a promise the language holds the class to. Two classes can keep the `Notifier` promise in completely different ways:
 
-<CollapsableCode>
+<CollapsibleCode>
 
 ```typescript
 class EmailNotifier implements Notifier {
@@ -117,9 +104,9 @@ class SmsNotifier implements Notifier {
 }
 ```
 
-</CollapsableCode>
+</CollapsibleCode>
 
-Each class has its own private representation (an email address, a phone number) and its own way of delivering a message, and each is fully encapsulated in the sense of the previous chapter. What is new is that both now share a public type, `Notifier`, that neither of them owns.
+Each class has its own private representation (an email address, a phone number) and its own way of delivering a message, and each is encapsulated as in the encapsulation chapter. What is new is that both now share a public type, `Notifier`, that neither of them owns.
 
 ```plantuml
 @startuml
@@ -133,7 +120,7 @@ Notifier <|.. EmailNotifier
 Notifier <|.. SmsNotifier
 
 Notifier : +send(message: string): void
-EmailNotifier : -address: string 
+EmailNotifier : -address: string
 EmailNotifier : +send(..)
 SmsNotifier : -phone: string
 SmsNotifier : +send(..)
@@ -145,7 +132,7 @@ SmsNotifier : +send(..)
 <details class="tooltip deep-dive">
 <summary>Structural Typing</summary>
 
-TypeScript checks types by _shape_, not by name: a value is acceptable wherever a type is expected if it has the required members, whatever it was declared as. A class with a matching `send` method is therefore usable as a `Notifier` even without writing `implements Notifier`. Why write `implements`, then? Because it declares intent and turns a silent mismatch into a clear error: with `implements Notifier`, forgetting `send` or misspelling it fails at the class, where the mistake is, rather than later at some distant call site. Some languages, such as Java, are instead _nominal_: a class is a `Notifier` only if it explicitly says so. In TypeScript, `implements` is a checked declaration of intent layered on top of structural typing, not the thing that makes the class assignable.
+TypeScript checks types by _shape_, not by name. A value is acceptable wherever a type is expected if it has the required members, whatever it was declared as, so a class with a matching `send` method can be used as a `Notifier` even without writing `implements Notifier`. `implements` is still worth writing, because it declares intent and turns a silent mismatch into a clear error. With `implements Notifier`, forgetting or misspelling `send` fails at the class, where the mistake is, rather than later at some distant call site. Some languages, such as Java, are instead _nominal_: a class is a `Notifier` only if it explicitly says so.
 
 </details>
 
@@ -157,7 +144,7 @@ Once a class implements an interface, an object of that class can be held in a v
 const alerts: Notifier = new EmailNotifier("ops@example.com");
 ```
 
-Two different types are in play here. The **apparent type** is the one written in the code, `Notifier`: it is what the compiler knows about the variable. The **actual type** is the type of the object that exists at run time, `EmailNotifier`. This is the static and dynamic distinction from [Part 1](../part1/index) seen from a new angle: the apparent type belongs to the static view the compiler checks, and the actual type belongs to the dynamic view that exists only once the program runs.
+Two different types are involved. The **apparent type** is the one written in the code, `Notifier`, and is what the compiler knows about the variable. The **actual type** is the type of the object that exists at run time, `EmailNotifier`. This is the static and dynamic distinction from [Part 1](../part1/index): the apparent type belongs to the static view the compiler checks, and the actual type belongs to the dynamic view that exists only when the program runs.
 
 The apparent type decides what you are allowed to do with the variable. Through an apparent type of `Notifier` you may call `send`, because the contract promises it, and nothing more:
 
@@ -166,11 +153,11 @@ alerts.send("disk almost full"); // allowed: send is declared on Notifier
 // alerts.address                // rejected: address is not part of Notifier
 ```
 
-That restriction looks like a loss, but it is exactly what we want: the code relies only on what `Notifier` promises, so the object behind `alerts` can be of any type that implements `Notifier`, and every line still type-checks. Declaring the variable with the interface, rather than with `EmailNotifier`, is the difference between code that works with one class and code that works with all of them. This is the practice usually summarised as _program to an interface, not an implementation_: prefer the apparent type that names the contract over the one that names a specific class, for parameters, fields, and return types alike.
+That restriction looks like a loss, but it is what we want. The code relies only on what `Notifier` promises, so the object behind `alerts` can be of any type that implements `Notifier`, and every line still type-checks. Declaring the variable with the interface rather than `EmailNotifier` is the difference between code that works with one class and code that works with all of them. This practice is usually summarised as _program to an interface, not an implementation_: prefer the apparent type that names the contract over the one that names a specific class, for parameters, fields, and return types alike.
 
-## One Boundary, Many Implementations
+## Many Implementations
 
-The benefit appears as soon as code is written against the interface. A function that raises an alert takes a `Notifier`, or a list of them, and never mentions a concrete channel:
+The benefit appears as soon as code is written against the interface. A function that raises an alert takes a `Notifier`, or a list of them, and never mentions a specific channel:
 
 ```typescript
 function alertAll(channels: Notifier[], message: string): void {
@@ -180,19 +167,19 @@ function alertAll(channels: Notifier[], message: string): void {
 }
 ```
 
-`alertAll` works for an `EmailNotifier`, for an `SmsNotifier`, for a list mixing the two, and for any channel written in the future, with no change to its body. The interface is a boundary, with the alerting logic on one side and the delivery mechanisms on the other; each side can be read, changed, and tested with only the contract in view, never the other side's code.
+`alertAll` works for an `EmailNotifier`, an `SmsNotifier`, a list mixing the two, and any channel written in the future, with no change to its body. The interface is a boundary, with the alerting logic on one side and the delivery mechanisms on the other. Each side can be read, changed, and tested with only the contract in view, without the other side's code.
 
-Notice what `alertAll` cannot do: it cannot tell, and cannot act on, which kind of channel each element is. Every element is, as far as the code can see, no more than a `Notifier`. In this chapter that uniformity is the goal.
+`alertAll` cannot tell which kind of channel each element is, or act on it. As far as the code can see, every element is only a `Notifier`. In this chapter, that uniformity is the goal.
 
-## Testing Across the Boundary
+## Test Doubles
 
-A boundary that callers depend on is also a boundary that tests can exploit. The real channels have effects we do not want in a test suite: a test of `alertAll` should not send actual email or actual text messages. Because `alertAll` depends only on `Notifier`, a test can hand it a stand-in that records what it was asked to send instead of sending anything:
+A boundary that callers depend on is also one that tests can use. The real channels have effects we do not want in a test suite, since a test of `alertAll` should not send actual email or text messages. Because `alertAll` depends only on `Notifier`, a test can give it a stand-in that records what it was asked to send instead of sending anything:
 
 ```typescript
 class RecordingNotifier implements Notifier {
     public readonly sent: string[] = [];
 
-    send(message: string): void {
+    public send(message: string): void {
         this.sent.push(message);
     }
 }
@@ -208,7 +195,7 @@ test("alertAll delivers the message over every channel", () => {
 });
 ```
 
-`RecordingNotifier` is a third implementation of `Notifier`, written only for tests. A stand-in like this is called a **test double**, or a **mock object**: it satisfies the same contract as the real thing but is simpler and observable, so the code under test can be exercised in isolation. This is the black-box testing from [Chapter 9](../part1/09_validation), now made easy by an interface: the test depends on the contract, the code under test depends on the contract, and the real delivery mechanism is not present at all. Designing against interfaces is, among other things, what makes code testable.
+`RecordingNotifier` is a third implementation of `Notifier`, written only for tests. A stand-in like this is called a **test double**, and is often loosely called a **mock object**. It satisfies the same contract as the real thing but is simpler and observable, so the code under test can be exercised in isolation. This is the black-box testing from [Chapter 9](../part1/09_validation), made easy by an interface: the test and the code under test both depend on the contract, and the real delivery mechanism is not involved at all. Designing against interfaces is one of the things that makes code testable.
 
 ```plantuml
 @startuml
@@ -223,14 +210,14 @@ Notifier <|.. SmsNotifier
 
 Notifier : +send(message: string): void
 EmailNotifier : -address: string
-EmailNotifier : +send(msg)
+EmailNotifier : +send(..)
 SmsNotifier : -phone: string
-SmsNotifier : +send(msg)
+SmsNotifier : +send(..)
 
 package test {
     Notifier <|.. RecordingNotifier
     RecordingNotifier : +sent: string[]
-    RecordingNotifier : +send(msg)
+    RecordingNotifier : +send(..)
 }
 
 @enduml
@@ -239,7 +226,7 @@ package test {
 
 ## Keeping Interfaces Small
 
-`Notifier` declares one method, and that restraint is itself a design choice. Suppose some channels can also report whether a message was acknowledged by the provider. It is tempting to add that to `Notifier`, but doing so would force _every_ implementation, including ones that can confirm nothing, to provide the operation. The capability belongs in its own small interface:
+`Notifier` declares one method, and that is a design choice. Suppose some channels can also report whether the provider acknowledged a message. It is tempting to add that to `Notifier`, but doing so would force _every_ implementation, including ones that cannot confirm anything, to provide the operation. The capability belongs in its own small interface:
 
 ```typescript
 interface Confirmable {
@@ -260,7 +247,7 @@ class SmsNotifier implements Notifier, Confirmable {
 }
 ```
 
-Now each caller depends on exactly the contract it needs: code that only sends takes a `Notifier`, and code that also checks receipts takes a `Confirmable`. A channel that cannot confirm anything remains a plain `Notifier` and is never forced to fake an operation it does not support.
+Now each caller depends on only the contract it needs. Code that only sends takes a `Notifier`, and code that only checks receipts takes a `Confirmable`. The next chapter shows how to combine the two for code that needs both. A channel that cannot confirm anything stays a plain `Notifier` and is never forced to fake an operation it does not support.
 
 ```plantuml
 @startuml
@@ -278,20 +265,20 @@ Confirmable <|.. SmsNotifier
 Notifier : +send(message: string): void
 Confirmable : +wasDelivered(): boolean
 EmailNotifier : -address: string
-EmailNotifier : +send(msg)
+EmailNotifier : +send(..)
 SmsNotifier : -phone: string
-SmsNotifier : +send(msg)
+SmsNotifier : +send(..)
 SmsNotifier : +wasDelivered()
 
 @enduml
 ```
 <!-- caption="SmsNotifier implementing two interfaces." -->
 
-Keeping interfaces small in this way is the interface-level equivalent of the advice for cohesion: classes should have a single responsibility. A small, focused interface describes one capability; a large interface that bundles several forces implementers to support operations that have nothing to do with one another, and forces callers to depend on more than they use. This guidance, that it is better to have many small interfaces than one large one, is known as the **interface segregation principle**. Small interfaces also preserve implementation freedom: every operation a contract promises becomes behaviour callers may rely on, so a large interface leaks more implementation detail into the public surface, while a small one keeps more of each implementation unobservable, and therefore free to change.
+Keeping interfaces small is the interface-level version of the cohesion advice that classes should have a single responsibility. A small, focused interface describes one capability. A large interface that bundles several forces implementers to support unrelated operations, and forces callers to depend on more than they use. The guidance that many small interfaces are better than one large one is called the **interface segregation principle**. Small interfaces also preserve implementation freedom. Every operation a contract promises becomes behaviour callers may rely on, so a large interface exposes more of each implementation, while a small one keeps more of it hidden and free to change.
 
-## Constraining a Type Parameter
+## Constraining Generics
 
-Interfaces have a second use, and it resolves a problem the previous chapter left open. `Roster<T>` could not compare two of its members, because a class that knows nothing about `T` has no operation to compare them with, so we handed it a comparison function when it was built. An interface offers the other route: rather than passing the operation in, require that every member already provides it.
+Interfaces have a second use, which solves a problem the previous chapter left open. `Roster<T>` could not compare two of its members, because a class that knows nothing about `T` has no operation to compare them with, so we passed it a comparison function when it was built. An interface offers the other option: instead of passing the operation in, require that every member already provides it.
 
 ```typescript
 interface Identifiable {
@@ -313,11 +300,14 @@ class <Name><T extends <Interface>> {
 }
 ```
 
-The restriction is what gives the class something to call:
+The constraint gives the class something to call:
 
 ```typescript
 class Roster<T extends Identifiable> {
+    private readonly capacity: number;
     private readonly members: T[];
+
+    // constructor, isFull, size, and add as before, with no comparison function
 
     isMember(candidate: T): boolean {
         for (const member of this.members) {
@@ -330,17 +320,17 @@ class Roster<T extends Identifiable> {
 }
 ```
 
-`member.sameAs(candidate)` compiles because the constraint promises that every member has the method, whatever type it turns out to be. This is the same reasoning as an apparent type, one level up: there the compiler knew a variable's operations from the type written on it, and here it knows a type parameter's operations from the constraint written on it.
+`member.sameAs(candidate)` compiles because the constraint promises that every member has the method, whatever its type. This is the same reasoning as an apparent type, applied to a type parameter. The compiler knew a variable's operations from the type written on it, and it knows a type parameter's operations from the constraint written on it.
 
-The two routes trade against each other. Constraining buys the class knowledge and pays for it in reach: `Roster<Seat>` works only if `Seat` implements `Identifiable`, and `Roster<string>` no longer compiles at all, because a string has no `sameAs` method. Passing a function in keeps the class usable with every type, including ones you did not write and primitives you cannot change, but obliges every caller to supply the comparison. Constrain when the operation is part of what the members fundamentally are and you control those types; pass the operation in when the members are types you do not own, or when different callers need different notions of sameness.
+The two options trade against each other. Constraining gives the class knowledge but limits which types it accepts. `Roster<Seat>` works only if `Seat` implements `Identifiable`, and `Roster<string>` no longer compiles at all, because a string has no `sameAs` method. Passing a function in keeps the class usable with every type, including ones you did not write and primitives you cannot change, but requires every caller to supply the comparison. Constrain when the operation is part of what the members are and you control those types. Pass the operation in when the members are types you do not own, or when different callers need different notions of sameness.
 
-Whichever you choose, the constraint should name the smallest interface that supplies what the class needs, for the reason the previous section gave: a constraint is a demand made of every type that wants to be a member, and a demand for operations the class never calls narrows the class for nothing.
+Either way, the constraint should name the smallest interface that supplies what the class needs, for the reason given in the previous section. A constraint is a demand made of every type that wants to be a member, and demanding operations the class never calls restricts the class for no benefit.
 
-## Depending on the Contract
+#### Depending on the Contract
 
-An interface is the public surface of a class extracted into a named type that any class can implement and any caller can depend on. Depending on the interface rather than on a concrete class is the strongest form of information hiding. The previous two chapters let a class change its representation without disturbing callers; an interface lets the _entire class_ behind the contract change without disturbing them. The cost is small and the discipline is simple: name contracts as interfaces, keep them small and well documented, and write the rest of the program against them.
+An interface is the public surface of a class extracted into a named type that any class can implement and any caller can depend on. Depending on an interface rather than a concrete class is the strongest form of information hiding. The previous two chapters let a class change its representation without affecting callers, and an interface lets the _entire class_ behind the contract change without affecting them. Name contracts as interfaces, keep them small and well documented, and write the rest of the program against them.
 
-Now we have a boundary in place, with one contract and several classes implementing it. The next chapter asks what happens when those classes are not merely interchangeable but embody different behaviour, so that one call does different work depending on the object behind the interface. That is polymorphism, and it is what makes interfaces more than a tidy way to organise types.
+We now have a boundary with one contract and several classes implementing it. The next chapter looks at what happens when those classes are not just interchangeable but behave differently, so that one call does different work depending on the object behind the interface. That is polymorphism.
 
 <details class="tooltip exercise">
   <summary>Exercise: Input Validation Rules</summary>
@@ -387,14 +377,13 @@ RecordingValidator .. N1
 
 Validator : +check(input: string): boolean
 Validator : +rule(): string
-MinLengthValidator : todo
-MinLengthValidator : +check(in)
+MinLengthValidator : -minLength: number
+MinLengthValidator : +check(..)
 MinLengthValidator : +rule()
-NoSpacesValidator : todo
-NoSpacesValidator : +check(in)
+NoSpacesValidator : +check(..)
 NoSpacesValidator : +rule()
-RecordingValidator : todo
-RecordingValidator : +check(in)
+RecordingValidator : +inputs: string[]
+RecordingValidator : +check(..)
 RecordingValidator : +rule()
 
 @enduml
