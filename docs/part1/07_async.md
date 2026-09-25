@@ -1,12 +1,12 @@
 # Asynchronous Effects and Time
 
-The previous chapter ended with **side effects**. These are changes that reach beyond a function, and often beyond the program entirely, to change something in the real world. In this chapter we will introduce asynchronicity, which will further complicate how we design our code, but specifically with the goal of enabling us to change state in the world.
+The previous chapter ended with **side effects**, changes that reach beyond a function and often beyond the program entirely. This chapter introduces _asynchrony_. It further complicates how we design our code, but it is what lets a program read from and change the world outside it.
 
 Programs become much more useful when they interact with other programs and other users. A weather station that can only summarise readings typed into its source code is a calculator, but a weather station that can load a year of readings from a file, fetch the current conditions from a web service, and make a report accessible over the web is a system. Most software systems need to interact with the world to accomplish their tasks:
 
 > As a weather-station operator, I want to load past readings from a file and fetch current conditions from the regional service, so that my station can publish complete reports without my entering the data by hand.
 
-But the outside world operates at a different pace than a program on a single computer. External interaction does happen immediately. This chapter is about how to design programs that can deal with the slowness outside interaction entails. The mechanics are a little tricky, but enable you to both read and write files and call web-based services. Those two capabilities are the foundation for a broad collection of common computing tasks.
+But the outside world operates at a different pace than a program on a single computer. External interaction does not happen immediately. This chapter is about designing programs that cope with that slowness. The mechanics are a little tricky, but they let you read and write files and call web services. Those two capabilities are the foundation for a broad collection of common computing tasks.
 
 ## How Long Computers Wait
 
@@ -20,15 +20,15 @@ Computer processors are fast: a simple operation takes around a nanosecond. Ever
 | Reading from a spinning disk | 10 ms | ~4 months |
 | Cross-country network round trip | 150 ms | ~5 years |
 
-Touching a disk or a network is not a little slower than computing, it is _millions of times_ slower. From the processor's point of view, asking a distant web service for the temperature and then waiting for the answer robs it of time that could be better spent getting local work done.
+Touching a disk or a network is _millions of times_ slower than computing. From the processor's point of view, asking a distant web service for the temperature and then waiting for the answer wastes time that could be spent on local work.
 
-A call that waits like this is called **blocking**. A blocked function does not return until the slow work finishes, and the program makes no progress of any kind while waiting. For a program that has nothing else to do, blocking is just a waste of resources. For most real programs though it is more than wasteful because a program frozen for the duration of a network request cannot respond to its user, accept another request, or get any other work done.
+A call that waits like this is called **blocking**. A blocked function does not return until the slow work finishes, and the program makes no progress of any kind while waiting. For a program with nothing else to do, blocking costs little. For most real programs it is a real problem, because a program frozen for the duration of a network request cannot respond to its user, accept another request, or get any other work done.
 
 ### One Thread at a Time
 
 What a program can do while it waits depends on the language's **threading model**. A **thread** is an independent sequence of executing statements.
 
-Many languages (e.g., Java and Rust) let a program run several threads at once. This means that one thread can block on the network while the others keep working. Multiple threads are useful, but error-prone. The previous chapter showed how hard it is to reason about _one_ sequence of mutations. With _multiple_ threads mutating shared objects, it is even harder.
+Many languages (such as Java and Rust) let a program run several threads at once. This means that one thread can block on the network while the others keep working. Multiple threads are useful, but error-prone. The previous chapter showed how hard it is to reason about _one_ sequence of mutations. With _multiple_ threads mutating shared objects, it is even harder.
 
 TypeScript makes a different design decision. A TypeScript program runs on a single thread. Exactly one statement is executing at any moment. This means you never have to wonder whether some other thread changed an object between two of your statements. The model is simple to reason about and easy to use.
 
@@ -39,11 +39,11 @@ But a single thread exposes us to the dilemma of waiting. If the only thread blo
 
 In Java, creating a thread is a few lines of code. Large Java systems can run hundreds of them. Programmers must coordinate every access to shared state. Getting this wrong produces bugs such as deadlocks and race conditions, which appear and vanish depending on timing and are among the hardest bugs to find and fix.
 
-Rust goes further and uses its type system to prevent many of these errors statically. This is part of why Rust is considered safer than other languages. But the cost of this is that Rust is also harder to learn.
+Rust goes further and uses its type system to prevent many of these errors statically. This is part of why Rust is considered safer than other languages. The cost is that Rust is also harder to learn.
 
-Python technically allows multiple threads, but only one thread may make progress at once. If you're writing single-file Python code without `multiprocessing` or other Python multi-threaded libraries, when you make a network call or read a file, your code waits for the file to be read or the network call to finish. 
+Python allows multiple threads, but in its standard implementation only one thread runs Python code at a time. In a simple Python program that uses neither threads nor `asyncio`, a network call or file read blocks: your code waits for the file to be read or the network call to finish.
 
-JavaScript, the language TypeScript is built on, was designed for web browsers, where a page must stay responsive while images and data load. Its designers chose one thread plus deferred computation as a model that balanced understandability without the complexity of multi-threading. This has proven to be a durable choice and is the architecture of many of the systems that run the modern web.
+JavaScript, the language TypeScript is built on, was designed for web browsers, where a page must stay responsive while images and data load. Its designers chose one thread plus deferred computation, a model that keeps a page responsive without the complexity of multiple threads. This has proven to be a durable choice and is the architecture of many of the systems that run the modern web.
 
 </details>
 
@@ -81,12 +81,12 @@ kettle has boiled        <- printed ten seconds later
 
 This order breaks the model we have used in every previous chapter, where statements _execute in the order they appear in the file_. `setTimeout` does not block the program and wait ten seconds. It _registers_ the callback and returns immediately, and the program continues to the next statement. Ten seconds later, when the timer expires, the callback runs.
 
-Asynchronous programming requires a mental shift. While source code lists statements top to bottom, _when_ each one runs is no longer the same as _where_ it was written. This further illustrates divergence between the static and dynamic views of the program. 
+Asynchronous programming requires a mental shift. While source code lists statements top to bottom, _when_ each one runs is no longer the same as _where_ it was written. This is another way the static and dynamic views of a program diverge.
 
-Timers are predicatable: you register their duration when you start them. But callbacks are commonly used to allow programs to respond to unpredictable events. Nowhere is this clearer than in a user interface (UI). Suppose the weather station's display has a refresh button. The program cannot know when the button will be clicked, or even whether it will be clicked at all. We could try continually checking whether the button is clicked, but this would either yield wasted computation (as we're continually checking), and we might not respond soon enough (if we only check every few seconds). Instead, to allow UIs to be responsive, the program registers a callback:
+Timers are predictable: you register their duration when you start them. But callbacks are commonly used to allow programs to respond to unpredictable events. Nowhere is this clearer than in a user interface (UI). Suppose the weather station's display has a refresh button. The program cannot know when the button will be clicked, or even whether it will be clicked at all. We could repeatedly check whether the button has been clicked, but checking constantly wastes computation, and checking only every few seconds makes the program slow to respond. Instead, to allow UIs to be responsive, the program registers a callback:
 
 ```typescript
-// refreshButton is an object representing the on-screen button;
+// refreshButton is an object representing the on-screen button
 refreshButton.addEventListener("click", () => {
     redrawForecast();   // runs once per click, whenever the user clicks
 });
@@ -108,6 +108,28 @@ Printing becomes less useful as programs grow and become distributed. Your IDE's
 
 The runtime keeps a queue of callbacks that are ready to run, for example because a timer expired, a button was clicked, or data arrived from a disk or a network. The single thread runs a continuous cycle called the **event loop**. It takes the callback at the front of the queue, runs it _to completion_, and then takes the next one. If the queue is empty, the thread sleeps until something is added.
 
+Every kind of event waits in that one queue:
+
+```graphviz
+digraph eventLoop {
+  rankdir = LR;
+  node [shape = box, style = filled, fillcolor = white, fontname = "sans-serif", fontsize = 11];
+  edge [fontname = "sans-serif", fontsize = 10];
+
+  timer  [label = "timer\ncallback"];
+  click  [label = "button\nclick"];
+  data   [label = "disk or network\ndata"];
+  queue  [label = "event loop queue", fillcolor = "#eeeeee"];
+  thread [label = "single thread", fillcolor = "#cfe8ff"];
+
+  timer  -> queue;
+  click  -> queue;
+  data   -> queue;
+  queue  -> thread [label = "one at a time"];
+}
+```
+<!-- caption="Every event waits in one queue, served by the single thread one at a time." -->
+
 This design has two consequences. First, a callback is never interrupted partway through, so no other code runs until it returns. This is what makes single-threaded programs simple to reason about. It also means a callback that computes for a long time freezes the rest of the program, because the loop cannot move on until the callback returns. Second, a timer duration such as `10000` means the callback is queued no earlier than ten seconds from now. If the thread is busy when the timer expires, the callback waits in the queue for its turn, so the event loop guarantees the order callbacks run in, but not their exact timing.
 
 </details>
@@ -116,13 +138,13 @@ This design has two consequences. First, a callback is never interrupted partway
 
 Callbacks defer computation, but they do not provide a way to return _results_. Reading a file produces the file's contents, and fetching from a web service produces a response. The program needs that value, but it will not exist until the slow operation finishes, and the program should not stop while it waits. TypeScript represents a result that will arrive later as an object called a **promise**.
 
-A promise works like a ticket at a busy coffee shop. Instead of standing at the espresso machine until your drink is poured, you are handed a numbered ticket and can scroll your socials at a table. When your drink is ready, your number is called and you trade the ticket for the drink.
+A promise works like a ticket at a busy coffee shop. Instead of standing at the espresso machine until your drink is poured, you are handed a numbered ticket and can sit at a table and check your phone. When your drink is ready, your number is called and you trade the ticket for the drink.
 
-A promise is just an object that a slow operation returns _immediately_ with a the understanding that it will turn into a value later. Like any other value, it can be stored in a variable, passed to a function, or placed in an array.
+A promise is an object that a slow operation returns _immediately_, standing in for a value that will arrive later. Like any other value, it can be stored in a variable, passed to a function, or placed in an array.
 
 A promise's type says what it will eventually deliver. A `Promise<string>` will deliver a `string`, and a `Promise<Reading[]>` will deliver an array of readings. This is the same generic notation that `LinkedList<T>` used earlier.
 
-Promise objects have three possible states. Every promise begins as **pending**, while the work is still underway. When the work it was waiting for is done,the promise completes, or _settles_, in one of two ways. It can be **fulfilled**, holding the delivered value, or **rejected**, holding an error that explains why the value could not be produced. The language maintains two invariants on every promise. A promise settles _at most once_, and once settled, its state and value _never change_.
+Promise objects have three possible states. Every promise begins as **pending**, while the work is still underway. When the work it was waiting for is done, the promise completes, or _settles_, in one of two ways. It can be **fulfilled**, holding the delivered value, or **rejected**, holding an error that explains why the value could not be produced. The language maintains two invariants on every promise. A promise settles _at most once_, and once settled, its state and value _never change_.
 
 ```graphviz
 digraph promiseStates {
@@ -148,7 +170,7 @@ digraph promiseStates {
 
 You will rarely create a promise yourself. Slow operations create them for you, and the file-reading and web-fetching functions later in this chapter all return them.
 
-You will see promises often in return types. When a function's signature says it returns a `Promise<string>` you will know that the call will return immediately, but what it returns does not yet contain the value you want. That value will be available only when the promise settles. Here is what happens when the promise itself is treated as the value:
+You will see promises often in return types. When a function's signature says it returns a `Promise<string>`, the call returns immediately, but what it returns does not yet contain the value you want. That value will be available only when the promise settles. Here is what happens when the promise itself is treated as the value:
 
 ```typescript
 import { readFile } from "fs/promises";
@@ -158,26 +180,6 @@ console.log(contents);  // prints "Promise { <pending> }", not the file's text
 ```
 
 `readFile` returns a `Promise<string>`, so `contents` holds a pending promise. When the `console.log` runs, the disk has not yet finished reading the file. The type checker knows this too. `contents` has the type `Promise<string>`, not `string`, so `contents.length` is a compile error. The type system will not let you use the promise as if it were the value it stands for. The next section shows how to get the value.
-
-<details class="tooltip deep-dive">
-<summary>Syntactic Sugar</summary>
-
-_Syntactic sugar_ is syntax that doesn't introduce new semantics, but simplifies writing code. For instance, in ISL,
-```racket
-(define (addone x) (+ x 1))
-```
-is _syntactic sugar_ for
-```racket
-(define addone (lambda (x) (+ x 1)))
-```
-
-Or, in TypeScript, the array type notation `number[]` is _syntactic sugar_ for `Array<number>`.
-
-The term "sugar" refers to syntax that "sweetens", or [makes less painful](https://www.merriam-webster.com/dictionary/sweeten), the use of the language.
-
-Syntactic sugar can always be rewritten using other constructs in the language.
-
-</details>
 
 <details class="tooltip ts-tips">
 <summary>Collecting Promise Values with <code>.then</code></summary>
@@ -192,7 +194,7 @@ readFile("report.txt", "utf8").then((contents) => {
 
 This is how callbacks and promises connect. A promise is an object that runs callbacks for you when its value arrives, and the `await` syntax in the next section is built on this mechanism.
 
-We show `then` here so you will recognise it in documentation and in other people's code, but we will not use it in this course. `await` is a form of _syntactic sugar_ that expresses the same thing and is much more readable.
+We show `then` here so you will recognise it in documentation and in other people's code, but we will not use it in this course. `await` is _syntactic sugar_ for `then`: syntax that adds no new meaning, but makes the same thing easier to write and read. (In ISL, `(define (f x) ...)` is syntactic sugar for `(define f (lambda (x) ...))` in the same way.)
 
 </details>
 
@@ -226,7 +228,7 @@ where `<expression>` evaluates to a value of `Promise<T>` type, suspends executi
 
 `async` marks a function that may contain `await`, and it changes the function's return type. An `async` function always returns a _promise_ of its result. `loadReport` is declared to return `Promise<string>`, not `string`, even though its body returns a string, because `loadReport` cannot give its caller a `string` immediately. It is itself waiting on `readFile`, so the caller of `loadReport` must in turn await `loadReport`.
 
-The caller gets a receipt and collects it the same way, with `await`. This means asynchrony spreads upward. A function that awaits must be `async`, so its callers await it and must themselves be `async`, all the way up the program.
+The caller gets a ticket of its own and collects it the same way, with `await`. This means asynchrony spreads upward. A function that awaits must be `async`, so its callers await it and must themselves be `async`, all the way up the program.
 
 <details class="tooltip ts-tips">
 <summary><code>async</code></summary>
@@ -235,8 +237,8 @@ The keyword `async` declares that a function may wait on a promise.
 
 ```typescript
 async function f(x: X, y: Y, z: Z): Promise<T> {
-      // function body must return a T
-      // or a Promise<T>
+    // function body must return a T
+    // or a Promise<T>
 }
 ```
 
@@ -281,28 +283,6 @@ R --> F : resume the awaiting function
 <!-- caption="A file read passing down the runtime and operating system and back." -->
 
 A paused function resumes through the same queue that clicks and timer callbacks use. Everything shares that one queue, served by the one thread, which is why a long-running computation delays everything: file results, button clicks, and resumed functions all wait behind it.
-
-Every kind of event waits in that queue:
-
-```graphviz
-digraph eventLoop {
-  rankdir = LR;
-  node [shape = box, style = filled, fillcolor = white, fontname = "sans-serif", fontsize = 11];
-  edge [fontname = "sans-serif", fontsize = 10];
-
-  timer  [label = "timer\ncallback"];
-  click  [label = "button\nclick"];
-  resume [label = "resumed\nawait"];
-  queue  [label = "event loop queue", fillcolor = "#eeeeee"];
-  thread [label = "single thread", fillcolor = "#cfe8ff"];
-
-  timer  -> queue;
-  click  -> queue;
-  resume -> queue;
-  queue  -> thread [label = "one at a time"];
-}
-```
-<!-- caption="Every event waits in one queue, served by the single thread one at a time." -->
 
 This layered design is why a single thread is enough. The waiting is done by the hardware and the operating system, which can handle thousands of requests at once, and your program's thread is used only for running your code. This is how a Node-based web server can handle thousands of simultaneous connections on a single thread.
 
@@ -393,7 +373,7 @@ async function archiveReport(): Promise<void> {
 }
 ```
 
-The documentation says what the function _modifies_, as the mutation chapter required. Writing a file is a side effect that outlives not just the function but the entire program. The order of the `await`s also matters. `writeFile` cannot start until the contents have arrived, and the sequence of awaits expresses that dependency. The function pauses at the first `await`, resumes when the contents arrive, pauses at the second, and resumes when the write completes. The rest of the program keeps running throughout.
+The documentation says what the function _modifies_, as the mutation chapter required. Writing a file is a side effect that outlives the function, and even the entire program. The order of the `await`s also matters. `writeFile` cannot start until the contents have arrived, and the sequence of awaits expresses that dependency. The function pauses at the first `await`, resumes when the contents arrive, pauses at the second, and resumes when the write completes. The rest of the program keeps running throughout.
 
 <details class="tooltip ts-tips">
 <summary>Text encoding (the <code>"utf8"</code> argument)</summary>
@@ -401,6 +381,116 @@ The documentation says what the function _modifies_, as the mutation chapter req
 Files on disk are stored as raw bytes. The second argument to `readFile` names the **text encoding** to use when turning those bytes into a string, and `"utf8"` is the standard encoding for text and the one to use in this course. Without the argument, `readFile` delivers raw bytes rather than a `string`.
 
 </details>
+
+### Reading and Writing JSON
+
+Programs frequently send and receive data. They save it to files, send it across the network to other machines, and exchange it with programs written in other languages. To do any of that, the data has to be captured in a format that is agreed on ahead of time. A commonly used format is **JSON**, short for *J*ava*S*cript *O*bject *N*otation. You have already seen JSON in this course: the metadata files in the learning activities, such as `package.json` and `tsconfig.json`, are JSON files.
+
+JSON's syntax is almost exactly the object and array literals you have been writing. Every JSON value is one of a small, fixed set of kinds. Four of them are the primitive values you already know, written just as they are in TypeScript:
+
+- `string`, always in double quotes: `"CPSC 210"`
+- `number`, with no distinction drawn between integers and decimals: `4`, `-273.15`
+- `boolean`: `true` or `false`
+- `null`, for the deliberate absence of a value: `null`
+
+The other two kinds are containers that hold other values, which is what lets JSON describe structured data.
+
+**A JSON object** groups related values together inside `{ }`:
+
+```json
+{
+  "hour": 6,
+  "tempCelsius": -4,
+  "freezing": true
+}
+```
+
+Each entry has two parts separated by a `:`. The name on the left, `"hour"`, is the **key**. The value on the right, `6`, is what is recorded for that key. A key is always a string. Each key is _unique_ within an object.
+
+**A JSON array** is an ordered list of values inside `[ ]`:
+
+```json
+[ -4, -1, 3, 8, 2, -2 ]
+```
+
+The values in an array can be any JSON value, including objects:
+
+```json
+[
+  { "hour": 6, "tempCelsius": -4 },
+  { "hour": 9, "tempCelsius": -1 },
+  { "hour": 12, "tempCelsius": 3 }
+]
+```
+
+JSON is flexible because values nest. The value filed under a key, or sitting in an array, may itself be an object or an array, and those may hold further objects and arrays. That is all of JSON: four primitive values, objects, and arrays, nested as required to describe data.
+
+<details class="tooltip deep-dive">
+<summary>A Complete JSON Document</summary>
+
+A full weather-station report brings every kind together at once:
+
+```json
+{
+  "stationId": "YVR-2",
+  "active": true,
+  "location": {
+    "name": "Vancouver International Airport",
+    "latitude": 49.19,
+    "longitude": -123.18
+  },
+  "elevationMetres": 4,
+  "readings": [
+    { "hour": 6, "tempCelsius": -4, "note": null },
+    { "hour": 9, "tempCelsius": -1, "note": "frost reported" }
+  ],
+  "tags": [ "coastal", "automated" ]
+}
+```
+
+The whole document is one object. The value under `"location"` is a second object, nested inside the first. The value under `"readings"` is an array of objects, and inside one of those, `"note"` is `null` for the reading with no note and a string for the one that has it. The value under `"tags"` is an array of strings. Every value, at every depth, is one of the kinds above.
+
+</details>
+
+JSON only contains text. It cannot contain functions or variables. This simplicity is why JSON is so widely used. Because JSON is not tied to a specific language, a Python program can produce it, a file can store it, and your TypeScript program can consume it. The two sides only need to agree on the shape of the data. Engineers can also read JSON files without special tools.
+
+Because JSON is text, a program cannot work with it as values directly. Two built-in functions convert between the notation and TypeScript values.
+
+`JSON.stringify` goes from a value to text. Give it any array, object, or primitive and it returns a string in JSON notation:
+
+```typescript
+const twoReadings: Reading[] = [
+    { hour: 6, tempCelsius: -4 },
+    { hour: 12, tempCelsius: 3 }
+];
+
+const text: string = JSON.stringify(twoReadings);
+// '[{"hour":6,"tempCelsius":-4},{"hour":12,"tempCelsius":3}]'
+```
+
+The output is compact and hard to read. When a person has to read it, as with a configuration file, a third argument adds indentation:
+
+```typescript
+JSON.stringify(twoReadings, null, 4);   // the same data, indented by four spaces
+```
+
+`JSON.parse` transforms data the other way, from text back to a value:
+
+```typescript
+const restored = JSON.parse(text);
+```
+
+`restored` now holds an array of objects, which the array operations from [Chapter 5](./05_arrays) can act on.
+
+Two cautions follow from JSON being nothing but text. The first is that _the conversion is lossy in one direction_. JSON has no notation for a date, `undefined`, or a function. `JSON.stringify` turns a date into a string, and leaves out object properties whose value is `undefined` or a function, without complaint. A value that goes through `stringify` and back through `parse` equals the original only when everything in it was a kind JSON can express. The second is that _`JSON.parse` cannot know what the text contains_. The text is not available until the program runs, so the compiler cannot inspect it or give the result a meaningful type. An annotation does not fix this:
+
+```typescript
+const readings: Reading[] = JSON.parse(text);   // hoped for, not checked
+```
+
+The compiler accepts that line and then checks every later use of `readings` against a type nobody verified. If the text came from a file somebody edited by hand, from another team's program, or from an older version of the format, the values may be nothing like `Reading`, and the compiler has no way to know. For now, work with JSON your own code produced, where the shapes are known. Data from somewhere you do not control must be checked before it is trusted, as [Part 3](../part3/index) describes.
+
+Together with `readFile` and `writeFile`, `JSON.stringify` and `JSON.parse` let a program save its data to a file and load it back later.
 
 ### Calling Web Services
 
@@ -421,9 +511,9 @@ async function currentTemperature(stationId: string): Promise<number> {
 }
 ```
 
-There are two `await`s because the answer arrives in stages. The first delivers the response once the service has begun answering. The second, `response.json()`, delivers the response's _body_, parsed from text into an object, which can itself take time for a large reply. After the second `await`, `report` is an ordinary object.
+There are two `await`s because the answer arrives in stages. The first delivers the response once the service has begun answering. The second, `response.json()`, delivers the response's _body_, parsed from JSON text into an object as `JSON.parse` would, which can itself take time for a large reply. After the second `await`, `report` is an ordinary object.
 
-The type annotation on `report` states _our expectation_, but the compiler cannot verify it. The data was produced by another machine at runtime, and the type checker cannot see across a network. If the service changes its reply format, the program will still compile, but will misbehave when it runs.
+As with `JSON.parse`, the type annotation on `report` states _our expectation_, but the compiler cannot verify it. The data was produced by another machine at runtime, and the type checker cannot see across a network. If the service changes its reply format, the program will still compile, but will misbehave when it runs.
 
 The compiler's guarantees stop at the program's edge. Data arriving from outside should be _checked_ before the rest of the program relies on it, as the invariants chapters described. We will not write that checking here, but this boundary is where it belongs.
 
@@ -535,17 +625,11 @@ async function versionTwo(): Promise<number> {
 
 </details>
 
-## When Slow Things Fail
-
-The operations in this chapter can fail in ways pure computation cannot. A file may not exist, a network may be down, or a service may return malformed data. This is what the rejected state of a promise is for. When an awaited promise rejects, the error appears in your program at the `await`.
-
-Handling these failures well is the subject of the next chapter.
-
-For this chapter and its exercises, we will assume files exist and services answer. If your program crashes, read the error message and fix the bug it points to. The most common cause is a path or URL that is not quite right. At this stage, crashing immediately with a clear message is acceptable.
-
 #### From Mechanics to Abstraction
 
-Mutation introduced state and time _inside_ the program. Asynchrony extends this to the world _outside_ the program, where data lives on disks and other machines and arrives only after a wait. TypeScript's model is single-threaded and deferred. Slow operations return promises, `await` collects their values while the thread does other work, and `async` marks every function that waits. With files and web services available, our programs can work with data from outside their own source code.
+Mutation introduced state and time _inside_ the program. Asynchrony extends this to the world _outside_ the program, where data lives on disks and other machines and arrives only after a wait. TypeScript's model is single-threaded and deferred. Slow operations return promises, `await` collects their values while the thread does other work, and `async` marks every function that waits. With files, JSON, and web services available, our programs can work with data from outside their own source code.
+
+These operations can also fail in ways pure computation cannot: a file may not exist, a network may be down, or a service may return malformed data. When an awaited promise rejects, the error appears in your program at the `await`, and handling these failures well is the subject of the [next chapter](./08_errors). For this chapter's exercises, assume files exist and services answer. If your program crashes, read the error message and fix what it points to, most often a path or URL that is not quite right.
 
 <details class="tooltip exercise">
   <summary>Exercise: A Journal on Disk</summary>
@@ -558,6 +642,6 @@ The journal is a plain text file, one entry per line.
 
 1. Write `async function lineCount(path: string): Promise<number>` that reads the file at `path` as text (pass `"utf8"` to `readFile`) and returns how many lines it has. (Hint: <span class="hint">`text.split("\n")` gives an array of the lines.</span>) Test it with an async check, of the form <span class="hint">`test("...", checkExpect(async () => await lineCount("entries.txt"), ...))`</span>.
 2. Write `async function backUp(path: string): Promise<void>` that reads the journal and writes its contents to a new file at `path + ".bak"`. Write the doc comment: <span class="hint">record that the function modifies the file system, as the mutation chapter required.</span> Note that <span class="hint">the two `await`s must run in order: the backup cannot be written before the contents have been read</span>.
-3. Write `async function restore(path: string): Promise<void>` that reads the backup <span class="hint">at `path + ".bak"`</span> and writes its contents back to `path`, replacing the journal with the backed-up copy. Write the doc comment: <span class="hint"> document the file-system change,</span> and,  <span class="hint">as in `backUp`, make sure the read finishes before the write begins</span>.
+3. Write `async function restore(path: string): Promise<void>` that reads the backup <span class="hint">at `path + ".bak"`</span> and writes its contents back to `path`, replacing the journal with the backed-up copy. Write the doc comment: <span class="hint">document the file-system change,</span> and, <span class="hint">as in `backUp`, make sure the read finishes before the write begins</span>.
 
 </details>
