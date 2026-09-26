@@ -39,9 +39,9 @@ Terms introduced in **bold** throughout the textbook, linked to the section wher
 - **Body** — [Consuming Data and Services by Using APIs § Calling a Web Service](/part3/02_consuming_data#calling-a-web-service)
 - **Boundary Value Analysis** — [Checking Invariants § Deriving Tests](/part1/03_checking-invariants#deriving-tests)
 - **Branch** — [Learning a New Programming Language § <code>if</code> statements](/part1/01_new-language#if-statements)
-- **Branch Coverage** — [Validating Behaviour § Code Coverage](/part1/09_validation#code-coverage)
 - **Branch, Else** — [Learning a New Programming Language § <code>if</code> statements](/part1/01_new-language#if-statements)
 - **Branch, Then** — [Learning a New Programming Language § <code>if</code> statements](/part1/01_new-language#if-statements)
+- **Branch Coverage** — [Validating Behaviour § Code Coverage](/part1/09_validation#code-coverage)
 - **Breakpoint** — [Mutation and Side Effects § State Gives Loops a Memory](/part1/06_state-mutation#state-gives-loops-a-memory)
 
 ## C
@@ -205,12 +205,12 @@ Terms introduced in **bold** throughout the textbook, linked to the section wher
 - **Object-Oriented Programming** — [Building Abstractions with Classes § Programming Paradigms](/part2/01_abstraction#programming-paradigms)
 - **Observability** — [Encapsulating What Varies § Designing for Testability](/part2/03_encapsulation#designing-for-testability)
 - **Observe** — [Encapsulating What Varies § Designing for Testability](/part2/03_encapsulation#designing-for-testability)
-- **Open for Extension** — [Growing Systems with the Open/Closed Principle § Open and Closed](/part2/07_ocp#open-and-closed)
 <!-- EXCLUDED, do not re-add. Bold in the Chapter 16 recap list, but that list
      points back at earlier chapters rather than defining a term here; the
      concept is already covered by "Open/Closed Principle" below.
 - **Open and Closed** — [Growing Systems with the Open/Closed Principle § The Principles Together](/part2/07_ocp#the-principles-together)
 -->
+- **Open for Extension** — [Growing Systems with the Open/Closed Principle § Open and Closed](/part2/07_ocp#open-and-closed)
 - **Open/Closed Principle** — [Growing Systems with the Open/Closed Principle](/part2/07_ocp#growing-systems-with-the-open-closed-principle)
 - **Operating System** — [Asynchronous Effects and Time § `async` and `await`](/part1/07_async#async-and-await)
 - **Optional** — [Consuming Data and Services by Using APIs § Calling a Web Service](/part3/02_consuming_data#calling-a-web-service)
