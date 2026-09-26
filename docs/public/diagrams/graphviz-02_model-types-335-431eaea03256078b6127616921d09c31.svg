@@ -36,7 +36,7 @@
 <polygon fill="black" stroke="black" points="132.09,-87.83 141.26,-82.53 130.79,-80.95 132.09,-87.83"/>
 </g>
 <!-- s1 -->
-<g id="node4" class="node">
+<g id="node3" class="node">
 <title>s1</title>
 <polygon fill="none" stroke="black" points="223.25,-149 163,-149 163,-113 229.25,-113 229.25,-143 223.25,-149"/>
 <polyline fill="none" stroke="black" points="223.25,-149 223.25,-143"/>
@@ -49,22 +49,8 @@
 <path fill="none" stroke="black" d="M106.75,-119C121.41,-119 137.32,-120.64 151.54,-122.71"/>
 <polygon fill="black" stroke="black" points="150.61,-126.11 161.04,-124.2 151.7,-119.19 150.61,-126.11"/>
 </g>
-<!-- e -->
-<g id="node3" class="node">
-<title>e</title>
-<polygon fill="none" stroke="black" points="344.62,-36 287.38,-36 287.38,0 350.62,0 350.62,-30 344.62,-36"/>
-<polyline fill="none" stroke="black" points="344.62,-36 344.62,-30"/>
-<polyline fill="none" stroke="black" points="350.62,-30 344.62,-30"/>
-<text xml:space="preserve" text-anchor="middle" x="319" y="-13.32" font-family="Times,serif" font-size="14.00">Empty</text>
-</g>
-<!-- n2&#45;&gt;e -->
-<g id="edge2" class="edge">
-<title>n2:r&#45;&gt;e</title>
-<path fill="none" stroke="black" d="M249.5,-31.75C258.1,-31.75 267.2,-30.69 275.85,-29.17"/>
-<polygon fill="black" stroke="black" points="276.3,-32.65 285.41,-27.24 274.91,-25.79 276.3,-32.65"/>
-</g>
 <!-- s2 -->
-<g id="node5" class="node">
+<g id="node4" class="node">
 <title>s2</title>
 <polygon fill="none" stroke="black" points="346.5,-90 285.5,-90 285.5,-54 352.5,-54 352.5,-84 346.5,-90"/>
 <polyline fill="none" stroke="black" points="346.5,-90 346.5,-84"/>
@@ -76,6 +62,20 @@
 <title>n2:f&#45;&gt;s2</title>
 <path fill="none" stroke="black" d="M249.5,-57C257.53,-57 265.96,-57.99 274.06,-59.47"/>
 <polygon fill="black" stroke="black" points="273.23,-62.87 283.74,-61.52 274.68,-56.02 273.23,-62.87"/>
+</g>
+<!-- e -->
+<g id="node5" class="node">
+<title>e</title>
+<polygon fill="none" stroke="black" points="344.62,-36 287.38,-36 287.38,0 350.62,0 350.62,-30 344.62,-36"/>
+<polyline fill="none" stroke="black" points="344.62,-36 344.62,-30"/>
+<polyline fill="none" stroke="black" points="350.62,-30 344.62,-30"/>
+<text xml:space="preserve" text-anchor="middle" x="319" y="-13.32" font-family="Times,serif" font-size="14.00">Empty</text>
+</g>
+<!-- n2&#45;&gt;e -->
+<g id="edge2" class="edge">
+<title>n2:r&#45;&gt;e</title>
+<path fill="none" stroke="black" d="M249.5,-31.75C258.1,-31.75 267.2,-30.69 275.85,-29.17"/>
+<polygon fill="black" stroke="black" points="276.3,-32.65 285.41,-27.24 274.91,-25.79 276.3,-32.65"/>
 </g>
 </g>
 </svg>
