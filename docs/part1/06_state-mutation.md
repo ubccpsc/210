@@ -350,15 +350,35 @@ function bump(n: number): void {
     n = n + 1;          // changes only the function's own copy
 }
 
-let hour: number = 6;
-bump(hour);
-
 test("bump leaves the caller's number unchanged",
-    checkExpect(() => hour, 6)
+    checkExpect(() => {
+        let hour: number = 6;
+        bump(hour);
+        return hour;
+    }, 6)
 );
 ```
 
 This behaviour is called **pass-by-value**. The function receives the value, not the variable. `bump` compiles and runs, but accomplishes nothing, because it reassigns only its own copy `n`, which is discarded when the function exits.
+
+<details class="tooltip ts-tips">
+<summary>A Check With Several Steps</summary>
+
+This is the first check we have written whose thunk has a body in braces. Every thunk we have seen so far has been a single expression, `() => <actual>`, which _implicitly returns_ its value. Testing what a function does to its argument takes several steps: create the value, call the function, and evaluate the result. A body in braces holds all three, so each check builds its own value and no other check can change it. The _Testing_ point in [Side Effects](#side-effects) explains why that matters.
+
+As the arrow function tooltip in [Chapter 1](./01_new-language) described, a block body returns nothing implicitly, so the value the check compares must be returned explicitly. Written without the `return`:
+
+```typescript
+checkExpect(() => {
+    let hour: number = 6;
+    bump(hour);
+    hour; // read, then discarded
+}, 6);
+```
+
+the thunk does the work but does not hand back the answer. The compiler rejects this call before the test can run: a thunk that returns nothing can only be compared with nothing, so the error points at `6`, saying that a `number` is not assignable to `void`. Whenever you use braces, check whether a `return` is needed. When a check fits in a single expression, prefer the form without braces.
+
+</details>
 
 _2. Passing an object: the function gets a copy of the reference._ The parameter is a new box, but it holds a copy of the _arrow_, and the arrow points at the caller's object. Mutation through the parameter changes the one object both arrows share, and the caller sees it:
 
@@ -372,11 +392,12 @@ function calibrate(reading: Reading, offset: number): void {
     reading.tempCelsius = reading.tempCelsius + offset;
 }
 
-const morning: Reading = { hour: 6, tempCelsius: -4 };
-calibrate(morning, 1);
-
 test("calibrate changes the caller's object",
-    checkExpect(() => morning.tempCelsius, -3)
+    checkExpect(() => {
+        const morning: Reading = { hour: 6, tempCelsius: -4 };
+        calibrate(morning, 1);
+        return morning.tempCelsius;
+    }, -3)
 );
 ```
 
@@ -396,11 +417,12 @@ function reset(reading: Reading): void {
     reading = { hour: reading.hour, tempCelsius: 0 };
 }
 
-const evening: Reading = { hour: 21, tempCelsius: -2 };
-reset(evening); // reset redirected its local arrow only
-
 test("reset leaves the caller's object unchanged",
-    checkExpect(() => evening.tempCelsius, -2)
+    checkExpect(() => {
+        const evening: Reading = { hour: 21, tempCelsius: -2 };
+        reset(evening); // reset redirected its local arrow only
+        return evening.tempCelsius;
+    }, -2)
 );
 ```
 
@@ -531,23 +553,33 @@ Side effects change what we must do as readers, as documenters, and as testers o
 
 - _Reading._ A pure function can be understood from its signature: `Reading[]` in, `number` out. A signature like `calibrateDay`'s (with `void` out) says nothing about what the function is _for_, because its whole purpose is the effect. You must read the implementation, or trust the documentation.
 - _Documenting._ Because the signature does not provide cues about side effects, the documentation has to say what the function changes. The line `Modifies the given reading in place` in `calibrate`'s comment provides this hint. A mutating function whose documentation does not mention the mutation is a trap for every caller who reasonably assumes their arguments come back unchanged.
-- _Testing._ A pure function is tested by checking its return value. A mutating function is tested by checking _state_: call it, then assert on the object afterwards.
+- _Testing._ A pure function is tested by checking its return value. A mutating function is tested by checking _state_: call it, then assert on the object afterwards. Do both inside the check, as the tests in [What a Function Can Change](#what-a-function-can-change) did. The testing framework loads the whole file before it runs any check, so a change made at the top level of the file has already happened when every check runs, including the checks written above it. A value created inside a check cannot be changed by any other check.
 
 ```typescript
-const readings: Reading[] = [
-    { hour: 6, tempCelsius: -4 },
-    { hour: 9, tempCelsius: -1 }
-];
-calibrateDay(readings, 1);
-
 test("the first reading is shifted by the offset",
-    checkExpect(() => readings[0].tempCelsius, -3)
+    checkExpect(() => {
+        const readings: Reading[] = [
+            { hour: 6, tempCelsius: -4 },
+            { hour: 9, tempCelsius: -1 }
+        ];
+        calibrateDay(readings, 1);
+        return readings[0].tempCelsius;
+    }, -3)
 );
 
 test("the second reading is shifted by the offset",
-    checkExpect(() => readings[1].tempCelsius, 0)
+    checkExpect(() => {
+        const readings: Reading[] = [
+            { hour: 6, tempCelsius: -4 },
+            { hour: 9, tempCelsius: -1 }
+        ];
+        calibrateDay(readings, 1);
+        return readings[1].tempCelsius;
+    }, 0)
 );
 ```
+
+Each check builds its own readings, which repeats the setup. [Chapter 9](./09_validation) shows how one test can make several checks against the same values.
 
 There is one more consequence that we have been building towards in Part 1. The invariants chapters established a practice: validate a value when it is constructed, and rely on the invariant afterwards. Mutation breaks the "afterwards". `reading.hour = 99` is a legal statement that violates the `Reading` invariant long after construction, and aliasing means _any_ part of the program holding a reference can do it, at any time. With mutation, an invariant is no longer established once. It must be _preserved by every operation that touches the data_.
 
@@ -578,6 +610,8 @@ A robot is just a position:
 ```typescript
 type Robot = { x: number; y: number };
 ```
+
+In each part, create the robot inside the check that tests it, as the `calibrate` and `calibrateDay` tests did, so that no part can move a robot that another part is checking.
 
 1. Write `step(robot: Robot, dx: number, dy: number): void` that moves the robot by adding `dx` to its `x` and `dy` to its `y`, changing the robot in place. Create a robot at `{ x: 0, y: 0 }`, call `step(robot, 1, 2)`, and write one test per coordinate, each with a single `checkExpect`, confirming the caller's robot now has an `x` of 1 and a `y` of 2.
 2. Write `teleport(robot: Robot, x: number, y: number): void` that instead _reassigns the parameter_, with `robot = { x: x, y: y }`. Predict what the caller's robot looks like after `teleport(robot, 9, 9)`, then confirm it with `checkExpect`. Why does `step` change the caller's robot while `teleport` does not?

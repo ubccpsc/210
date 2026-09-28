@@ -304,18 +304,7 @@ test("the report loads",
 );
 ```
 
-This is the first check we have written whose thunk has a body in braces. Until now every thunk has been a single expression, `() => <actual>`, which _implicitly returns_ its value. Here the check needs two steps, awaiting the report and then measuring it, so the thunk uses a block body instead.
-
-As the arrow function tooltip in [Chapter 1](./01_new-language) described, a block body returns nothing implicitly, so the value the check compares must be returned explicitly. Written without the `return`:
-
-```typescript
-checkExpect(async () => {
-    const report: string = await loadReport();
-    report.length > 0; // computed, then discarded
-}, true);
-```
-
-the thunk computes the answer but does not return it. The compiler rejects this call before the test can run: a thunk that returns nothing can only be compared with nothing, so the error points at `true`, saying that a `boolean` is not assignable to `void`. Whenever you use braces, check whether a `return` is needed. When a check fits in a single expression, prefer the form without braces.
+The thunk has a body in braces, like the tests of mutating functions in [Chapter 6](./06_state-mutation), because the check takes two steps: awaiting the report and then measuring it. As there, the value the check compares must be returned explicitly, and the compiler rejects the check if the `return` is missing.
 
 `checkExpect` awaits whatever its function produces, so the test does not finish until every `await` inside it has completed. This also means `checkExpect(() => loadReport(), expected)` works without an `await`, because the check awaits the promise the thunk returns. Inside a block body, though, each async call still needs its own `await`. Without it, the next line works with a promise rather than the value it delivers.
 
