@@ -86,6 +86,12 @@ function checkPrerequisite(student: Student, section: Section): Result<Section, 
 
 The main benefit of this approach is that the failure is part of the type. A caller of `findSection` receives a `Result<Section, string>`, not a `Section`, so the compiler will not let them access `.value` without first checking `.ok`.
 
+<details class="tooltip deep-dive">
+<summary>Other Ways to Return Failures as Values</summary>
+
+`Result` is not the only way to return an error as a value. A function can return `undefined` when it fails, the way `Array.find` does. This is the _optional_ pattern, in effect a `Result` with no error detail. Older code and lower-level languages often use **sentinel values**, a special return value such as `-1`, or `null` for "not found". Sentinels are error-prone because they are ordinary values that can be used by mistake or collide with real data.
+</details>
+
 Since the returned failure is an ordinary value, it can be tested like any other value:
 
 ```typescript
@@ -148,12 +154,6 @@ Of the nine lines in the loop, six exist only to detect a failure and return it.
 
 This makes the function harder to read. The success path (often called the _happy path_), which runs almost every time, is three steps: "find the section, check the prerequisite, add it to the list". In the design above, a failure check sits between each step. This is the cost of returning failure as a value. Every layer between the function that _detects_ a problem and the function that _handles_ it must manage the failure, and that handling gets in the way of reading the function's main logic. When detection and handling are next to each other this might be OK, but when handling is far from where the failure arises, exceptions can be more appropriate.
 
-<details class="tooltip deep-dive">
-<summary>Other Ways to Return Failures as Values</summary>
-
-`Result` is not the only way to return an error as a value. A function can return `undefined` when it fails, the way `Array.find` does. This is the _optional_ pattern, in effect a `Result` with no error detail. Older code and lower-level languages often use **sentinel values**, a special return value such as `-1`, or `null` for "not found". Sentinels are error-prone because they are ordinary values that can be used by mistake or collide with real data.
-</details>
-
 ## Throwing an Exception
 
 The second mechanism, exceptions, keeps the error out of the return type. When an error is encountered, we **throw** an **exception** by executing a `throw` statement. Throwing an exception immediately abandons the rest of the current function and hands the exception to that function's caller. If the caller does not handle it, the exception is handed to _its_ caller, and so on up the call stack.
@@ -195,22 +195,6 @@ a is done
 
 </details>
 
-<details class="tooltip ts-tips">
-<summary><code>throw</code> Syntax</summary>
-
-`throw` takes an error value, usually a `new Error` carrying a message that describes the problem. The skeleton below shows its effect:
-
-```typescript
-function attempt(): void {
-    // (A)
-    throw new Error("a description of what went wrong");
-    // (B)
-}
-```
-
-If `(A)` runs and the `throw` is reached, `(B)` never runs. A `throw` leaves the function immediately, much as `return` does, with two differences. First, the exception carries an error rather than an ordinary value, and the caller does not receive that error as a result. Second, the exception travels up the chain of callers, as described above.
-</details>
-
 `requireSection` is a throwing version of `findSection`. When the section does not exist, it signals this to its callers with `throw new Error(...)`. It no longer returns a `Result`. It returns a `Section`, the value from the successful path. The `@throws` annotation in its documentation tells callers what errors to expect.
 
 ```typescript
@@ -231,7 +215,39 @@ function requireSection(catalogue: Section[], id: string): Section {
 }
 ```
 
+<details class="tooltip ts-tips">
+<summary><code>throw</code> Syntax</summary>
+
+`throw` takes an error value, usually a `new Error` carrying a message that describes the problem. The skeleton below shows its effect:
+
+```typescript
+function attempt(): void {
+    // (A)
+    throw new Error("a description of what went wrong");
+    // (B)
+}
+```
+
+If `(A)` runs and the `throw` is reached, `(B)` never runs. A `throw` leaves the function immediately, much as `return` does, with two differences. First, the exception carries an error rather than an ordinary value, and the caller does not receive that error as a result. Second, the exception travels up the chain of callers, as described above.
+</details>
+
 Communicating errors with exceptions is not unique to TypeScript. The same mechanism, with slightly different syntax, appears in Java, C++, C#, and Python (where `raise` and `except` take the place of `throw` and `catch`), among many others, so what you learn here applies in those languages too.
+
+<details class="tooltip link-110">
+<summary>Raising Errors in ISL</summary>
+
+You raised errors in CPSC 110 with `error`, which stopped the program with a message:
+
+```racket
+;; require-section : Catalogue String -> Section
+(define (require-section catalogue id)
+  (cond [(false? (find-section catalogue id)) (error "no section with id" id)]
+        [else (find-section catalogue id)]))
+```
+
+`throw` is the same idea. CPSC 110 also had `check-error`, the counterpart of the `checkError` we use here, which passed only when its expression signalled an error.
+
+</details>
 
 Here is the rest of our example:
 
@@ -298,22 +314,6 @@ function assert(condition: boolean, message: string): void {
 ```
 
 An assertion should fail only when there is a bug, and the right response to a bug is to stop. The errors in the rest of this chapter are outcomes the contract anticipates, which callers are expected to handle.
-
-</details>
-
-<details class="tooltip link-110">
-<summary>Raising Errors in ISL</summary>
-
-You raised errors in CPSC 110 with `error`, which stopped the program with a message:
-
-```racket
-;; require-section : Catalogue String -> Section
-(define (require-section catalogue id)
-  (cond [(false? (find-section catalogue id)) (error "no section with id" id)]
-        [else (find-section catalogue id)]))
-```
-
-`throw` is the same idea. CPSC 110 also had `check-error`, the counterpart of the `checkError` we use here, which passed only when its expression signalled an error.
 
 </details>
 
@@ -398,16 +398,6 @@ This has two consequences. First, like `checkExpect`, `checkError` takes a funct
 
 </details>
 
-<details class="tooltip deep-dive">
-<summary>Checked and Unchecked Exceptions</summary>
-
-Languages differ in how much they ask of a caller. TypeScript uses **unchecked exceptions**. A function's type says nothing about what it might throw, and the compiler never forces a caller to handle a possible exception. The signature `attempt(): void` gives no sign that it can throw an exception.
-
-Some languages, like Java, offer **checked exceptions**, which must be declared in the signature. The compiler forces every caller either to catch the exception or to declare that it will pass it up the call stack, so a failure cannot be forgotten.
-
-The `Result` type from earlier in this chapter gives the same _checked_ property in a language whose exceptions are unchecked. Because the failure is in the return type, the compiler forces callers to deal with it.
-</details>
-
 ### The `finally` Block
 
 A `try` may be followed by a `finally` block. A `catch` runs only when the `try` throws, but a `finally` runs on every path out of the `try`, whether it finished normally or threw. Some actions must happen on both paths. Opening a file, for instance, returns a _handle_, a token the operating system grants so the program can read and write that file. Handles are finite, so whether the task succeeds or fails, the program must close the file to give the handle back. A program that keeps opening files and never closing them eventually runs out of handles. This fault is called a _resource leak_.
@@ -422,6 +412,23 @@ try {
     closeFile(file);                 // runs even if useFile throws, returning the handle
 }
 ```
+
+<details class="tooltip ts-tips">
+<summary>Optional <code>finally</code> Block</summary>
+
+In the abstract:
+
+```typescript
+try {
+    // (A)
+} finally {
+    // (B)
+}
+// (C)
+```
+
+If `(A)` runs to completion, `(B)` runs and then control continues at `(C)`. If `(A)` throws, `(B)` still runs, and then the exception continues up the call stack, so `(C)` is not reached. A `finally` may also follow a `catch`, written `try { ... } catch (error) { ... } finally { ... }`, in which case the `finally` runs after the `try` and any `catch`, again on every path.
+</details>
 
 `finally` blocks are relatively rare, but you will see them whenever code needs to clean up after itself.
 
@@ -456,23 +463,6 @@ endif
 @enduml
 ```
 <!-- caption="Control flow through try, catch, and finally." -->
-
-<details class="tooltip ts-tips">
-<summary>Optional <code>finally</code> Block</summary>
-
-In the abstract:
-
-```typescript
-try {
-    // (A)
-} finally {
-    // (B)
-}
-// (C)
-```
-
-If `(A)` runs to completion, `(B)` runs and then control continues at `(C)`. If `(A)` throws, `(B)` still runs, and then the exception continues up the call stack, so `(C)` is not reached. A `finally` may also follow a `catch`, written `try { ... } catch (error) { ... } finally { ... }`, in which case the `finally` runs after the `try` and any `catch`, again on every path.
-</details>
 
 ### Recovering or Reporting
 
@@ -587,7 +577,7 @@ The ability to jump across the call stack reduces error-handling code, but it is
 
 Recall that the **static view** is the program as written, and the **dynamic view** is how that program runs on one particular execution. A `throw` and a `try`/`catch` are both visible in the static view. You can read in the source that a function _might_ throw and that some caller _might_ catch. What you cannot read is the connection between the two. Neither the `throw` nor the `catch` names the other, and which `catch` handles a given `throw` is decided only at run time, by the call stack that exists when the exception is raised.
 
-Without exceptions, you can understand a function by reading it together with the contracts of the functions it calls, and everything you need is local. Exceptions break this in both directions. The error a function raises may be handled far above it, by code it does not know about. And an error raised deep below something it calls may pass through it. Look again at the `deep`, `middle`, and `shallow` example above. `middle` neither throws nor catches, yet it is on the path of an exception, and reading `middle` on its own gives no sign that it takes part in a failure raised in `deep` and handled in `shallow`. This _non-locality_ keeps the success path clean, but makes failure behaviour hard to trace.
+Without exceptions, you can understand a function by reading it together with the contracts of the functions it calls, and everything you need is local. Exceptions break this in both directions. The error a function raises may be handled far above it, by code it does not know about. And an error raised deep below something it calls may pass through it. Look again at the propagation diagram above. `enrolAll` neither throws nor catches, yet it is on the path of an exception raised in `requireSection` and handled in `enrolStudent`. Nothing in the body of `enrolAll` shows this. Only its `@throws` documentation does. This _non-locality_ keeps the success path clean, but makes failure behaviour hard to trace.
 
 Two habits keep this in check. First, keep exceptions _rare_ by reserving them for errors, so that the places where control can jump are few. Second, _document_ what each function throws, and under what conditions, in its contract.
 
@@ -598,6 +588,16 @@ With two ways to communicate erroneous outcomes, each design has to choose betwe
 A **returned** failure is _visible to the type checker_. It appears in the function's return type, and the compiler forces every caller to handle it. The cost is that every layer between detection and handling must examine the failure, and the checks can obscure the success path. Returning failure is the better choice when the failure is a routine part of the operation that the _immediate_ caller should always deal with.
 
 A **thrown** failure _propagates on its own_, which keeps the success path clear. The cost is that the failure is invisible in the type. A function that throws has the same signature as one that always succeeds, so it is easy for a caller to forget that handling is needed. Throwing is the better choice when a failure should abort the current operation and be handled much further up, or when passing a `Result` through many layers would obscure the logic.
+
+<details class="tooltip deep-dive">
+<summary>Checked and Unchecked Exceptions</summary>
+
+Languages differ in how much they ask of a caller. TypeScript uses **unchecked exceptions**. A function's type says nothing about what it might throw, and the compiler never forces a caller to handle a possible exception. The signature of `requireSection` says it returns a `Section`, and gives no sign that it can throw an exception.
+
+Some languages, like Java, offer **checked exceptions**, which must be declared in the signature. The compiler forces every caller either to catch the exception or to declare that it will pass it up the call stack, so a failure cannot be forgotten.
+
+The `Result` type from earlier in this chapter gives the same _checked_ property in a language whose exceptions are unchecked. Because the failure is in the return type, the compiler forces callers to deal with it.
+</details>
 
 Where to catch an exception is as much a design decision as when to throw one. A function that cannot do anything useful about an error should let it propagate to a function that has the context to recover or report. A practical rule is to catch where the program knows what to do. A command-line tool might catch at the top level and print the message, and a web server might catch per request and return an error response.
 
