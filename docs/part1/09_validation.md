@@ -1,10 +1,10 @@
 # Validating Behaviour
 
-A function's contract states what it _should_ do. A test shows what it _does_ for a chosen input.
+A function's contract states what it should do, and a test checks what it does for one chosen input.
 
 The earlier chapters tested with `checkExpect` and `checkError`. These functions were a deliberately simple stand-in for the assertions used by real test frameworks. For the rest of the course we use `expect`, the assertion vocabulary of the [Chai](https://www.chaijs.com/) library. The [Vitest](https://vitest.dev/) test runner includes Chai's `expect`, as do many other test frameworks.
 
-The change is more than syntax. `checkExpect` could only compare for equality, and only reported failure in terms of that comparison. `expect` offers a family of assertion operators, each stating a different kind of expectation and, when it fails, reporting a message that describes the nature of the failure. A test case is also now a function body that you write, so it can build the values it needs, contain multiple assertions, and drive code that takes more than one step to set up.
+`checkExpect` could only compare for equality, and only reported failure in terms of that comparison. `expect` offers a family of assertion operators, each stating a different kind of expectation and, when it fails, reporting a message that describes the nature of the failure. A test case is also now a function body that you write, so it can build the values it needs, contain multiple assertions, and drive code that takes more than one step to set up.
 
 ## From `checkExpect` to `expect`
 
@@ -66,7 +66,7 @@ expect(() => f()).to.throw("error");
 ```
 </details>
 
-`to.throw` is also more precise than `checkError`. It takes the message we expect the failure to carry, and passes only if the thrown error's message contains it. A `checkError` test written with one failure in mind would still pass if a different failure happened. A `to.throw` test with a message does not.
+`to.throw` is also more precise than `checkError`. It takes the message we expect the failure to carry, and passes only if the thrown error's message contains it. A `checkError` test written with one failure in mind would still pass if a different failure happened, while a `to.throw` test with a message would fail.
 
 <details class="tooltip deep-dive">
   <summary>Behaviour-Driven Development (BDD)</summary>
@@ -158,8 +158,6 @@ while the specific form (`expect(ids).to.include("CPSC210")`) names the value an
 AssertionError: expected [ 'CPSC213' ] to include 'CPSC210'
 ```
 
-With a specific operator, a failing test reports the cause of the failure.
-
 <!--
 <details class="tooltip deep-dive">
 <summary>What Developers Write in Practice</summary>
@@ -182,7 +180,7 @@ test(<description>, () => {
 
 The description is unchanged, but the body is now an ordinary arrow function with a block body, so it can hold any number of statements. (As [Chapter 1](./01_new-language) described, a block body returns nothing implicitly. A test body has nothing to return anyway, because the runner judges the case by whether an assertion inside it failed.) This removes three restrictions of the earlier form:
 
-1. _A test case can hold as many assertions as the behaviour needs._ We had one check per test case because the check _was_ the test body, not because a good test has only one check. With a block body, a test can state several expectations about a single result, which helps pinpoint what is wrong (see [Richer Failures](#richer-failures)). You may still write one assertion per test case, but it is now a choice rather than a limitation.
+1. _A test case can hold as many assertions as the behaviour needs._ We had one check per test case because the check _was_ the test body, not because a good test has only one check. With a block body, a test can state several expectations about a single result, which helps pinpoint what is wrong (see [Richer Failures](#richer-failures)). You can still write one assertion per test case when that is all a behaviour needs.
 
 2. _Setup belongs inside the case._ In earlier chapters, a check was a single call `checkExpect(() => <actual>, <expected>)`, so the values a check needed were either declared above the tests, at the top level of the file, or built inside the thunk, as [Chapter 6](./06_state-mutation) did when testing functions that change their arguments. Everything declared at the top level is shared by every test in the file. If one of those values is _mutable_, a change made by one test is seen by the tests that run after it, and the suite can pass or fail depending on the order its cases run in. With a block body, each test case can hold its own `const` and `let` declarations, building only the values it needs without affecting other tests.
 
@@ -268,7 +266,7 @@ test("a student who finished first year can take CPSC210", () => {
 });
 ```
 
-This assertion is correct, and it fails if the result is wrong in any way. But consider what it tells you when it fails. The report says only that one array did not deeply equal another, and leaves you to compare them yourself. Did the function return `undefined`? An array of the wrong length? The right length but the wrong section? The right section with the wrong prerequisites? Every one of those faults produces a very similar error message.
+This assertion is correct, and it fails if the result is wrong in any way. When it fails, though, the report says only that one array did not deeply equal another. You have to compare the two arrays yourself to find out whether the function returned `undefined`, an array of the wrong length, the wrong section, or the right section with the wrong prerequisites, because each of those faults produces almost the same message.
 
 With a block body, we do not need to rely on a single assertion. We can get more precise failure messages by thinking about the different ways `eligibleSections` can fail, and writing a _sequence_ of assertions that catches each one, ordered from the most general to the most specific:
 
@@ -299,7 +297,7 @@ Only a result that exists, is an array of the right length, and contains the exp
 
 You need not attach five assertions to every test, because redundant checks clutter a test without adding meaning. Layering is worthwhile when a value is structured enough that a _bare equality failure_ is hard to read, or when a function makes several independent guarantees worth checking separately. For the example above, we might skip the `to.exist` assertion and the one using `map`.
 
-As in software design more broadly, test design rarely has a single right answer. `expect` lets you write several assertions per test, and you decide when that is worth doing.
+`expect` lets you write several assertions per test, and you decide when that is worth doing.
 
 ## Partitioning
 
@@ -384,71 +382,200 @@ function playableTitles(catalogue: Title[], viewer: Viewer): Title[] {
 
 </CollapsibleCode>
 
-Our tests will run against the following catalogue:
+Our tests use three titles, each with its own name so that a test can use it alone, and a catalogue holding all three:
 
 ```typescript
-const catalogue: Title[] = [
-    { id: "t1", published: true,  tier: "free",    regions: ["CA", "US"] },
-    { id: "t2", published: false, tier: "free",    regions: ["CA"] },
-    { id: "t3", published: true,  tier: "premium", regions: ["CA"] }
-];
+const t1: Title = { id: "t1", published: true,  tier: "free",    regions: ["CA", "US"] };
+const t2: Title = { id: "t2", published: false, tier: "free",    regions: ["CA"] };
+const t3: Title = { id: "t3", published: true,  tier: "premium", regions: ["CA"] };
+
+const catalogue: Title[] = [t1, t2, t3];
 ```
 
 The catalogue has a published free title licensed in two regions, an unpublished free title, and a published premium title.
 
 ### Partitioning Inputs
 
-`playableTitles` does not take a number. It takes a whole `Viewer` and a `catalogue`, and its input classes depend on _relationships_ between their fields, such as whether the viewer's region is one a title is licensed in. We can divide the viewer input into classes such as:
+`playableTitles` takes a `Viewer` and a catalogue instead of a single number. Whether a title appears in the result depends on how their fields relate, for example whether the viewer's region is one of the regions the title is licensed in. The specification names four conditions. Checking them in order puts every pairing of a title and a viewer into one of five classes:
 
-| Class | Representative viewer |
-|---|---|
-| Free plan, in a licensed region | `{ plan: "free", region: "CA" }` |
-| Premium plan, in a licensed region | `{ plan: "premium", region: "CA" }` |
-| In a region nothing is licensed for | `{ plan: "free", region: "EU" }` |
+```graphviz
+digraph inputClasses {
+  node [shape = box, style = "rounded,filled", fillcolor = white, fontname = "sans-serif", fontsize = 11];
+  edge [fontname = "sans-serif", fontsize = 10];
 
-The specification also depends on the catalogue's contents: a published title versus an unpublished one, and a free title versus a premium one. The classes are the meaningful _combinations_ of these, so a thorough suite needs more than one viewer paired with one title. As with a numeric input, the classes come from the _specification_ rather than the code. The difference is that a representative is now a constructed `Viewer` _and_ `catalogue`, not a single value.
+  published [label = "Is the title published?", fillcolor = "#fff3c4"];
+  licensed  [label = "Is it licensed in\nthe viewer's region?", fillcolor = "#fff3c4"];
+  premium   [label = "Is it a premium title?", fillcolor = "#fff3c4"];
+  plan      [label = "Is the viewer on\nthe premium plan?", fillcolor = "#fff3c4"];
 
-### Partitioning Outputs
+  A [label = "A: unpublished\nnot playable\ne.g. t2, any viewer", fillcolor = "#ffd6d6"];
+  B [label = "B: not licensed here\nnot playable\ne.g. t1, viewer in EU", fillcolor = "#ffd6d6"];
+  C [label = "C: free title\nplayable\ne.g. t1, viewer in CA", fillcolor = "#d6f5d6"];
+  D [label = "D: premium title, premium viewer\nplayable\ne.g. t3, premium viewer in CA", fillcolor = "#d6f5d6"];
+  E [label = "E: premium title, free viewer\nnot playable\ne.g. t3, free viewer in CA", fillcolor = "#ffd6d6"];
 
-Because the inputs to `playableTitles` have several dimensions that interact, partitioning each input separately may not produce a suite that tests all of its behaviours.
+  published -> A [label = "no"];
+  published -> licensed [label = "yes"];
+  licensed -> B [label = "no"];
+  licensed -> premium [label = "yes"];
+  premium -> C [label = "no"];
+  premium -> plan [label = "yes"];
+  plan -> D [label = "yes"];
+  plan -> E [label = "no"];
+}
+```
+<!-- caption="The five input classes for a title and a viewer, taken from the specification. Yellow boxes are the questions the specification asks. Green classes are playable and red classes are not. Each class shows a representative from the catalogue." -->
 
-Another way to guide the suite is to partition the _output_, and write a test case for each output class. `playableTitles` can return an empty list when nothing is playable, a single title, or several titles. We need to choose inputs deliberately to reach each of these. For the catalogue above, `playableTitles` returns an empty list only if the viewer is outside the regions "CA" and "US".
+The questions in the tree come from the specification. The tree matches the `if` statements in `canPlay` because the code was written from the same specification. Taking the classes from the code instead would copy any mistakes the code makes, as [Chapter 3](./03_checking-invariants#equivalence-classes) showed.
 
-Here is a suite of tests that covers each output class:
+Classes A, B, and E have the same outcome, a title that is not shown, but the specification reaches it for three different reasons. Each reason is a separate condition the code can get wrong, so each class needs its own check.
+
+The simplest suite includes one test case for each class, with the smallest input that reaches it: a catalogue holding one title.
+
+| Class | Catalogue | Viewer | Expected result |
+|---|---|---|---|
+| A: unpublished | `[t2]` | free, in CA | `[]` |
+| B: not licensed here | `[t1]` | free, in EU | `[]` |
+| C: free title | `[t1]` | free, in CA | `[t1]` |
+| D: premium title, premium viewer | `[t3]` | premium, in CA | `[t3]` |
+| E: premium title, free viewer | `[t3]` | free, in CA | `[]` |
+
+Boundary value analysis also applies to structured inputs. For a collection, the boundaries are its sizes: empty, one element, and more than one. The tests above all use one title, so we add a test for the empty catalogue. Catalogues with more than one title are covered in the next section.
 
 <CollapsibleCode>
 
 ```typescript
-test("a viewer outside every licensed region sees nothing", () => {
-    const viewer: Viewer = { id: "v3", plan: "free", region: "EU" };
-    const result = playableTitles(catalogue, viewer);
-
-    expect(result).to.be.an("array"); // the right kind of value
-    expect(result).to.be.empty; // the empty-result class
-});
-
-test("a free viewer sees published, licensed, non-premium titles", () => {
+test("an unpublished title is hidden", () => {
     const viewer: Viewer = { id: "v1", plan: "free", region: "CA" };
-    const result = playableTitles(catalogue, viewer);
-
-    expect(result).to.be.an("array"); // the right kind of value
-    expect(result).to.have.length(1); // the single-result class
-    expect(result.map(t => t.id)).to.have.members(["t1"]); // the title we expect
+    expect(playableTitles([t2], viewer)).to.deep.equal([]); // class A
 });
 
-test("a premium viewer also sees premium titles", () => {
-    const viewer: Viewer = { id: "v2", plan: "premium", region: "CA" };
-    const result = playableTitles(catalogue, viewer);
+test("a title is hidden outside its licensed regions", () => {
+    const viewer: Viewer = { id: "v3", plan: "free", region: "EU" };
+    expect(playableTitles([t1], viewer)).to.deep.equal([]); // class B
+});
 
-    expect(result).to.be.an("array"); // the right kind of value
-    expect(result).to.have.length(2); // the several-results class
-    expect(result.map(t => t.id)).to.have.members(["t1", "t3"]); // the titles we expect
+test("a free title is shown to a free viewer", () => {
+    const viewer: Viewer = { id: "v1", plan: "free", region: "CA" };
+    expect(playableTitles([t1], viewer)).to.deep.equal([t1]); // class C
+});
+
+test("a premium title is shown to a premium viewer", () => {
+    const viewer: Viewer = { id: "v2", plan: "premium", region: "CA" };
+    expect(playableTitles([t3], viewer)).to.deep.equal([t3]); // class D
+});
+
+test("a premium title is hidden from a free viewer", () => {
+    const viewer: Viewer = { id: "v1", plan: "free", region: "CA" };
+    expect(playableTitles([t3], viewer)).to.deep.equal([]); // class E
+});
+
+test("an empty catalogue has nothing to play", () => {
+    const viewer: Viewer = { id: "v1", plan: "free", region: "CA" };
+    expect(playableTitles([], viewer)).to.deep.equal([]); // boundary: no titles at all
 });
 ```
 
 </CollapsibleCode>
 
-Partitioning the input tells you which situations to give a function, and partitioning the output tells you which kinds of answer to confirm it can produce. For functions with structured output, partitioning only one of the two can leave a whole category of behaviour untested.
+### Partitioning Outputs
+
+Every result in those six tests is either empty or holds a single title. No test asks `playableTitles` to collect more than one title, so the suite cannot tell whether it does. Consider a near-miss implementation that stops at the first playable title:
+
+```typescript
+// Near-miss implementation example
+function playableTitles(catalogue: Title[], viewer: Viewer): Title[] {
+    for (const title of catalogue) {
+        if (canPlay(viewer, title)) {
+            return [title]; // bug: should keep going
+        }
+    }
+    return [];
+}
+```
+
+This version passes every test above, because with one title in the catalogue, returning the first playable title and returning every playable title give the same answer.
+
+Partitioning the _output_ shows what is missing. `playableTitles` can return no titles, one title, or several titles. The tests for the input classes produce the first two kinds of result but never the third. When no test produces an output class, the suite needs a test that does. To produce several titles, a test needs at least two titles that the same viewer can play, and no single input class provides that. The test needs a free title and a premium title in the same catalogue, and a premium viewer who can see both, which combines classes C and D.
+
+Adding titles to the catalogue does not guarantee this. A free viewer in CA given the whole catalogue sees only `t1`, so that test would still produce a single title. The test's input has to be chosen so that several titles are playable.
+
+```graphviz
+digraph outputsDriveTests {
+  rankdir = LR;
+  nodesep = 0.2;
+  ranksep = 0.85;
+  node [shape = box, style = "rounded,filled", fillcolor = white, fontname = "sans-serif", fontsize = 11];
+  edge [fontname = "sans-serif", fontsize = 10, color = "#888888"];
+
+  hin  [label = "Input classes", shape = plaintext, style = ""];
+  htst [label = "Tests", shape = plaintext, style = ""];
+  hout [label = "Output classes", shape = plaintext, style = ""];
+
+  A [label = "A: unpublished"];
+  B [label = "B: not licensed here"];
+  C [label = "C: free title"];
+  D [label = "D: premium title,\npremium viewer"];
+  E [label = "E: premium title,\nfree viewer"];
+
+  tA [label = "one unpublished title"];
+  tB [label = "one title licensed elsewhere"];
+  tC [label = "one free title"];
+  tD [label = "one premium title,\npremium viewer"];
+  tE [label = "one premium title,\nfree viewer"];
+  tN [label = "free and premium titles,\npremium viewer\n(needs C and D in one test)", fillcolor = "#cfe8ff", color = "#1f5fbf", penwidth = 2];
+
+  none    [label = "no titles"];
+  one     [label = "one title"];
+  several [label = "several titles", color = "#1f5fbf", penwidth = 2, fillcolor = "#cfe8ff"];
+  order   [label = "in catalogue order", color = "#1f5fbf", penwidth = 2, fillcolor = "#cfe8ff"];
+
+  { rank = same; hin; A; B; C; D; E; }
+  { rank = same; htst; tA; tB; tC; tD; tE; tN; }
+  { rank = same; hout; none; one; several; order; }
+
+  edge [style = invis];
+  hin -> A -> B -> C -> D -> E;
+  htst -> tA -> tB -> tC -> tD -> tE -> tN;
+  hout -> none -> one -> several -> order;
+  hin -> htst -> hout [weight = 100];
+
+  edge [style = solid, color = "#888888"];
+  A -> tA; B -> tB; C -> tC; D -> tD; E -> tE;
+  tA -> none; tB -> none; tE -> none;
+  tC -> one;  tD -> one;
+
+  edge [color = "#1f5fbf", penwidth = 1.6, fontcolor = "#1f5fbf"];
+  tN -> several [dir = back, label = "no test reached\nthis class"];
+  tN -> order [dir = back, label = "only visible with\nseveral titles"];
+  C -> tN [dir = back];
+  D -> tN [dir = back];
+}
+```
+<!-- caption="Grey: one test for each input class. None of them produces several titles. Blue: the test added by working back from the output classes the grey tests miss." -->
+
+The specification's last sentence says that titles are returned in catalogue order. Order only shows when there are at least two titles, so this is another behaviour the tests above cannot check. An implementation that builds its result with `unshift` instead of `push` returns the right titles in reverse order and passes all of them. It would also pass `to.have.members(["t1", "t3"])`, because `members` accepts the elements in any order. The new test therefore compares the whole list:
+
+```typescript
+test("a premium viewer sees every playable title, in catalogue order", () => {
+    const viewer: Viewer = { id: "v2", plan: "premium", region: "CA" };
+    const result = playableTitles(catalogue, viewer);
+
+    expect(result).to.have.length(2); // the several-titles class
+    expect(result.map(t => t.id)).to.deep.equal(["t1", "t3"]); // in catalogue order
+});
+```
+
+This test fails for both near-miss implementations. For the first, the length assertion reports one title where two were expected.
+
+Partitioning the input chooses the situations to test. Partitioning the output then checks the suite that results: list the kinds of result the function can produce, find the ones no test produces, and add a test for each. For `lateFee`, each input class produces its own kind of fee, so the output classes add no new tests. For `playableTitles`, the tests for the input classes never produced several titles, and the test added for that output class caught both near-miss implementations.
+
+Together with [Chapter 3](./03_checking-invariants), this gives four places to look for test inputs:
+
+| | Classes | Boundaries |
+|---|---|---|
+| **Inputs** | `lateFee`: grace, accruing, capped. `playableTitles`: classes A to E | `lateFee`: days 2 and 3, days 21 and 22. `playableTitles`: an empty catalogue |
+| **Outputs** | `lateFee`: no fee, a partial fee, the $10 cap. `playableTitles`: no titles, one title, several titles | `lateFee`: the first day at $10. `playableTitles`: two titles, the smallest result that shows order |
 
 ## White-Box Testing
 
@@ -527,7 +654,7 @@ function canPlay(viewer: Viewer, title: Title): boolean {
 
 This version has four branches. A suite that checks an unpublished title, a premium title for a premium viewer, a premium title for a free viewer, and a published free title gets 100% coverage. But the code is wrong: a title that is not licensed in the viewer's region can be judged playable.
 
-Coverage cannot reveal this fault, because the problem is a _missing_ branch. Coverage measures the code you wrote, and cannot tell you that the specification needs more. White-box testing _supplements_ black-box testing but never _replaces_ it, because only the specification says what the code ought to do.
+Coverage cannot reveal this fault, because the problem is a _missing_ branch. Coverage measures the code you wrote, and cannot tell you that the specification needs more. White-box testing adds to black-box testing and cannot replace it, because only the specification says what the code ought to do.
 
 <details class="tooltip deep-dive">
 <summary>Other Forms of Code Coverage</summary>
@@ -576,13 +703,13 @@ function canPlay(viewer: Viewer, title: Title): boolean {
 }
 ```
 
-The assumption is wrong: `t2` is not published, yet it is now judged playable. The change looks harmless, and a quick manual check on a published title would pass. The test suite catches it immediately. The test `"a free viewer sees published, licensed, non-premium titles"` expects exactly one title, and the changed version returns two, `t1` and `t2`, so its `to.have.length(1)` assertion fails.
+The assumption is wrong: `t2` is not published, yet it is now judged playable. The change looks harmless, and a quick manual check on a published title would pass. The test suite catches it immediately. The test `"an unpublished title is hidden"` gives a catalogue holding only `t2` and expects nothing back, and the changed version returns `[t2]`. The several-titles test fails too, because a premium viewer now sees three titles instead of two.
 
 So far, the tests you have written helped you get an implementation right. Catching regressions is their second job, and over the life of a program it is the more important one. Re-running the whole suite after every change, even one that looks harmless, makes it safe to keep changing a program, and the effort of writing tests is repaid each time someone touches the code.
 
 #### Validating with Confidence
 
-The type checker rules out malformed programs before they run, and tests show that the program does what its contract promises when it runs. Each testing technique in this chapter checks something different. Layered assertions make a failing test explain the fault. Partitioning inputs and outputs makes a passing suite meaningful. Coverage shows the code the suite does not reach. Re-running the suite on every change keeps a correct program correct. No one technique is enough on its own. Used together, they give us good reason to believe a program honours its contract.
+The type checker rules out malformed programs before they run, and tests show that the program does what its contract promises when it runs. Each testing technique in this chapter checks something different: layered assertions explain why a test failed, partitioning inputs and outputs chooses the cases a suite needs, coverage shows code the suite does not run, and re-running the suite after every change catches regressions. Together they give good reason to believe a program honours its contract.
 
 This closes Part 1, which covered modelling a problem with types, writing contracts and tests, maintaining invariants, managing state, interacting with the outside world, and designing for failure.
 
