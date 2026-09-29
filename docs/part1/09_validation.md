@@ -396,7 +396,7 @@ The catalogue has a published free title licensed in two regions, an unpublished
 
 ### Partitioning Inputs
 
-`playableTitles` takes a `Viewer` and a catalogue instead of a single number. Whether a title appears in the result depends on how their fields relate, for example whether the viewer's region is one of the regions the title is licensed in. The specification names four conditions. Checking them in order puts every pairing of a title and a viewer into one of five classes:
+`playableTitles` takes a `Viewer` and a catalogue instead of a single number. Whether a title appears in the result depends on how their fields relate, for example whether the viewer's region is one of the regions the title is licensed in. The specification names four conditions (yellow boxes). Checking them in order puts every pairing of a title and a viewer into one of five classes (red and green boxes). Each class is a different behaviour and needs its own test.
 
 ```graphviz
 digraph inputClasses {
@@ -679,7 +679,7 @@ test("greater than 5 returns true", () => {
 
 covers every line, but never exercises the case where `foo` returns `undefined`, when `x` is 5 or less.
 
-The sequence of branches taken in one run of a program is called a _path_. If we could list all the possible paths through a function, we could measure a suite's _path coverage_, the share of paths it runs. This is possible for functions made only of `if` statements, but with loops and recursion the number of paths can be unbounded. Different paths are also not always meaningfully different: a loop running 5 times rather than 6 rarely needs its own test.
+The sequence of branches taken in one run of a program is called a **path**. If we could list all the possible paths through a function, we could measure a suite's **path coverage**, the share of paths it runs. This is possible for functions made only of `if` statements, but with loops and recursion the number of paths can be unbounded. Different paths are also not always meaningfully different: a loop running 5 times rather than 6 rarely needs its own test.
 </details>
 
 ## Regression Testing
@@ -711,9 +711,7 @@ So far, the tests you have written helped you get an implementation right. Catch
 
 The type checker rules out malformed programs before they run, and tests show that the program does what its contract promises when it runs. Each testing technique in this chapter checks something different: layered assertions explain why a test failed, partitioning inputs and outputs chooses the cases a suite needs, coverage shows code the suite does not run, and re-running the suite after every change catches regressions. Together they give good reason to believe a program honours its contract.
 
-This closes Part 1, which covered modelling a problem with types, writing contracts and tests, maintaining invariants, managing state, interacting with the outside world, and designing for failure.
-
-[Chapter 4](./04_maintaining-invariants) maintained invariants with very little support from the programming language. That works while a program is small enough for one person to hold in their head. [Part 2](../part2/index) looks at what happens when programs and teams grow beyond what one person can manage, and we can no longer rely on one programmer's discipline to maintain invariants. Large codebases need new abstractions and more support from the language.
+This closes [Part 1](../part1/index), which covered modelling a problem with types, writing contracts and tests, maintaining invariants, managing state, interacting with the outside world, and designing for failure. [Part 2](../part2/index) builds on these foundational skills and extends them to systems where programs and teams grow beyond what one person can manage, and we can no longer rely on one programmer's discipline to maintain invariants. 
 
 <details class="tooltip exercise">
   <summary>Exercise: Validating a Shipping Calculator</summary>
