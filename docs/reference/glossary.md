@@ -32,7 +32,6 @@ Terms introduced in **bold** throughout the textbook, linked to the section wher
 - **Base Class** — [Extending Behaviour Through Polymorphism § Abstract Base Classes](/part2/06_extension#abstract-base-classes)
 - **Behaviour-Driven Development** — [Validating Behaviour § From `checkExpect` to `expect`](/part1/09_validation#from-checkexpect-to-expect)
 - **Binding** — [Preserving Implementation Freedom with Abstract Values § Immutable Values](/part2/04_flexibility#immutable-values)
-- **Black-Box Testing** — [Validating Behaviour § White-Box Testing](/part1/09_validation#white-box-testing)
 - **Block** — [Learning a New Programming Language § <code>if</code> statements](/part1/01_new-language#if-statements)
 - **Block Scope** — [Mutation and Side Effects § Scope: Where Names Live](/part1/06_state-mutation#scope-where-names-live)
 - **Blocking** — [Asynchronous Effects and Time § How Long Computers Wait](/part1/07_async#how-long-computers-wait)
@@ -274,6 +273,7 @@ Terms introduced in **bold** throughout the textbook, linked to the section wher
      "Interface Segregation Principle".
 - **Small Contracts** — [Growing Systems with the Open/Closed Principle § The Principles Together](/part2/07_ocp#the-principles-together)
 -->
+- **Specification-Based Testing** — [Validating Behaviour § Specification-Based Testing](/part1/09_validation#specification-based-testing)
 - **State** — [Learning a New Programming Language § Control Flow Statements](/part1/01_new-language#control-flow-statements)
 - **Statement** — [Learning a New Programming Language § Control Flow Statements](/part1/01_new-language#control-flow-statements)
 - **Static** — [Learning a New Programming Language § Static and Dynamic Views](/part1/01_new-language#static-and-dynamic-views)
@@ -282,6 +282,7 @@ Terms introduced in **bold** throughout the textbook, linked to the section wher
 - **Status Code** — [Consuming Data and Services by Using APIs § Calling a Web Service](/part3/02_consuming_data#calling-a-web-service)
 - **Strictly Equal** — [Using Types to Model Problems § Branching on the Case](/part1/02_model-types#branching-on-the-case)
 - **Strongly-Typed** — [UBC CPSC 210: Software Construction § Language Choice](/index#language-choice)
+- **Structure-Based Testing** — [Validating Behaviour § Structure-Based Testing](/part1/09_validation#structure-based-testing)
 - **Stub** — [Checking Invariants § The Testing Process](/part1/03_checking-invariants#the-testing-process)
 - **Substitutability** — [Growing Systems with the Open/Closed Principle § The Principles Together](/part2/07_ocp#the-principles-together)
 - **Successful Outcome** — [Checking Invariants § Erroneous Outcomes](/part1/03_checking-invariants#erroneous-outcomes)
@@ -323,4 +324,3 @@ Terms introduced in **bold** throughout the textbook, linked to the section wher
 
 - **Web Service** — [Asynchronous Effects and Time § Calling Web Services](/part1/07_async#calling-web-services)
 - **Web Service API** — [Consuming Data and Services by Using APIs § Two Kinds of API](/part3/02_consuming_data#two-kinds-of-api)
-- **White-Box Testing** — [Validating Behaviour § White-Box Testing](/part1/09_validation#white-box-testing)

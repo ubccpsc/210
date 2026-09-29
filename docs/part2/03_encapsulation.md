@@ -413,7 +413,7 @@ test("the array from guests() cannot change the list", () => {
 
 </CollapsibleCode>
 
-This is black-box testing by construction. With the representation hidden, all a test can check is behaviour. It also shows a design pressure. An object is testable only to the extent that its important behaviour is observable through its public methods. If a `GuestList` could fall into an invalid state but offered no way to observe its contents, no test could catch the fault. Designing for testability means giving callers, and therefore tests, enough public behaviour to confirm the invariant holds, without exposing the representation that would let them break it. The third test above is only possible because `guests()` and `size()` together let us observe that the escape attempt failed.
+This is specification-based testing by construction. With the representation hidden, all a test can check is the behaviour the class promises. It also shows a design pressure. An object is testable only to the extent that its important behaviour is observable through its public methods. If a `GuestList` could fall into an invalid state but offered no way to observe its contents, no test could catch the fault. Designing for testability means giving callers, and therefore tests, enough public behaviour to confirm the invariant holds, without exposing the representation that would let them break it. The third test above is only possible because `guests()` and `size()` together let us observe that the escape attempt failed.
 
 ### Designing for Testability
 

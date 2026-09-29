@@ -301,9 +301,9 @@ You need not attach five assertions to every test, because redundant checks clut
 
 ## Specification-Based Testing
 
-A test case has three parts: constructing inputs, exercising the code with those inputs, and asserting that it behaves as expected. The sections above covered assertions. This section covers choosing inputs.
+A test case has three parts: constructing inputs, exercising the code with those inputs, and asserting that it behaves as expected. The sections above covered assertions. This section covers choosing inputs from a function's specification, without looking at its implementation. This is called **specification-based testing**, and is also known as _black-box testing_.
 
-In [Chapter 3](./03_checking-invariants), we divided a function's input space into equivalence classes, grouping the inputs the specification treats alike, and tested one representative of each. We also looked closely at the boundaries between these equivalence classes.
+In [Chapter 3](./03_checking-invariants), we divided a function's input space into equivalence classes, grouping the inputs the specification treats alike, and tested one representative of each. We also looked closely at the boundaries between these equivalence classes. Both techniques are specification-based.
 
 These techniques are the basis of input selection. But once a function's inputs and outputs are more complex than a single number, the input classes are defined over combinations of fields rather than ranges. We can also partition the output into classes.
 
@@ -577,11 +577,11 @@ Together with [Chapter 3](./03_checking-invariants), this gives four places to l
 | **Inputs** | `lateFee`: grace, accruing, capped. `playableTitles`: classes A to E | `lateFee`: days 2 and 3, days 21 and 22. `playableTitles`: an empty catalogue |
 | **Outputs** | `lateFee`: no fee, a partial fee, the $10 cap. `playableTitles`: no titles, one title, several titles | `lateFee`: the first day at $10. `playableTitles`: two titles, the smallest result that shows order |
 
-## Structural Testing
+## Structure-Based Testing
 
-All the techniques so far are forms of **black-box testing**, where tests are derived from the specification, treating the function under test as a box whose contents we cannot see.
+All the techniques so far are specification-based: the tests come from the specification, and the implementation is never examined.
 
-Once an implementation exists, we can look inside. **White-box testing** derives tests from the _code as written_. We read the code and ask whether our tests _exercise_ everything it does.
+Once an implementation exists, we can look inside. **Structure-based testing**, also known as _white-box testing_, derives tests from the _code as written_. We read the code and ask whether our tests _exercise_ everything it does.
 
 Reading code reveals its _branches_, and each branch is a place a fault can hide untested. The decisions in `playableTitles` are all in its helper, `canPlay`, so that is where we look:
 
@@ -631,7 +631,7 @@ These five calls run every branch of `canPlay` at least once.
 
 ### Code Coverage
 
-The white-box view also gives a natural measure of how thorough a test suite is. **Code coverage** measures how much of the code the suite executes.
+Structure-based testing also gives a natural measure of how thorough a test suite is. **Code coverage** measures how much of the code the suite executes.
 
 A common form is **branch coverage**: the fraction of branches run by at least one test. The five cases above execute all five branches of `canPlay`, for 100% branch coverage. Without the two premium-title cases, coverage falls to three of five branches, and branches 3 and 4 are never run. Measuring coverage points out the parts of your code your tests do not reach.
 
@@ -654,7 +654,7 @@ function canPlay(viewer: Viewer, title: Title): boolean {
 
 This version has four branches. A suite that checks an unpublished title, a premium title for a premium viewer, a premium title for a free viewer, and a published free title gets 100% coverage. But the code is wrong: a title that is not licensed in the viewer's region can be judged playable.
 
-Coverage cannot reveal this fault, because the problem is a _missing_ branch. Coverage measures the code you wrote, and cannot tell you that the specification needs more. White-box testing adds to black-box testing and cannot replace it, because only the specification says what the code ought to do.
+Coverage cannot reveal this fault, because the problem is a _missing_ branch. Coverage measures the code you wrote, and cannot tell you that the specification needs more. Structure-based testing adds to specification-based testing and cannot replace it, because only the specification says what the code ought to do.
 
 <details class="tooltip deep-dive">
 <summary>Other Forms of Code Coverage</summary>
