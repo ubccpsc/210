@@ -20,6 +20,20 @@ test("no fee at the grace boundary", () => {
 });
 ```
 
+<details class="tooltip ts-tips">
+<summary><code>equal</code> Versus <code>deep.equal</code></summary>
+
+`to.equal` compares with `===`. That is correct for numbers, strings, and booleans, but not for objects and arrays. For those, `===` asks whether two values are _the same object in memory_, not whether they hold the same contents, so two separately built objects with identical fields are not equal.
+
+```typescript
+expect({ id: "CPSC210" }).to.equal({ id: "CPSC210" });      // fails: different objects
+expect({ id: "CPSC210" }).to.deep.equal({ id: "CPSC210" }); // passes: same contents
+```
+
+`to.deep.equal` compares structure. It checks that the two values have the same shape and the same values throughout. `checkExpect` always compared using deep equality, so when you translate a `checkExpect` whose expected value is an object or an array, use `deep.equal`, not `equal`.
+
+</details>
+
 Errors translate just as directly. Recall `requireSection` from the previous chapter, which throws when no section matches the requested id. `checkError` ran a function and passed if it threw, and `expect(...).to.throw` does the same:
 
 ```typescript
@@ -106,27 +120,6 @@ import { test, expect } from "@ubccpsc/210-toolkit/testing";
 </details>
 -->
 
-<details class="tooltip ts-tips">
-<summary><code>equal</code> Versus <code>deep.equal</code></summary>
-
-`to.equal` compares with `===`. That is correct for numbers, strings, and booleans, but not for objects and arrays. For those, `===` asks whether two values are _the same object in memory_, not whether they hold the same contents, so two separately built objects with identical fields are not equal.
-
-```typescript
-expect({ id: "CPSC210" }).to.equal({ id: "CPSC210" });      // fails: different objects
-expect({ id: "CPSC210" }).to.deep.equal({ id: "CPSC210" }); // passes: same contents
-```
-
-`to.deep.equal` compares structure. It checks that the two values have the same shape and the same values throughout. `checkExpect` always compared using deep equality, so when you translate a `checkExpect` whose expected value is an object or an array, use `deep.equal`, not `equal`.
-
-</details>
-
-<details class="tooltip link-110">
-<summary>A Family of Checks</summary>
-
-CPSC 110 already had more than one kind of check. Alongside `check-expect` you used `check-within` for numbers that need only be close, `check-member-of` for a value that must be one of several, `check-range` for a number in an interval, and `check-error` for an expression that must signal an error. Chai offers a larger set built on the same idea. `check-within` becomes `to.be.closeTo`, `check-member-of` becomes `to.be.oneOf`, `check-range` becomes `to.be.within`, and `check-error` becomes `to.throw`.
-
-</details>
-
 ### A Vocabulary of Assertions
 
 Beyond equality, Chai groups its assertions by the kind of property they check. A few cover most of what you will write:
@@ -143,6 +136,13 @@ Beyond equality, Chai groups its assertions by the kind of property they check. 
 | Property | `expect(section).to.have.property("id", "CPSC210")` | An object has the property, with the given value |
 | Numeric | `expect(fee).to.be.at.most(10)` | A numeric comparison holds |
 | Throws | `expect(() => f()).to.throw("...")` | The call raises an error |
+
+<details class="tooltip link-110">
+<summary>A Family of Checks</summary>
+
+CPSC 110 already had more than one kind of check. Alongside `check-expect` you used `check-within` for numbers that need only be close, `check-member-of` for a value that must be one of several, `check-range` for a number in an interval, and `check-error` for an expression that must signal an error. Chai offers a larger set built on the same idea. `check-within` becomes `to.be.closeTo`, `check-member-of` becomes `to.be.oneOf`, `check-range` becomes `to.be.within`, and `check-error` becomes `to.throw`.
+
+</details>
 
 None of these is strictly necessary. Each could be written as an equality or boolean check: `expect(ids.includes("CPSC210")).to.equal(true)` does the same work as `expect(ids).to.include("CPSC210")`.
 
@@ -166,7 +166,7 @@ These categories are not arbitrary. A study of 33,873 assertions drawn from 105 
 </details>
 -->
 
-## Richer Test Cases
+### Richer Test Cases
 
 The second argument to `test` has always been a function. `checkExpect` hid this, because `checkExpect(...)` built the function that `test` would call to carry out the check.
 
@@ -186,7 +186,7 @@ The description is unchanged, but the body is now an ordinary arrow function wit
 
 3. _Code under test can be driven through several steps._ We have seen that a `checkExpect` thunk could hold more than one statement, but it still had to reduce all the computation to one final value to check. A test body has no such limit. It can construct a value, configure it, exercise it, and assert at any point along the way, choosing a different operator for each assertion. Real tests need this because the behaviour under test is not reachable until the value has been built up through several steps.
 
-## Richer Failures
+### Richer Failures
 
 Consider a function that lists the sections a student can currently enrol in: those courses they have not already passed and whose prerequisites they have completed. We reuse the `Section` and `Student` types from [Chapter 8](./08_errors), with a catalogue that now offers two first-year courses:
 
@@ -299,7 +299,7 @@ You need not attach five assertions to every test, because redundant checks clut
 
 `expect` lets you write several assertions per test, and you decide when that is worth doing.
 
-## Partitioning
+## Specification-Based Testing
 
 A test case has three parts: constructing inputs, exercising the code with those inputs, and asserting that it behaves as expected. The sections above covered assertions. This section covers choosing inputs.
 
@@ -394,7 +394,7 @@ const catalogue: Title[] = [t1, t2, t3];
 
 The catalogue has a published free title licensed in two regions, an unpublished free title, and a published premium title.
 
-### Partitioning Inputs
+### Input Partitioning
 
 `playableTitles` takes a `Viewer` and a catalogue instead of a single number. Whether a title appears in the result depends on how their fields relate, for example whether the viewer's region is one of the regions the title is licensed in. The specification names four conditions (yellow boxes). Checking them in order puts every pairing of a title and a viewer into one of five classes (red and green boxes). Each class is a different behaviour and needs its own test.
 
@@ -478,7 +478,7 @@ test("an empty catalogue has nothing to play", () => {
 
 </CollapsibleCode>
 
-### Partitioning Outputs
+### Output Partitioning
 
 Every result in those six tests is either empty or holds a single title. No test asks `playableTitles` to collect more than one title, so the suite cannot tell whether it does. Consider a near-miss implementation that stops at the first playable title:
 
@@ -577,7 +577,7 @@ Together with [Chapter 3](./03_checking-invariants), this gives four places to l
 | **Inputs** | `lateFee`: grace, accruing, capped. `playableTitles`: classes A to E | `lateFee`: days 2 and 3, days 21 and 22. `playableTitles`: an empty catalogue |
 | **Outputs** | `lateFee`: no fee, a partial fee, the $10 cap. `playableTitles`: no titles, one title, several titles | `lateFee`: the first day at $10. `playableTitles`: two titles, the smallest result that shows order |
 
-## White-Box Testing
+## Structural Testing
 
 All the techniques so far are forms of **black-box testing**, where tests are derived from the specification, treating the function under test as a box whose contents we cannot see.
 
