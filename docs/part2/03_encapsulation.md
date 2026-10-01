@@ -92,7 +92,7 @@ digraph encapsulation {
 
 Both fields _and_ methods can be marked with a visibility modifier:
 
-- `public` is the default, and means the member is accessible everywhere. Methods that callers are meant to use are public.
+- `public` is the default, and means the member is accessible everywhere. Methods that callers are meant to use are public. Because it is the default, `public` can be left out, but from here on the examples write it on every member that is not `private`, as the course's linter requires, so each member's visibility is stated rather than assumed.
 - `private` restricts the member to the class body. Hide the representation by marking fields `private`.
 - `readonly` allows a field to be assigned only where it is declared or in the constructor, never afterwards. A `GuestList`'s capacity is fixed once the list exists, so it should be `private readonly`:
 
@@ -134,7 +134,7 @@ class GuestList {
      * @param {number} capacity the most guests the list may hold
      * @throws {Error} "capacity must be at least 1" when capacity is too small
      */
-    constructor(capacity: number) {
+    public constructor(capacity: number) {
         if (capacity < 1) {
             throw new Error("capacity must be at least 1");
         }
@@ -156,7 +156,7 @@ A validating constructor guarantees the object _starts_ valid. Keeping it valid 
  *
  * @param {string} guestId the guest to invite
  */
-add(guestId: string): void {
+public add(guestId: string): void {
     if (this.isInvited(guestId)) {
         return; // already invited; the list is unchanged
     }
@@ -168,15 +168,15 @@ add(guestId: string): void {
 The early return protects the duplicate invariant, because inviting someone already present changes nothing. The `assert` protects the capacity invariant. The method's contract makes the caller responsible for checking space by calling `isFull` first, so reaching `add` on a full list is a programmer error, and the method halts. The supporting methods are small, and each reports on the state without exposing it:
 
 ```typescript
-isInvited(guestId: string): boolean {
+public isInvited(guestId: string): boolean {
     return this.invited.includes(guestId);
 }
 
-isFull(): boolean {
+public isFull(): boolean {
     return this.invited.length >= this.capacity;
 }
 
-size(): number {
+public size(): number {
     return this.invited.length;
 }
 ```
@@ -228,7 +228,7 @@ The structures you built with `define-struct` in CPSC 110 were immutable. Once m
 A caller often needs to _see_ the guests, to print them at the door or count them. An accessor that returns the list looks harmless:
 
 ```typescript
-guests(): string[] {
+public guests(): string[] {
     return this.invited; // returns the internal array itself
 }
 ```
@@ -247,7 +247,7 @@ everyone.push("carol"); // and now over capacity
 No method of `GuestList` was called to break the invariant, and no `private` rule was violated. The array _escaped_. `private` prevented external code from accessing the `invited` field directly, but `guests()` handed callers a reference to the same array. The fix is to return a copy:
 
 ```typescript
-guests(): string[] {
+public guests(): string[] {
     return this.invited.slice(); // a copy; mutating it cannot affect the list
 }
 ```
@@ -300,7 +300,7 @@ class GuestList {
     private readonly capacity: number;
     private invited: Set<string>;
 
-    constructor(capacity: number) {
+    public constructor(capacity: number) {
         if (capacity < 1) {
             throw new Error("capacity must be at least 1");
         }
@@ -308,19 +308,19 @@ class GuestList {
         this.invited = new Set<string>();
     }
 
-    isInvited(guestId: string): boolean {
+    public isInvited(guestId: string): boolean {
         return this.invited.has(guestId);
     }
 
-    isFull(): boolean {
+    public isFull(): boolean {
         return this.invited.size >= this.capacity;
     }
 
-    size(): number {
+    public size(): number {
         return this.invited.size;
     }
 
-    add(guestId: string): void {
+    public add(guestId: string): void {
         if (this.isInvited(guestId)) {
             return;
         }
@@ -328,11 +328,11 @@ class GuestList {
         this.invited.add(guestId);
     }
 
-    remove(guestId: string): void {
+    public remove(guestId: string): void {
         this.invited.delete(guestId);
     }
 
-    guests(): string[] {
+    public guests(): string[] {
         return Array.from(this.invited); // still a fresh array, still a copy
     }
 }
@@ -375,7 +375,7 @@ Information hiding is not only about marking fields `private`. It is also about 
 TypeScript can make a method callable as though it were a field, using a `get` accessor:
 
 ```typescript
-get count(): number {
+public get count(): number {
     return this.invited.size;
 }
 ```
@@ -436,7 +436,7 @@ class LoginThrottle {
     private lockedUntil = 0; // a timestamp; 0 means not locked
 
     /** Records a failed attempt, locking the account after the third. */
-    recordFailure(): void {
+    public recordFailure(): void {
         this.failures = this.failures + 1;
         if (this.failures >= 3) {
             this.lockedUntil = Date.now() + 30000;
@@ -444,7 +444,7 @@ class LoginThrottle {
     }
 
     /** Throws when the account is currently locked. */
-    checkAccess(): void {
+    public checkAccess(): void {
         if (Date.now() < this.lockedUntil) {
             throw new Error("account locked");
         }
@@ -461,14 +461,14 @@ It is hard to **observe**, because nothing reports the throttle's state. A test 
 Three small changes fix this without weakening encapsulation. First, for controllability, take the current time as a parameter rather than reading it from a global clock:
 
 ```typescript
-recordFailure(now: number): void {
+public recordFailure(now: number): void {
     this.failures = this.failures + 1;
     if (this.failures >= 3) {
         this.lockedUntil = now + 30000;
     }
 }
 
-checkAccess(now: number): void {
+public checkAccess(now: number): void {
     if (now < this.lockedUntil) {
         throw new Error("account locked");
     }
@@ -478,11 +478,11 @@ checkAccess(now: number): void {
 A test can now supply any time it likes, locking the account at time `1000` and confirming the lock has lifted at time `31000`, with no real waiting. Then, for observability, add two methods that report derived facts:
 
 ```typescript
-isLocked(now: number): boolean {
+public isLocked(now: number): boolean {
     return now < this.lockedUntil;
 }
 
-failureCount(): number {
+public failureCount(): number {
     return this.failures;
 }
 ```
@@ -514,15 +514,15 @@ Here is a first draft of a leaderboard for a game. It tracks the best score each
 type Entry = { player: string; score: number };
 
 class Leaderboard {
-    entries: Entry[];
+    public entries: Entry[];
 
-    constructor() {
+    public constructor() {
         this.entries = [];
     }
 
-    record(entry: Entry): void { /* record a player's score */ }
-    topScores(): Entry[] { /* the entries, highest score first */ }
-    scoreFor(player: string): number { /* the player's best score, or 0 */ }
+    public record(entry: Entry): void { /* record a player's score */ }
+    public topScores(): Entry[] { /* the entries, highest score first */ }
+    public scoreFor(player: string): number { /* the player's best score, or 0 */ }
 }
 ```
 

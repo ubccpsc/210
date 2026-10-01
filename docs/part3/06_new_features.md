@@ -90,11 +90,11 @@ When a request fits an extension point, the work is small. The sixth carrier is 
 class CarrierFClient implements CarrierClient {
     private readonly baseUrl: string;
 
-    constructor(baseUrl: string) {
+    public constructor(baseUrl: string) {
         this.baseUrl = baseUrl;
     }
 
-    async track(trackingNumber: string): Promise<Result<Shipment, string>> {
+    public async track(trackingNumber: string): Promise<Result<Shipment, string>> {
         // this carrier's URL scheme, its JSON, its status vocabulary
     }
 }
@@ -124,7 +124,7 @@ The tracker has no concept of a shipment being _watched_ over time, no point at 
 
 ```typescript
 class ParcelTracker {
-    async locate(request: TrackingRequest, notifier?: Notifier): Promise<Result<Shipment, TrackingError>> {
+    public async locate(request: TrackingRequest, notifier?: Notifier): Promise<Result<Shipment, TrackingError>> {
         // ... find the shipment as before ...
         if (notifier !== undefined) {
             if (found.ok === true && found.value.status === "exception") {
@@ -180,12 +180,12 @@ class ParcelTracker {
     private readonly carriers: CarrierClient[];
     private readonly observers: ShipmentObserver[];
 
-    constructor(carriers: CarrierClient[], observers: ShipmentObserver[] = []) {
+    public constructor(carriers: CarrierClient[], observers: ShipmentObserver[] = []) {
         this.carriers = carriers;
         this.observers = observers;
     }
 
-    async locate(request: TrackingRequest): Promise<Result<Shipment, TrackingError>> {
+    public async locate(request: TrackingRequest): Promise<Result<Shipment, TrackingError>> {
         // ... find the shipment exactly as before ...
         if (found.ok === true) {
             for (const observer of this.observers) {
@@ -206,7 +206,7 @@ class DelayNotifier implements ShipmentObserver {
     private readonly channel: Notifier;
     private readonly lastSeen: Map<string, ShipmentStatus>;
 
-    constructor(channel: Notifier) {
+    public constructor(channel: Notifier) {
         this.channel = channel;
         this.lastSeen = new Map<string, ShipmentStatus>();
     }
@@ -311,11 +311,11 @@ class LendingDesk {
     private readonly loans: LoanStore;
     private readonly rule: OverdueRule;
 
-    constructor(loans: LoanStore, rule: OverdueRule) { /* ... */ }
+    public constructor(loans: LoanStore, rule: OverdueRule) { /* ... */ }
 
-    checkOut(memberId: string, holdingId: string, now: number): Result<Loan, string> { /* ... */ }
-    renew(loanId: string, now: number): Result<Loan, string> { /* ... */ }
-    overdueLoans(now: number): Loan[] { /* ... */ }
+    public checkOut(memberId: string, holdingId: string, now: number): Result<Loan, string> { /* ... */ }
+    public renew(loanId: string, now: number): Result<Loan, string> { /* ... */ }
+    public overdueLoans(now: number): Loan[] { /* ... */ }
 }
 ```
 

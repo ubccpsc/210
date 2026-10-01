@@ -20,7 +20,7 @@ A new `WeeklyRecap` class is written to implement this story. The history is alr
 class WeeklyRecap {
     private readonly playlist: Playlist;
 
-    constructor(playlist: Playlist) {
+    public constructor(playlist: Playlist) {
         this.playlist = playlist;
     }
 
@@ -29,7 +29,7 @@ class WeeklyRecap {
      *
      * @returns {string} a one-line summary of the recent play history
      */
-    summary(): string {
+    public summary(): string {
         const recent: Song[] = this.playlist.recentlyPlayedSongs();
         let text = "You played " + recent.length + " songs";
         if (recent.length > 0) {
@@ -165,7 +165,7 @@ Suppose the recap should cover either the past day or the past week. The smalles
 class Recap {
     private readonly log: PlayLog;
 
-    constructor(log: PlayLog) {
+    public constructor(log: PlayLog) {
         this.log = log;
     }
 
@@ -176,7 +176,7 @@ class Recap {
      * @param {boolean} weekly true for the past week, false for the past day
      * @returns {string} a one-line summary of the period
      */
-    summary(now: number, weekly: boolean): string {
+    public summary(now: number, weekly: boolean): string {
         const dayInMs = 24 * 60 * 60 * 1000;
         let since = now - dayInMs;
         if (weekly) {
@@ -204,16 +204,16 @@ When there are only a few fixed modes, the fix is to give each mode its own name
 class Recap {
     private readonly log: PlayLog;
 
-    constructor(log: PlayLog) {
+    public constructor(log: PlayLog) {
         this.log = log;
     }
 
-    dailySummary(now: number): string {
+    public dailySummary(now: number): string {
         const dayInMs = 24 * 60 * 60 * 1000;
         return this.summarySince(now - dayInMs);
     }
 
-    weeklySummary(now: number): string {
+    public weeklySummary(now: number): string {
         const weekInMs = 7 * 24 * 60 * 60 * 1000;
         return this.summarySince(now - weekInMs);
     }
@@ -304,7 +304,7 @@ Cycles are rarely designed deliberately. They usually appear when a class needs 
 class PlayHistory {
     private readonly playlist: Playlist;   // a back-reference
 
-    record(song: Song, playedAt: number): void {
+    public record(song: Song, playedAt: number): void {
         // ... record the play ...
         const weekInMs = 7 * 24 * 60 * 60 * 1000;
         if (this.playsSince(song, playedAt - weekInMs) >= 3) {
@@ -350,11 +350,11 @@ class PlayHistory {
      * @param {number} time milliseconds since the epoch
      * @returns {Song[]} the qualifying songs, most recently played first
      */
-    playedAtLeast(times: number, time: number): Song[] { /* ... */ }
+    public playedAtLeast(times: number, time: number): Song[] { /* ... */ }
 }
 
 class Playlist {
-    favourites(now: number): Song[] {
+    public favourites(now: number): Song[] {
         const weekInMs = 7 * 24 * 60 * 60 * 1000;
         return this.playHistory.playedAtLeast(3, now - weekInMs);
     }
@@ -474,7 +474,7 @@ class PlayHistory implements PlayLog {
 class WeeklyRecap {
     private readonly log: PlayLog;
 
-    constructor(log: PlayLog) {
+    public constructor(log: PlayLog) {
         this.log = log;
     }
 
@@ -484,7 +484,7 @@ class WeeklyRecap {
      * @param {number} now milliseconds since the epoch
      * @returns {string} a one-line summary of the week's play history
      */
-    summary(now: number): string {
+    public summary(now: number): string {
         const weekInMs = 7 * 24 * 60 * 60 * 1000;
         const songs: Song[] = this.log.songsSince(now - weekInMs);
         if (songs.length === 0) {
@@ -610,11 +610,11 @@ A `Network` holds a list of `Station`s, each `Station` holds a list of `Dock`s, 
 class MaintenanceReport {
     private readonly network: Network;
 
-    constructor(network: Network) {
+    public constructor(network: Network) {
         this.network = network;
     }
 
-    lines(): string[] {
+    public lines(): string[] {
         const out: string[] = [];
         for (const station of this.network.stations) {
             for (const dock of station.docks) {

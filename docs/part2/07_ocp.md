@@ -34,7 +34,7 @@ The other is the design we have been building, where a new channel is a new impl
 class PushNotifier extends BaseNotifier {
     private readonly deviceId: string;
 
-    constructor(deviceId: string) {
+    public constructor(deviceId: string) {
         super();
         this.deviceId = deviceId;
     }

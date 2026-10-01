@@ -118,7 +118,7 @@ _Names are the documentation everyone reads._ A client sees a name in an autocom
 _Make the wrong call hard to write._ Consider an operation that takes a carrier and a tracking number:
 
 ```typescript
-locate(carrierId: string, trackingNumber: string): Promise<Result<Shipment, TrackingError>>
+public locate(carrierId: string, trackingNumber: string): Promise<Result<Shipment, TrackingError>>
 ```
 
 Both parameters are strings, so they can be swapped without the compiler noticing. The call `locate("9K4T", "carrier-a")` compiles and then fails at run time. The type checker cannot help here, because both parameters have the same type. An options object fixes this by naming each argument at the call site:
@@ -130,7 +130,7 @@ export type TrackingRequest = {
     carrierId?: string;   // omit to ask every carrier in turn
 };
 
-locate(request: TrackingRequest): Promise<Result<Shipment, TrackingError>>
+public locate(request: TrackingRequest): Promise<Result<Shipment, TrackingError>>
 ```
 
 ```typescript
@@ -189,7 +189,7 @@ This determines what has to be documented. Each operation needs its purpose, its
  * @returns {Promise<Result<Shipment, TrackingError>>} ok: true with the
  * shipment, or ok: false with one of the documented TrackingError cases
  */
-locate(request: TrackingRequest): Promise<Result<Shipment, TrackingError>>
+public locate(request: TrackingRequest): Promise<Result<Shipment, TrackingError>>
 ```
 
 This documentation contains two kinds of statement that are easy to overlook.
@@ -261,7 +261,7 @@ Removing something from an API takes several steps, and the steps are the same f
  * @deprecated Use `locate` with a TrackingRequest instead. This form
  * will be removed in version 3.0.
  */
-locate(carrierId: string, trackingNumber: string): Promise<Result<Shipment, TrackingError>>
+public locate(carrierId: string, trackingNumber: string): Promise<Result<Shipment, TrackingError>>
 ```
 
 As a sequence of releases, replacing the two-argument `locate` looks like this:
@@ -329,7 +329,7 @@ Its central operation is:
 
 ```typescript
 /** Books a room. */
-book(roomId: string, userId: string, start: number, minutes: number,
+public book(roomId: string, userId: string, start: number, minutes: number,
      allowOverlap: boolean, notify: boolean): Booking
 ```
 

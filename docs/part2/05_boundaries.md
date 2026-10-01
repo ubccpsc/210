@@ -82,7 +82,7 @@ The compiler then checks that the class provides every operation the interface d
 class EmailNotifier implements Notifier {
     private readonly address: string;
 
-    constructor(address: string) {
+    public constructor(address: string) {
         this.address = address;
     }
 
@@ -94,7 +94,7 @@ class EmailNotifier implements Notifier {
 class SmsNotifier implements Notifier {
     private readonly phone: string;
 
-    constructor(phone: string) {
+    public constructor(phone: string) {
         this.phone = phone;
     }
 
@@ -309,7 +309,7 @@ class Roster<T extends Identifiable> {
 
     // constructor, isFull, size, and add as before, with no comparison function
 
-    isMember(candidate: T): boolean {
+    public isMember(candidate: T): boolean {
         for (const member of this.members) {
             if (member.sameAs(candidate)) {
                 return true;

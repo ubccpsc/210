@@ -71,7 +71,7 @@ A class supports equivalence by providing a method for it, conventionally named 
 The obvious implementation compares the representations, position by position. For the array version of `GuestList` it would be:
 
 ```typescript
-equals(other: GuestList): boolean {
+public equals(other: GuestList): boolean {
     if (this.capacity !== other.capacity) {
         return false;
     }
@@ -103,7 +103,7 @@ Equality belongs at the level of the abstract value: the same capacity and the s
  * @param {GuestList} other the guest list to compare against
  * @returns {boolean} true when both denote the same guest list
  */
-equals(other: GuestList): boolean {
+public equals(other: GuestList): boolean {
     if (this.capacity !== other.capacity) {
         return false;
     }
@@ -163,7 +163,7 @@ A minimal immutable guest list shows the pattern:
 class ImmutableGuestList {
     private readonly guests: string[];
 
-    constructor(guests: string[] = []) {
+    public constructor(guests: string[] = []) {
         this.guests = [];
         for (const guest of guests) {
             if (this.guests.includes(guest) === false) {
@@ -172,11 +172,11 @@ class ImmutableGuestList {
         }
     }
 
-    add(guest: string): ImmutableGuestList {
+    public add(guest: string): ImmutableGuestList {
         return new ImmutableGuestList(this.guests.concat([guest]));
     }
 
-    includes(guest: string): boolean {
+    public includes(guest: string): boolean {
         return this.guests.includes(guest);
     }
 }
@@ -235,7 +235,7 @@ class Roster<T> {
      * @param {number} capacity the most members the roster may hold
      * @throws {Error} "capacity must be at least 1" when capacity is too small
      */
-    constructor(capacity: number) {
+    public constructor(capacity: number) {
         if (capacity < 1) {
             throw new Error("capacity must be at least 1");
         }
@@ -243,15 +243,15 @@ class Roster<T> {
         this.members = [];
     }
 
-    isMember(candidate: T): boolean {
+    public isMember(candidate: T): boolean {
         return this.members.includes(candidate);
     }
 
-    isFull(): boolean {
+    public isFull(): boolean {
         return this.members.length >= this.capacity;
     }
 
-    size(): number {
+    public size(): number {
         return this.members.length;
     }
 
@@ -262,7 +262,7 @@ class Roster<T> {
      *
      * @param {T} member the member to add
      */
-    add(member: T): void {
+    public add(member: T): void {
         if (this.isMember(member)) {
             return;
         }
@@ -308,7 +308,7 @@ The type is fixed for the life of the object. A `Roster<string>` is a different 
 `Roster<T>` has a defect, and it shows what flexibility costs. Look again at the membership test:
 
 ```typescript
-isMember(candidate: T): boolean {
+public isMember(candidate: T): boolean {
     return this.members.includes(candidate);
 }
 ```
@@ -320,12 +320,12 @@ class Seat {
     private readonly row: string;
     private readonly seatNumber: number;
 
-    constructor(row: string, seatNumber: number) {
+    public constructor(row: string, seatNumber: number) {
         this.row = row;
         this.seatNumber = seatNumber;
     }
 
-    equals(other: Seat): boolean {
+    public equals(other: Seat): boolean {
         return this.row === other.row && this.seatNumber === other.seatNumber;
     }
 }
@@ -365,7 +365,7 @@ class Roster<T> {
      * @param {function} sameMember reports whether two members are the same
      * @throws {Error} "capacity must be at least 1" when capacity is too small
      */
-    constructor(capacity: number, sameMember: (a: T, b: T) => boolean) {
+    public constructor(capacity: number, sameMember: (a: T, b: T) => boolean) {
         if (capacity < 1) {
             throw new Error("capacity must be at least 1");
         }
@@ -374,7 +374,7 @@ class Roster<T> {
         this.sameMember = sameMember;
     }
 
-    isMember(candidate: T): boolean {
+    public isMember(candidate: T): boolean {
         for (const member of this.members) {
             if (this.sameMember(member, candidate)) {
                 return true;

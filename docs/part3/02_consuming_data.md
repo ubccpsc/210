@@ -362,7 +362,7 @@ The class that talks to one carrier handles all three:
 class CarrierAClient {
     private readonly baseUrl: string;
 
-    constructor(baseUrl: string) {
+    public constructor(baseUrl: string) {
         this.baseUrl = baseUrl;
     }
 
@@ -373,7 +373,7 @@ class CarrierAClient {
      * @returns {Promise<Result<Shipment, string>>} ok: true with the shipment,
      * or ok: false describing why it could not be retrieved
      */
-    async track(trackingNumber: string): Promise<Result<Shipment, string>> {
+    public async track(trackingNumber: string): Promise<Result<Shipment, string>> {
         let response: Response;
         try {
             response = await fetch(this.baseUrl + "/shipments/" + trackingNumber);
@@ -461,11 +461,11 @@ The tracker depends on the interface, never on a specific carrier:
 class ParcelTracker {
     private readonly carriers: CarrierClient[];
 
-    constructor(carriers: CarrierClient[]) {
+    public constructor(carriers: CarrierClient[]) {
         this.carriers = carriers;
     }
 
-    async locate(trackingNumber: string): Promise<Result<Shipment, string>> {
+    public async locate(trackingNumber: string): Promise<Result<Shipment, string>> {
         for (const carrier of this.carriers) {
             const found = await carrier.track(trackingNumber);
             if (found.ok === true) {
@@ -531,11 +531,11 @@ The most immediate benefit is that the tracker becomes testable. A test that cal
 class StubCarrier implements CarrierClient {
     private readonly answer: Result<Shipment, string>;
 
-    constructor(answer: Result<Shipment, string>) {
+    public constructor(answer: Result<Shipment, string>) {
         this.answer = answer;
     }
 
-    async track(trackingNumber: string): Promise<Result<Shipment, string>> {
+    public async track(trackingNumber: string): Promise<Result<Shipment, string>> {
         return this.answer;
     }
 }

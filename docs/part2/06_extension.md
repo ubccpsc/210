@@ -47,7 +47,7 @@ A concrete channel extends `BaseNotifier` and supplies only its own delivery:
 class EmailNotifier extends BaseNotifier {
     private readonly address: string;
 
-    constructor(address: string) {
+    public constructor(address: string) {
         super();
         this.address = address;
     }
@@ -68,7 +68,7 @@ A subclass can also **override** an inherited method, replacing it with its own 
 class SmsNotifier extends BaseNotifier {
     private readonly phone: string;
 
-    constructor(phone: string) {
+    public constructor(phone: string) {
         super();
         this.phone = phone;
     }
@@ -252,7 +252,7 @@ interface Formatter {
 abstract class BaseNotifier implements Notifier {
     private readonly formatter: Formatter;
 
-    constructor(formatter: Formatter) {
+    public constructor(formatter: Formatter) {
         this.formatter = formatter;
     }
 
@@ -269,7 +269,7 @@ abstract class BaseNotifier implements Notifier {
 class EmailNotifier extends BaseNotifier {
     private readonly address: string;
 
-    constructor(address: string, formatter: Formatter) {
+    public constructor(address: string, formatter: Formatter) {
         super(formatter);
         this.address = address;
     }
@@ -349,7 +349,7 @@ abstract class QuizScorer {
      * Records the result of one answer.
      * @param {boolean} correct whether the answer was correct
      */
-    submit(correct: boolean): void {
+    public submit(correct: boolean): void {
         this.total = this.total + 1;
         if (correct) {
             this.points = this.points + this.correctPoints();
@@ -359,12 +359,12 @@ abstract class QuizScorer {
     }
 
     /** The accumulated score. */
-    score(): number {
+    public score(): number {
         return this.points;
     }
 
     /** The number of answers submitted so far. */
-    count(): number {
+    public count(): number {
         return this.total;
     }
 
