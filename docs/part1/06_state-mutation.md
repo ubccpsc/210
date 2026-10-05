@@ -579,7 +579,7 @@ test("the second reading is shifted by the offset",
 );
 ```
 
-Each check builds its own readings, which repeats the setup. [Chapter 9](./09_validation) shows how one test can make several checks against the same values.
+Each check builds its own readings, which repeats the setup. [Chapter 9](./09_validation) shows two ways to avoid this: one test can make several checks against the same values, and a test runner can build fresh values before each test.
 
 There is one more consequence that we have been building towards in Part 1. The invariants chapters established a practice: validate a value when it is constructed, and rely on the invariant afterwards. Mutation breaks the "afterwards". `reading.hour = 99` is a legal statement that violates the `Reading` invariant long after construction, and aliasing means _any_ part of the program holding a reference can do it, at any time. With mutation, an invariant is no longer established once. It must be _preserved by every operation that touches the data_.
 

@@ -186,6 +186,88 @@ The description is unchanged, but the body is now an ordinary arrow function wit
 
 3. _Code under test can be driven through several steps._ We have seen that a `checkExpect` thunk could hold more than one statement, but it still had to reduce all the computation to one final value to check. A test body has no such limit. It can construct a value, configure it, exercise it, and assert at any point along the way, choosing a different operator for each assertion. Real tests need this because the behaviour under test is not reachable until the value has been built up through several steps.
 
+### Shared Setup
+
+Constructing values inside each test case keeps the tests independent, but can mean writing the same setup many times. [Chapter 6](./06_state-mutation) tested `calibrateDay` by building the same `readings` array inside every test case. A block body lets several assertions share one setup inside a single test case, but separate test cases still need their own copies. Building the array once at the top level instead lets one test's changes leak into the next.
+
+Test runners solve this with **lifecycle hooks**, functions the runner calls before or after your tests. The most useful is `beforeEach`, which runs before every test. A hook is usually placed inside a `describe` block, which groups related tests under a shared name:
+
+```typescript
+describe("calibrateDay", () => {
+    let readings: Reading[];
+
+    beforeEach(() => {
+        readings = [
+            { hour: 6, tempCelsius: -4 },
+            { hour: 9, tempCelsius: -1 }
+        ];
+    });
+
+    test("the first reading is shifted by the offset", () => {
+        calibrateDay(readings, 1);
+        expect(readings[0].tempCelsius).to.equal(-3);
+    });
+
+    test("a zero offset leaves the readings unchanged", () => {
+        calibrateDay(readings, 0);
+        expect(readings).to.deep.equal([
+            { hour: 6, tempCelsius: -4 },
+            { hour: 9, tempCelsius: -1 }
+        ]);
+    });
+});
+```
+
+Each test now starts from a fresh `readings` array, unaffected by what any other test did to it, so the tests are independent and can run in any order.
+
+Because `readings` is declared inside the `describe` block, the scope rules from [Chapter 6](./06_state-mutation#scope-where-names-live) mean only the code in the block can use it. A hook declared inside a `describe` also applies only to that block's tests, so a test file can hold several `describe` blocks, each with its own setup. The runner reports each test under its group's name, such as `calibrateDay > the first reading is shifted by the offset`.
+
+Most testing frameworks provide four hooks:
+
+- `beforeEach` runs before each test and `afterEach` runs after each test. These are helpful for per-test setup and teardown.
+- `beforeAll` runs once before the first test in the block and `afterAll` runs once after its last test is complete. These are best for setup too expensive to repeat, such as opening a read-only connection (e.g., to a database) or some other expensive resource like opening and parsing a large dataset file.
+
+For values held in memory, a `beforeEach` that builds a fresh is almost always enough. The `afterEach` hook matters most when a test touches something outside the program, such as a file or a network connection, that must be released whether the test passed or failed.
+
+The runner wraps each test in the per-test hooks, with the run-once hooks on the outside. The `beforeEach`, test, `afterEach` cycle repeats for every test:
+
+<!-- pikchr playground: https://pikchr.org/home/pikchrshow -->
+```pikchr
+$yOnce = 1.4
+$yEach = 0.7
+$yCase = 0.0
+
+box wid 8.9 ht 0.52 at (4.6,$yOnce) fill 0xf3f3f3 color 0xe6e6e6
+box wid 8.9 ht 0.52 at (4.6,$yEach) fill 0xeaf2fb color 0xe6e6e6
+box wid 8.9 ht 0.52 at (4.6,$yCase) fill 0xeaf7ea color 0xe6e6e6
+
+text "Once per Group" small rjust at (0.05,$yOnce)
+text "Around Each Test Case" small rjust at (0.05,$yEach)
+text "Test Case(s)" small rjust at (0.05,$yCase)
+
+boxwid = 0.84
+boxht = 0.34
+boxrad = 0.06
+
+BA: box "beforeAll"  at (1.3,$yOnce) fill 0xcccccc
+B1: box "beforeEach" at (2.3,$yEach) fill 0x9ec5e8
+T1: box "test 1"     at (3.3,$yCase) fill 0x9ed29e
+E1: box "afterEach"  at (4.3,$yEach) fill 0x9ec5e8
+B2: box "beforeEach" at (5.3,$yEach) fill 0x9ec5e8
+T2: box "test 2"     at (6.3,$yCase) fill 0x9ed29e
+E2: box "afterEach"  at (7.3,$yEach) fill 0x9ec5e8
+AA: box "afterAll"   at (8.3,$yOnce) fill 0xcccccc
+
+arrow from BA.s to B1.n
+arrow from B1.s to T1.n
+arrow from T1.n to E1.s
+arrow from E1.e to B2.w
+arrow from B2.s to T2.n
+arrow from T2.n to E2.s
+arrow from E2.n to AA.s
+```
+<!-- caption="beforeEach and afterEach wrap every test in a group; beforeAll and afterAll run once for the group." -->
+
 ### Richer Failures
 
 Consider a function that lists the sections a student can currently enrol in: those courses they have not already passed and whose prerequisites they have completed. We reuse the `Section` and `Student` types from [Chapter 8](./08_errors), with a catalogue that now offers two first-year courses:

@@ -178,7 +178,7 @@ Terms introduced in **bold** throughout the textbook, linked to the section wher
 - **Law of Demeter** — [Coupling and Dependencies § Reaching Past a Neighbour](/part3/01_coupling#reaching-past-a-neighbour)
 - **Library** — [Designing APIs to Provide Data and Services § Publishing the Tracker](/part3/03_api_design#publishing-the-tracker)
 - **Library API** — [Consuming Data and Services by Using APIs § Two Kinds of API](/part3/02_consuming_data#two-kinds-of-api)
-- **Lifecycle Hooks** — [Building Abstractions with Classes § Testing Classes](/part2/01_abstraction#testing-classes)
+- **Lifecycle Hooks** — [Validating Behaviour § Shared Setup](/part1/09_validation#shared-setup)
 - **Line Coverage** — [Validating Behaviour § Code Coverage](/part1/09_validation#code-coverage)
 - **Liskov Substitution Principle** — [Extending Behaviour Through Polymorphism § Honouring the Contract](/part2/06_extension#honouring-the-contract)
 - **Loop** — [Arrays and Iteration § Writing Your Own Loops](/part1/05_arrays#writing-your-own-loops)

@@ -18,9 +18,7 @@ An invariant like _"the current position points to a real song in the playlist"_
 
 That discipline does not scale. Suppose the song list and the index are **global variables**, which any part of the system can read and write. Then any part of the program can leave the index pointing at a song that no longer exists, and splitting the program into more files does not help, because every file can still reach the variables. To maintain the invariant, we would have to audit the whole program, which is costly and error-prone.
 
-What we want is a way to bundle the _state_ (the songs and the index) with the _operations that are allowed to change it_ (add, remove, advance). The invariant then becomes the responsibility of one small, named unit, rather than of every caller.
-
-The unit that bundles state and operations is the _class_.
+What we want is a way to bundle the _state_ (the songs and the index) with the _operations that are allowed to change it_ (add, remove, advance). The invariant then becomes the responsibility of one small, named unit, a class, rather than of every caller.
 
 ## From Closures to Classes
 
@@ -60,7 +58,7 @@ function makePlaylist(): Playlist {
 
 </CollapsibleCode>
 
-The state (`songs` and `currentIndex`) is reachable only through the three returned operations, so the invariant is safe. But the language gives no help. The connection between the state, the constructor function, and the operations exists only because we arranged it by hand.
+The state (`songs` and `currentIndex`) is reachable only through the three returned operations, so the invariant is safe. But the language gives no help: the connection between the state, the constructor function, and the operations exists only because we arranged it by hand.
 
 A **class** expresses the same arrangement with support from the language. The same playlist, written as a class, looks like this:
 
@@ -101,7 +99,7 @@ Each piece of the closure maps onto a piece of the class:
 | The returned operations | Methods |
 | Reaching state by closure | Reaching state through `this` |
 
-The behaviour is identical. The class adds what the hand-built version lacked: one declaration that holds the state, the constructor, and the operations together, and a standard way to construct instances with `new`. One difference runs the other way. The closure's variables were unreachable from outside, but these fields can be read and written by any code that holds a `Playlist`. [Chapter 12](./03_encapsulation) closes that gap. The rest of this chapter develops the class itself.
+The behaviour is identical. The class adds what the hand-built version lacked: one declaration that holds the state, the constructor, and the operations together, and a standard way to construct instances with `new`. In one respect the class is weaker. The closure's variables were unreachable from outside, but these fields can be read and written by any code that holds a `Playlist`. [Chapter 12](./03_encapsulation) fixes this, and the rest of this chapter develops the class itself.
 
 ```plantuml
 @startuml
@@ -369,7 +367,7 @@ class Playlist {
 
 Removing a song can invalidate the current index. If the removed song was before the current one, every later index shifts down by one, and if the removed song was the last one and it was current, the index now points past the end. Each branch repairs the index so that the invariant still holds when `remove` returns. The caller does not have to think about any of this, because the work of keeping the index valid lives _with_ the data it constrains, inside the method, rather than in the calling code.
 
-In `remove`, `indexOf` finds the song by _identity_, so `remove` removes the exact object it was given and ignores a separately built song with identical fields. Is this reasonable to expect of the caller? [Chapter 13](./04_flexibility) discusses this design tradeoff.
+In `remove`, `indexOf` finds the song by _identity_, so `remove` removes the exact object it was given and ignores a separately built song with identical fields. Whether that is reasonable to expect of a caller is a design question that [Chapter 13](./04_flexibility) takes up.
 
 ```plantuml
 @startuml
@@ -423,7 +421,7 @@ for (const song of songs) {
 const total: number = playlist.totalDuration();
 ```
 
-These three are not competitors. A method body is usually imperative, a class can hold immutable values, and a functional pipeline can run inside a method. What differs is how a program is organised. Object-oriented programs are organised around objects that own their state.
+The three styles are often mixed: a method body is usually imperative, a class can hold immutable values, and a functional pipeline can run inside a method. They differ in how a program is organised, and object-oriented programs are organised around objects that own their state.
 
 <!--
 RTH: not clear this digression is worth adding
@@ -543,9 +541,7 @@ The code above puts several checks in one block. The verification chapter argues
 
 In [Chapter 9](../part1/09_validation), we tested pure functions by passing them arguments and inspecting the return value.
 
-Testing a class is different. An object carries _state_ between calls, so a test usually constructs an object, performs a sequence of operations, and then checks the resulting state. What is being tested is the object's observable behaviour, not a single return value.
-
-The `Playlist` class tracks a current song as songs are added and removed. A test for it sets up an object, drives it through some calls, and checks where it ended up.
+Testing a class is different, because an object carries _state_ between calls. A test usually constructs an object, performs a sequence of operations, and then checks the resulting state: the object's observable behaviour, not a single return value. This test adds two songs to a `Playlist`, moves to the second, and removes it:
 
 ```typescript
 const songA: Song = { title: "Aubade", artist: "Dawn Quartet", durationSeconds: 180 };
@@ -563,80 +559,34 @@ test("removing the current song keeps the position valid", () => {
 
 The test-design ideas from Part 1 still apply. Equivalence classes and boundaries now describe _sequences of method calls_ rather than single arguments: an empty playlist, a one-song playlist, and removing the current song versus another song. Layered assertions apply to whatever state the object exposes.
 
-Almost every test of a class starts by building a fresh object. Writing `new Playlist()` at the top of every test is repetitive, but sharing one object across tests is worse, because one test's changes would leak into the next and the suite would depend on the order its tests run in. Test runners solve this with **lifecycle hooks**, functions the runner calls around your tests. The most useful is `beforeEach`, which runs before every test and is the natural place to create a fresh object:
+Almost every test of a class starts by building a fresh object. Writing `new Playlist()` at the top of every test is repetitive, but sharing one object across tests is worse, because one test's changes would leak into the next. A `beforeEach` hook inside a `describe` block, as in [Chapter 9](../part1/09_validation#shared-setup), is the natural place to create a fresh object:
 
 ```typescript
-let playlist: Playlist;
+describe("Playlist", () => {
+    let playlist: Playlist;
 
-beforeEach(() => {
-    playlist = new Playlist();   // a fresh, empty playlist before each test
-});
+    beforeEach(() => {
+        playlist = new Playlist();   // a fresh, empty playlist before each test
+    });
 
-test("a new playlist has no current song", () => {
-    expect(playlist.current()).to.equal(null);
-});
+    test("a new playlist has no current song", () => {
+        expect(playlist.current()).to.equal(null);
+    });
 
-test("the first song added becomes current", () => {
-    playlist.add(songA);
-    expect(playlist.current()).to.deep.equal(songA);
+    test("the first song added becomes current", () => {
+        playlist.add(songA);
+        expect(playlist.current()).to.deep.equal(songA);
+    });
 });
 ```
 
-Each test now gets its own `playlist`, unaffected by any other, so the tests are independent and can run in any order. The hook removed both the repeated construction and the shared state that would have tied the tests together.
-
-Most testing frameworks provide four hooks:
-
-- `beforeEach` runs before each test and `afterEach` runs after each test. These are helpful for per-test setup and teardown.
-- `beforeAll` runs once before the first test and `afterAll` runs once after the last test is complete. These are best for setup too expensive to repeat, such as opening a read-only connection shared by every test.
-
-For the in-memory objects in this course, a `beforeEach` that constructs a fresh object is almost always enough. The `afterEach` hook matters most when a test touches something outside the program, such as a file or a network connection, that must be released whether the test passed or failed.
-
-The runner wraps each test in the per-test hooks, with the run-once hooks on the outside. The `beforeEach`, test, `afterEach` cycle repeats for every test:
-
-<!-- pikchr playground: https://pikchr.org/home/pikchrshow -->
-```pikchr
-$yOnce = 1.4
-$yEach = 0.7
-$yCase = 0.0
-
-box wid 8.9 ht 0.52 at (4.6,$yOnce) fill 0xf3f3f3 color 0xe6e6e6
-box wid 8.9 ht 0.52 at (4.6,$yEach) fill 0xeaf2fb color 0xe6e6e6
-box wid 8.9 ht 0.52 at (4.6,$yCase) fill 0xeaf7ea color 0xe6e6e6
-
-text "Once per Test File" small rjust at (0.05,$yOnce)
-text "Around Each Test Case" small rjust at (0.05,$yEach)
-text "Test Case(s)" small rjust at (0.05,$yCase)
-
-boxwid = 0.84
-boxht = 0.34
-boxrad = 0.06
-
-BA: box "beforeAll"  at (1.3,$yOnce) fill 0xcccccc
-B1: box "beforeEach" at (2.3,$yEach) fill 0x9ec5e8
-T1: box "test 1"     at (3.3,$yCase) fill 0x9ed29e
-E1: box "afterEach"  at (4.3,$yEach) fill 0x9ec5e8
-B2: box "beforeEach" at (5.3,$yEach) fill 0x9ec5e8
-T2: box "test 2"     at (6.3,$yCase) fill 0x9ed29e
-E2: box "afterEach"  at (7.3,$yEach) fill 0x9ec5e8
-AA: box "afterAll"   at (8.3,$yOnce) fill 0xcccccc
-
-arrow from BA.s to B1.n
-arrow from B1.s to T1.n
-arrow from T1.n to E1.s
-arrow from E1.e to B2.w
-arrow from B2.s to T2.n
-arrow from T2.n to E2.s
-arrow from E2.n to AA.s
-```
-<!-- caption="beforeEach and afterEach wrap every test; beforeAll and afterAll run once for the file." -->
+Each test now gets its own `playlist`, unaffected by any other, so the tests are independent and can run in any order.
 
 #### The Value of Class Abstractions
 
-A class is a unit of _abstraction_ because it bundles state with the operations that maintain it. A client reasons about _what_ a `Playlist` does, through its methods, without needing to know _how_ it keeps the current index valid. A client only needs to find a class that models what they care about and call the methods that provide the behaviour they want. The work of storing the state and keeping it consistent stays inside the class.
+A class is a unit of abstraction because it bundles state with the operations that maintain it. A client reasons about what a `Playlist` does, through its methods, without needing to know how it keeps the current index valid. Because those methods live alongside the state they protect, a client that uses only the methods cannot leave a `Playlist` in an inconsistent state, and the rest of the program no longer has to keep that state consistent.
 
-Naming matters in class design, because a good name lets an engineer find the abstraction they need _without_ reading the code that implements it.
-
-The class is the one place responsible for its own state, which frees the rest of the program from that responsibility. Because the operations that maintain the invariant live alongside the state they protect, a client following the intended path cannot leave an object in an inconsistent state.
+To use a class, a client only needs to find one that models what they care about and call its methods. Naming therefore matters in class design, because a good name lets an engineer find the abstraction they need without reading the code that implements it.
 
 <!--
 So far this is the class _offering_ an interface that a client has no need to look past. It is not yet a guarantee. Nothing in this chapter stops a determined caller from reaching in and writing `favourites.currentIndex = 99` directly, breaking the invariant from outside. Guaranteeing that a client _cannot_ reach past the interface, so that an object's state is truly the class's own, is the role of [encapsulation](./03_encapsulation).
