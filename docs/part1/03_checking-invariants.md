@@ -475,9 +475,78 @@ The second test confirms that a refused renewal produces the result the contract
 
 ### Precondition Violations
 
-What about a call that breaks the precondition: `renew` on a `Loan` whose `renewalsRemaining` is `-1`, or `lateFee(-5)`? These are neither successful nor erroneous outcomes, because the contract says nothing about them. The caller has broken their half of the bargain, and the function promises nothing in return. Our `lateFee` returns `1.75` for `lateFee(5.5)`, a number with no meaning under the policy, and this is not a defect in `lateFee`: `5.5` was never a permitted input. There is nothing to test, because there is no specified behaviour to test against.
+What about a call that breaks the precondition: `renew` on a `Loan` whose `renewalsRemaining` is `-1`, or `lateFee(-5)`? These are neither successful nor erroneous outcomes, because the contract says nothing about them. The caller has broken their half of the bargain, and the function makes no promises about how it will respond in these cases. Our `lateFee` returns `1.75` for `lateFee(5.5)`, a number with no meaning under the policy, and the caller has no way to tell that anything went wrong.
 
-So the choice between a precondition and an erroneous outcome is a design decision. A precondition keeps a function simple, and is appropriate when every caller is code you control and can trust to respect the restriction. An erroneous outcome costs a check and a `Result`, and is appropriate when callers cannot be trusted to respect the restriction. This is especially important when a value arrives from somewhere you cannot trust: a user, a file, a network, or another system. In that case the function checks the input and returns `ok: false`, so the caller receives a clear result instead of a meaningless one. Whichever you choose, write it down: a restriction that appears in neither the precondition nor the postcondition protects no one.
+A call like this is a bug in the calling code, and it is easier to find if it is reported at the call that caused it. A function can check its own precondition with **`assert`**. An `assert` call takes a condition and a description. If the condition is true, `assert` does nothing and the function continues. If it is false, the program stops immediately and reports the description:
+
+```typescript
+import assert from "node:assert/strict";
+
+function lateFee(daysLate: number): number {
+    assert(daysLate % 1 === 0, "daysLate must be a whole number");
+    assert(daysLate >= 0, "daysLate must not be negative");
+    if (daysLate <= 2) {
+        return 0;
+    }
+    const fee = 0.5 * (daysLate - 2);
+    if (fee > 10) {
+        return 10;
+    }
+    return fee;
+}
+```
+
+The first condition uses the remainder operator `%` from [Chapter 1](./01_new-language): `daysLate % 1` is the remainder after dividing `daysLate` by 1, which is `0` exactly when `daysLate` is a whole number. With these two lines, `lateFee(5.5)` stops with the message `daysLate must be a whole number` instead of returning `1.75`, so the mistake is reported at the call that made it. `renew` could check the `Loan` invariant in the same way.
+
+The condition states what _should_ hold, and the description is printed only when it does not, so the description usually says what went wrong. Note also where `assert` lives. A `checkExpect` sits in `test/` and checks the inputs a test chose. An `assert` sits in the source code in `src/`, and runs on every call to the function, whoever the caller is.
+
+<details class="tooltip ts-tips">
+<summary><code>assert</code></summary>
+
+`assert` is not part of the TypeScript language. In this course we use the standard `assert` function provided by the Node runtime, which a source file imports at the top:
+
+```typescript
+import assert from "node:assert/strict";
+```
+
+The description is optional: `assert(daysLate >= 0)` also works, but when it fails it only reports that a condition was false. [Chapter 8](./08_errors) shows how `assert` stops the program, using a mechanism called an exception.
+
+</details>
+
+An assertion is part of what the function does, so it can be tested. The test checks that a call breaking the precondition is refused. There is no value to compare against, because the correct behaviour is to produce no value at all, so `checkExpect` cannot express it. For this we use `checkError`, which runs the call it is given and passes only if the call stops with an error:
+
+```typescript
+test("a negative number of days is refused",
+    checkError(() => lateFee(-5))
+);
+
+test("a fraction of a day is refused",
+    checkError(() => lateFee(5.5))
+);
+```
+
+Run against the earlier version of `lateFee` without assertions, both tests fail, because `lateFee(-5)` returns `0` and `lateFee(5.5)` returns `1.75`.
+
+Like `checkExpect`, `checkError` takes the call wrapped in `() =>`. Without the wrapper, `lateFee(-5)` would run, and stop the program, before `checkError` was ever called. `checkError` checks only _that_ an error occurred, not which one, so the test's description should say what is being refused.
+
+<details class="tooltip ts-tips">
+<summary><code>checkError</code></summary>
+
+`checkError` is provided by the course toolkit alongside `test` and `checkExpect`:
+
+```typescript
+import {
+    test,
+    checkExpect,
+    checkError
+} from "@ubccpsc/210-toolkit/testing";
+```
+
+You may also see `checkError` given a second argument naming the expected message, as in `checkError(() => lateFee(-5), "daysLate must not be negative")`. The current toolkit records that message for readers but does not check it.
+
+</details>
+
+So a restriction on an input can be handled in two ways, and choosing between them is a design decision. A precondition, enforced with `assert`, keeps the function simple. It is appropriate when every caller is code you control and can trust to respect the restriction, so that a violation means a bug and stopping is the right response. An erroneous outcome costs a check and a `Result`, and is appropriate when callers cannot be trusted to respect the restriction. This is especially important when a value arrives from somewhere you cannot trust: a user, a file, a network, or another system. In that case the function checks the input and returns `ok: false`, so the caller receives a result it can act on. Whichever you choose, write it down: a restriction that appears in neither the precondition nor the postcondition protects no one.
 
 <details class="tooltip deep-dive">
 <summary>Failing with User-Specified Inputs: Give More Detail</summary>
@@ -485,11 +554,13 @@ So the choice between a precondition and an erroneous outcome is a design decisi
 Functions that take _user-specified input_ should almost always report bad input as an erroneous outcome rather than rely on a precondition, because users will do things you did not expect. The error should also say enough to fix the problem. For example, when you pass a TypeScript program with invalid syntax to `tsc`, it tells you where the error is, rather than reporting only `SyntaxError`.
 </details>
 
-#### Triangulating Quality: Type Checking and Testing
+#### Triangulating Quality: Type Checking, Testing, and Assertions
 
 The type checker and the test suite operate at different times. The type checker works _statically_ on the source code, ruling out whole categories of invalid calls before the program runs. Tests work _dynamically_, checking specific behaviours by executing the function. They are complementary approaches: a program that passes every type check can still return the wrong value for a given input. And a program that passes all its tests may still fail on an input the test suite did not evaluate. Together they give confidence. Types narrow the space of programs that can even be written, and tests validate that the program you wrote does what you intended.
 
-Documented invariants connect the two. The preconditions and postconditions in a function's doc comment record the part of the specification the compiler cannot see, and they are what the tests should check.
+Assertions add a third check. Like tests, they run dynamically, but they run on every call instead of only on the inputs a test chose, so a broken precondition is reported wherever it happens, including in calls no test anticipated.
+
+Documented invariants connect all three. The preconditions and postconditions in a function's doc comment record the part of the specification the compiler cannot see. They are what the tests should check, and the preconditions are what assertions can enforce.
 
 An invariant that is written down can be turned into a test suite, but one that lives only in someone's head cannot be checked by anything.
 
@@ -506,6 +577,7 @@ Parking is free for the first hour. After that, each additional hour costs $4, a
 2. Derive the tests first. Use equivalence class partitioning to find the input classes the policy treats alike, and pick one representative of each. Then use boundary value analysis to add the edges: where the free hour ends, and where the cap is reached.
 3. Stub `parkingFee` so it returns a clearly wrong value, run your tests, and confirm they all fail.
 4. Implement `parkingFee`, run the tests again, and confirm they pass.
-5. Handle bad input. Decide what should happen when a caller supplies an input outside the precondition, for example <span class="hint">`parkingFee(-1)`</span>. Turn it into an erroneous outcome: change the return type to <span class="hint">`Result<number, string>`</span>, document the error in the contract, and write a `checkExpect` test that confirms `parkingFee(-1)` returns `ok: false`.
+5. Enforce the precondition. Add `assert` calls to `parkingFee` that check its precondition, and write `checkError` tests confirming that <span class="hint">`parkingFee(-1)` and `parkingFee(1.5)`</span> are refused. Run the new tests against your version without assertions first, and confirm that they fail.
+6. Handle bad input as an erroneous outcome instead. Suppose the hours come from a ticket machine that sometimes misreads a ticket, so `parkingFee` cannot trust its input. Change the return type to <span class="hint">`Result<number, string>`</span>, replace the assertions with checks that return `ok: false`, document the error in the contract, and write a `checkExpect` test that confirms `parkingFee(-1)` returns `ok: false`.
 
 </details>

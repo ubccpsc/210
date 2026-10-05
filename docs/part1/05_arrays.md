@@ -310,6 +310,22 @@ test("slicing takes all elements from i (inclusive) to j (exclusive)",
 );
 ```
 
+### `includes`: Membership
+
+`includes` answers a yes-or-no question: is this value one of the elements? Unlike `find`, it takes the value itself rather than a function, and returns a `boolean`:
+
+```typescript
+test("includes reports a value that is present",
+    checkExpect(() => temperatures.includes(13), true)
+);
+
+test("includes reports a value that is absent",
+    checkExpect(() => temperatures.includes(20), false)
+);
+```
+
+`includes` compares elements with `===`, the strict equality from [Chapter 2](./02_model-types). Strings have an `includes` too, which checks for a substring: `"CPSC210".includes("210")` is `true`.
+
 Arrays have many other useful operations that this chapter does not cover.
 
 ## Writing Your Own Loops

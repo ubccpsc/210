@@ -98,7 +98,7 @@ This is the first time we have needed `as`. It tells the compiler that a value h
 
 `as` does much less than it appears to. It performs no conversion and runs no check. It produces no code at all. After compilation, the expression is unchanged, and the only difference is that the compiler no longer reports an error. At run time, the value is whatever it was before, whether or not it has the claimed shape.
 
-TypeScript calls this operator a _type assertion_. This chapter calls it a _claim_ instead, to avoid confusion with the `assert` checks from [Chapter 8](../part1/08_errors). Those do the opposite. An `assert` tests a condition while the program runs, and halts when the condition is false. `as` tests nothing and cannot fail.
+TypeScript calls this operator a _type assertion_. This chapter calls it a _claim_ instead, to avoid confusion with the `assert` checks from [Chapter 3](../part1/03_checking-invariants#precondition-violations). Those do the opposite. An `assert` tests a condition while the program runs, and halts when the condition is false. `as` tests nothing and cannot fail.
 
 There is one narrow legitimate use, described in the next section, where the surrounding code has already established the fact being claimed. Everywhere else, using `as` to make a type error go away replaces a compile-time error with a fault at run time.
 

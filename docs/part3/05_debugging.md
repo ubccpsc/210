@@ -90,7 +90,7 @@ _Logging_ is the form of printing that stays in production code. A deployed syst
 
 Two tools from earlier in the textbook also help with debugging. The _type checker_ eliminates whole categories of fault before the program runs, so a fault that survives compilation is already in a narrower category. The _test suite_ helps localize faults: a failing unit test names the unit, which does most of the search for you. This is another argument for the design advice from [Part 2](../part2/index), and it is why a system of small, independently tested units is faster to debug than one that can only be tested end to end.
 
-_Assertions_, from [Chapter 8](../part1/08_errors), are especially useful, because they reduce the distance between a fault and a failure. An assertion turns an error into a failure at the moment the error occurs, before it can spread to an unrelated part of the program. A `Shipment` with an invalid status can be caught where it is created, with a stack trace pointing at that code, instead of being noticed three layers away when something tries to display it.
+_Assertions_, from [Chapter 3](../part1/03_checking-invariants#precondition-violations), are especially useful, because they reduce the distance between a fault and a failure. An assertion turns an error into a failure at the moment the error occurs, before it can spread to an unrelated part of the program. A `Shipment` with an invalid status can be caught where it is created, with a stack trace pointing at that code, instead of being noticed three layers away when something tries to display it.
 
 <details class="tooltip ts-tips">
 <summary>Reading a Stack Trace</summary>

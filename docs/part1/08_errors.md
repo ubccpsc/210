@@ -58,7 +58,7 @@ Each function returns a `Result`. The success case holds the section, and the fa
  * or ok: false with the error "no section with id <id>" when none matches.
  */
 function findSection(catalogue: Section[], id: string): Result<Section, string> {
-    const section = catalogue.find(s => s.id === id);
+    const section = catalogue.find((s) => s.id === id);
     if (section === undefined) {
         return { ok: false, error: "no section with id " + id };
     }
@@ -207,7 +207,7 @@ a is done
  * @throws {Error} "no section with id <id>" when no section matches.
  */
 function requireSection(catalogue: Section[], id: string): Section {
-    const section = catalogue.find(s => s.id === id);
+    const section = catalogue.find((s) => s.id === id);
     if (section === undefined) {
         throw new Error("no section with id " + id);
     }
@@ -295,7 +295,7 @@ Compare this with the `Result` version. The six lines of failure-forwarding are 
 <details class="tooltip deep-dive">
 <summary>Halting on a Bug with <code>assert</code></summary>
 
-Not every failure is an erroneous outcome that a contract anticipates. Sometimes a function discovers that an invariant it depends on has been violated. The program has reached a state that should have been impossible, which means there is a bug somewhere. A common response is to halt with **`assert`**:
+Not every failure is an erroneous outcome that a contract anticipates. Sometimes a function discovers that an invariant it depends on has been violated. The program has reached a state that should have been impossible, which means there is a bug somewhere. A common response is to halt with `assert`, which [Chapter 3](./03_checking-invariants#precondition-violations) used to check preconditions:
 
 ```typescript
 import assert from "node:assert/strict";
@@ -353,7 +353,7 @@ If `(A)` runs to completion without throwing, the `catch` block `(B)` is skipped
 
 </details>
 
-A thrown failure interrupts execution rather than coming back as a returned value, so we cannot inspect it with `checkExpect`. Instead, we use `checkError`, which runs the code it is given and passes only if that code throws.
+A thrown failure interrupts execution rather than coming back as a returned value, so we cannot inspect it with `checkExpect`. Instead, we use `checkError` from [Chapter 3](./03_checking-invariants#precondition-violations), which runs the code it is given and passes only if that code throws.
 
 ```typescript
 test("an unknown section throws",

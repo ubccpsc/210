@@ -23,7 +23,7 @@ Terms introduced in **bold** throughout the textbook, linked to the section wher
 - **Array** — [Arrays and Iteration](/part1/05_arrays#arrays-and-iteration)
 - **Array Literal** — [Arrays and Iteration § Creating and Using Arrays](/part1/05_arrays#creating-and-using-arrays)
 - **Arrow Function** — [Learning a New Programming Language § Testing the Dynamic View](/part1/01_new-language#testing-the-dynamic-view)
-- **Assert** — [Designing for Failure § Throwing an Exception](/part1/08_errors#throwing-an-exception)
+- **Assert** — [Checking Invariants § Precondition Violations](/part1/03_checking-invariants#precondition-violations)
 - **Assertion** — [Checking Invariants § Testing Invariants](/part1/03_checking-invariants#testing-invariants)
 - **Assignment** — [Mutation and Side Effects § Reassignment](/part1/06_state-mutation#reassignment)
 

@@ -308,7 +308,7 @@ The thunk has a body in braces, like the tests of mutating functions in [Chapter
 
 `checkExpect` awaits whatever its function produces, so the test does not finish until every `await` inside it has completed. This also means `checkExpect(() => loadReport(), expected)` works without an `await`, because the check awaits the promise the thunk returns. Inside a block body, though, each async call still needs its own `await`. Without it, the next line works with a promise rather than the value it delivers.
 
-The toolkit also provides `checkError`, which runs the function it is given and passes only if that call fails with an error instead of producing a value. [Chapter 8](./08_errors) covers errors in depth. `checkError` awaits in the same way `checkExpect` does, which matters for the slow operations in this chapter, since a file may not exist and a service may not answer. An `async` function does not fail at the point you call it. It returns a promise that _later_ rejects, and the thunk hands that promise back to the check by awaiting it:
+`checkError`, from [Chapter 3](./03_checking-invariants#precondition-violations), runs the function it is given and passes only if that call fails with an error instead of producing a value. [Chapter 8](./08_errors) covers errors in depth. `checkError` awaits in the same way `checkExpect` does, which matters for the slow operations in this chapter, since a file may not exist and a service may not answer. An `async` function does not fail at the point you call it. It returns a promise that _later_ rejects, and the thunk hands that promise back to the check by awaiting it:
 
 ```typescript
 test("reading a missing file rejects the promise",
