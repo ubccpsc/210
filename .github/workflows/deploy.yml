@@ -1,11 +1,11 @@
-# Builds the CPSC 210 handbook with VitePress and deploys it to GitHub Pages.
+# Builds the CPSC 210 textbook with VitePress and deploys it to GitHub Pages.
 name: Deploy VitePress site to Pages
 
 on:
   push:
     branches: [main]
 
-  # Allows you to run this workflow manually from the Actions tab
+  # Enable running this workflow manually from the Actions tab
   workflow_dispatch:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages

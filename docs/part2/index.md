@@ -1,43 +1,42 @@
 # Part 2: Defining Abstractions
 
-> When a system grows beyond one person's attention, the question is no longer whether a design works, but whether it can keep working as it changes.
+> Once a system grows beyond what one person can keep track of, a design has to keep working as the system changes.
 
-In [Part 1](../part1/index), we saw programs small enough for one person to keep the whole design in their mental model. We maintained invariants by careful factory function design and by personal _programmer discipline_ about how objects were constructed and modified.
+In [Part 1](../part1/index), programs were small enough for one person to keep the whole design in mind. We maintained invariants with carefully written constructor functions and with _programmer discipline_ about how objects were created and changed.
 
-In Part 2, we expand our scope. Real software is built by teams, is maintained for years, and solves problems too large for any one person to tackle alone. In real software systems, the contributor count exceeds what an individual can manage, the longevity of the codebase exceeds what an individual can remember, and the code volume exceeds what an individual can audit. All of this means we cannot trust that other programmers will use the code we write correctly, or that every invariant will survive by discipline alone.
+Part 2 widens the scope. Real software is built by teams, maintained for years, and solves problems too large for one person. No single person can keep track of every contributor, remember the whole history of the code, or review all of it. We cannot assume that other programmers will use our code correctly, or that every invariant will survive through discipline alone.
 
-In response, we move from _programmer discipline_ to encoding invariants _in the language_ itself. By encoding invariants into classes and their associated abstractions, we shift the burden of consistency from individual care to _language enforcement_ and from ad hoc coordination to explicit design.
+So we move from _programmer discipline_ to encoding invariants _in the language_ itself. When classes and the abstractions built around them encode the invariants, the language enforces them instead of each programmer's care, and the way programmers coordinate becomes an explicit part of the design.
 
 <details class="tooltip link-110">
 <summary>Programmer Discipline vs Enforcement</summary>
 
-Recall in CPSC 110, the _signature_ encoded type information. But the teaching languages did not enforce this signature. In [Part 1](../part1/index), we saw the shift from the unenforced signature in CPSC 110:
+Recall that in CPSC 110, the _signature_ recorded type information, but the teaching languages did not enforce it. [Part 1](../part1/index) showed the shift from the unenforced signature in CPSC 110:
 
 ```racket
 (@signature Number -> Number)
-(define (double n) (* n 2))  
+(define (double n) (* n 2))
 ; no issues statically, causes a runtime error: '*: expects a number, given "Clearly not a number"'
-(double "Clearly not a number") 
+(double "Clearly not a number")
 ```
 
-To the _typed_ signature in TypeScript, which is enforced by the typechecker.
+to the _typed_ signature in TypeScript, which the type checker enforces:
 
 ```typescript
 function double(n: number): number {
-    return n * 2;  
+    return n * 2;
 }
 // static error: "Argument of type 'string' is not assignable to parameter of type 'number'"
-double("Clearly not a number") 
-
+double("Clearly not a number");
 ```
 
-This is a shift from programmer discipline (in CPSC 110, _assuming_ callers of the function would respect the signature) to enforcement by the language. In addition to the type checker giving us a static error, so the code will not fail at runtime, we see that the error is more accurate: the issue was not in passing a number to the `*` operator, but in passing a string as parameter `n`.
+This is a shift from programmer discipline (in CPSC 110, _assuming_ callers would respect the signature) to enforcement by the language. The type checker reports the error before the program runs, and it also reports it in the right place. The mistake is the call that passes a string as `n`, not the `*` inside `double`, which is where the CPSC 110 error appeared.
 
 In Part 2, we'll see the same shift, but with more complex constraints than type signatures.
 
 </details>
 
-In this module we develop _class-based_ abstractions as the mechanism for invariant enforcement. Across seven lectures, we define classes, decompose systems into cohesive units, hide what is free to change, separate what a class means from how it stores it, depend on abstractions through interfaces, organise classes into hierarchies, and write code that continues to apply as new types arrive.
+This part develops _class-based_ abstractions as the mechanism for enforcing invariants. Across seven chapters, we define classes, decompose systems into cohesive units, hide what is free to change, separate what a class means from how it stores it, depend on abstractions through interfaces, organise classes into hierarchies, and write code that keeps working as new types are added.
 
 ## Intended Learning Objectives
 
@@ -71,4 +70,4 @@ Part 2 covers three connected themes across seven chapters.
 
 ## Toward [Part 3](../part3/index): Evolution
 
-Part 2 ends with a design goal that is crucial for large systems: we need the ability to fix problems and add new features without impacting all of the existing code within the rest of the system. [Part 3](../part3/index) extends this further: we examine how systems are composed from interchangeable pieces, how dependencies are managed so that concrete implementations can be supplied from the outside, and how a codebase can remain open to new extensions while staying manageable across modules and teams.
+Part 2 ends with a design goal that matters most for large systems: fixing problems and adding features without changing the existing code around them. [Part 3](../part3/index) builds on this. It examines how systems are composed from interchangeable pieces, how dependencies are managed so that concrete implementations can be supplied from outside, and how a codebase can stay open to new extensions while remaining manageable across modules and teams.

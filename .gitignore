@@ -7,6 +7,6 @@ node_modules/
 docs/.vitepress/dist
 docs/.vitepress/cache
 
-# docs/public/diagrams is deliberately committed: the build fetches each
+# docs/public/diagrams is committed on purpose: the build fetches each
 # diagram from kroki.io only when its source changes, so keeping the
 # generated SVGs in the repo means CI does not depend on that service.
