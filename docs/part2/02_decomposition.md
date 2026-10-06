@@ -1,6 +1,6 @@
 # Decomposing Systems into Cohesive Classes
 
-[Chapter 10](./01_abstraction) established the _class_ as the unit of abstraction. A class bundles state that must respect an ivariant with the operations that maintain that invariant, giving the rest of the program a named type it can depend on. This bounds reasoning to one kind of thing at a time. 
+[Chapter 10](./01_abstraction) established the _class_ as the unit of abstraction. A class bundles state that must respect an invariant with the operations that maintain that invariant, giving the rest of the program a named type it can depend on. This bounds reasoning to one kind of thing at a time. 
 
 A class is a way to build an abstraction, but how do we build a _good_ abstraction? We still have to decide what classes we need, what state they maintain, and what operations they afford.
 
@@ -8,7 +8,7 @@ This chapter is about those decisions. Classes only improve the design of a syst
 
 ## How Classes Lose Cohesion
 
-Classes rarely start out doing too much: they gain responsibilities one reasonable change at a time. Our `Playlist` from the previous chapter contained a single invariant: the current index is always a valid position in the song list. Suppose we now add a new feature, remembering recently played songs:
+Classes rarely _start out_ doing too much. Rather, they _gain_ responsibilities one reasonable change at a time. Our `Playlist` from the previous chapter contained a single invariant: the current index is always a valid position in the song list. Suppose we now add a new feature, remembering recently played songs:
 
 
 > As a listener, I want my music app to remember what I have recently played, so that I can return to a song without searching for it again.
@@ -52,13 +52,19 @@ class Playlist {
 
 </CollapsibleCode>
 
-This change doesn't add much code. But, the class now maintains two unrelated invariants: (1) the original navigation invariant says the current index is valid, and (2) a new history invariant says the recently played list holds each song at most once, most-recently-played first. The two invariants nothing to do with each other, yet they now live in one class. Now, `play()` straddles both: it observes the navigation state through `current()` and maintains the history state directly. To understand or safely change either invariant, an engineer now has to consider the other one.
+This change doesn't add much code. But, the class now maintains two unrelated invariants: 
+1. the original navigation invariant over the validity of the current index; and 
+2. a new history invariant says the recently played list holds each song at most once, most-recently-played first. 
+
+The two invariants nothing to do with each other, yet they now live in one class. Because of this, `play()` now has to handle both invariants: it observes the navigation state through `current()` and maintains the history state directly. To understand or safely change either invariant, an engineer now has to consider the other one.
 
 Left unchecked, a class that keeps absorbing responsibilities becomes a **god class**: one type that knows about and does everything. Each addition seemed reasonable on its own, but the result is a class with many fields and methods that collaborate on multiple invariants. This happens because adding one more method to an existing class is easier than creating a new class and keeping its contents cohesive.
 
-A god class is hard to maintain: there is no one invariant to reason about, so any change risks disturbing something unrelated. It is also hard to _use_. This usage cost is easy to overlook. Clients use a class by finding the one that models what they care about, and calling the methods that provide that behaviour. This reuse depends on a class having a clear, single purpose. When disparate functionality is included in one class with no organising invariant, an engineer cannot predict where a feature lives. In a god class the answer is: it could be anywhere! The engineer is left scrolling a long list of unrelated methods hoping to recognise the right one.
+A god class is hard to maintain: there is no one invariant to reason about, so any change risks disturbing something unrelated. It is also hard to _use_. 
 
-Cohesion makes features findable. When every class is organised around a single invariant, we can easily reason about where a capability should live and look there first. The name of the class confirms whether we have found that right place. A system of many small, cohesive classes is easier to navigate than one of a few large ones, even though it has more parts, because each part announces what it is responsible for.
+This usage cost is easy to overlook. Clients use a class by finding the one that models what they care about, and calling the methods that provide that behaviour. Effective reuse depends on a class having a clear, single purpose. When disparate functionality is included in one class with no organising invariant, an engineer cannot predict where a feature lives. In a god class, it could be anywhere! The engineer is left scrolling a long list of unrelated methods, hoping to recognise the right one.
+
+A system with cohesive classes is easier to find features in. When every class is organised around a single invariant, we can easily reason about where a capability should live and look there first. The name of the class confirms whether we have found that right place. A system of many small, cohesive classes is easier to navigate than one of a few large ones---even though it has more parts. 
 
 <details class="tooltip ts-tips">
   <summary>A <code>Playlist</code> that has grown into a god class</summary>
