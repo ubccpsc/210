@@ -105,15 +105,17 @@ class Playlist {
 
 </CollapsibleCode>
 
-Consider where you would look in this class to change how recently played songs are tracked, to adjust how ratings are averaged, or to export the playlist. Nothing about the class points you anywhere, because it is responsible for all of it. Each comment marks a group of members that serves a different invariant, and each group belongs in its own class.
+Consider where you would look in this class to change how recently played songs are tracked, to adjust how ratings are averaged, or to export the playlist. You may have to look everywhere! 
+
+Even the need to add comments to delineate groups of related members (rather than it being obvious from the code organization) suggests that the design has bloated into a god class. 
 
 </details>
 
 ## Single Responsibility
 
-At the class level, the **Single Responsibility Principle** means one class, one invariant. A _cohesive_ class enforces exactly one invariant, and every field and method exists to establish, preserve, or observe it. Such a class can be understood from its invariant alone and changed without reaching into the rest of the system, which are both properties of a good decomposition.
+At the class level, the **Single Responsibility Principle** means one class, one invariant. A _cohesive_ class enforces exactly one invariant, and every field and method exists to establish, preserve, or observe it. We can understand such a class from its invariant alone, and we can change such a class without reaching into the rest of the system. These are both properties of a good decomposition.
 
-Some classes are not built around an explicit invariant. A class that only represents a value, such as a date, or a stateless helper that only groups calculations like the `meanTemp` function from [Chapter 5](../part1/05_arrays), holds no invariant, but is cohesive around a single concept or operation instead. The principle is the same: one purpose per class.
+Some classes are not built around an explicit invariant. Both a class that only represent data (but no operations on it), and a stateless class that groups calculations like the `meanTemp` function from [Chapter 5](../part1/05_arrays), hold no invariant. But they can be cohesive around a single concept or operation instead. The principle is the same: one purpose per class.
 
 Cohesion shapes how a system responds to change. When each invariant lives in exactly one class, a bug fix or a new feature for that invariant stays inside the class that owns it. The change stays local, which makes it easier to make and less likely to force matching changes in many other places.
 
@@ -132,13 +134,15 @@ That is still cohesion, where the unit is the smallest set of state that must st
 
 ## Diagnosing a Class
 
-A poorly decomposed class shows it in the code: it enforces more than one invariant, it has fields the invariant never mentions, it has methods that maintain some other invariant, or its name does not match the fields and methods it contains. A simple test finds most of these. First, name the invariant the class claims to protect. Then take its parts one at a time, the fields first and then the methods, and ask of each whether it serves that invariant.
+A poorly decomposed class is spottable from its code: it enforces more than one invariant, it has fields the invariant never mentions, it has methods that maintain some other invariant, or its name does not match the fields and methods it contains. 
 
-Every field should take part in the invariant the class protects. A field the invariant refers to belongs in the class. A field the invariant never mentions usually means a second responsibility has crept in. The common exception is a field that holds the object's identity, such as a name or id, which names the thing the invariant is about rather than taking part in it.
 
-For a class that only represents a value, or a stateless helper, we can apply the same test using _the single concept_ the class represents, rather than an invariant. A field that has nothing to do with that concept may signal a poor decomposition.
+How do we spot these symptoms of poor decomposition? First, try to name the invariant the class claims to protect. Then, look at each part of the class (fields and methods), and analyze whether each of those parts serves the invariant. If a field is not used in the class invariant at all, this is an early symptom that a second responsibility has snuck into the class. (One common exception: a field that holds the object's identity, such as a name or id.)
 
-The Single Responsibility Principle applies at the method level too: one method, one operation on the invariant. Every method should help maintain the class invariant, and nothing else. A method that maintains a different invariant is the method-level version of the same cohesion problem, and it has the same fix: that invariant, and the method with it, belongs in another class.
+
+For a class that only represents a value, or a stateless helper, we can apply the same analysis, but using _the single concept_ the class represents, rather than the invariant. A field that has nothing to do with that concept may signal a poor decomposition.
+
+The Single Responsibility Principle applies at the method level too. Each method should correspond to *one* operation on the invariant. A method that maintains a different invariant is the method-level version of the cohesion problem. It likely means that that method does not belong in this class.
 
 <details class="tooltip exercise">
   <summary>Diagnosing the bloated <code>Playlist</code></summary>
@@ -158,23 +162,11 @@ Everything that does not mention the current index is the play-history material.
 
 </details>
 
-## Designing a Decomposition
 
-The previous section diagnosed an existing class. It is just as useful to work top-down, from a problem to a set of classes, the way the [Part 1](../part1/index) modelling chapter moved from a problem to a data definition. One common way to do this is to:
-
-1. Identify the invariants the system must maintain.
-2. For each invariant, identify the state it constrains.
-3. Give each invariant its own class, owning the state and the operations on it.
-4. Where one responsibility needs another, have one class hold the other and delegate to it.
-5. Name each class for its single responsibility. If it is hard to find a name, the split may be poor.
-
-Applied to the music app, step 1 finds two invariants: the current position is valid, and the recently played list is deduplicated and ordered. Step 2 assigns the songs and the index to the first, and the recent list to the second. Step 3 gives us two classes, `Playlist` and `PlayHistory`. Step 5, naming, is discussed next, and the rest of the chapter covers step 4.
-
-Naming is part of design. A cohesive class is easy to name because it does one thing, and its name is what an engineer reads when deciding where a feature should live. A god class has no such name. A class that is hard to name usually does too much, and a vague name helps no one find their way around it.
 
 ## Decomposing the Playlist
 
-Applying that process to the bloated `Playlist`, we move the play-history material into a `PlayHistory` class that owns the history invariant, and leave `Playlist` responsible only for navigation.
+To decompose the bloated `Playlist`, we move the play-history material into a `PlayHistory` class that owns the history invariant, and leave `Playlist` responsible only for navigation.
 
 <CollapsibleCode>
 
@@ -230,15 +222,16 @@ class Playlist {
 
 </CollapsibleCode>
 
-Each class can now be understood from a single invariant. `PlayHistory` can change how it orders or deduplicates songs without `Playlist` knowing, and `Playlist` owns the navigation invariant alone. `play` now does two things: get the current song, and tell the history it was played.
-
-Cohesion also helps with testing. Because `PlayHistory` owns its invariant and holds its own state, it can be tested on its own, without constructing a `Playlist`: record a few songs and check that the result is deduplicated and ordered. `Playlist` can likewise be tested against the navigation invariant alone. When the two were combined in one class, no test could exercise one invariant without involving the other. [Chapter 10](./01_abstraction#testing-classes) covers how to write these tests.
+ `play` still does two things: get the current song, and tell the history it was played. But, by, pushing the history logic into its own class, we can easily change how `PlayHistory` orders or deduplicates songs without changing `Playlist`'. You can compare this code to the first version of `Playlist` in the chapter; do you find this new version more readable?
+ 
+This split also makes our testing easier to do. Recall [Chapter 10](./01_abstraction#testing-classes) covers how to write tests for classes. Because `PlayHistory` owns its invariant and holds its own state, we can test it on its own. Likewise, we can  now test `Playlist` for only the navigation invariant. When the two were combined in one class, no test could exercise one invariant without involving the other. 
 
 ## Composition and Delegation
 
-The relationship between `Playlist` and `PlayHistory` has a name. When one object holds a reference to another, it is called **composition**: a `Playlist` _has a_ `PlayHistory`. When the holding object passes work to the held one rather than doing it itself, it is called **delegation**. `play` does not implement the deduplication and ordering rule. It _delegates_ that to `playHistory.record`.
+**Composition** is when one class (or rather, an object instance of the class) holds a reference to another. For instance, a `Playlist` _has a_ `PlayHistory`. **Delegation** is when the holding object passes work to the held one rather than doing it itself. For instance, in the most recent version of `Playlist`, `play` _delegates_ deduplication and ordering to `playHistory.record`.
 
-As a diagram, the two classes and the direction of delegation look like this:
+
+Visually, we can represent the two classes and the direction of delegation as follows:
 
 ```plantuml
 @startuml
@@ -267,36 +260,70 @@ Playlist *--> PlayHistory : delegates history
 ```
 <!-- caption="Playlist composes a PlayHistory and delegates the recording work to it." -->
 
-Composition and delegation let a system of cohesive classes do more than any single class can. Decomposition splits a responsibility out, and composition combines the pieces into a working whole without merging their invariants. Each class keeps its own state, and larger behaviour comes from objects holding and calling one another. Most useful objects are composed of smaller ones they delegate to.
 
-The direction of composition follows need. `Playlist` holds `PlayHistory` because `Playlist` needs to delegate the recording work, and `PlayHistory` needs nothing from `Playlist`. The class that needs a capability holds the class that provides it, so the field declaration shows where the dependency lies. Reversing it, by giving `PlayHistory` a reference back to `Playlist`, would tie the two classes together in both directions and make each harder to understand and test on its own.
+The direction of composition comes from need. `Playlist` holds `PlayHistory` because `Playlist` needs to delegate the recording work. `PlayHistory`, on the other hand, needs nothing from `Playlist`. The class that needs a capability holds the class (as a field) that provides it. 
+
+Decomposition splits a responsibility out, and composition combines the pieces into a working whole---without merging their invariants. 
 
 <details class="tooltip deep-dive">
   <summary>Does the <code>playHistory</code> field break field cohesion?</summary>
 
-The navigation invariant does not mention `playHistory`, so at first the field looks like the problem we just removed. The difference is _ownership_. `playHistory` is not state that the navigation invariant constrains. It is a collaborator that `Playlist` holds so it can delegate a responsibility it no longer maintains itself. A field that holds a collaborator is part of how the class does its job, not a second invariant hidden inside it. The test still works: ask whether the field is governed by the class's own invariant. The songs and index are, the history collaborator is not, and `Playlist` never touches its internals.
+The navigation invariant does not mention `playHistory`... so doesn't this violate our test for cohesion? The difference is _ownership_. 
+
+While `playHistory` is a field, it is not _state_ that the navigation invariant constrains. It is a _collaborator_ . `Playlist` has it as a field so itcan delegate a responsibility. A field that holds a collaborator is part of how the class does its job, not a second invariant hidden inside it. The test still works: ask whether the field is governed by the class's own invariant. The songs and index are, the history collaborator is not, and `Playlist` never touches its internals.
 
 </details>
 
+## Designing a Decomposition
+
+We've been talking about analyzing existing code, because most of the time, when you interact with code, you'll be interacting with an existin code base.
+But what about if we are designing a system for the first time? We can use the same principles we've been discussion to try to design a "good" decomposition as follows:
+
+1. Identify the invariants the system must maintain.
+2. For each invariant, identify the state it constrains.
+3. Give each invariant its own class, owning the state and the operations on it.
+4. Name each class for its single responsibility. (If it is hard to find a name, the split may be poor. A cohesive class is easy to name because it does one thing. A class that is hard to name usually does too much. We may be tempted in that case to use a vague name (e.g. "MusicOrganizer"), but this is not helpful for maintenance. )
+5. Where one responsibility needs another, have one class hold the other and delegate to it.
+
+
+If we were defining our music example from ground up, we would get to the split we've been discussing as follows:
+
+1. We have two invariants: the current position being valid, and the recently played list is deduplicated and ordered.
+2. The first invariant constrains the list of songs and the index in that list. The second invariant constraints the list of recent songs.
+3. As we have two invariants, we should have two classes...
+4. ... `Playlist` and `PlayHistory`.
+5. `Playlist` needs to send information to `PlayHistory`, but not the other way around. So, `Playlist` should have `PlayHistory` as a collaborator and delegate to it.  
+
+
+
 ## Judgment Calls
 
-The `Playlist` and `PlayHistory` split is clear-cut, because the two invariants share no state. Most real decisions are less obvious. Here is one that requires judgment.
+The `Playlist` and `PlayHistory` split is clear-cut, because the two invariants share no state. Most real decisions are less obvious. For instance:
 
 > As an author, I want to publish an article with tags and reader comments, so that readers can find it and respond to it.
 
-An `Article` holds its title and body, a set of tags, and a list of reader comments. Reading the requirements for invariants, we find three candidates: the article's own content, a tag rule (no duplicate tags), and a comment rule (comments are kept in the order they were posted, each with an author).
+An `Article` has a title, body, a set of tags, and a list of reader comments. Reading the requirements for invariants, we find three candidate invariants: (1) the article's own content, (2) a tag rule (no duplicate tags), and (3) a comment rule (comments are kept in the order they were posted, each with an author).
 
-The comments are an easy decision. Keeping comments ordered, attributing each to an author, and later supporting editing or moderation is a complete responsibility with its own invariant and room to grow. It belongs in its own `CommentThread` class that the `Article` holds and delegates to, as `Playlist` holds `PlayHistory`.
+The comments are an easy decision. Keeping comments ordered, attributing each to an author, and later supporting editing or moderation is a complete responsibility with its own invariant and room to grow. It belongs in its own `CommentThread` class. The `Article` can hold and delegate to this class, as `Playlist` holds `PlayHistory`.
 
-Where the tags should live is less clear. "No duplicate tags" is a one-line rule over a single `string[]`. One engineer extracts a `TagSet` class for it, and another keeps `tags: string[]` as a field on `Article` and enforces the rule in an `addTag` method. Both are reasonable, and the deciding question is how much the tag rules are likely to grow. If tags will only ever be a deduplicated set of strings, a separate class adds an abstraction without adding clarity, and keeping the rule inline is better. If tags will gain rules of their own, such as a maximum count or a fixed vocabulary, those rules belong in their own `TagSet` class.
+Where the tags should live is less clear. "No duplicate tags" is a one-line rule over a single `string[]`. One engineer might extract a `TagSet` class for it. Another engineer might keep `tags: string[]` as a field on `Article` and enforce the rule in an `addTag` method. Both choices are reasonable. Which is best depends on how much the tag rules are likely to grow:
+-  If tags will only ever be a deduplicated set of strings, a separate class adds an abstraction without adding clarity, and keeping the rule inline is better. 
+-  If tags will gain rules of their own, such as a maximum count or a fixed vocabulary, those rules belong in their own `TagSet` class.
 
-Decomposition involves this kind of balance. Splitting is the fix for a class that owns more than one invariant, but it has a cost: every new class is another name to learn and another unit of code to manage. Extracting a class for a rule that will never grow beyond one line fragments the design without making it clearer.
+
+Splitting a class into multiple classes that each own an invariant improves cohesion, but it has a cost: every new class is another name to learn and another unit of code to manage. Extracting a class for a rule that will never grow beyond one line may fragment the design without making it clearer. 
+
+Software design involves balancing these relative costs, so, out-of-context, it is hard to say which design is "the best".
+
+
 
 #### A Cohesive Decomposition
 
-A cohesive decomposition gives every invariant exactly one home. Each class can be understood from its own invariant, tested against it, and changed in isolation, so a fix or a feature stays local. Because each class is named for its single responsibility, an engineer can find the class they need. Composition and delegation then combine these small classes into a working system, each still owning its own state and rule. As a result, a design can grow from one class to many while each class stays small enough to reason about and easy to find.
+A cohesive decomposition gives every invariant exactly one home. We can understand each class based on its one invariant; test the class against it; and change the class in isolation from other concerns.  Because each class is named for its single responsibility, an engineer can find the class they need. 
 
-Giving each invariant a single home settles which class is _responsible_ for it, but it does not yet let that class _defend_ it. Every class we have written keeps its state in fields that any code holding the object can read and write, so the class that owns an invariant is not the only code able to break it. The next chapter closes that gap by hiding a class's representation, so that other parts of the system cannot violate the invariant it owns.
+Then, we can use composition and delegation to combine these small classes into a working system, while still keeping each class responsible for its own state and rulese. As a result, a design can grow from one class to many while each class stays small enough to reason about and easy to find.
+
+Giving each invariant a single home settles which class is _responsible_ for it, but it does not yet let that class _defend_ it. Every class we have written keeps its state in fields: but so far, any code holding the object can read and write those fields. So, while the class owns the invariant, other code can break it. In [Chapter 12](./03_encapsulation.html), we'll resolve this problem by learning new language features that allow us to hide those fields from other parts of the code base.
 
 <details class="tooltip exercise">
   <summary>Exercise: Finding the Classes</summary>
@@ -310,6 +337,6 @@ Work through a decomposition for a problem you have not seen before:
 3. Identify which splits are clear-cut, where the invariants share no state, and which are judgment calls, where a rule is small enough that keeping it inline is also reasonable.
 4. Make one judgment call and argue it both ways: when would you extract a separate class, and when would you keep the rule inline?
 
-As a starting point, a message has an author, text, and a time. A conversation keeps its messages in order. Read receipts record how far each member has read. A mute setting belongs to a member rather than to the conversation. Whether each of these becomes its own class is the decision this exercise is about.
+As a starting point, <span class="hint">a message has an author, text, and a time</span>. <span class="hint">A conversation keeps its messages in order</span>. <span class="hint">Read receipts record how far each member has read</span>. <span class="hint">A mute setting belongs to a member rather than to the conversation</span>. The exercise is about deciding whether each of these becomes its own class.
 
 </details>
