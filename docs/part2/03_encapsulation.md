@@ -1,10 +1,14 @@
 # Encapsulating What Varies
 
-Much of [Part 1](../part1/index) was concerned with invariants: the properties a value must satisfy to be meaningful, and the preconditions and postconditions that make up a function's contract (an approach sometimes called **design by contract**). These describe and detect invariant violations, but cannot prevent them. A documented invariant is a promise that the rest of the program is free to break. The object `{ renewalsRemaining: -1 }` satisfies the `Loan` type but violates the `Loan` invariant, and the compiler will not object.
+In [Part 1](../part1/index), we covered how to specify, check, and maintain invariants. Specifying them in documentation is easy enough, but gives us no guarantees that they will actually hold. We saw how to establish invariants with `makeX` functions. We saw how to maintain invariants, either with the use of `Result` types and `assert` to stop at invalid states, or using the closure design from [Chapter 4](../part1/04_maintaining-invariants.html) to hide state from outsiders altogether
 
-Classes begin to close this gap through the constructor, a single, controlled path for building an object. But a constructor only controls how an object begins. If a class's fields are accessible from elsewhere in a program, any code holding the object can read and write them directly, and undo the invariant the constructor established.
+Last chapter, we were introduced to the notion of the class. We've seen the _constructor_ of a class, which gives us language enforcement to ensure there is only _one_ way of creating data of that type. If we check invariants in the constructor, this gives us language support to _establish_ invariants. But what about maintaining them?
 
-**Encapsulation** closes the gap by hiding a class's representation, so that external code cannot break the invariant. The data becomes accessible only to the class's own methods, which are designed to maintain it. This is **information hiding**, and TypeScript's access modifiers let the compiler enforce it, where in [Part 1](../part1/index) we could only write a comment asking other code to leave a field alone. This chapter covers the mechanism (`private`, `public`, and `readonly`), how to decide what to hide, and how hiding improves the design of the overall system.
+So far, a class's fields are accessible from elsewhere in a program. This means any code holding the object can read and write them directly, and undo the invariant the constructor established.
+
+**Encapsulation** allows us to hide fields (and methods) of a class, so that external code cannot arbitrarily access the class's data and break invariants. The hidden fields will be accessible only to the class's own methods. If we design those methods to maintain the invariant, we get true language support for invariant maintenance. 
+
+In [Part 1](../part1/index) we could only write a comment asking other code to leave a field alone. TypeScript's access modifiers allow the compiler to enforce **information hiding**. This chapter covers the mechanisms (`private`, `public`, and `readonly`), how to decide what to hide, and how hiding improves the design of the overall system.
 
 #### A Guest List That Must Stay Valid
 
