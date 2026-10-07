@@ -123,7 +123,7 @@ import { test, expect } from "@ubccpsc/210-toolkit/testing";
 ### A Vocabulary of Assertions
 
 Beyond equality, Chai groups its assertions by the kind of property they check. 
-There are a lot of Chai assertions (many, many [a lot](https://www.chaijs.com/api/bdd/)). 
+There are a lot of Chai assertions ([many, many](https://www.chaijs.com/api/bdd/)). 
 While you can use any of them, the ones we find most commonly used in this course are listed below.
 
 | Kind | Example | Passes when |
