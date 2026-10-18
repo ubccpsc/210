@@ -1,24 +1,106 @@
 # Defining Boundaries with Interfaces
 
-The last two chapters removed two commitments from a class: how it stores its data, and what type of members it holds. One commitment remains in every design we have written. A variable is declared `GuestList`, a parameter is typed `GuestList`, and the code around it depends on that one class even though it uses only the public methods. The representation is hidden, but the class itself is not.
+The last two chapters removed two commitments from a class: how it stores its data, and what type of members it holds. But one commitment remains in every design we have written---the class's name. 
 
-An **interface** lets the class be hidden as well. It is a named type that lists a set of operations and says nothing about which class provides them. Code written against an interface depends only on the operations it names, so any class that provides those operations can be used, and the class can change without the calling code being modified.
+A variable is declared `GuestList`, a parameter is typed `GuestList`, and the code around it depends on that one class even though it uses only the public methods. The representation is hidden, but the class itself is not.
 
-This chapter covers the `interface` keyword and what belongs in an interface, how a class commits to an interface with `implements`, the difference between the type a variable is declared with and the type of the object it holds at run time, and why depending on an interface rather than a concrete class is one of the most useful decisions in a design. It is also the foundation for the next two chapters, on polymorphism and on extending a system without modifying it.
+An **interface** lets the class name be hidden as well. An interface is a named type that lists a set of operations, but not their implementation. Code written against an interface depends only on the operations it names, so any class that provides those operations can be used, and the class can change without the calling code being modified.
 
-#### A Channel as a Contract
+This chapter covers: 
+- the `interface` keyword and what belongs in an interface;
+- how a class commits to an interface with `implements`; 
+- the difference between the type a variable is declared with and the type of the object it holds at run time; and 
+- why depending on an interface rather than a concrete class is one of the most useful decisions in a design. 
 
-We use one running example across this chapter and the next two: a small system that delivers alert messages to people over different communication channels.
+This chapter is also the foundation for the next two chapters, on _polymorphism_ and on _extending_ a system without modifying it.
+
+<details class="tooltip exercise">
+<summary>Exercise: There's nothing new about separating types and implementations...</summary>
+
+In Chapter 4, we saw how to hide data from all but a few given operations, using a closure-based `makeX` constructor function. To do this, we separated out the type declaration `X`, which specified those few operations, from the constructor function `makeX`, where those operations were actually declared.
+
+For all the applications we saw up to Chapter 10, this separation of `type X` and `makeX` was mostly a nuisance. In Chapter 10, we welcomed the use of `class` to reduce the duplication. But this separation allows us to provide some of the same abstraction we'll see in this and the next chapter.
+
+Try the following exercise:
+1. Specify a `Pet` type that provides the operations `getName(): string` and `say(): string`, for the pet's name and what is says.
+2. Write a `makeCat` and `makeDog` (or whatever your favourite pet species is), that closes over the pet's name while providing a `getName(): string` getter and a `say(): string` appropriate for that species.
+3. Write a function `petDialogue(p: Pet): string` that returns what the pet says with its name prepended.
+4. Note how the same `petDialogue` function can be used for various types of pets, reducing code duplication!
+5. (Extension) Do the same using `interface` after reading this chapter.
+
+(If you came into this course knowing a bit about object orientation, you may actually find the analogy of interfaces useful for understanding Chapter 4.)
+
+<details class="tooltip deep-dive">
+<summary>Solution</summary>
+
+Run in [Playground](https://www.typescriptlang.org/play/?#code/C4TwDgpgBAChxQLxQN4Cgqagc3gOQEMBbCACgEoAuKAZ2ACcBLAO2wBoMsaCQLq6mrNAF80aAGYBXZgGNgjAPbMoRAgGsIAEQXZSzfgxbYqseKk6YZSulAAmO6nATJ0WN5lzBCJPrUOtzdyDMenhJemVmAG4LIOEOYMxuXhMBI0DEt1DgcOUAIgB3BQVxAEI8mMzRN2qsbNy7HRjRCWk5RWVVDQBhAmA9A0FjRzNXLCtmGxk+kecM4M9vMlT-bHnMqHqIqGjY93i9t2TfNICxjc2w7bySBQKAOgrDrFrMV8uc7engZrEpWXkSigkGAmkYBAANjpJGQwLMVkN1ltlAADAAkKDA90WxGWwmoGKxx3IwhRIjEExs4kY9lmSBU6i0OlIeQAYjSFHlyDFKQgwPQShAaDQFPQALIQO505BdCC9fp5GAC8RCkX0KASu5cmJoXnA+A0WYAbQAuvSjdT7GxgcrVaLNQUTVEoH9RVBSHqwFASvrgDRyOtKQoIRB7lDdCCwZDobDyNyREA):
+
+```typescript
+type Pet = {
+    getName(): string,
+    say(): string
+}
+
+function makeDog(n: string): Pet {
+    const dog: Pet = {
+         getName(): string {
+             return n;
+         },
+         say(): string {
+             return "woof!";
+         }
+    }
+    return dog;
+}
+
+function makeCat(n: string): Pet {
+    const cat: Pet = {
+         getName(): string {
+             return n;
+         },
+         say(): string {
+             return "meow.";
+         }
+    }
+    return cat;
+}
+
+function petDialogue(p: Pet): string {
+    return `${p.getName()}: ${p.say()}`
+}
+
+const fido: Pet = makeDog("Fido");
+const professorMeow: Pet = makeCat("Professor Meow");
+
+const pets: Pet[] = [fido, professorMeow]; 
+
+for (const p of pets) {
+    console.log(petDialogue(p));
+}
+
+```
+</details>
+</details>
+
+
+## A Channel as a Contract
+
+We will use one running example for the rest of Part 2. We will consider a small system that delivers alert messages to people over different communication channels. Here's a user story:
 
 > As a monitoring system, I want to deliver an alert over each configured channel, so that the code that raises an alert never changes when a new channel is added.
 
-Email and SMS differ in almost every respect, but for raising an alert they have one thing in common: each can deliver a message. That shared capability is all the alerting code should depend on, and an interface lets us write it down as a type.
+For example, email and SMS (two communication channels) differ in almost every respect. But they can both deliver a message, which is all that's important for raising an alert. The `interface` keyword will allow us to precisely specify write this shared capability to send a message.
 
 ## Declaring an Interface
 
-An interface declares a name and a list of method signatures:
+An interface declares a name and a list of method signatures. Each line in the body is a **method signature**: a method's name, parameters, and return type, with no body. All interface methods are public. The interface records what operations exist, not how they work. 
+
+<details class="tooltip ts-tips">
+<summary> The <code>interface</code> keyword </summary>
 
 <!-- TS allows fields in interfaces, but we won't cover this in 210 -->
+
+The following declares an interface with a name `<Name>` and method(s):
 
 ```typescript
 interface <Name> {
@@ -26,7 +108,11 @@ interface <Name> {
 }
 ```
 
-Each line in the body is a **method signature**: a method's name, parameters, and return type, with no body. All interface methods are public. The interface records what operations exist, not how they work. For our channels:
+The syntax is nearly identical to `class` except interfaces will not have method bodies. Just like a class, the name `<Name>` can be used as a type.
+
+</details>
+
+Here's an interface expressing the send capability for our channels:
 
 ```typescript
 /**
@@ -46,35 +132,44 @@ interface Notifier {
 }
 ```
 
-`Notifier` contains a single method signature and no fields. This is intentional, because an interface describes the operations a caller may invoke, never the state or representation behind them. The encapsulation chapter chose which methods a class exposes. An interface takes that public surface and gives it a name of its own, separate from any class.
 
-Because an interface is a contract that one body of code implements and another depends on, it should be documented carefully. Every member is part of a promise that callers rely on and implementers must keep, so documentation that was good practice for a function is close to essential for an interface.
+
+`Notifier` contains a single method signature and no fields. This is intentional, because an interface describes the operations a caller may invoke, not the state or representation behind them. In [Chapter 12](./03_encapsulation.html), we discussed which methods a class should expose. We can use interfaces to give that public surface a name of its own, separate from any class.
+
+Because an interface is a contract that one body of code implements and another depends on, it should be documented carefully. Every member is part of a promise that callers rely on and implementers must keep. So while documentation is mostly "good practice" for a function, it is close to essential for an interface.
 
 <details class="tooltip ts-tips">
 <summary><code>interface</code> Versus <code>type</code></summary>
 
-You have used `type` since [Part 1](../part1/index) to name unions and the shapes of data, and TypeScript lets you describe an object's shape with either `type` or `interface`. This course uses an `interface` for a contract that classes implement and callers depend on, and `type` for unions (`"red" | "green" | "yellow"`) and for the shape of plain data. Use `interface` when several classes will commit to the same set of operations, and a `type` alias when you are naming a structure.
+You have used `type` since [Part 1](../part1/index) to name unions and the shapes of data, and TypeScript lets you describe an object's shape with either `type` or `interface`. This course uses an `interface` for a contract that classes implement and callers depend on, and `type` for unions (`"red" | "green" | "yellow"`) and for the shape of plain data. Use `interface` when several classes will commit to the same set of operations. 
 
 </details>
 
 <details class="tooltip link-110">
 <summary>Contracts Before Implementations</summary>
 
-You relied on contracts without implementations in CPSC 110. When a function needed a helper you had not written yet, you recorded the helper's signature and purpose and called it right away, trusting that contract while its body was still on your wish list. An interface makes that arrangement permanent and checked. It records the signatures a caller may rely on, and the compiler guarantees that an implementation exists and matches.
+You relied on contracts without implementations in CPSC 110. When a function needed a helper you had not written yet, you recorded the helper's signature and purpose and called it right away, trusting that contract while its body was still on your wish list. 
+
+When we use interfaces, we rely on a similar abstraction. An interface records the signatures a caller may rely on, and the compiler guarantees that an implementation exists and matches.
 
 </details>
 
 ## Implementing the Contract
 
-A class states that it satisfies an interface with the `implements` keyword:
+A class states that it satisfies an interface with the `implements` keyword. The header:
 
 ```typescript
 class <ClassName> implements <InterfaceName> {
-    // must provide every member the interface declares
+    // ...
 }
 ```
 
-The compiler then checks that the class provides every operation the interface declares, with compatible signatures, and the class does not compile if it does not. `implements` is a promise the language holds the class to. Two classes can keep the `Notifier` promise in completely different ways:
+says that `<ClassName>` must implement every method declared by `<InterfaceName>`.
+
+
+Given an `implements` relationship, the compiler checks that the class provides every operation the interface declares, with compatible signatures. The class does not compile if it does not provide every operation, or has provides a method with an incompatible signature. 
+
+`implements` allows two classes to keep the `Notifier` promise in completely different ways:
 
 <CollapsibleCode>
 
@@ -92,9 +187,11 @@ class EmailNotifier implements Notifier {
 }
 
 class SmsNotifier implements Notifier {
+    private readonly countryCode: number;
     private readonly phone: string;
 
-    public constructor(phone: string) {
+    public constructor(phone: string, countryCode: number) {
+        this.countryCode = countryCode;
         this.phone = phone;
     }
 
@@ -106,7 +203,7 @@ class SmsNotifier implements Notifier {
 
 </CollapsibleCode>
 
-Each class has its own private representation (an email address, a phone number) and its own way of delivering a message, and each is encapsulated as in the encapsulation chapter. What is new is that both now share a public type, `Notifier`, that neither of them owns.
+Each class has its own private representation (an email address, a country code and a phone number) and its own way of delivering a message. Each class is encapsulated as per [Chapter 12](./03_encapsulation.html). The only new bit is that both classes share a public type, `Notifier`, that neither of them owns.
 
 ```plantuml
 @startuml
@@ -130,9 +227,14 @@ SmsNotifier : +send(..)
 <!-- caption="Notifier with multiple concrete classes." -->
 
 <details class="tooltip deep-dive">
-<summary>Structural Typing</summary>
+<summary>Deep-Dive: Structural Typing</summary>
 
-TypeScript checks types by _shape_, not by name. A value is acceptable wherever a type is expected if it has the required members, whatever it was declared as, so a class with a matching `send` method can be used as a `Notifier` even without writing `implements Notifier`. `implements` is still worth writing, because it declares intent and turns a silent mismatch into a clear error. With `implements Notifier`, forgetting or misspelling `send` fails at the class, where the mistake is, rather than later at some distant call site. Some languages, such as Java, are instead _nominal_: a class is a `Notifier` only if it explicitly says so.
+Many languages, such as Java, are _nominal_: a class is a `Notifier` only if it explicitly says so.
+
+TypeScript is weird in that it checks types by _shape_ (the term we've been using throughout the book to describe the property names and types of an object), not by name. A value is acceptable wherever a type is expected if it has the required members, whatever it was declared as, so a class with a matching `send` method can be used as a `Notifier` even without writing `implements Notifier`. `implements` is still worth writing, because it declares intent and turns a silent mismatch into a clear error. With `implements Notifier`, forgetting or misspelling `send` fails at the class, where the mistake is, rather than later at some distant call site. 
+
+
+You can read more in the [Uncovered Language Features](../reference/language-features.html) reference page.
 
 </details>
 
