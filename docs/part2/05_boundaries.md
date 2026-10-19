@@ -246,20 +246,20 @@ Once a class implements an interface, an object of that class can be held in a v
 const alerts: Notifier = new EmailNotifier("ops@example.com");
 ```
 
-Two different types are involved. The **apparent type** is the one written in the code, `Notifier`, and is what the compiler knows about the variable. The **actual type** is the type of the object that exists at run time, `EmailNotifier`. This is the static and dynamic distinction from [Part 1](../part1/index): the apparent type belongs to the static view the compiler checks, and the actual type belongs to the dynamic view that exists only when the program runs.
+Two different types are involved. The **apparent type** (static type) is the one written in the code, `Notifier`, and is what the compiler knows about the variable. The **actual type** (dynamic type) is the type of the object that exists at run time, `EmailNotifier`. This is the static and dynamic distinction from [Part 1](../part1/index): the apparent type belongs to the static view the compiler checks, and the actual type belongs to the dynamic view that exists only when the program runs.
 
-The apparent type decides what you are allowed to do with the variable. Through an apparent type of `Notifier` you may call `send`, because the contract promises it, and nothing more:
+The compiler restricts what you can do with a variable based on its _apparent_ (or static) type.Through an apparent type of `Notifier` you may call `send`, because the contract promises it. But you can do nothing more than that:
 
 ```typescript
 alerts.send("disk almost full"); // allowed: send is declared on Notifier
 // alerts.address                // rejected: address is not part of Notifier
 ```
 
-That restriction looks like a loss, but it is what we want. The code relies only on what `Notifier` promises, so the object behind `alerts` can be of any type that implements `Notifier`, and every line still type-checks. Declaring the variable with the interface rather than `EmailNotifier` is the difference between code that works with one class and code that works with all of them. This practice is usually summarised as _program to an interface, not an implementation_: prefer the apparent type that names the contract over the one that names a specific class, for parameters, fields, and return types alike.
+That restriction may look like a loss, but it is what we want in this scenario. The code relies only on what `Notifier` promises, so the object behind `alerts` can be of any type that implements `Notifier`. If we'd declared the variable with `EmailNotifier`, the code would have to be modified or duplicated to work with different types of `Notifier`s. The practice of using the least restrictive type we can is summarised as _program to an interface, not an implementation_: prefer the apparent type that names the contract over the one that names a specific class.
 
 ## Many Implementations
 
-The benefit appears as soon as code is written against the interface. A function that raises an alert takes a `Notifier`, or a list of them, and never mentions a specific channel:
+Let's look at a concrete example of why _program to an interface, not an implementation_ is useful. Let's say we want to send our notification to multiple channels at once. With the `Notifier` interface, a function can take in a whole list of different `Notifiers` and raise an alert for each of them:
 
 ```typescript
 function alertAll(channels: Notifier[], message: string): void {
@@ -269,13 +269,25 @@ function alertAll(channels: Notifier[], message: string): void {
 }
 ```
 
-`alertAll` works for an `EmailNotifier`, an `SmsNotifier`, a list mixing the two, and any channel written in the future, with no change to its body. The interface is a boundary, with the alerting logic on one side and the delivery mechanisms on the other. Each side can be read, changed, and tested with only the contract in view, without the other side's code.
+By contrast, here's a version that hard-codes two notifiers:
 
-`alertAll` cannot tell which kind of channel each element is, or act on it. As far as the code can see, every element is only a `Notifier`. In this chapter, that uniformity is the goal.
+```typeScript
+function alertEmailSMS(echannel: EmailNotifier, schannel: SmsNotifier, message: string): void {
+    echannel.send(message);
+    schannel.send(message);
+
+}
+```
+
+The most important quality of `alertAll` is that it will continue to work _without modifying the code_ if we choose to add or delete channels in the future. 
+
+The `Notifier` interface serves as a boundary, with the alerting logic (`alertAll`) on one side and the delivery mechanisms (`EmailNotifier` and `SmsNotifier`'s `send) on the other. Each side can be read, changed, and tested with only the contract in view, without the other side's code.
+
+
 
 ## Test Doubles
 
-A boundary that callers depend on is also one that tests can use. The real channels have effects we do not want in a test suite, since a test of `alertAll` should not send actual email or text messages. Because `alertAll` depends only on `Notifier`, a test can give it a stand-in that records what it was asked to send instead of sending anything:
+This clear boundary is also useful for testing. The real channels have effects we do not want in a test suite, since a test of `alertAll` should not send actual email or text messages. But because `alertAll` depends only on `Notifier`, we can easily test it with a stand-in that records what it was asked to send instead of sending anything:
 
 ```typescript
 class RecordingNotifier implements Notifier {
@@ -297,7 +309,7 @@ test("alertAll delivers the message over every channel", () => {
 });
 ```
 
-`RecordingNotifier` is a third implementation of `Notifier`, written only for tests. A stand-in like this is called a **test double**, and is often loosely called a **mock object**. It satisfies the same contract as the real thing but is simpler and observable, so the code under test can be exercised in isolation. This is the specification-based testing from [Chapter 9](../part1/09_validation#specification-based-testing), made easy by an interface: the test and the code under test both depend on the contract, and the real delivery mechanism is not involved at all. Designing against interfaces is one of the things that makes code testable.
+`RecordingNotifier` is a third implementation of `Notifier`, written only for tests. A stand-in like this is called a **test double**, and is often loosely called a **mock object**. It satisfies the same contract as the real thing but is simpler and observable, so the code under test can be exercised in isolation. Interfaces make the specification-based testing from [Chapter 9](../part1/09_validation#specification-based-testing) easy: the test and the code under test both depend on the contract, and the real delivery mechanism is not involved at all. Designing against interfaces is one of the things that makes code testable.
 
 ```plantuml
 @startuml
@@ -328,7 +340,7 @@ package test {
 
 ## Keeping Interfaces Small
 
-`Notifier` declares one method, and that is a design choice. Suppose some channels can also report whether the provider acknowledged a message. It is tempting to add that to `Notifier`, but doing so would force _every_ implementation, including ones that cannot confirm anything, to provide the operation. The capability belongs in its own small interface:
+In building `Notifier`, we chose to have it declare only one method. Suppose some channels can also report whether the provider acknowledged a message, say `wasDelivered(): boolean`. It is tempting to add that capability to `Notifier`. But if we do so, this would force _every_ implementation of `Notifier` to provide  a `wasDelivered`. If some notifiers cannot provide this operation, its presence, even as a no-op method, would be confusing. Instead we can put that capability in its own small interface:
 
 ```typescript
 interface Confirmable {
@@ -337,7 +349,7 @@ interface Confirmable {
 }
 ```
 
-A class can implement more than one interface by listing them, so a channel that can confirm delivery commits to both contracts:
+A class can implement more than one interface by listing them both:
 
 ```typescript
 class SmsNotifier implements Notifier, Confirmable {
@@ -349,7 +361,9 @@ class SmsNotifier implements Notifier, Confirmable {
 }
 ```
 
-Now each caller depends on only the contract it needs. Code that only sends takes a `Notifier`, and code that only checks receipts takes a `Confirmable`. The next chapter shows how to combine the two for code that needs both. A channel that cannot confirm anything stays a plain `Notifier` and is never forced to fake an operation it does not support.
+... and a channel that cannot confirm anything stays a plain `Notifier` and is never forced to fake an operation it does not support.
+
+By splitting these up, we also allow each caller to depend only on the contract that caller needs. Code that only sends takes a `Notifier`, and code that only checks receipts takes a `Confirmable`.  In [Chapter 15](./06_extension.html), we'll see how to specify when code needs both.
 
 ```plantuml
 @startuml
@@ -376,12 +390,15 @@ SmsNotifier : +wasDelivered()
 ```
 <!-- caption="SmsNotifier implementing two interfaces." -->
 
-Keeping interfaces small is the interface-level version of the cohesion advice that classes should have a single responsibility. A small, focused interface describes one capability. A large interface that bundles several forces implementers to support unrelated operations, and forces callers to depend on more than they use. The guidance that many small interfaces are better than one large one is called the **interface segregation principle**. Small interfaces also preserve implementation freedom. Every operation a contract promises becomes behaviour callers may rely on, so a large interface exposes more of each implementation, while a small one keeps more of it hidden and free to change.
+Keeping interfaces small is the interface-level version of the [cohesion principle](./02_decomposition.html) that favours classes with a single responsibility. A small, focused interface describes one capability. A large interface that bundles several forces implementers to support unrelated operations, and forces callers to depend on more than they use. The guidance that many small interfaces are better than one large one is called the **interface segregation principle**. 
+
+Small interfaces also preserve [implementation freedom](./04_flexibility.html). Every operation a contract promises becomes behaviour callers may rely on, so a large interface exposes more of each implementation, while a small one keeps more of it hidden and free to change.
 
 ## Constraining Generics
 
-Interfaces have a second use, which solves a problem the previous chapter left open. `Roster<T>` could not compare two of its members, because a class that knows nothing about `T` has no operation to compare them with, so we passed it a comparison function when it was built. An interface offers the other option: instead of passing the operation in, require that every member already provides it.
+Remember the problem we ended [Chapter 13](./04_flexibility.html) with, where `Roster<T>` was more generic than `GuestList`, but couldn't compare its members? The solution we offered was to directly pass in a compare function---higher-order functions to the rescue again. But while higher-order functions are powerful, many people find them hard to reason about, and hard-to-reason-about code is error-prone code. 
 
+Interfaces provide us another solution. Instead of passing in a compare function, we can first write an interface that captures whether a type is comparable:
 ```typescript
 interface Identifiable {
     /**
@@ -394,15 +411,7 @@ interface Identifiable {
 }
 ```
 
-A type parameter can then be restricted to types that satisfy that interface, written with `extends`:
-
-```typescript
-class <Name><T extends <Interface>> {
-    // every T is guaranteed to provide the interface's operations
-}
-```
-
-The constraint gives the class something to call:
+And then use that type to constrain a generic type:
 
 ```typescript
 class Roster<T extends Identifiable> {
@@ -422,17 +431,30 @@ class Roster<T extends Identifiable> {
 }
 ```
 
-`member.sameAs(candidate)` compiles because the constraint promises that every member has the method, whatever its type. This is the same reasoning as an apparent type, applied to a type parameter. The compiler knew a variable's operations from the type written on it, and it knows a type parameter's operations from the constraint written on it.
+The constraint `T extends Identifiable` promises that every `T` support `sameAs(candidate)`, so `member.sameAs(candidate)` compiles. This is the same reasoning as an apparent type. The compiler knows a variable's operations from the type written on it, and it knows a type parameter's operations from the constraint written on it.
 
-The two options trade against each other. Constraining gives the class knowledge but limits which types it accepts. `Roster<Seat>` works only if `Seat` implements `Identifiable`, and `Roster<string>` no longer compiles at all, because a string has no `sameAs` method. Passing a function in keeps the class usable with every type, including ones you did not write and primitives you cannot change, but requires every caller to supply the comparison. Constrain when the operation is part of what the members are and you control those types. Pass the operation in when the members are types you do not own, or when different callers need different notions of sameness.
+<details class="tooltip ts-tips">
+<summary><code>extends</code> on Generic Types</summary>
 
-Either way, the constraint should name the smallest interface that supplies what the class needs, for the reason given in the previous section. A constraint is a demand made of every type that wants to be a member, and demanding operations the class never calls restricts the class for no benefit.
+A type parameter can be restricted to types that satisfy that interface, written with `extends`:
+
+```typescript
+class <Name><T extends <Interface>> {
+    // every T is guaranteed to provide the interface's operations
+}
+```
+</details>
+
+
+Constraining with an interface or passing in a higher-order function is a design decision; each has trade-offs. Constraining with `extends` gives the class knowledge but limits which types it accepts. `Roster<Seat>` works only if `Seat` implements `Identifiable`. `Roster<string>` no longer compiles at all, because a string has no `sameAs` method. Passing a function in keeps the class usable with every type, including ones you did not write and primitives you cannot change, but requires every caller to supply the comparison. As a rule of thumb, constrain when the operation is part of what the members are and you control those types. Pass the operation in when the members are types you do not control, or when different callers need different notions of sameness.
+
+Either way, the constraint should name the smallest interface that supplies what the class needss. A constraint is a demand made of every type that wants to be a member, and demanding operations the class never calls restricts the class for no benefit.
 
 #### Depending on the Contract
 
-An interface is the public surface of a class extracted into a named type that any class can implement and any caller can depend on. Depending on an interface rather than a concrete class is the strongest form of information hiding. The previous two chapters let a class change its representation without affecting callers, and an interface lets the _entire class_ behind the contract change without affecting them. Name contracts as interfaces, keep them small and well documented, and write the rest of the program against them.
+An interface is the public surface of a class, extracted into a named type that any class can implement and any caller can depend on. Depending on an interface rather than a concrete class is the strongest form of information hiding. The previous two chapters let a class change its representation without affecting callers. An interface lets the _entire class_ behind the contract change without affecting callers. Interfaces allow us to make code that follows contracts very directly, by naming contracts as interfaces, keeping them small and well documented, and writing the rest of the program against them.
 
-We now have a boundary with one contract and several classes implementing it. The next chapter looks at what happens when those classes are not just interchangeable but behave differently, so that one call does different work depending on the object behind the interface. That is polymorphism.
+Interfaces define a boundary with a contract one one side, and several classes implementing it on the other side. In the next chapter, we'll introduce _polymorphism_, which allows different classes to share method implementations that are identical, while still allowing those classes to differ in the implementation of other methods. 
 
 <details class="tooltip exercise">
   <summary>Exercise: Input Validation Rules</summary>
@@ -494,9 +516,9 @@ RecordingValidator : +rule()
 
 Work through the following:
 
-1. _Implementing `failedRules`._ The `Validator` contract says `check` returns `true` for a passing input, and `rule` returns the violation message. Write the body of `failedRules` so that it collects the `rule()` of every validator whose `check` returns `false`.
-2. _Writing validators._ Implement two classes that satisfy `Validator`: a `MinLengthValidator` that fails when the input is shorter than a configurable minimum, and a `NoSpacesValidator` that fails when the input contains a space. Neither should require any change to `failedRules`.
-3. _Testability._ Write a `RecordingValidator` that records every input passed to `check` and always returns `true`. Use it to confirm that `failedRules` calls `check` on every validator, even after an earlier one has failed.
+1. _Implementing `failedRules`._ The `Validator` contract says `check` returns `true` for a passing input, and `rule` returns the violation message. Write the body of `failedRules` <span class="hint">so that it collects the `rule()` of every validator whose `check` returns `false`</span>.
+2. _Writing validators._ Implement two classes that satisfy `Validator`: a `MinLengthValidator` that fails when the input is shorter than a configurable minimum, and a `NoSpacesValidator` that fails when the input contains a space. <span class="hint">Neither should require any change to `failedRules`.</span>
+3. _Testability._ Write a `RecordingValidator` that records every input passed to `check` and always returns `true`. Use it to confirm that <span class="hint">`failedRules` calls `check` on every validator, even after an earlier one has failed</span>.
 4. _Interface size._ Suppose you need validators to carry a severity so that callers can display warnings differently from hard errors. What are the costs of adding a `severity(): string` method to `Validator`, compared with defining a separate `SeverityRated` interface that only some validators implement?
 
 </details>
