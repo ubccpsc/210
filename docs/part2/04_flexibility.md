@@ -101,7 +101,7 @@ Both of these problems, the wrong answer and the lost freedom, come from writing
 
 Equality should be implemented at the level of the abstract value. Two instances of `GuestList` with the same capacity and the same guests should be treated as equivalent, regardless of how either instance stores them.
 
-Here's a first attempt at `equals` that respects the abstract values:
+Here's an `equals` that respects the abstract values:
 
 ```typescript
 /**
@@ -133,7 +133,7 @@ The heuristic breaks a tiny bit because this version does also compare `capacity
 
 Beyond working at the abstract-value level, equality should also be _symmetric_: whenever `a.equals(b)` is true, `b.equals(a)` must be true as well. Most callers assume this is true, and caller code will break if this is not maintained. 
 
-Symmetry is easy to break by accident, usually by comparing some fields in only one direction. Is the `equals` method above symmetric? 
+Symmetry is easy to break by accident, usually by comparing some fields in only one direction. What makes `equals` above correct, even though it only checks that each member of `this.guests` is invited in `other`, and not the other way around? How could you write `equals` differently and still ensure it is symmetric?
 
 <details class="tooltip ts-tips">
 <summary>Reaching Into Another Object's Private Fields</summary>
