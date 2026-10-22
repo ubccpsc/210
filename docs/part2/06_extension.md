@@ -1,14 +1,17 @@
 # Extending Behaviour Through Polymorphism
 
-This chapter covers polymorphism, which lets one method call behave according to the object it is called on. It also introduces a second way for classes to relate to each other. An interface lets unrelated classes commit to the same contract, but it cannot say that one class is a _kind of_ another, or let a class reuse another's implementation. Class **extension** does both. A class can extend another, inheriting its behaviour and refining it, and an instance of the extending class can be used wherever the original is expected. Both mechanisms reduce duplication, by letting many types share one implementation and one body of calling code, and both make a system easier to change, since a new type can be added behind an existing contract without rewriting the code that uses it. The next chapter is devoted to that second benefit.
+This chapter introduces polymorphism, which lets one method call behave according to the object it is called on. It also demonstrates an additional way for classes to relate to each other. 
 
-The sections below introduce extension (abstract base classes, `extends`, overriding, and `super`), explain the dynamic dispatch that makes polymorphism possible, describe the responsibilities subtypes take on, and discuss when inheritance causes more problems than it solves.
+An interface allows unrelated classes commit to the same contract, but does not say that one class is a _kind of_ another, or let a class reuse another's implementation: these are both the domain of class **extension**. A class can extend another, inheriting its behaviour and refining it, and an instance of the extending class can be used wherever the original is expected. Both mechanisms reduce duplication, by letting multiple types share one implementation, and both make a system easier to change, since a new type can be added behind an existing contract without rewriting the code that uses it. This chapter is devoted to that second benefit.
+
+The sections below introduce extension (abstract base classes, `extends`, overriding, and `super`), explains how dynamic dispatch makes polymorphism possible, describes the responsibilities subtypes take on, and discusses the shortcomings of inheritance.
 
 ## Abstract Base Classes
 
-In the previous chapter each notifier implemented `send(..)` itself. Side by side, the two methods would repeat the same opening steps before doing anything specific to the channel: refuse an empty message, then format the alert text. Copying that logic into every channel is what the principle of **don't repeat yourself** (DRY) warns against. Each copy is another place the rule has to be changed, and copies drift apart as some are updated and others are forgotten, so a rule is best kept in one place. An interface cannot hold that shared work, because an interface has signatures and no bodies. A class can.
+In the previous chapter each notifier implemented `send(..)` itself. The two methods repeat the same opening steps before doing anything specific to the channel: refuse an empty message, then format the alert text. Copying that logic into every channel is contrary to the **don't repeat yourself** (DRY) principle. 
+Each copy is another place the rule has to be changed, and copies drift apart as some are updated and others are missed, so a rule is best kept in one place. But an interface cannot hold that shared work, because an interface has signatures and no bodies. A class can.
 
-The shared work goes in a **base class**, which holds the functionality common to a family of related classes so that each can build on it instead of repeating it. Our base class is also **abstract**, meaning it cannot be created on its own and exists only to be built on. An abstract class can have two kinds of member: concrete ones, with a body that the whole family shares, and **abstract** ones, declared without a body for each class in the family to fill in.
+Shared work goes in a **base class**, which holds the functionality common to a family of related classes so that each can build on it instead of repeating it. Our base class is also **abstract**, meaning it cannot be created on its own and exists only to be built on. An abstract class can have two kinds of member: concrete ones, with a body that the whole family shares, and **abstract** ones, declared without a body for each class in the family to fill in.
 
 ```typescript
 abstract class <Name> implements <Interface> {
@@ -37,7 +40,7 @@ abstract class BaseNotifier implements Notifier {
 }
 ```
 
-`BaseNotifier` provides `send(..)` and a default `decorate(..)`, and declares `deliver(..)` as _abstract_: it has no body here, and every concrete subclass must supply one. Only `send(..)` is `public`, because it is part of the `Notifier` contract. `decorate(..)` and `deliver(..)` are internal steps, so they are `protected`, reachable inside the class and its subclasses but not from outside.
+`BaseNotifier` provides `send(..)` and a default `decorate(..)`, and declares `deliver(..)` as _abstract_: it does not have a body, and every concrete subclass must supply their own. Only `send(..)` is `public`, because it is part of the `Notifier` contract. `decorate(..)` and `deliver(..)` are internal steps, so they are `protected`, reachable inside the class and its subclasses but not from outside.
 
 ### Extending the Base Class
 
