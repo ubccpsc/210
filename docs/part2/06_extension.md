@@ -44,7 +44,7 @@ abstract class BaseNotifier implements Notifier {
 
 ### Extending the Base Class
 
-A concrete channel extends `BaseNotifier` and supplies only its own delivery:
+A concrete channel extends `BaseNotifier` and only provides its own delivery:
 
 ```typescript
 class EmailNotifier extends BaseNotifier {
@@ -61,7 +61,7 @@ class EmailNotifier extends BaseNotifier {
 }
 ```
 
-`EmailNotifier` has no `send(..)` method of its own. It inherits the one in `BaseNotifier`. The `super()` call in its constructor runs the base class constructor, which a subclass must do before using `this`.
+`EmailNotifier` has no `send(..)` method of its own. It inherits `BaseNotifier`'s. The `super()` call in its constructor calls the base class constructor, which a subclass must do before using `this`.
 
 ### Overriding Methods
 
@@ -118,13 +118,14 @@ SmsNotifier : #deliver(..)
 <details class="tooltip ts-tips">
 <summary>Abstract Classes and <code>protected</code></summary>
 
-An `abstract class` cannot be instantiated. `new BaseNotifier()` is a compile error, because the class exists only to be extended. An `abstract` method has a signature but no body, and a subclass that does not provide one does not compile, so the base class guarantees that every subclass fills in the missing step. The encapsulation chapter introduced `public` and `private`, and `protected` is a third visibility modifier. A protected member is visible inside the class and any subclass, but not to outside callers. That is what `decorate(..)` and `deliver(..)` need, since they are internal steps of delivery and not part of the public `Notifier` contract.
+An `abstract class` cannot be instantiated. `new BaseNotifier()` does not compile, because the class exists only to be extended. An `abstract` method only has a signature, and a subclass that does not provide a body for its inherited abstract methods will not compile.
+This guarantees that every subclass completes the 'holes' in the abstract class. The encapsulation chapter introduced `public` and `private`, and `protected` is a third visibility modifier. A protected member is visible inside the class and any subclass, but not to outside callers. That is what `decorate(..)` and `deliver(..)` need, since they are internal steps of delivery and not part of the public `Notifier` contract.
 
 </details>
 
 ## Dynamic Dispatch
 
-The notifiers now share a `send(..)` method, and something less obvious is also happening. **Polymorphism** is the ability of one piece of code to work with many types and to behave, for each, according to that type. We have already seen it: `alertAll(..)` calls `channel.send(message)`, and the right delivery happens whether the channel is email or SMS. What makes this work is **dynamic dispatch**. When a method is called through a variable, the method body that runs is chosen at run time from the variable's _actual_ type, not its _apparent_ type.
+The notifiers now share a `send(..)` method, but what exactly runs when `send(..)` is called?. **Polymorphism** is the ability of one piece of code to work with many types and to behave, for each, according to that type. We have already seen it: `alertAll(..)` calls `channel.send(message)`, and the right delivery happens whether the channel is email or SMS. What makes this work is **dynamic dispatch**. When a method is called through a variable, the method body that runs is chosen at run time from the variable's _actual_ type, not its _apparent_ type.
 
 Consider a single channel held at the interface type:
 
@@ -133,13 +134,13 @@ const channel: Notifier = new SmsNotifier("+1-555-0100");
 channel.send("disk almost full");
 ```
 
-The apparent type of `channel` is `Notifier`, so the compiler checks only that `Notifier` has a `send(..)`. At run time the object is an `SmsNotifier`, and the call resolves in steps:
+The apparent type of `channel` is `Notifier`, so the compiler checks only that `Notifier` has a `send(..)`. At runtime the object is an `SmsNotifier`, and the call resolves in steps:
 
 1. `send(..)` is not defined on `SmsNotifier`. It is inherited from `BaseNotifier`, so `BaseNotifier`'s `send(..)` runs.
 2. That `send(..)` calls `this.decorate(message)`. `this` is the `SmsNotifier`, which overrides `decorate(..)`, so the _subclass's_ `decorate(..)` runs and truncates the formatted text.
 3. That `send(..)` then passes the decorated text to `this.deliver(..)`. `deliver(..)` is abstract in the base, and `this` is the `SmsNotifier`, so the _subclass's_ `deliver(..)` runs and sends over SMS.
 
-Steps 2 and 3 show how this works. The calls to `decorate(..)` and `deliver(..)` are written inside `BaseNotifier`, but the versions that run are the ones belonging to the actual object. When a method calls `this.something()`, dispatch finds the right `something` for whatever object `this` is. This is what lets a base class lay out a sequence of steps and leave the steps themselves to its subclasses.
+Steps 2 and 3 show how this works. The calls to `decorate(..)` and `deliver(..)` are written inside `BaseNotifier`, but the versions that run are the ones belonging to the actual object. When a method calls `this.something()`, dispatch finds the right `something` for whatever object `this` is. This lets a base class lay out a sequence of steps and leave the steps themselves to its subclasses.
 
 The same mechanism is what makes `alertAll(..)` work across a mixed list:
 
@@ -153,7 +154,7 @@ alertAll(channels, "deploy finished");
 
 `alertAll(..)`'s loop body is the single line `channel.send(message)`. On the first pass it delivers an email and on the second an SMS, because each `send(..)` dispatches to the actual object behind it. This is polymorphism: one call site with different behaviour for each type, chosen at run time by dynamic dispatch.
 
-This is the apparent and actual type distinction from the previous chapter, now affecting behaviour. The compiler reasons about apparent types, in the static view, and dispatch happens over actual types, in the dynamic view. Writing `channel: Notifier` decides which calls are legal, and the actual object decides what those calls do. This is also one of the most common ways a design preserves implementation freedom. A caller that can see only the apparent type cannot depend on the actual one, so the object behind the variable can change its representation, or be a different class entirely, without any caller noticing.
+The compiler reasons about apparent types, in the static view, and dispatch happens over actual types, in the dynamic view. Writing `channel: Notifier` decides which calls are legal, and the actual object decides which methods actually execute. This is also one of the most common ways a design preserves implementation freedom. A caller that can see only the apparent type cannot depend on the actual one, so the object behind the variable can change its representation, or be a different class entirely, without any caller noticing.
 
 ## Honouring the Contract
 
