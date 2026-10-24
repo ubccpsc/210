@@ -553,7 +553,7 @@ test("the recap names the count and the most recent song", () => {
 
 `StubLog` is a test double, like the ones in the interfaces chapter. In general, if a unit test requires you to construct a large part of the system, then the class under test is coupled to a large part of the system. Changing the test cannot fix this problem, because the problem is in the design.
 
-## Judgment Calls
+## Judgement Calls
 
 Some coupling is always present, and it is not a defect to be eliminated. The parts of a system with no dependencies could never work together. Every collaboration in a design is a dependency, so a working system always has arrows in its dependency graph.
 
@@ -561,7 +561,7 @@ The important distinction is between coupling that is _necessary_ and coupling t
 
 Treating low coupling as a goal on its own is also a mistake. Coupling between classes can always be reduced to zero by merging the classes, and a single class containing the entire program has no coupling between classes at all. That design is the god class from the decomposition chapter. Merging classes only hides the dependencies inside one class, where they are harder to see and reason about.
 
-The same judgment applies as with decomposition. Adding an interface for every collaboration produces a system where every call goes through an abstraction, and readers struggle to find the code that runs. Define an interface when the dependency is likely to change, when a second implementation is plausible, or when a test needs a stand-in. When a class collaborates with one stable class that no one expects to replace, depending on that class directly is often clearer.
+The same judgement applies as with decomposition. Adding an interface for every collaboration produces a system where every call goes through an abstraction, and readers struggle to find the code that runs. Define an interface when the dependency is likely to change, when a second implementation is plausible, or when a test needs a stand-in. When a class collaborates with one stable class that no one expects to replace, depending on that class directly is often clearer.
 
 ## Cohesion and Coupling
 

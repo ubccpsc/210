@@ -21,7 +21,7 @@ new Set(["alice", "bob"])     // not an array at all
 
 All three representations represent the same guest list. The order of the array is a detail of how the guests are stored. A guest list is a _set_ of guests, and a set has no order, so the documentation of `guests()` does not promise an order (even though both versions happen to return guests in the order they were added). We were able to change the representation in the previous chapter because all these representations have the same abstract value.
 
-Representations of data are one reason why an invariant on its own own do not fully describe a class. The invariant says which representations are _legal_, but not what a legal representation _means_. Both details (the meaning of a representation and which representations are legal) should be added to the class documentation:
+Representations of data are one reason why an invariant on its own does not fully describe a class. The invariant says which representations are _legal_, but not what a legal representation _means_. Both details (the meaning of a representation and which representations are legal) should be added to the class documentation:
 
 ```typescript
 /**
@@ -426,7 +426,7 @@ const seats = new Roster<Seat>(400, (a, b) => a.equals(b));
 
 The class still knows nothing about `T`, which is what lets one implementation serve every kind of member. The missing knowledge is passed in rather than assumed.
 
-This tradeoff---between specialization, which restricts a piece of code, and generalization, which may require extra abstraction---applies well beyond generics. When we write a class generically, avoiding commitment to a particular type or implementation, we also lost the knowledge that was encoded in that type or implementation. To implement any behaviour that depends on that knowledge, we'll need to get that knowledge from somewhere else. For each commitment, ask whether the freedom gained is worth the knowledge the class gives up.
+This trade-off---between specialisation, which restricts a piece of code, and generalisation, which may require extra abstraction---applies well beyond generics. When we write a class generically, avoiding commitment to a particular type or implementation, we also lost the knowledge that was encoded in that type or implementation. To implement any behaviour that depends on that knowledge, we'll need to get that knowledge from somewhere else. For each commitment, ask whether the freedom gained is worth the knowledge the class gives up.
 
 There is a second option. Instead of passing the equivalence operation in, we could restrict `T` to types that are guaranteed to provide an equivalence operation. This requires a way for us to say "the types that offer these operations",  which is the subject of the next chapter.
 

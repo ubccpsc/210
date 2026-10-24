@@ -107,7 +107,7 @@ class Playlist {
 
 Consider where you would look in this class to change how recently played songs are tracked, to adjust how ratings are averaged, or to export the playlist. You may have to look everywhere! 
 
-Even the need to add comments to delineate groups of related members (rather than it being obvious from the code organization) suggests that the design has bloated into a god class. 
+Even the need to add comments to delineate groups of related members (rather than it being obvious from the code organisation) suggests that the design has bloated into a god class. 
 
 </details>
 
@@ -137,7 +137,7 @@ That is still cohesion, where the unit is the smallest set of state that must st
 A poorly decomposed class is spottable from its code: it enforces more than one invariant, it has fields the invariant never mentions, it has methods that maintain some other invariant, or its name does not match the fields and methods it contains. 
 
 
-How do we spot these symptoms of poor decomposition? First, try to name the invariant the class claims to protect. Then, look at each part of the class (fields and methods), and analyze whether each of those parts serves the invariant. If a field is not used in the class invariant at all, this is an early symptom that a second responsibility has snuck into the class. (One common exception: a field that holds the object's identity, such as a name or id.)
+How do we spot these symptoms of poor decomposition? First, try to name the invariant the class claims to protect. Then, look at each part of the class (fields and methods), and analyse whether each of those parts serves the invariant. If a field is not used in the class invariant at all, this is an early symptom that a second responsibility has snuck into the class. (One common exception: a field that holds the object's identity, such as a name or id.)
 
 
 For a class that only represents a value, or a stateless helper, we can apply the same analysis, but using _the single concept_ the class represents, rather than the invariant. A field that has nothing to do with that concept may signal a poor decomposition.
@@ -270,19 +270,19 @@ Decomposition splits a responsibility out, and composition combines the pieces i
 
 The navigation invariant does not mention `playHistory`... so doesn't this violate our test for cohesion? The difference is _ownership_. 
 
-While `playHistory` is a field, it is not _state_ that the navigation invariant constrains. It is a _collaborator_ . `Playlist` has it as a field so itcan delegate a responsibility. A field that holds a collaborator is part of how the class does its job, not a second invariant hidden inside it. The test still works: ask whether the field is governed by the class's own invariant. The songs and index are, the history collaborator is not, and `Playlist` never touches its internals.
+While `playHistory` is a field, it is not _state_ that the navigation invariant constrains. It is a _collaborator_. `Playlist` has it as a field so it can delegate a responsibility. A field that holds a collaborator is part of how the class does its job, not a second invariant hidden inside it. The test still works: ask whether the field is governed by the class's own invariant. The songs and index are, the history collaborator is not, and `Playlist` never touches its internals.
 
 </details>
 
 ## Designing a Decomposition
 
-We've been talking about analyzing existing code, because most of the time, when you interact with code, you'll be interacting with an existin code base.
+We've been talking about analysing existing code, because most of the time, when you interact with code, you'll be interacting with an existing code base.
 But what about if we are designing a system for the first time? We can use the same principles we've been discussion to try to design a "good" decomposition as follows:
 
 1. Identify the invariants the system must maintain.
 2. For each invariant, identify the state it constrains.
 3. Give each invariant its own class, owning the state and the operations on it.
-4. Name each class for its single responsibility. (If it is hard to find a name, the split may be poor. A cohesive class is easy to name because it does one thing. A class that is hard to name usually does too much. We may be tempted in that case to use a vague name (e.g. "MusicOrganizer"), but this is not helpful for maintenance. )
+4. Name each class for its single responsibility. (If it is hard to find a name, the split may be poor. A cohesive class is easy to name because it does one thing. A class that is hard to name usually does too much. We may be tempted in that case to use a vague name (e.g. "MusicOrganiser"), but this is not helpful for maintenance. )
 5. Where one responsibility needs another, have one class hold the other and delegate to it.
 
 
@@ -296,7 +296,7 @@ If we were defining our music example from ground up, we would get to the split 
 
 
 
-## Judgment Calls
+## Judgement Calls
 
 The `Playlist` and `PlayHistory` split is clear-cut, because the two invariants share no state. Most real decisions are less obvious. For instance:
 
@@ -321,7 +321,7 @@ Software design involves balancing these relative costs, so, out-of-context, it 
 
 A cohesive decomposition gives every invariant exactly one home. We can understand each class based on its one invariant; test the class against it; and change the class in isolation from other concerns.  Because each class is named for its single responsibility, an engineer can find the class they need. 
 
-Then, we can use composition and delegation to combine these small classes into a working system, while still keeping each class responsible for its own state and rulese. As a result, a design can grow from one class to many while each class stays small enough to reason about and easy to find.
+Then, we can use composition and delegation to combine these small classes into a working system, while still keeping each class responsible for its own state and rules. As a result, a design can grow from one class to many while each class stays small enough to reason about and easy to find.
 
 Giving each invariant a single home settles which class is _responsible_ for it, but it does not yet let that class _defend_ it. Every class we have written keeps its state in fields: but so far, any code holding the object can read and write those fields. So, while the class owns the invariant, other code can break it. In [Chapter 12](./03_encapsulation#hiding-the-representation), we'll resolve this problem by learning new language features that allow us to hide those fields from other parts of the code base.
 
@@ -334,8 +334,8 @@ Work through a decomposition for a problem you have not seen before:
 
 1. Apply the process from [Designing a Decomposition](#designing-a-decomposition): list the invariants this system must maintain, then identify the state each one constrains.
 2. Propose at least two different decompositions into classes. For each, name the classes and state the single invariant each one owns.
-3. Identify which splits are clear-cut, where the invariants share no state, and which are judgment calls, where a rule is small enough that keeping it inline is also reasonable.
-4. Make one judgment call and argue it both ways: when would you extract a separate class, and when would you keep the rule inline?
+3. Identify which splits are clear-cut, where the invariants share no state, and which are judgement calls, where a rule is small enough that keeping it inline is also reasonable.
+4. Make one judgement call and argue it both ways: when would you extract a separate class, and when would you keep the rule inline?
 
 As a starting point, <span class="hint">a message has an author, text, and a time</span>. <span class="hint">A conversation keeps its messages in order</span>. <span class="hint">Read receipts record how far each member has read</span>. <span class="hint">A mute setting belongs to a member rather than to the conversation</span>. The exercise is about deciding whether each of these becomes its own class.
 

@@ -120,7 +120,7 @@ The `private` modifier it only enforced in your source code, not for any JavaScr
 
 JavaScript has a separate feature for information hiding: fields whose names begin with `#`, stay private at runtime as well. This course uses TypeScript's `private` throughout, and you do not need `#` names. 
 
-For the purposes of the course, you don't need to know either of these details. (This is one way in which this course is *not* a course teaching you the ins-and-outs of TypeScript) But, we want to point it out so that you can make an educated choice about what language you choose in the future. In particular, if you want to truly create a secure system in in the future, you may prefer a language that enforces private more strictly (Java, C++, Rust ...). 
+For the purposes of the course, you don't need to know either of these details. (This is one way in which this course is *not* a course teaching you the ins-and-outs of TypeScript) But, we want to point it out so that you can make an educated choice about what language you choose in the future. In particular, if you want to truly create a secure system in the future, you may prefer a language that enforces private more strictly (Java, C++, Rust ...). 
 
 </details>
 
@@ -245,7 +245,7 @@ The structures you built with `define-struct` in CPSC 110 were immutable. Once m
 
 ### When References Escape
 
-We emphasized references in [Chapter 6](../part1/06_state-mutation#copies-and-references) because their presence makes programming... well, much more complex. 
+We emphasised references in [Chapter 6](../part1/06_state-mutation#copies-and-references) because their presence makes programming... well, much more complex. 
 
 For instance. A caller often needs to _see_ the guests, to print them at the door or count them. So why not provide an accessor like this?
 
@@ -454,7 +454,7 @@ test("the array from guests() cannot change the list", () => {
 This is specification-based testing by construction. 
 ---->
 
-With the representation hidden, all a test can check is the behaviour the class exposes. This gives us another cost-benefit tradeoff in software design. An object is testable only to the extent that its important behaviour is observable through its public methods.  If a `GuestList` could fall into an invalid state but offered no way to observe its contents, no test could catch the fault.
+With the representation hidden, all a test can check is the behaviour the class exposes. This gives us another cost-benefit trade-off in software design. An object is testable only to the extent that its important behaviour is observable through its public methods.  If a `GuestList` could fall into an invalid state but offered no way to observe its contents, no test could catch the fault.
 
 Designing for testability means giving callers, and therefore tests, enough public behaviour to confirm the invariant holds... without exposing the representation that would let them break it. We can only write the third test above (`"the array from guests() ..."`) because `guests()` and `size()` together let us observe that the escape attempt failed.
 
@@ -540,7 +540,7 @@ A test can now check the lock state directly instead of probing it with a `try`/
 
 #### Designing for Encapsulation
 
-Let's close by summarizing the process we followed throughout this chapter's running example, which led our encapsulation design:
+Let's close by summarising the process we followed throughout this chapter's running example, which led our encapsulation design:
 
 1. _Name the invariant_, and choose a `private` representation that can express it.
 2. _Establish the invariant in the constructor_, rejecting input it cannot satisfy.

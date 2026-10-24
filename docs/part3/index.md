@@ -6,7 +6,7 @@ A working system is not finished. Requirements keep arriving after the first rel
 
 This changes your initial starting point. In Parts 1 and 2 you mostly wrote new code into workspaces over which you had full control. From here on, the more common situation is the professional one: the system already exists, much of its code was written by someone else (or by you, months ago, which amounts to the same thing), and you are tasked with fixing, improving, or extending it while ensuring that the rest of the system keeps working.
 
-This part of the course is oriented around three high-level questions. The first is structure: how do the pieces of a system depend on one another, and what does a change to one of them cost the others? Judging that dependency structure deliberately, the way [Part 2](../part2/index) judged cohesion, is our first task. The second question is around boundaries: how does a program consume data and services it does not control, and how does it publish a contract of its own for others to build on? This is also where [Part 2](../part2/index)'s open question is settled, since code that depends on a contract rather than a class still needs somebody to decide which implementation it receives. The third question is practice: the everyday workflows of evolution, judging and improving code quality, localizing and fixing faults, and adding features, all protected by the verification habits we established in [Part 1](../part1/index).
+This part of the course is oriented around three high-level questions. The first is structure: how do the pieces of a system depend on one another, and what does a change to one of them cost the others? Judging that dependency structure deliberately, the way [Part 2](../part2/index) judged cohesion, is our first task. The second question is around boundaries: how does a program consume data and services it does not control, and how does it publish a contract of its own for others to build on? This is also where [Part 2](../part2/index)'s open question is settled, since code that depends on a contract rather than a class still needs somebody to decide which implementation it receives. The third question is practice: the everyday workflows of evolution, judging and improving code quality, localising and fixing faults, and adding features, all protected by the verification habits we established in [Part 1](../part1/index).
 
 <details class="tooltip deep-dive">
 <summary>Where the Time Goes</summary>
@@ -27,7 +27,7 @@ By the end of Part 3, you will be able to:
 
 4. _Design and evolve APIs as contracts_, exposing small, stable surfaces and judging which changes are compatible with existing clients and which break them.
 
-5. _Carry out the everyday work of evolution_, localizing and fixing faults, refactoring behind a regression suite, and adding features by extension rather than disturbance.
+5. _Carry out the everyday work of evolution_, localising and fixing faults, refactoring behind a regression suite, and adding features by extension rather than disturbance.
 
 ## Chapter Overview
 
@@ -47,7 +47,7 @@ Part 3 covers three connected themes across six chapters, one per lecture.
 
 4. [Code Quality and Refactoring](./04_refactoring) originates from a fact of long-lived systems: working code can still be hard to work on. This chapter develops judgement about internal quality, readability, complexity, and the smells that signal trouble, and introduces refactoring: improving structure without changing behaviour, with the regression testing practice from [Chapter 9](../part1/09_validation) used to provide trust that the system remains working as expected.
 
-5. [Debugging and Fault Localization](./05_debugging) treats a bug report as a claim that the system misbehaves, usually far from the fault that causes it. The chapter looks at systematic debugging: reproducing the failure, forming and testing hypotheses, localizing the fault, and fixing and checking the original problem has been resolved.
+5. [Debugging and Fault Localisation](./05_debugging) treats a bug report as a claim that the system misbehaves, usually far from the fault that causes it. The chapter looks at systematic debugging: reproducing the failure, forming and testing hypotheses, localising the fault, and fixing and checking the original problem has been resolved.
 
 6. [Adding New Features](./06_new_features) closes with feature requests, and with the observation that a feature's cost depends less on the feature than on whether the design anticipated it. It looks at the process of extending systems: reading unfamiliar code, finding the extension points the existing design left open, creating one where none exists, planning and making the change, and, as with debugging, checking that everything that worked before still works.
 

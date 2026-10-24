@@ -464,13 +464,13 @@ class <Name><T extends <Interface>> {
 
 Constraining with an interface or passing in a higher-order function is a design decision; each has trade-offs. Constraining with `extends` gives the class knowledge but limits which types it accepts. `Roster<Seat>` works only if `Seat` implements `Identifiable`. `Roster<string>` no longer compiles at all, because a string has no `sameAs` method. Passing a function in keeps the class usable with every type, including ones you did not write and primitives you cannot change, but requires every caller to supply the comparison. As a rule of thumb, constrain when the operation is part of what the members are and you control those types. Pass the operation in when the members are types you do not control, or when different callers need different notions of sameness.
 
-Either way, the constraint should name the smallest interface that supplies what the class needss. A constraint is a demand made of every type that wants to be a member, and demanding operations the class never calls restricts the class for no benefit.
+Either way, the constraint should name the smallest interface that supplies what the class needs. A constraint is a demand made of every type that wants to be a member, and demanding operations the class never calls restricts the class for no benefit.
 
 #### Depending on the Contract
 
 An interface is the public surface of a class, extracted into a named type that any class can implement and any caller can depend on. Depending on an interface rather than a concrete class is the strongest form of information hiding. The previous two chapters let a class change its representation without affecting callers. An interface lets the _entire class_ behind the contract change without affecting callers. Interfaces allow us to make code that follows contracts very directly, by naming contracts as interfaces, keeping them small and well documented, and writing the rest of the program against them.
 
-Interfaces define a boundary with a contract one one side, and several classes implementing it on the other side. This is a form of _polymorphism_; the same method call executing different based on which class it's defined in. In the next chapter, we'll explore other forms of polymorphism, including allowing different classes to share method implementations that are identical, while still allowing those classes to differ in the implementation of other methods. 
+Interfaces define a boundary with a contract on one side, and several classes implementing it on the other side. This is a form of _polymorphism_; the same method call executing different based on which class it's defined in. In the next chapter, we'll explore other forms of polymorphism, including allowing different classes to share method implementations that are identical, while still allowing those classes to differ in the implementation of other methods. 
 
 <details class="tooltip exercise">
   <summary>Exercise: Input Validation Rules</summary>

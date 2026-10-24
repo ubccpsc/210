@@ -104,7 +104,7 @@ Terms introduced in **bold** throughout the textbook, linked to the section wher
 - **Equivalence Class Partitioning** — [Checking Invariants § Deriving Tests](/part1/03_checking-invariants#deriving-tests)
 - **Equivalence Classes** — [Checking Invariants § Equivalence Classes](/part1/03_checking-invariants#equivalence-classes)
 - **Erroneous Outcome** — [Checking Invariants § Erroneous Outcomes](/part1/03_checking-invariants#erroneous-outcomes)
-- **Error** — [Debugging and Fault Localization § Fault, Error, Failure](/part3/05_debugging#fault-error-failure)
+- **Error** — [Debugging and Fault Localisation § Fault, Error, Failure](/part3/05_debugging#fault-error-failure)
 - **Event** — [Asynchronous Effects and Time § Callbacks](/part1/07_async#callbacks)
 - **Event Loop** — [Asynchronous Effects and Time § Callbacks](/part1/07_async#callbacks)
 - **Event-Driven Programming** — [Asynchronous Effects and Time § Callbacks](/part1/07_async#callbacks)
@@ -117,14 +117,14 @@ Terms introduced in **bold** throughout the textbook, linked to the section wher
 
 ## F
 
-- **Failure** — [Debugging and Fault Localization § Fault, Error, Failure](/part3/05_debugging#fault-error-failure)
+- **Failure** — [Debugging and Fault Localisation § Fault, Error, Failure](/part3/05_debugging#fault-error-failure)
 - **Failure, Returned** — [Designing for Failure § Results or Exceptions?](/part1/08_errors#results-or-exceptions)
 - **Failure, Thrown** — [Designing for Failure § Results or Exceptions?](/part1/08_errors#results-or-exceptions)
 - **Falsy** — [Uncovered Language Features § Truthiness](/reference/language-features#truthiness)
 - **Fan-In** — [Coupling and Dependencies § What Coupling Is](/part3/01_coupling#what-coupling-is)
 - **Fan-Out** — [Coupling and Dependencies § What Coupling Is](/part3/01_coupling#what-coupling-is)
-- **Fault** — [Debugging and Fault Localization § Fault, Error, Failure](/part3/05_debugging#fault-error-failure)
-- **Fault Localization** — [Debugging and Fault Localization](/part3/05_debugging#debugging-and-fault-localization)
+- **Fault** — [Debugging and Fault Localisation § Fault, Error, Failure](/part3/05_debugging#fault-error-failure)
+- **Fault Localisation** — [Debugging and Fault Localisation](/part3/05_debugging#debugging-and-fault-localisation)
 - **Field** — [Building Abstractions with Classes § Class State](/part2/01_abstraction#class-state)
 - **Fragile Base Class Problem** — [Extending Behaviour Through Polymorphism § Composition Over Inheritance](/part2/06_extension#composition-over-inheritance)
 - **Fulfilled** — [Asynchronous Effects and Time § Promises: A Future Value](/part1/07_async#promises-a-future-value)
