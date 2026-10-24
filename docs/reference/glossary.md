@@ -154,6 +154,7 @@ Terms introduced in **bold** throughout the textbook, linked to the section wher
 - **Implementation Freedom** — [Growing Systems with the Open/Closed Principle § The Principles Together](/part2/07_ocp#the-principles-together)
 - **Index** — [Arrays and Iteration § Creating and Using Arrays](/part1/05_arrays#creating-and-using-arrays)
 - **Information Hiding** — [Encapsulating What Varies](/part2/03_encapsulation#encapsulating-what-varies)
+- **Inheritance** — [Extending Behaviour Through Polymorphism](/part2/06_extension#extending-behaviour-through-polymorphism)
 - **Instance** — [Building Abstractions with Classes § Classes and Constructors](/part2/01_abstraction#classes-and-constructors)
 - **Instantiating** — [Building Abstractions with Classes § Classes and Constructors](/part2/01_abstraction#classes-and-constructors)
 - **Interface** — [Defining Boundaries with Interfaces](/part2/05_boundaries#defining-boundaries-with-interfaces)
@@ -284,8 +285,11 @@ Terms introduced in **bold** throughout the textbook, linked to the section wher
 - **Strongly-Typed** — [UBC CPSC 210: Software Construction § Language Choice](/index#language-choice)
 - **Structure-Based Testing** — [Validating Behaviour § Structure-Based Testing](/part1/09_validation#structure-based-testing)
 - **Stub** — [Checking Invariants § The Testing Process](/part1/03_checking-invariants#the-testing-process)
+- **Subclass** — [Extending Behaviour Through Polymorphism § Abstract Base Classes](/part2/06_extension#abstract-base-classes)
 - **Substitutability** — [Growing Systems with the Open/Closed Principle § The Principles Together](/part2/07_ocp#the-principles-together)
+- **Subtype** — [Extending Behaviour Through Polymorphism § Honouring the Contract](/part2/06_extension#honouring-the-contract)
 - **Successful Outcome** — [Checking Invariants § Erroneous Outcomes](/part1/03_checking-invariants#erroneous-outcomes)
+- **Supertype** — [Extending Behaviour Through Polymorphism § Honouring the Contract](/part2/06_extension#honouring-the-contract)
 - **Syntax** — [Learning a New Programming Language § Programming Languages](/part1/01_new-language#programming-languages)
 
 ## T

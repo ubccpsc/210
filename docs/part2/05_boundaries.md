@@ -9,7 +9,7 @@ An **interface** lets the class name be hidden as well. An interface is a named 
 This chapter covers: 
 - the `interface` keyword and what belongs in an interface;
 - how a class commits to an interface with `implements`; 
-- the difference between the type a variable is declared with and the type of the object it holds at run time; and 
+- the difference between the type a variable is declared with and the type of the object it holds at runtime; and 
 - why depending on an interface rather than a concrete class is one of the most useful decisions in a design. 
 
 This chapter is also the foundation for the next two chapters, on _polymorphism_ and on _extending_ a system without modifying it.
@@ -123,8 +123,9 @@ Here's an interface expressing the send capability for our channels:
  */
 interface Notifier {
     /**
-     * Delivers `message` over this channel, returning once delivery has
-     * been attempted.
+     * Delivers an alert carrying `message` over this channel, formatted and
+     * shortened as the channel requires, returning once delivery has been
+     * attempted.
      *
      * @param {string} message the alert text; callers pass a non-empty string
      */
@@ -134,7 +135,7 @@ interface Notifier {
 
 
 
-`Notifier` contains a single method signature and no fields. This is intentional, because an interface describes the operations a caller may invoke, not the state or representation behind them. In [Chapter 12](./03_encapsulation.html), we discussed which methods a class should expose. We can use interfaces to give that public surface a name of its own, separate from any class.
+`Notifier` contains a single method signature and no fields. This is intentional, because an interface describes the operations a caller may invoke, not the state or representation behind them. In [Chapter 12](./03_encapsulation#choosing-what-to-expose), we discussed which methods a class should expose. We can use interfaces to give that public surface a name of its own, separate from any class.
 
 Because an interface is a contract that one body of code implements and another depends on, it should be documented carefully. Every member is part of a promise that callers rely on and implementers must keep. So while documentation is mostly "good practice" for a function, it is close to essential for an interface.
 
@@ -182,28 +183,34 @@ class EmailNotifier implements Notifier {
     }
 
     public send(message: string): void {
-        // deliver `message` to this.address over email
+        if (message.length === 0) {
+            return; // an empty alert is never delivered
+        }
+        const text: string = "[ALERT] " + message;
+        // deliver `text` to this.address over email
     }
 }
 
 class SmsNotifier implements Notifier {
-    private readonly countryCode: number;
     private readonly phone: string;
 
-    public constructor(phone: string, countryCode: number) {
-        this.countryCode = countryCode;
+    public constructor(phone: string) {
         this.phone = phone;
     }
 
     public send(message: string): void {
-        // deliver `message` to this.phone over SMS
+        if (message.length === 0) {
+            return; // an empty alert is never delivered
+        }
+        const text: string = "[ALERT] " + message;
+        // deliver `text` to this.phone over SMS
     }
 }
 ```
 
 </CollapsibleCode>
 
-Each class has its own private representation (an email address, a country code and a phone number) and its own way of delivering a message. Each class is encapsulated as per [Chapter 12](./03_encapsulation.html). The only new bit is that both classes share a public type, `Notifier`, that neither of them owns.
+Each class has its own private representation (an email address and a phone number) and its own way of delivering a message. Each class is encapsulated as per [Chapter 12](./03_encapsulation#hiding-the-representation). The only new bit is that both classes share a public type, `Notifier`, that neither of them owns.
 
 ```plantuml
 @startuml
@@ -234,7 +241,7 @@ Many languages, such as Java, are _nominal_: a class is a `Notifier` only if it 
 TypeScript is weird in that it checks types by _shape_ (the term we've been using throughout the book to describe the property names and types of an object), not by name. A value is acceptable wherever a type is expected if it has the required members, whatever it was declared as, so a class with a matching `send` method can be used as a `Notifier` even without writing `implements Notifier`. `implements` is still worth writing, because it declares intent and turns a silent mismatch into a clear error. With `implements Notifier`, forgetting or misspelling `send` fails at the class, where the mistake is, rather than later at some distant call site. 
 
 
-You can read more in the [Uncovered Language Features](../reference/language-features.html) reference page.
+You can read more in the [Uncovered Language Features](../reference/language-features#structural-typing) reference page.
 
 </details>
 
@@ -246,7 +253,7 @@ Once a class implements an interface, an object of that class can be held in a v
 const alerts: Notifier = new EmailNotifier("ops@example.com");
 ```
 
-Two different types are involved. The **apparent type** (static type) is the one written in the code, `Notifier`, and is what the compiler knows about the variable. The **actual type** (dynamic type) is the type of the object that exists at run time, `EmailNotifier`. This is the static and dynamic distinction from [Part 1](../part1/index): the apparent type belongs to the static view the compiler checks, and the actual type belongs to the dynamic view that exists only when the program runs.
+Two different types are involved. The **apparent type** (static type) is the one written in the code, `Notifier`, and is what the compiler knows about the variable. The **actual type** (dynamic type) is the type of the object that exists at runtime, `EmailNotifier`. This is the static and dynamic distinction from [Part 1](../part1/index): the apparent type belongs to the static view the compiler checks, and the actual type belongs to the dynamic view that exists only when the program runs.
 
 The compiler restricts what you can do with a variable based on its _apparent_ (or static) type.Through an apparent type of `Notifier` you may call `send`, because the contract promises it. But you can do nothing more than that:
 
@@ -299,8 +306,8 @@ class RecordingNotifier implements Notifier {
 }
 
 test("alertAll delivers the message over every channel", () => {
-    const a = new RecordingNotifier();
-    const b = new RecordingNotifier();
+    const a: RecordingNotifier = new RecordingNotifier();
+    const b: RecordingNotifier = new RecordingNotifier();
 
     alertAll([a, b], "deploy finished");
 
@@ -353,17 +360,26 @@ A class can implement more than one interface by listing them both:
 
 ```typescript
 class SmsNotifier implements Notifier, Confirmable {
-    // send is unchanged from above
+    /** Whether the provider acknowledged the last send; false before any send. */
+    private acknowledged: boolean = false;
 
+    // phone, constructor and send are as above, except that send also
+    // records the provider's acknowledgement in this.acknowledged
+
+    /**
+     * Reports whether the provider acknowledged the last send.
+     *
+     * @returns {boolean} true once the provider has acknowledged the last send
+     */
     public wasDelivered(): boolean {
-        // report the provider's acknowledgement
+        return this.acknowledged;
     }
 }
 ```
 
 ... and a channel that cannot confirm anything stays a plain `Notifier` and is never forced to fake an operation it does not support.
 
-By splitting these up, we also allow each caller to depend only on the contract that caller needs. Code that only sends takes a `Notifier`, and code that only checks receipts takes a `Confirmable`.  In [Chapter 15](./06_extension.html), we'll see how to specify when code needs both.
+By splitting these up, we also allow each caller to depend only on the contract that caller needs. Code that only sends takes a `Notifier`, and code that only checks receipts takes a `Confirmable`.  In [Chapter 15](./06_extension#is-a-and-can-do), we'll see how to specify when code needs both.
 
 ```plantuml
 @startuml
@@ -390,13 +406,13 @@ SmsNotifier : +wasDelivered()
 ```
 <!-- caption="SmsNotifier implementing two interfaces." -->
 
-Keeping interfaces small is the interface-level version of the [cohesion principle](./02_decomposition.html) that favours classes with a single responsibility. A small, focused interface describes one capability. A large interface that bundles several forces implementers to support unrelated operations, and forces callers to depend on more than they use. The guidance that many small interfaces are better than one large one is called the **interface segregation principle**. 
+Keeping interfaces small is the interface-level version of the cohesion principle from [Chapter 11](./02_decomposition#single-responsibility) that favours classes with a single responsibility. A small, focused interface describes one capability. A large interface that bundles several forces implementers to support unrelated operations, and forces callers to depend on more than they use. The guidance that many small interfaces are better than one large one is called the **interface segregation principle**. 
 
-Small interfaces also preserve [implementation freedom](./04_flexibility.html). Every operation a contract promises becomes behaviour callers may rely on, so a large interface exposes more of each implementation, while a small one keeps more of it hidden and free to change.
+Small interfaces also preserve the implementation freedom described in [Chapter 13](./04_flexibility#what-makes-a-change-safe). Every operation a contract promises becomes behaviour callers may rely on, so a large interface exposes more of each implementation, while a small one keeps more of it hidden and free to change.
 
 ## Constraining Generics
 
-Remember the problem we ended [Chapter 13](./04_flexibility.html) with, where `Roster<T>` was more generic than `GuestList`, but couldn't compare its members? The solution we offered was to directly pass in a compare function---higher-order functions to the rescue again. But while higher-order functions are powerful, many people find them hard to reason about, and hard-to-reason-about code is error-prone code. 
+Remember the problem we ended [Chapter 13](./04_flexibility#what-flexibility-costs) with, where `Roster<T>` was more generic than `GuestList`, but couldn't compare its members? The solution we offered was to directly pass in a compare function---higher-order functions to the rescue again. But while higher-order functions are powerful, many people find them hard to reason about, and hard-to-reason-about code is error-prone code. 
 
 Interfaces provide us another solution. Instead of passing in a compare function, we can first write an interface that captures whether a type is comparable:
 ```typescript
