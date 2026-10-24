@@ -121,7 +121,7 @@ _Make the wrong call hard to write._ Consider an operation that takes a carrier 
 public locate(carrierId: string, trackingNumber: string): Promise<Result<Shipment, TrackingError>>
 ```
 
-Both parameters are strings, so they can be swapped without the compiler noticing. The call `locate("9K4T", "carrier-a")` compiles and then fails at run time. The type checker cannot help here, because both parameters have the same type. An options object fixes this by naming each argument at the call site:
+Both parameters are strings, so they can be swapped without the compiler noticing. The call `locate("9K4T", "carrier-a")` compiles and then fails at runtime. The type checker cannot help here, because both parameters have the same type. An options object fixes this by naming each argument at the call site:
 
 ```typescript
 // exported: the request a client passes to locate
@@ -163,7 +163,7 @@ A client can now branch on `kind`, which we promise, rather than on the wording 
 <details class="tooltip deep-dive">
 <summary>Adding a Failure Is a Breaking Change</summary>
 
-There is an asymmetry here that is easy to miss. Adding an _operation_ to an API is safe, but adding a new _failure case_ to an existing operation usually is not. A client that handles the three cases above has code that is complete today. If we publish a fourth `kind`, that code becomes incomplete. It still compiles, because nothing requires it to handle every case, and at run time none of its branches match the new case. The client did nothing wrong and received no warning.
+There is an asymmetry here that is easy to miss. Adding an _operation_ to an API is safe, but adding a new _failure case_ to an existing operation usually is not. A client that handles the three cases above has code that is complete today. If we publish a fourth `kind`, that code becomes incomplete. It still compiles, because nothing requires it to handle every case, and at runtime none of its branches match the new case. The client did nothing wrong and received no warning.
 
 Failure cases can still be added, but adding one should be treated like any other breaking change. It needs a version bump, an announcement, and documentation that told clients in advance whether the set of failures was complete. An API that says "these are the only errors this operation produces" makes a much stronger promise than one that says "these errors include", and the two should not be confused.
 

@@ -60,7 +60,7 @@ const b = new GuestList(2);
 b.add("alice");
 ```
 
-Are `a` and `b` the same? In [Chapter 10](./01_abstraction.html) we learned that two objects are distinct (according to `===`) even when their contents match. `a === b` is `false`, because `===` on objects compares identity, asking whether two names refer to the same object in memory. 
+Are `a` and `b` the same? In [Chapter 10](./01_abstraction#objects-and-references) we learned that two objects are distinct (according to `===`) even when their contents match. `a === b` is `false`, because `===` on objects compares identity, asking whether two names refer to the same object in memory. 
 
 But both these objects represent for the same abstract value: a guest list for a venue for two holding only Alice. So we may *want* to treat these as equal in some code. We can separate these two notions of sameness as follows:
 
@@ -328,7 +328,7 @@ guests.add(42);              // compile error: 42 is not a string
 const seats = new Roster<Seat>(400);
 ```
 
-One `Roster` class now serves every kind of member, with full type checking for each. You have been using classes written this way since [Chapter 12](./03_encapsulation.html): `new Set<string>()` and `new Map<string, number>()` use generic types too, with the element and key types supplied where the object is created.
+One `Roster` class now serves every kind of member, with full type checking for each. You have been using classes written this way since [Chapter 12](./03_encapsulation#changing-representations): `new Set<string>()` and `new Map<string, number>()` use generic types too, with the element and key types supplied where the object is created.
 
 
 ## What Flexibility Costs
@@ -432,7 +432,7 @@ There is a second option. Instead of passing the equivalence operation in, we co
 
 #### Implementation Freedom
 
-In [Chapter 12](./03_encapsulation.html), we saw how, by hiding a class's internal representation, we could gain implementation freedom, and change an internal representation without affecting users of a class.
+In [Chapter 12](./03_encapsulation#changing-representations), we saw how, by hiding a class's internal representation, we could gain implementation freedom, and change an internal representation without affecting users of a class.
 
 In this chapter, we saw how making an internal representation `private` is not _sufficient_ for implementation freedom. We preserve implementation freedom through careful design. 
 

@@ -401,7 +401,7 @@ PlayObserver <|.. Playlist
 ```
 <!-- caption="The same notification, with the compile-time dependency pointing one way." -->
 
-`PlayHistory` still calls `Playlist` at run time, but at compile time it depends only on `PlayObserver`, and `PlayObserver` does not depend on `Playlist`. The interface does not know which class implements it, so the cycle is broken. `PlayHistory` can now be tested with a stub observer that records the calls it receives.
+`PlayHistory` still calls `Playlist` at runtime, but at compile time it depends only on `PlayObserver`, and `PlayObserver` does not depend on `Playlist`. The interface does not know which class implements it, so the cycle is broken. `PlayHistory` can now be tested with a stub observer that records the calls it receives.
 
 _Extract a third class._ When both classes are doing work that belongs to neither of them, that logic can move into a new class that depends on both, and that neither depends on. This is the right choice when the rule "three plays in a week makes a favourite" is a policy in its own right.
 

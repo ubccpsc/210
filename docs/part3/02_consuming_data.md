@@ -71,7 +71,7 @@ Two properties of JSON matter for this chapter. The first is what JSON can repre
 
 The second property is what happens to our _types_ when text is turned back into values.
 
-`JSON.parse` returns `any`. It has no other choice, because the text is not known until run time, so the compiler has nothing to inspect. The same is true of `response.json()`, which reads the body of a web service response. [Chapter 7](../part1/07_async) used a line like this one:
+`JSON.parse` returns `any`. It has no other choice, because the text is not known until runtime, so the compiler has nothing to inspect. The same is true of `response.json()`, which reads the body of a web service response. [Chapter 7](../part1/07_async) used a line like this one:
 
 ```typescript
 const report: StationReport = await response.json();
@@ -96,11 +96,11 @@ This is the first time we have needed `as`. It tells the compiler that a value h
 <expression> as <Type>
 ```
 
-`as` does much less than it appears to. It performs no conversion and runs no check. It produces no code at all. After compilation, the expression is unchanged, and the only difference is that the compiler no longer reports an error. At run time, the value is whatever it was before, whether or not it has the claimed shape.
+`as` does much less than it appears to. It performs no conversion and runs no check. It produces no code at all. After compilation, the expression is unchanged, and the only difference is that the compiler no longer reports an error. At runtime, the value is whatever it was before, whether or not it has the claimed shape.
 
 TypeScript calls this operator a _type assertion_. This chapter calls it a _claim_ instead, to avoid confusion with the `assert` checks from [Chapter 3](../part1/03_checking-invariants#precondition-violations). Those do the opposite. An `assert` tests a condition while the program runs, and halts when the condition is false. `as` tests nothing and cannot fail.
 
-There is one narrow legitimate use, described in the next section, where the surrounding code has already established the fact being claimed. Everywhere else, using `as` to make a type error go away replaces a compile-time error with a fault at run time.
+There is one narrow legitimate use, described in the next section, where the surrounding code has already established the fact being claimed. Everywhere else, using `as` to make a type error go away replaces a compile-time error with a fault at runtime.
 
 </details>
 
@@ -264,7 +264,7 @@ const stored = JSON.stringify(tracker);               // serialises the fields
 const restored = JSON.parse(stored) as ParcelTracker; // no methods on this
 ```
 
-Serialisation records an object's fields, but not its class or its methods. Deserialisation returns a plain object with the right property names and none of the behaviour. Calling a method on it fails at run time, even though the claim made the code compile. A `Map` is worse, because it serialises to `{}` and silently loses every entry.
+Serialisation records an object's fields, but not its class or its methods. Deserialisation returns a plain object with the right property names and none of the behaviour. Calling a method on it fails at runtime, even though the claim made the code compile. A `Map` is worse, because it serialises to `{}` and silently loses every entry.
 
 An object with behaviour therefore needs an explicit reconstruction step, which is another conversion function. The function reads the deserialised fields, validates them, and passes them to the real constructor. The object is then created the same way as every other instance, and its invariant is established the same way. Saving state to a file and reading it back is the same problem as reading a carrier's response, and it has the same solution.
 

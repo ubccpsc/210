@@ -323,7 +323,7 @@ A cohesive decomposition gives every invariant exactly one home. We can understa
 
 Then, we can use composition and delegation to combine these small classes into a working system, while still keeping each class responsible for its own state and rulese. As a result, a design can grow from one class to many while each class stays small enough to reason about and easy to find.
 
-Giving each invariant a single home settles which class is _responsible_ for it, but it does not yet let that class _defend_ it. Every class we have written keeps its state in fields: but so far, any code holding the object can read and write those fields. So, while the class owns the invariant, other code can break it. In [Chapter 12](./03_encapsulation.html), we'll resolve this problem by learning new language features that allow us to hide those fields from other parts of the code base.
+Giving each invariant a single home settles which class is _responsible_ for it, but it does not yet let that class _defend_ it. Every class we have written keeps its state in fields: but so far, any code holding the object can read and write those fields. So, while the class owns the invariant, other code can break it. In [Chapter 12](./03_encapsulation#hiding-the-representation), we'll resolve this problem by learning new language features that allow us to hide those fields from other parts of the code base.
 
 <details class="tooltip exercise">
   <summary>Exercise: Finding the Classes</summary>

@@ -1,6 +1,6 @@
 # Encapsulating What Varies
 
-In [Part 1](../part1/index), we covered how to specify, check, and maintain invariants. Specifying them in documentation is easy enough, but gives us no guarantees that they will actually hold. We saw how to establish invariants with `makeX` functions. We saw how to maintain invariants, either with the use of `Result` types and `assert` to stop at invalid states, or using the closure design from [Chapter 4](../part1/04_maintaining-invariants.html) to hide state from outsiders altogether
+In [Part 1](../part1/index), we covered how to specify, check, and maintain invariants. Specifying them in documentation is easy enough, but gives us no guarantees that they will actually hold. We saw how to establish invariants with `makeX` functions. We saw how to maintain invariants, either with the use of `Result` types and `assert` to stop at invalid states, or using the closure design from [Chapter 4](../part1/04_maintaining-invariants#hiding-state-with-a-closure) to hide state from outsiders altogether
 
 Last chapter, we were introduced to the notion of the class. We've seen the _constructor_ of a class, which gives us language enforcement to ensure there is only _one_ way of creating data of that type. If we check invariants in the constructor, this gives us language support to _establish_ invariants. But what about maintaining them?
 
@@ -126,7 +126,7 @@ For the purposes of the course, you don't need to know either of these details. 
 
 ## Maintaining the Invariant
 
-Because the representation of the guest list (`invited`) is private, the constructor is the only way to create a `GuestList`. This makesit the natural place to establish the invariant and to _throw_ ([Chapter 8](../part1/08_errors.html)) when the input cannot be turned into a valid object. 
+Because the representation of the guest list (`invited`) is private, the constructor is the only way to create a `GuestList`. This makes it the natural place to establish the invariant and to _throw_ ([Chapter 8](../part1/08_errors#throwing-an-exception)) when the input cannot be turned into a valid object. 
 
 The `GuestList` with information hiding, above, still accepts invalid input: `new GuestList(-1)` produces a `GuestList` with invalid capacity. The constructor should reject it:
 
@@ -201,7 +201,7 @@ public size(): number {
 }
 ```
 
-The constructor establishes the invariant and every method preserves it---that's not new, we tried to do this with our functions in [Chapter 3](../part1/03_checking-invariants.html). But because the _representation_ of the data behind the invariant is now private, this establish-and-preserve pattern actually _ensures_ (beyond programmer discipline) that the invariant holds.
+The constructor establishes the invariant and every method preserves it---that's not new, we tried to do this with our functions in [Chapter 4](../part1/04_maintaining-invariants#valid-types-invalid-values). But because the _representation_ of the data behind the invariant is now private, this establish-and-preserve pattern actually _ensures_ (beyond programmer discipline) that the invariant holds.
 
 ```graphviz
 digraph encapsulation {
@@ -245,7 +245,7 @@ The structures you built with `define-struct` in CPSC 110 were immutable. Once m
 
 ### When References Escape
 
-We emphasized references in [Chapter 6](../part1/06_state-mutation.html) because their presence makes programming... well, much more complex. 
+We emphasized references in [Chapter 6](../part1/06_state-mutation#copies-and-references) because their presence makes programming... well, much more complex. 
 
 For instance. A caller often needs to _see_ the guests, to print them at the door or count them. So why not provide an accessor like this?
 

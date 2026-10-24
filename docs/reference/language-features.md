@@ -112,7 +112,7 @@ The `any` type turns the type checker off for a value. Anything may be assigned 
 ```typescript
 let value: any = 30;
 value = "thirty";            // allowed: any accepts anything
-value.toUpperCase();         // allowed at compile time; crashes at run time if value is a number
+value.toUpperCase();         // allowed at compile time; crashes at runtime if value is a number
 ```
 
 We *never* write any in this course, because it discards exactly the guarantee [Part 1](../part1/index) is built on. The type checker is the mechanism that turns a promise into an enforced constraint, and `any` opts a value out of it while still looking like a type annotation. It also spreads: a value typed `any` makes every expression derived from it unchecked too, so a single `any` can quietly disable checking across a whole calculation. `any` exists so that large untyped JavaScript codebases can adopt TypeScript gradually, which is a real need and not one you have. When you are tempted to reach for it, the useful question is the modelling question from [Part 1](../part1/index): what _are_ the values this name can hold?
@@ -239,7 +239,7 @@ return name;
 
 ## `instanceof`
 
-The `instanceof` operator asks, at run time, whether an object was created from a particular class or from one of its subclasses. TypeScript uses the answer to narrow the type within the branch:
+The `instanceof` operator asks, at runtime, whether an object was created from a particular class or from one of its subclasses. TypeScript uses the answer to narrow the type within the branch:
 
 ```typescript
 if (channel instanceof SmsNotifier) {
