@@ -1,6 +1,6 @@
 # Growing Systems with the Open/Closed Principle
 
-Successful software systems keep changing. New kinds of users, delivery channels, and pricing rules are added throughout a system's life, and a codebase that cannot absorb them without breaking what already works becomes harder to change. Polymorphism makes a system extensible by supporting the **Open/Closed Principle**.
+Successful software systems keep changing. New kinds of users, delivery channels, and pricing rules are added throughout a system's life, and each addition risks breaking what already works unless the design can absorb it. Polymorphism makes a system extensible by supporting the **Open/Closed Principle**.
 
 ## Open and Closed
 
@@ -97,13 +97,6 @@ end note
 ```
 <!-- caption="Adding PushNotifier requires no change to Notifier, alertAll, or the existing channels." -->
 
-<details class="tooltip link-110">
-<summary>When the Data Grows</summary>
-
-In CPSC 110, a function over a data type with several variants had one `cond` branch per variant. Adding a variant to the data definition meant revisiting every function that branched on that data, so the cost of growing the data grew with the number of functions that processed it. The polymorphic design reverses this. A new variant is a new class that carries its own behaviour, and the functions written against the interface do not change at all.
-
-</details>
-
 ## Why Add Instead of Edit
 
 The reason to prefer adding code to editing it comes from [Chapter 9](../part1/09_validation#regression-testing). Code that already works has been tested, and every edit to it risks breaking something that worked before, a regression. Editing `notify(..)` to add push reopens the email and SMS branches, which then have to be read, possibly disturbed, and re-tested. Adding `PushNotifier` touches none of that. The existing channels and their tests are left alone, so they cannot regress. The only new tests are for `PushNotifier`, and the existing suite still passes.
@@ -144,7 +137,7 @@ This applies the advice from [Chapter 12](./03_encapsulation#choosing-what-to-ex
 <details class="tooltip deep-dive">
 <summary>Speculative Generality</summary>
 
-The opposite of a rigid design is an over-flexible one. Adding interfaces, base classes, and extension points for variation you only imagine you might need is a recognised design smell, sometimes called _speculative generality_: the indirection is real while the flexibility is hypothetical.
+The opposite of a rigid design is an over-flexible one. Adding interfaces, base classes, and extension points for variation you only imagine you might need is a recognised design mistake, usually called _speculative generality_: the indirection is real while the flexibility is hypothetical.
 
 </details>
 
@@ -158,11 +151,11 @@ The Open/Closed Principle is the last of a set of principles this part of the co
 - **Encapsulation** ([Chapter 12](./03_encapsulation#hiding-the-representation)): a class hides its representation behind a contract, so its internals can change without its callers changing.
 - **Implementation freedom** ([Chapter 13](./04_flexibility#what-makes-a-change-safe)): what a class means is kept separate from how it is built, so the implementation stays free to change, and each commitment a class avoids is one more thing that can vary.
 - **Small contracts** ([Chapter 14](./05_boundaries#keeping-interfaces-small)): callers depend on a narrow, named abstraction rather than on a concrete class.
-- **Substitutability** ([Chapter 15](./06_extension#honouring-the-contract)): many implementations stand behind one contract, each honouring it, so one can stand in for another. This is the Liskov substitution principle.
+- **Substitutability** ([Chapter 15](./06_extension#honouring-the-contract)): many implementations stand behind one contract, each honouring it, so one can stand in for another. This is the Liskov Substitution Principle.
 - **Dependency inversion** (this chapter): high-level code depends on abstractions rather than on concrete classes.
 - **Open and closed** (this chapter): together, the principles above let a system grow by adding implementations rather than by editing existing code.
 
-Dependency inversion is new in this chapter. `alertAll(..)` depends on `Notifier`, never on `EmailNotifier` or `SmsNotifier`, so the policy of "alert all channels" is separate from how any one channel delivers. This inversion, where high-level policy depends on an abstraction rather than on a concrete implementation, is called the **Dependency Inversion Principle**.
+Dependency inversion is new in this chapter. `alertAll(..)` depends on `Notifier`, never on `EmailNotifier` or `SmsNotifier`, so the policy of "alert all channels" is separate from how any one channel delivers. This is called the **Dependency Inversion Principle**: high-level policy depends on an abstraction, and so do the low-level classes that implement it, which inverts the usual arrangement in which high-level code depends directly on the low-level code it calls.
 
 Each of these principles was introduced separately, with its own example and argument, which can make them look like seven unrelated pieces of advice. They work together as a single mechanism, which is easiest to see by re-examining something we have already designed.
 
@@ -186,7 +179,7 @@ One way to see that these principles depend on one another is to remove them one
 
 _Without cohesion._ Suppose `EmailNotifier` had also owned message formatting and the system's retry policy, because those were added to it when email was the only channel. Adding push now means adding push delivery, push formatting, and push retry, wherever those responsibilities ended up. The interface is still there and still polymorphic, but the change, and its potential to affect existing code, is now spread across three places.
 
-_Without encapsulation._ Suppose `address` had been public, and an audit log had come to read `channel.address` to record who was notified. `PushNotifier` has no address, only a device id. The new channel compiles and satisfies `Notifier`, but breaks the audit log, because a caller depended on a field rather than on behaviour.
+_Without encapsulation._ Suppose `address` had been public, and an audit log had come to read `channel.address` to record who was notified. `PushNotifier` has no address, only a device id, so the audit log cannot accept it, and auditing push alerts means changing existing code, because a caller depended on a field rather than on behaviour.
 
 _Without implementation freedom._ Suppose `send(..)` had been declared to return the provider's raw response object, so that callers could inspect delivery details. The response object differs between providers, so either `PushNotifier` cannot conform to the contract, or it fabricates a response in a shape that does not fit its provider. The interface exposed a representation, and representations are not interchangeable even when the behaviour is.
 
@@ -202,7 +195,7 @@ The addition was easy only because every one of these principles held in the exi
 
 The principles do not always agree. Applied without judgement, several of them pull against each other.
 
-Cohesion says to split a class that owns two invariants, but [Chapter 11](./02_decomposition#judgement-calls) also warned that every split adds a name to learn and a file to navigate, and that extracting a class for a rule that will never grow fragments a design without clarifying it. Interface segregation says to prefer many small interfaces, but a system with twenty single-method interfaces can be harder to learn than one with five coherent ones. This chapter says to put an extension point where change is expected, and the speculative generality tooltip says that building an abstraction where change never comes is a design smell.
+Cohesion says to split a class that owns two invariants, but [Chapter 11](./02_decomposition#judgement-calls) also warned that every split adds a name to learn and a file to navigate, and that extracting a class for a rule that will never grow fragments a design without clarifying it. Interface segregation says to prefer many small interfaces, but a system with twenty single-method interfaces can be harder to learn than one with five coherent ones. This chapter says to put an extension point where change is expected, and the speculative generality tooltip says that building an abstraction where change never comes is a mistake.
 
 These tensions have a common source, and it is the central idea of this part of the course. Every design decision answers the same question: _what is likely to change?_ Split a class where its reasons to change differ. Draw an interface where new variants will appear. Hide what will vary and expose what will not. When you have a confident answer to that question, the principles agree, because they all follow from it. When they seem to conflict, the disagreement is usually about a prediction, not about design, and it is better argued in those terms than by citing principles at each other. The judgement this part has asked for is a prediction about which parts of a system will need to change, made with incomplete information and revised as the system shows you where you were wrong.
 
@@ -234,8 +227,106 @@ Implement two initial transformers: a `TrimTransformer` that strips leading and 
 Work through the following:
 
 1. _Extension._ Add a `PrefixTransformer` that takes a fixed string in its constructor and prepends it to its input. List every class or function outside `PrefixTransformer` itself that needed to change.
-2. _Order matters._ Write a test showing that applying trim then uppercase to `"  hello  "` produces `"HELLO"`. Write a second test showing that reversing the two transformers produces a different result. What does this say about what `applyAll` guarantees?
+2. _Order matters._ Write a test showing that applying trim then uppercase to `"  hello  "` produces `"HELLO"`. Then use the `PrefixTransformer` from step 1: applying `PrefixTransformer("note: ")` and then `UpperCaseTransformer` to `"hello"` produces `"NOTE: HELLO"`, while the reverse order produces `"note: HELLO"`. Write a test for each order. What does this say about what `applyAll` guarantees?
 3. _Validation._ Write a `CapturingTransformer` that records the input it receives and returns it unchanged. Use it to confirm that `applyAll` passes the correct accumulated text to each transformer in sequence.
 4. _The axis._ Your pipeline is open for new transformers. Suppose the requirement is to skip a transformation when its input is shorter than a given length. What would need to change, and why does `TextTransformer` not help with this?
+
+<!-- Potential unverified solution:
+
+```typescript
+import { test, expect } from "vitest";
+
+interface TextTransformer {
+    /**
+     * Returns a transformed version of `text`.
+     *
+     * @param {string} text the input
+     * @returns {string} the transformed text
+     */
+    transform(text: string): string;
+}
+
+/**
+ * Applies each transformer in order, feeding the output of one into the next.
+ *
+ * @param {TextTransformer[]} transformers the steps, in order
+ * @param {string} text the starting text
+ * @returns {string} the text after every transformer has been applied
+ */
+function applyAll(transformers: TextTransformer[], text: string): string {
+    let result: string = text;
+    for (const transformer of transformers) {
+        result = transformer.transform(result);
+    }
+    return result;
+}
+
+class TrimTransformer implements TextTransformer {
+    public transform(text: string): string {
+        return text.trim();
+    }
+}
+
+class UpperCaseTransformer implements TextTransformer {
+    public transform(text: string): string {
+        return text.toUpperCase();
+    }
+}
+
+class PrefixTransformer implements TextTransformer {
+    /** The text to put in front of every input. */
+    private readonly prefix: string;
+
+    /**
+     * Creates a transformer that prepends `prefix`.
+     *
+     * @param {string} prefix the text to prepend
+     */
+    public constructor(prefix: string) {
+        this.prefix = prefix;
+    }
+
+    public transform(text: string): string {
+        return this.prefix + text;
+    }
+}
+
+class CapturingTransformer implements TextTransformer {
+    /** Every input passed to transform, in the order received. */
+    public readonly inputs: string[] = [];
+
+    public transform(text: string): string {
+        this.inputs.push(text);
+        return text;
+    }
+}
+
+test("trim then uppercase", () => {
+    expect(applyAll([new TrimTransformer(), new UpperCaseTransformer()], "  hello  ")).to.equal("HELLO");
+});
+
+test("prefix then uppercase", () => {
+    expect(applyAll([new PrefixTransformer("note: "), new UpperCaseTransformer()], "hello")).to.equal("NOTE: HELLO");
+});
+
+test("uppercase then prefix", () => {
+    expect(applyAll([new UpperCaseTransformer(), new PrefixTransformer("note: ")], "hello")).to.equal("note: HELLO");
+});
+
+test("each transformer receives the accumulated text", () => {
+    const afterTrim: CapturingTransformer = new CapturingTransformer();
+    const afterUpper: CapturingTransformer = new CapturingTransformer();
+    const steps: TextTransformer[] = [new TrimTransformer(), afterTrim, new UpperCaseTransformer(), afterUpper];
+    expect(applyAll(steps, "  hello  ")).to.equal("HELLO");
+    expect(afterTrim.inputs).to.deep.equal(["hello"]);
+    expect(afterUpper.inputs).to.deep.equal(["HELLO"]);
+});
+```
+
+1. Nothing outside `PrefixTransformer` changes: `applyAll` and the other transformers are untouched.
+2. `applyAll` guarantees that the transformers run in list order, so a pipeline is defined by its order and not just by its members.
+3. The `CapturingTransformer` test above shows each step receiving the accumulated text, not the original input.
+4. Skipping short inputs is a rule about when a step applies, not about what a step does, and `TextTransformer` varies only the transformation. Either `applyAll` changes to know about lengths, and the pipeline is no longer closed, or the rule becomes a transformer itself: a wrapper that holds another `TextTransformer` and a minimum length, and returns the input unchanged when it is too short. The wrapper keeps `applyAll` closed by putting the new variation behind the existing interface.
+-->
 
 </details>
