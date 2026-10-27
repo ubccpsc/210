@@ -120,7 +120,7 @@ export default defineConfig({
                 text: "01: Learning a New Language",
                 link: "/part1/01_new-language"
             }, {
-                text: "02: Modelling With Types",
+                text: "02: Modelling with Types",
                 link: "/part1/02_model-types"
             }, {
                 text: "03: Checking Invariants",
