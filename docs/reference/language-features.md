@@ -2,9 +2,9 @@
 
 TypeScript is a large, full-featured industrial language. In this course we have taught you the main language features that will translate to most modern programming languages. But we have chosen to leave some aspects of the language out that either are not broadly available in all languages or can complicate learning more than their value is worth.
 
-You will still meet the features below in other people's code, in library documentation, and in whatever a generative tool hands you. This chapter describes each one and gives the reason we have kept it out of the textbook, so you can recognise them without being surprised by their absence. Nothing here is required.
+You will still meet the features below in other people's code, in library documentation, and in whatever a generative tool hands you. This page describes each one and gives the reason we have kept it out of the textbook, so you can recognise them without being surprised by their absence. Nothing here is required.
 
-A high-level list of concepts we have intentionally decided not to talk about in this course include:
+The chapters deliberately leave these features out of their examples, and mention a few only in passing:
 
 * Type inference
 * Structural typing
@@ -47,11 +47,11 @@ function greet(name) {           // error: parameter 'name' implicitly has an 'a
 }
 ```
 
-Beyond that, a return type that is only inferred can change silently when the body changes, whereas one that is written down is a promise to callers, in the same way the doc comments in [Part 1](../part1/index) record a contract. A written type is also a message to the next reader, who should not have to run the compiler to learn what a name holds. Finally, the habit transfers: most typed languages require the annotations that TypeScript merely permits.
+Beyond that, a return type that is only inferred can change silently when the body changes, whereas one that is written down is a promise to callers, in the same way the doc comments in Chapter 3 record a contract. A written type is also a message to the next reader, who should not have to run the compiler to learn what a name holds. Finally, the habit transfers: most typed languages require the annotations that TypeScript merely permits.
 
-There is one deliberate exception in the textbook. An arrow function passed to an array operation leaves its parameter unannotated, because the compiler already knows the element type of the array it is working on. That is a local convenience at a call site, not a change of policy about declarations.
+The textbook annotates arrow-function parameters too, including those passed to array operations, even though the compiler could infer them from the array's element type.
 
-Ultimately, while type inference decrease the amount of text you need to encode, type annotations make code easier for a person to read and understand. For this reason we will explicitly encode types as much as possible in this course.
+Ultimately, while type inference decreases the amount of text you need to encode, type annotations make code easier for a person to read and understand. For this reason we will explicitly encode types as much as possible in this course.
 
 ## Structural Typing
 
@@ -77,7 +77,7 @@ const partial = { name: "Bob" };
 const bad: User = partial;       // error: property 'email' is missing
 ```
 
-We leave this out because it is atypical. Most statically typed languages, Java and C# among them, work the other way: a value belongs to a type only if it was declared to, which is called _nominal_ typing. TypeScript's behaviour follows from JavaScript, where an object is simply a collection of properties and nothing records which type it was meant to be. Building your intuition on the structural rule would not transfer to the next language you learn. It also has a consequence we would rather not rely on: a class can satisfy an interface without ever declaring that it implements it. The textbook always writes `implements` regardless, because declaring the intent is what makes it visible to a reader.
+We leave this out because it is atypical. Most statically typed languages, Java and C# among them, work the other way: a value belongs to a type only if it was declared to, which is called _nominal_ typing. TypeScript's behaviour follows from JavaScript, where an object is simply a collection of properties and nothing records which type it was meant to be. Building your intuition on the structural rule would not transfer to the next language you learn. It also has a consequence we would rather not rely on: a class can satisfy an interface without ever declaring that it implements it. The textbook always writes `implements` regardless, because declaring the intent makes it visible to a reader. [Chapter 14](../part2/05_boundaries#implementing-the-contract) notes this in a deep dive when it introduces `implements`.
 
 ## `enum`
 
@@ -103,7 +103,7 @@ enum Light {
 }
 ```
 
-[Part 1](../part1/index) models a fixed set of choices as a union of string literals instead, `type TrafficLight = "red" | "green" | "yellow"`, which does the same job with less machinery. An `enum` is also unusual among TypeScript's constructs in that it is not purely a type: it emits a real object into the compiled JavaScript, so it leaves a footprint at runtime where every other type we write is erased. A numeric enum's values are opaque once the program is running, too, since logging or storing `signal` yields `0` rather than anything that says "red", whereas a literal union's values are the strings you wrote. The literal union also composes with the tagged unions from the modelling chapter, where the `kind` property that distinguishes the cases is exactly such a set of literals.
+[Chapter 2](../part1/02_model-types#traffic-lights) models a fixed set of choices as a union of string literals instead, `type TrafficLight = "red" | "green" | "yellow"`, which does the same job with less machinery. An `enum` is also unusual among TypeScript's constructs in that it is not purely a type: it emits a real object into the compiled JavaScript, so it leaves a footprint at runtime where every other type we write is erased. A numeric enum's values are opaque once the program is running, too, since logging or storing `signal` yields `0` rather than anything that says "red", whereas a literal union's values are the strings you wrote. The literal union also composes with the tagged unions from Chapter 2, where the `kind` property that distinguishes the cases is exactly such a set of literals.
 
 ## `any`
 
@@ -115,7 +115,7 @@ value = "thirty";            // allowed: any accepts anything
 value.toUpperCase();         // allowed at compile time; crashes at runtime if value is a number
 ```
 
-We *never* write any in this course, because it discards exactly the guarantee [Part 1](../part1/index) is built on. The type checker is the mechanism that turns a promise into an enforced constraint, and `any` opts a value out of it while still looking like a type annotation. It also spreads: a value typed `any` makes every expression derived from it unchecked too, so a single `any` can quietly disable checking across a whole calculation. `any` exists so that large untyped JavaScript codebases can adopt TypeScript gradually, which is a real need and not one you have. When you are tempted to reach for it, the useful question is the modelling question from [Part 1](../part1/index): what _are_ the values this name can hold?
+We never write `any` in this course, because it discards exactly the guarantee the type checker provides. The type checker is the mechanism that turns a promise into an enforced constraint, and `any` opts a value out of it while still looking like a type annotation. It also spreads: a value typed `any` makes every expression derived from it unchecked too, so a single `any` can quietly disable checking across a whole calculation. `any` exists so that large untyped JavaScript codebases can adopt TypeScript gradually, which is a real need and not one you have. When you are tempted to reach for it, the useful question is the modelling question from [Chapter 2](../part1/02_model-types#modelling-data): what _are_ the values this name can hold? [Chapter 18](../part3/02_consuming_data#json-and-the-type-hole) explains how `any` still enters your code through `JSON.parse`, and how `unknown` replaces it.
 
 ## Tuple Return Types
 
@@ -156,7 +156,7 @@ range.low;                   // named, and checked
 range.lowest;                // error: property 'lowest' does not exist
 ```
 
-This is the same argument the modelling chapter made for grouping related values into a compound type rather than passing them separately: the shape of the data should say what each part means. Tuples do earn their place when the positions are genuinely symmetric and conventional, a coordinate pair being the usual example, but a named type is rarely the worse choice.
+This is the same argument Chapter 2 made for grouping related values into a compound type rather than passing them separately: the shape of the data should say what each part means. Tuples do earn their place when the positions are genuinely symmetric and conventional, a coordinate pair being the usual example, but a named type is rarely the worse choice.
 
 ## Spread and Rest (`...`)
 
@@ -173,7 +173,7 @@ function logAll(...messages: string[]): void { // any number of arguments, colle
 }
 ```
 
-The spread forms are useful, but the copy it makes is _shallow_. `[...songs]` produces a new array holding the very same `Song` objects, so mutating one of those songs is still visible through both arrays. That distinction is the subject of the mutation chapter, and it is better addressed with explicit copying, where what is and is not duplicated stays visible. The rest form has a separate cost: a function that takes `...messages` no longer states how many arguments it expects, which is exactly the information its signature is supposed to give a caller.
+The spread forms are useful, but the copy it makes is _shallow_. `[...songs]` produces a new array holding the very same `Song` objects, so mutating one of those songs is still visible through both arrays. That distinction is the subject of Chapter 6, and it is better addressed with explicit copying, where what is and is not duplicated stays visible. The rest form has a separate cost: a function that takes `...messages` no longer states how many arguments it expects, which is exactly the information its signature is supposed to give a caller.
 
 ## Truthiness
 
@@ -189,7 +189,7 @@ if (name) {                  // runs when name is not "", null, or undefined
 }
 ```
 
-We write conditions that are already boolean instead: a comparison such as `songs.length > 0`, a call to a method that returns a `boolean` such as `isFull()`, or an explicit test against `null` or `undefined`. The `=== false` form you see throughout [Part 1](../part1/index) comes from the same instinct.
+We write conditions that are already boolean instead: a comparison such as `songs.length > 0`, a call to a method that returns a `boolean` such as `isFull()`, or an explicit test against `null` or `undefined`. The same rule applies to the operands of `&&` and `||`, which is why [Chapter 1](../part1/01_new-language#combining-conditions) asks for boolean operands, and the `=== false` form the textbook prefers to `!` comes from the same instinct.
 
 The first reason is that a truthy test does not say what it is testing. `if (songs.length)` asks a reader to recall which numbers are falsy before they can tell what the branch means, whereas `if (songs.length > 0)` states the condition outright.
 
@@ -235,7 +235,7 @@ if (name === null) {
 return name;
 ```
 
-[Part 1](../part1/index) treats a missing value as a case the specification usually has something to say about, which is why `null` and `undefined` are handled as explicit branches. `??` makes a fallback so cheap to write that it becomes easy to supply one without deciding whether the absent case deserved handling of its own. Its companion `?.`, called optional chaining, has the same character: `config?.host` produces `undefined` instead of throwing when `config` is absent, which is convenient and equally quiet about the case it just skipped.
+[Chapter 2](../part1/02_model-types#branching-on-the-case) treats a missing value as a case the specification usually has something to say about, which is why `null` and `undefined` are handled as explicit branches. `??` makes a fallback so cheap to write that it becomes easy to supply one without deciding whether the absent case deserved handling of its own. Its companion `?.`, called optional chaining, has the same character: `config?.host` produces `undefined` instead of throwing when `config` is absent, which is convenient and equally quiet about the case it just skipped.
 
 ## `instanceof`
 
@@ -247,9 +247,9 @@ if (channel instanceof SmsNotifier) {
 }
 ```
 
-We leave it out because it reduces the benefits of the designs introduced in [Part 2](../part2/index). A series of `instanceof` statements checking which implementations of an interface is really a the tag-switch with a different syntax: the caller asks which concrete class it was handed and branches on the answer. This introduces a dependency on concrete types that the coupling chapter warns about, and the shape that the Open/Closed Principle replaces. When behaviour has to differ by kind, the difference belongs in a method that each class implements, so dispatch does the branching and no caller has to ask.
+We leave it out because it reduces the benefits of the designs introduced in Chapters 14 and 15. A series of `instanceof` statements checking which implementations of an interface is really a tag switch with a different syntax: the caller asks which concrete class it was handed and branches on the answer. This introduces a dependency on concrete types that Chapter 17 warns about, and the shape that the Open/Closed Principle replaces in Chapter 16. When behaviour has to differ by kind, the difference belongs in a method that each class implements, so dispatch does the branching and no caller has to ask.
 
-There are two places where these are less problematic, both of them cases where the type system has lost track of a value rather than a design having failed to commit. The first is a `catch` block, where the caught value has no useful type because anything at all can be thrown, so a handler that wants to read an error's `message` has to establish first that it has one. The error handling chapter sidesteps this by logging the whole caught value, but real handlers often need the narrowing. The second is the edge of the program, where data arrives from a file or a service and nothing about its type has been checked yet, which is a subject of [Part 3](../part3/index).
+There are two places where these are less problematic, both of them cases where the type system has lost track of a value rather than a design having failed to commit. The first is a `catch` block, where the caught value has no useful type because anything at all can be thrown, so a handler that wants to read an error's `message` has to establish first that it has one. [Chapter 8](../part1/08_errors#catching-an-exception) sidesteps this by logging the whole caught value, but real handlers often need the narrowing. The second is the edge of the program, where data arrives from a file or a service and nothing about its type has been checked yet, which is a subject of [Chapter 18](../part3/02_consuming_data#json-and-the-type-hole).
 
 ## `switch`
 
@@ -268,7 +268,7 @@ switch (light) {
 }
 ```
 
-Every `switch` can be written as the `if`/`else if` chain from the first chapter, so it adds a second construct for a job you can already do. It also brings a failure mode of its own: a case that omits `break` falls through into the next one and runs it too, which is legal, occasionally intended, and a classic source of bugs. The deeper reason is that a `switch` on a tag is usually a design smell rather than a syntax choice. [Part 2](../part2/index) replaces exactly this shape with polymorphism, where each case becomes a class carrying its own behaviour and the branching disappears, so we would rather you learn to recognise the shape than get comfortable writing it.
+Every `switch` can be written as the `if`/`else if` chain from Chapter 1, so it adds a second construct for a job you can already do. It also brings a failure mode of its own: a case that omits `break` falls through into the next one and runs it too, which is legal, occasionally intended, and a classic source of bugs. The deeper reason is that a `switch` on a tag is usually a design smell rather than a syntax choice. [Chapter 15](../part2/06_extension#replacing-branches) replaces exactly this shape with polymorphism, where each case becomes a class carrying its own behaviour and the branching disappears, so we would rather you learn to recognise the shape than get comfortable writing it.
 
 ## `break` and `continue`
 
@@ -285,4 +285,4 @@ for (const song of songs) {
 }
 ```
 
-Both are convenient, and occasionally a `break` really is the clearest way to stop a search. We leave them out because a loop whose exit conditions all appear in its header is easier to reason about: you can read the header and know when the loop ends, without scanning the body for the statements that might end it early. Each `break` or `continue` also adds a path through the loop, and the testing chapters ask you to enumerate those paths in order to judge whether a suite covers them. In most cases where you would reach for one, the array operations from the iteration chapter express the intent directly: `find` stops at the first match, and `filter` skips the elements you do not want.
+Both are convenient, and occasionally a `break` really is the clearest way to stop a search. We leave them out because a loop whose exit conditions all appear in its header is easier to reason about: you can read the header and know when the loop ends, without scanning the body for the statements that might end it early. Each `break` or `continue` also adds a path through the loop, and Chapter 9 asks you to enumerate those paths in order to judge whether a suite covers them. In most cases where you would reach for one, the array operations from Chapter 5 express the intent directly: `find` stops at the first match, and `filter` skips the elements you do not want.

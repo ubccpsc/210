@@ -8,7 +8,7 @@ Since VSCode will be used extensively, we will focus on that in this document; i
 
 ## Where Files Live
 
-The **Explorer** (the top icon on the left-hand bar, or `Ctrl/Cmd+Shift+E`) shows the files in your workspace.
+The "Explorer" (the top icon on the left-hand bar, or `Ctrl/Cmd+Shift+E`) shows the files in your workspace.
 
 ![Explorer View](img/explorer.png)
 
@@ -27,7 +27,7 @@ To open a file quickly without using the Explorer, press `Ctrl/Cmd+P` and start 
 
 ## Identifying Static Problems
 
-Static problems are found without running your code, and come in two kinds: compilation errors and lint errors. Both correspond to the **static view** of a program described in the textbook, and both appear in the same places in VSCode.
+Static problems are found without running your code, and come in two kinds: compilation errors and lint errors. Both correspond to the static view of a program described in [Chapter 1](../../../part1/01_new-language#static-and-dynamic-views), and both appear in the same places in VSCode.
 
 ### Compilation Errors
 
@@ -65,7 +65,7 @@ In this case the first two options fix the code and the last two do not. Read th
 
 ### Lint Errors
 
-The Problems View also shows **lint** warnings from Biome, the linter and formatter this course uses. These are about style rather than correctness (indentation, unused imports, and the like), though they often point at problems that are hard to debug later. Most teams run a linter to keep their code consistent.
+The Problems View also shows lint warnings from Biome, the linter and formatter this course uses. These are about style rather than correctness (indentation, unused imports, and the like), though they often point at problems that are hard to debug later. Most teams run a linter to keep their code consistent.
 
 Most lint warnings can be fixed for you by running:
 
@@ -79,13 +79,13 @@ Lint warnings can also be fixed one at a time where they occur: click the underl
 
 ## Identifying Dynamic Problems
 
-Dynamic problems only appear when the code runs: a function that compiles but returns the wrong answer. The type checker cannot see these. Your tests can, and they correspond to the **dynamic view** of a program.
+Dynamic problems only appear when the code runs: a function that compiles but returns the wrong answer. The type checker cannot see these. Your tests can, and they correspond to the dynamic view of a program.
 
-Tests run from the **Testing View** (the beaker icon on the left-hand bar). It lists every test file and every test inside it. The official [Testing](https://code.visualstudio.com/docs/debugtest/testing) documentation covers this view in depth.
+Tests run from the "Testing View" (the beaker icon on the left-hand bar). It lists every test file and every test inside it. The official [Testing](https://code.visualstudio.com/docs/debugtest/testing) documentation covers this view in depth.
 
 ![Testing View](img/beaker.png)
 
-- The **Run Tests** button at the top of the Testing View runs everything.
+- The "Run Tests" button at the top of the Testing View runs everything.
 
   ![Run tests button](img/runTests.png)
 
