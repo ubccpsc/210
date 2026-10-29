@@ -2,16 +2,16 @@
 
 > Once a system grows beyond what one person can keep track of, a design has to keep working as the system changes.
 
-In [Part 1](../part1/index), programs were small enough for one person to keep the whole design in mind. We maintained invariants with carefully written constructor functions and with _programmer discipline_ about how objects were created and changed.
+In [Part 1](../part1/index), programs were small enough for one person to keep the whole design in mind. We maintained invariants with carefully written constructor functions, with _programmer discipline_ about how objects were created and changed, and in [Chapter 4](../part1/04_maintaining-invariants#hiding-state-with-a-closure) by hiding state inside closures, a pattern the language gave us no direct support for.
 
 Part 2 widens the scope. Real software is built by teams, maintained for years, and solves problems too large for one person. No single person can keep track of every contributor, remember the whole history of the code, or review all of it. We cannot assume that other programmers will use our code correctly, or that every invariant will survive through discipline alone.
 
-So we move from _programmer discipline_ to encoding invariants _in the language_ itself. When classes and the abstractions built around them encode the invariants, the language enforces them instead of each programmer's care, and the way programmers coordinate becomes an explicit part of the design.
+So we move from _programmer discipline_ to encoding invariants in the language itself. When classes and the abstractions built around them encode the invariants, the language enforces them instead of each programmer's care, and the way programmers coordinate becomes an explicit part of the design.
 
 <details class="tooltip link-110">
 <summary>Programmer Discipline vs Enforcement</summary>
 
-Recall that in CPSC 110, the _signature_ recorded type information, but the teaching languages did not enforce it. [Part 1](../part1/index) showed the shift from the unenforced signature in CPSC 110:
+Recall that in CPSC 110, the _signature_ recorded type information, but the teaching languages did not enforce it. [Chapter 1](../part1/01_new-language#types-in-typescript) showed the shift from the unenforced signature in CPSC 110:
 
 ```racket
 (@signature Number -> Number)
@@ -50,24 +50,24 @@ By the end of Part 2, you will be able to:
 
 ## Chapter Overview
 
-Part 2 covers three connected themes across seven chapters.
+Part 2 covers three connected themes.
 
-#### Building abstractions:
+#### Building Abstractions
 
 1. [Building Abstractions with Classes](./01_abstraction) introduces classes as the direct language support for bundling state with the operations that maintain it.
 2. [Decomposing Systems into Cohesive Classes](./02_decomposition) shows how to split a system into classes and responsibilities that belong together.
 
-#### Hiding what can change:
+#### Hiding What Can Change
 
 3. [Encapsulating What Varies](./03_encapsulation) uses access control to keep a representation private, so the invariant that makes an object meaningful cannot be broken from outside.
-4. [Preserving Implementation Freedom with Abstract Values](./04_flexibility) treats the freedom to change an implementation as something a design can lose, showing how a careless comparison gives it away and how far it extends beyond the representation.
+4. [Preserving Implementation Freedom with Abstract Values](./04_flexibility) treats the freedom to change an implementation as something a design can lose, showing how a careless comparison gives it away, and how immutable values and generic classes extend it beyond the representation.
 5. [Defining Boundaries with Interfaces](./05_boundaries) establishes narrow contracts that let clients depend on a stable shape rather than on a concrete implementation.
 
-#### Designing for growth:
+#### Designing for Growth
 
-6. [Extending Behaviour Through Polymorphism](./06_extension) uses inheritance and overriding to let related classes share behaviour while varying the parts that differ.
-7. [Growing Systems with the Open/Closed Principle](./07_ocp) brings the design ideas together and shows how polymorphism lets software grow by adding new code instead of rewriting code that already works.
+6. [Extending Behaviour Through Polymorphism](./06_extension) uses inheritance and overriding to let related classes share behaviour while varying the parts that differ, and weighs inheritance against composition.
+7. [Growing Systems with the Open/Closed Principle](./07_ocp) brings the design ideas together, adds the Dependency Inversion Principle, and shows how polymorphism lets software grow by adding new code instead of rewriting code that already works.
 
 ## Toward [Part 3](../part3/index): Evolution
 
-Part 2 ends with a design goal that matters most for large systems: fixing problems and adding features without changing the existing code around them. [Part 3](../part3/index) builds on this. It examines how systems are composed from interchangeable pieces, how dependencies are managed so that concrete implementations can be supplied from outside, and how a codebase can stay open to new extensions while remaining manageable across modules and teams.
+Part 2 ends with a design goal that large systems depend on: adding new kinds of behaviour without reopening code that already works. [Part 3](../part3/index) builds on this. It examines how the parts of a system depend on one another, how concrete implementations are supplied from outside, how a program depends on and publishes contracts across its boundaries, and how working systems are refactored, debugged, and extended.

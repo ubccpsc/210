@@ -36,7 +36,7 @@ class PushNotifier extends BaseNotifier {
     /**
      * Creates a notifier that pushes alerts to the device `deviceId`.
      *
-     * @param {string} deviceId the identifier of the recipient's device
+     * @param {string} deviceId the identifier of the recipient's device.
      */
     public constructor(deviceId: string) {
         super();
@@ -240,8 +240,8 @@ interface TextTransformer {
     /**
      * Returns a transformed version of `text`.
      *
-     * @param {string} text the input
-     * @returns {string} the transformed text
+     * @param {string} text the input.
+     * @returns {string} the transformed text.
      */
     transform(text: string): string;
 }
@@ -249,9 +249,9 @@ interface TextTransformer {
 /**
  * Applies each transformer in order, feeding the output of one into the next.
  *
- * @param {TextTransformer[]} transformers the steps, in order
- * @param {string} text the starting text
- * @returns {string} the text after every transformer has been applied
+ * @param {TextTransformer[]} transformers the steps, in order.
+ * @param {string} text the starting text.
+ * @returns {string} the text after every transformer has been applied.
  */
 function applyAll(transformers: TextTransformer[], text: string): string {
     let result: string = text;
@@ -280,7 +280,7 @@ class PrefixTransformer implements TextTransformer {
     /**
      * Creates a transformer that prepends `prefix`.
      *
-     * @param {string} prefix the text to prepend
+     * @param {string} prefix the text to prepend.
      */
     public constructor(prefix: string) {
         this.prefix = prefix;
