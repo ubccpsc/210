@@ -250,7 +250,7 @@ Read the two descriptions of `GuestList` again:
 > 
 > Class invariant: holds no duplicate guests, and never more than `capacity` of them.
 
-Neither description mentions strings. Nothing about "a bounded set with no duplicates" depends on a member being a specific kind of guest rather than an employee record or a seat number. So the representation was not the only unnecessary commitment `GuestList` made. It also fixed what its members are, and that commitment has the same cost. The class serves guest lists and nothing else, and a team that wants the same rules for seats or employees has to copy it.
+Neither description mentions strings. Nothing about "a bounded set with no duplicates" depends on a member being a specific kind of guest rather than an employee record or a seat number. So the representation was not the only unnecessary commitment `GuestList` made. It also fixed what its members are, and that commitment has the same cost. The class serves guest lists and nothing else, and a team that wants the same rules for seats or employees cannot use this class (unless they modify it in a way that would break existing clients of `GuestList`).
 
 TypeScript gives us a feature that allows classes to avoid this commitment too. [Chapter 2](../part1/02_model-types#playlists) introduced type variables for naming a type that is not fixed until the type is used, as in `LinkedList<T>` for a list of any element type. A class declares type variables the same way:
 
@@ -493,7 +493,12 @@ The class still knows nothing about `T`, so one implementation can serve every k
 
 This trade-off between specialisation, which restricts a piece of code, and generalisation, which may require extra abstraction, applies well beyond generics. When we write a class generically, avoiding commitment to a particular type or implementation, we also lose the knowledge that was encoded in that type or implementation. To implement any behaviour that depends on that knowledge, we'll need to get that knowledge from somewhere else. For each commitment, ask whether the freedom gained is worth the knowledge the class gives up.
 
-There is a second option. Instead of passing the equivalence operation in, we could restrict `T` to types that are guaranteed to provide an equivalence operation. This requires a way for us to say "the types that offer these operations".
+<!-- 
+RTH: Hidden here because we don't know how to do this yet,
+but we will by the end of Chapter 15.
+
+There is a second option. Instead of passing the equivalence operation in, we could restrict `T` to types that are guaranteed to provide an equivalence operation. This requires a way for us to say "the types that offer these operations". 
+-->
 
 #### Implementation Freedom
 
