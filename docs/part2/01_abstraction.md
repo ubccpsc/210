@@ -1,8 +1,8 @@
 # Building Abstractions with Classes
 
-[Part 1](../part1/index) ended with invariants maintained by hand. In [Chapter 4](../part1/04_maintaining-invariants), we wrote a constructor function that established an invariant when a value was created, and hid the value's state inside a closure so that only a fixed set of operations could change it.
+[Part 1](../part1/index) ended with invariants maintained by hand. In [Chapter 4](../part1/04_maintaining-invariants#hiding-state-with-a-closure), we wrote a constructor function that established an invariant when a value was created, and hid the value's state inside a closure so that only a fixed set of operations could change it.
 
-This chapter introduces object-oriented programming, which provides the same pattern as language syntax. The mechanism is the **class**, a named unit that bundles _state_ with the _operations that maintain it_.
+Object-oriented programming provides the same pattern as language syntax. Its mechanism is the **class**, a named unit that bundles state with the operations that maintain it.
 
 #### A Playlist with a Current Song
 
@@ -10,32 +10,48 @@ Consider the running example for this chapter:
 
 > As a listener, I want a playlist that always knows which song is current, so that pressing "next" moves through my music predictably as I add and remove songs.
 
-A playlist holds a list of songs and remembers which one is _current_, so that an interface can show what is playing and advance to the next song. The current position is an index into the list of songs. Its type is `number`, but not every number is meaningful. Only an index that points at a real song makes sense, and when the playlist is empty there is no current song at all. This rule, that the current index is always a valid position in the list (or a sentinel when the list is empty), is an _invariant_. As in [Part 1](../part1/index), the type system cannot express it, because `number` permits `-4` and `9999` as readily as a valid index.
+A playlist holds a list of songs and remembers which one is current, so that the app's screen can show what is playing and advance to the next song. The current position is an index into the list of songs. Its type is `number`, but not every number is meaningful. Only an index that points at a real song makes sense, and when the playlist is empty there is no current song at all. This rule, that the current index is always a valid position in the list (or a sentinel when the list is empty), is an invariant. As in [Chapter 4](../part1/04_maintaining-invariants#valid-types-invalid-values), the type system cannot express it, because `number` permits `-4` and `9999` as readily as a valid index.
 
 ## Keeping State Consistent
 
-An invariant like _"the current position points to a real song in the playlist"_ is only useful if it is always true. In a small program it can be maintained through _discipline_, where every place that changes the song list also fixes the current index.
+An invariant like "the current position points to a real song in the playlist" is only useful if it is always true. In a small program it can be maintained through discipline, where every place that changes the song list also fixes the current index.
 
 That discipline does not scale. Suppose the song list and the index are **global variables**, which any part of the system can read and write. Then any part of the program can leave the index pointing at a song that no longer exists, and splitting the program into more files does not help, because every file can still reach the variables. To maintain the invariant, we would have to audit the whole program, which is costly and error-prone.
 
-What we want is a way to bundle the _state_ (the songs and the index) with the _operations that are allowed to change it_ (add, remove, advance). The invariant then becomes the responsibility of one small, named unit, a class, rather than of every caller.
+What we want is a way to bundle the state (the songs and the index) with the operations that are allowed to change it (add, remove, advance). The invariant then becomes the responsibility of one small, named unit, a class, rather than of every caller.
 
 ## From Closures to Classes
 
-The closure pattern from [Chapter 4](../part1/04_maintaining-invariants) bundled state with operations using only what you knew from CPSC 110, but without support from the language. Here is a playlist built with closures, as a constructor function whose returned operations close over the hidden state:
+The closure pattern from [Chapter 4](../part1/04_maintaining-invariants#hiding-state-with-a-closure) bundled state with operations using only what you knew from CPSC 110, but without support from the language. Here is a playlist built with closures, as a constructor function whose returned operations close over the hidden state:
 
 <CollapsibleCode>
 
 ```typescript
 type Playlist = {
+    /**
+     * Adds a song to the end; the first song added becomes current.
+     *
+     * @param {Song} song the song to add.
+     */
     add(song: Song): void;
+    /**
+     * Returns the current song.
+     *
+     * @returns {Song | null} the current song, or null when the playlist is empty.
+     */
     current(): Song | null;
+    /** Advances to the next song, wrapping back to the start; does nothing when the playlist is empty. */
     next(): void;
 };
 
+/**
+ * Creates an empty playlist.
+ *
+ * @returns {Playlist} a playlist with no songs.
+ */
 function makePlaylist(): Playlist {
     const songs: Song[] = [];   // hidden state
-    let currentIndex = -1;      // hidden state; -1 means empty
+    let currentIndex: number = -1;  // hidden state; -1 means empty
 
     return {
         add(song: Song): void {
@@ -60,15 +76,22 @@ function makePlaylist(): Playlist {
 
 The state (`songs` and `currentIndex`) is reachable only through the three returned operations, so the invariant is safe. But the language gives no help: the connection between the state, the constructor function, and the operations exists only because we arranged it by hand.
 
-A **class** expresses the same arrangement with support from the language. The same playlist, written as a class, looks like this:
+A class expresses the same arrangement with support from the language. The same playlist, written as a class, looks like this:
 
 <CollapsibleCode>
 
 ```typescript
 class Playlist {
+    /** The songs, in playing order. */
     songs: Song[] = [];
+    /** The position of the current song: -1 when songs is empty, otherwise a valid index into songs. */
     currentIndex: number = -1;
 
+    /**
+     * Adds a song to the end; the first song added becomes current.
+     *
+     * @param {Song} song the song to add.
+     */
     add(song: Song): void {
         this.songs.push(song);
         if (this.currentIndex === -1) {
@@ -76,10 +99,16 @@ class Playlist {
         }
     }
 
+    /**
+     * Returns the current song.
+     *
+     * @returns {Song | null} the current song, or null when the playlist is empty.
+     */
     current(): Song | null {
         return this.currentIndex === -1 ? null : this.songs[this.currentIndex];
     }
 
+    /** Advances to the next song, wrapping back to the start; does nothing when the playlist is empty. */
     next(): void {
         if (this.currentIndex !== -1) {
             this.currentIndex = (this.currentIndex + 1) % this.songs.length;
@@ -99,7 +128,7 @@ Each piece of the closure maps onto a piece of the class:
 | The returned operations | Methods |
 | Reaching state by closure | Reaching state through `this` |
 
-The behaviour is identical. The class adds what the hand-built version lacked: one declaration that holds the state, the constructor, and the operations together, and a standard way to construct instances with `new`. In one respect the class is weaker. The closure's variables were unreachable from outside, but these fields can be read and written by any code that holds a `Playlist`. [Chapter 12](./03_encapsulation) fixes this, and the rest of this chapter develops the class itself.
+The behaviour is identical. The class adds what the hand-built version lacked: one declaration that holds the state, the constructor, and the operations together, and a standard way to construct instances with `new`. In one respect the class is weaker. The closure's variables were unreachable from outside, but these fields can be read and written by any code that holds a `Playlist`. [Chapter 12](./03_encapsulation#hiding-the-representation) fixes this, and the rest of this chapter develops the class itself.
 
 ```plantuml
 @startuml
@@ -128,18 +157,18 @@ Song : durationSeconds: number
 
 ## Classes and Constructors
 
-A class is the primary unit of abstraction in object-oriented programs. It can be read as a _template_ for a kind of value, describing the state every value of that kind holds and the operations every such value provides. Most object-oriented languages, including C++, Java, Python, and TypeScript, provide classes.
+A class is the primary unit of **abstraction** in object-oriented programs: something a client can use by knowing what it does, without knowing how it does it. It can be read as a template for a kind of value, describing the state every value of that kind holds and the operations every such value provides. Most object-oriented languages, including C++, Java, Python, and TypeScript, provide classes.
 
 <details class="tooltip deep-dive">
-  <summary>Where classes are stored</summary>
+  <summary>Where Classes Are Stored</summary>
 
-Classes are stored in files. In some languages, like Java, a file contains one public class. TypeScript has no such restriction, and a file can contain several classes. In practice, it is most predictable for a file to contain one class and for the filename to match the class name.
+Classes are stored in files. In some languages, like Java, a file can contain at most one public class. TypeScript has no such restriction, and a file can contain several classes. In practice, code is easier to find when each file contains one class and the filename matches the class name.
 
 As systems grow, these files are organised into folders with meaningful names that group related classes together.
 
 </details>
 
-Each class declares a type named for the class. As with `type` in [Part 1](../part1/index), the name should be chosen carefully, because it is the shortest description of what the class is for.
+Each class declares a type named for the class. As with `type` in Chapter 2, the name should be chosen carefully, because it is the shortest description of what the class is for.
 
 <details class="tooltip ts-tips">
 <summary>Class Declarations</summary>
@@ -150,7 +179,7 @@ class X {
    // ...
 }
 ```
-is a _statement_ that declares the name `X` as a type.
+is a statement that declares the name `X` as a type.
 
 </details>
 
@@ -161,13 +190,13 @@ const favourites: Playlist = new Playlist();
 ```
 
 <details class="tooltip ts-tips">
-  <summary>The <code>new</code> operator</summary>
+  <summary>The <code>new</code> Operator</summary>
 
-The statement
+The expression
 ```typescript
-new T();
+new T()
 ```
-creates an object of class `T`. `new T()` calls the constructor declared by class `T`, and evaluates to the new instance of `T`.
+creates an object of class `T` and evaluates to the new instance.
 
 </details>
 
@@ -176,12 +205,12 @@ creates an object of class `T`. `new T()` calls the constructor declared by clas
 ```typescript
 class Playlist {
     constructor() {
-        // configure class here
+        // set up the new object here
     }
 }
 ```
 
-The constructor is the single point where every object of the class comes into existence, which makes it the place to _establish_ invariants, as the constructor function did in [Chapter 4](../part1/04_maintaining-invariants). Once the constructor has established an invariant, every method can _assume_ it holds, and each method must preserve it, as in [Part 1](../part1/index).
+The constructor is the single point where every object of the class comes into existence, which makes it the place to establish invariants, as the constructor function did in Chapter 4. Once the constructor has established an invariant, every method can assume it holds, and each method must preserve it, as in Part 1.
 
 <details class="tooltip ts-tips">
 <summary>Constructors</summary>
@@ -194,11 +223,11 @@ class T {
    }
 }
 ```
-defines how objects of type `T` are created. We do not call `constructor()` directly. `new T()` calls it. Unlike other functions, a constructor has no return type annotation, because it always produces an instance of its class. If a class declares no constructor, TypeScript provides a default one that takes no arguments.
+defines how objects of type `T` are created. Unlike other functions, a constructor has no return type annotation, because it always produces an instance of its class. If a class declares no constructor, TypeScript provides a default one that takes no arguments.
 
 </details>
 
-Creating an object from a class is called **instantiating** the class, and the object is an **instance** of it. Every instance is an **object** with its own state, independent of every other instance.
+Creating an object from a class is called **instantiating** the class, and the object is an **instance** of it. Every instance is an object with its own state, independent of every other instance.
 
 ```typescript
 const favourites: Playlist = new Playlist();
@@ -209,7 +238,7 @@ Adding a song to `favourites` does nothing to `workout`. This independence is on
 
 <!-- ## Class Bodies: Storing State and Functionality -->
 
-A class combines _state_ and _functionality_. We look at each in turn.
+A class combines state and functionality. We look at each in turn.
 
 ## Class State
 
@@ -241,7 +270,7 @@ class T {
 }
 ```
 
-The `this` keyword refers to the _current instance_ of the class, and only makes sense inside a class body. In the constructor, `this.myField` refers to `myField` in the object being constructed.
+The `this` keyword refers to the current instance of the class, and only makes sense inside a class body. In the constructor, `this.myField` refers to `myField` in the object being constructed.
 
 </details>
 
@@ -267,14 +296,14 @@ This sets the default value of `myField` to `<default value>`, which can be any 
 
 </details>
 
-Declaring a field is straightforward. Decide what state you need to track, give it a clear name and a type, and decide whether it has a default value or must be supplied through the constructor. The harder question is _what should be state at all_, as opposed to a local variable inside a method. As a rule of thumb, data belongs in a field if its value must survive after a method returns, or must be visible to other methods.
+Declaring a field is straightforward. Decide what state you need to track, give it a clear name and a type, and decide whether it has a default value or must be supplied through the constructor. The harder question is what should be state at all, as opposed to a local variable inside a method. As a rule of thumb, data belongs in a field if its value must survive after a method returns, or must be visible to other methods.
 
 ## Class Functionality
 
 Functionality is provided by methods. A **method** is a function property that acts on the object's state. Most methods preserve or observe the class's invariants.
 
 <details class="tooltip ts-tips">
-<summary>Methods (and <code>this</code> again)</summary>
+<summary>Methods (and <code>this</code> Again)</summary>
 
 The following defines a method `firstMethod` for class `T`:
 ```typescript
@@ -284,7 +313,7 @@ class T {
     }
 }
 ```
-Given an instance `const t: T = new T()`, we call the method with `t.firstMethod(...)`, and the call can see only the data stored in `t`. To call one method from another, use `this`:
+Given an instance `const t: T = new T()`, we call the method with `t.firstMethod(...)`, and inside the method, `this` refers to `t`. To call one method from another, use `this`:
 
 ```typescript
 class T {
@@ -309,7 +338,7 @@ Declaring a method involves a few decisions:
 - What parameters it takes, with their names and types.
 - What it returns, and its type.
 
-It can help to think about testing. If you know what you want to check about a method, its parameters are the data you would pass it and its return value is the result you would inspect. Unlike a free function, though, a method can also read and change the object's _fields_, so part of its input and part of its result may live in the _object_ rather than in its parameters and return value.
+It can help to think about testing. If you know what you want to check about a method, its parameters are the data you would pass it and its return value is the result you would inspect. Unlike a free function, though, a method can also read and change the object's fields, so part of its input and part of its result may live in the object rather than in its parameters and return value.
 
 Here is the `Playlist` class with its methods, including the `remove` operation that makes the invariant interesting:
 
@@ -317,10 +346,16 @@ Here is the `Playlist` class with its methods, including the `remove` operation 
 
 ```typescript
 class Playlist {
+    /** The songs, in playing order. */
     songs: Song[] = [];
+    /** The position of the current song: -1 when songs is empty, otherwise a valid index into songs. */
     currentIndex: number = -1;
 
-    /** Adds a song to the end; the first song added becomes current. */
+    /**
+     * Adds a song to the end; the first song added becomes current.
+     *
+     * @param {Song} song the song to add.
+     */
     add(song: Song): void {
         this.songs.push(song);
         if (this.currentIndex === -1) {
@@ -328,19 +363,28 @@ class Playlist {
         }
     }
 
-    /** Returns the current song, or null when the playlist is empty. */
+    /**
+     * Returns the current song.
+     *
+     * @returns {Song | null} the current song, or null when the playlist is empty.
+     */
     current(): Song | null {
         return this.currentIndex === -1 ? null : this.songs[this.currentIndex];
     }
 
-    /** Advances to the next song, wrapping back to the start. */
+    /** Advances to the next song, wrapping back to the start; does nothing when the playlist is empty. */
     next(): void {
         if (this.currentIndex !== -1) {
             this.currentIndex = (this.currentIndex + 1) % this.songs.length;
         }
     }
 
-    /** Removes the given song, keeping the current position valid. */
+    /**
+     * Removes the given song, keeping the current position valid. Does nothing
+     * when the song is not in the playlist.
+     *
+     * @param {Song} song the song to remove; matched by identity.
+     */
     remove(song: Song): void {
         const i: number = this.songs.indexOf(song);
         if (i === -1) {
@@ -356,18 +400,22 @@ class Playlist {
         }
     }
 
-    /** Total playing time of the playlist, in seconds. */
+    /**
+     * Returns the total playing time of the playlist.
+     *
+     * @returns {number} the sum of the songs' durations, in seconds; 0 when the playlist is empty.
+     */
     totalDuration(): number {
-        return this.songs.reduce((sum, song) => sum + song.durationSeconds, 0);
+        return this.songs.reduce((sum: number, song: Song) => sum + song.durationSeconds, 0);
     }
 }
 ```
 
 </CollapsibleCode>
 
-Removing a song can invalidate the current index. If the removed song was before the current one, every later index shifts down by one, and if the removed song was the last one and it was current, the index now points past the end. Each branch repairs the index so that the invariant still holds when `remove` returns. The caller does not have to think about any of this, because the work of keeping the index valid lives _with_ the data it constrains, inside the method, rather than in the calling code.
+Removing a song can invalidate the current index. If the removed song was before the current one, every later index shifts down by one, and if the removed song was the last one and it was current, the index now points past the end. Each branch repairs the index so that the invariant still holds when `remove` returns. The caller does not have to think about any of this, because the work of keeping the index valid lives with the data it constrains, inside the method, rather than in the calling code.
 
-In `remove`, `indexOf` finds the song by _identity_, so `remove` removes the exact object it was given and ignores a separately built song with identical fields. Whether that is reasonable to expect of a caller is a design question that [Chapter 13](./04_flexibility) takes up.
+In `remove`, `indexOf` finds the song by identity, so `remove` removes the exact object it was given and ignores a separately built song with identical fields. Whether that is reasonable to expect of a caller is a design question that [Chapter 13](./04_flexibility#two-notions-of-sameness) takes up.
 
 ```plantuml
 @startuml
@@ -400,13 +448,13 @@ Song : durationSeconds: number
 
 The class is a third way of organising a program, alongside two paradigms from Part 1.
 
-**Functional programming** builds values and transforms them with functions, without mutation. We saw this in [Part 1](../part1/index) when we modelled data as types and processed it with pure functions. Summing the durations of a list of songs functionally looks like this, with no mutation:
+**Functional programming** builds values and transforms them with functions, without mutation. We saw this in Chapter 2 when we modelled data as types and processed it with pure functions. Summing the durations of a list of songs functionally looks like this, with no mutation:
 
 ```typescript
 const total: number = songs.reduce((sum: number, song: Song) => sum + song.durationSeconds, 0);
 ```
 
-**Imperative programming** is a sequence of statements ([Chapter 1](../part1/01_new-language)) that read and change state ([Chapter 6](../part1/06_state-mutation)) step by step. Recursion is the idiomatic functional way of handling variable-sized data, and loops ([Chapter 5](../part1/05_arrays)) are the idiomatic imperative way. Imperatively, the same sum looks like this:
+**Imperative programming** is a sequence of statements (Chapter 1) that read and change state (Chapter 6) step by step. Recursion is the idiomatic functional way of handling variable-sized data, and loops (Chapter 5) are the idiomatic imperative way. Imperatively, the same sum looks like this:
 
 ```typescript
 let total: number = 0;
@@ -421,28 +469,26 @@ for (const song of songs) {
 const total: number = playlist.totalDuration();
 ```
 
-The three styles are often mixed: a method body is usually imperative, a class can hold immutable values, and a functional pipeline can run inside a method. They differ in how a program is organised, and object-oriented programs are organised around objects that own their state.
-
-<!--
-RTH: not clear this digression is worth adding
+The three styles are often mixed: a method body is usually imperative, a class can hold immutable values, and a functional pipeline can run inside a method.
 
 <details class="tooltip link-110">
 <summary>You Have Already Modelled a Playlist</summary>
 
-In the Part 1 modelling chapter you described a playlist as a _tagged union_, `EmptyPlaylist | NonEmptyPlaylist`, and wrote separate functions such as `countSongs` and `totalDuration` that each took a `Playlist` and returned a result. The data lived in the type; the operations lived in free-standing functions; the two were separate things that a caller connected by hand. The object-oriented version keeps the same information but joins the data and the operations into one unit. The shift from "a type plus the functions that operate on it" to "an object that carries its own operations" is the move this chapter is about.
+[Chapter 2](../part1/02_model-types#playlists) modelled a playlist as a tagged union, `EmptyPlaylist | NonEmptyPlaylist`, with separate functions such as `countSongs` and `totalDuration` that each took a `Playlist`. This chapter's `Playlist` is a new design that reuses Chapter 2's `Song`: it keeps the songs in an array and joins the data and the operations that maintain it into one class.
 
 </details>
--->
 
 ## Classes Are Types
 
-Declaring a class declares a type, and that type behaves like any other type from [Part 1](../part1/index). `Playlist` can annotate a variable, type a parameter, be a return type, or be the element type of an array:
+Declaring a class declares a type, and that type behaves like any other type from Chapter 2. `Playlist` can annotate a variable, type a parameter, be a return type, or be the element type of an array:
 
 ```typescript
 function longest(playlists: Playlist[]): Playlist | null {
     let longestSoFar: Playlist | null = null;
     for (const playlist of playlists) {
-        if (longestSoFar === null || playlist.totalDuration() > longestSoFar.totalDuration()) {
+        if (longestSoFar === null) {
+            longestSoFar = playlist;
+        } else if (playlist.totalDuration() > longestSoFar.totalDuration()) {
             longestSoFar = playlist;
         }
     }
@@ -450,11 +496,11 @@ function longest(playlists: Playlist[]): Playlist | null {
 }
 ```
 
-The compiler checks these annotations as it did for the types in [Part 1](../part1/index). A function that expects a `Playlist` cannot be given a `Song`, and the result of `longest` is known to be a `Playlist` or `null`, so a caller must handle the empty case.
+The compiler checks these annotations as it did for the types in Part 1. A function that expects a `Playlist` cannot be given a `Song`, and the result of `longest` is known to be a `Playlist` or `null`, so a caller must handle the empty case.
 
 ### Objects and References
 
-A field of one object can hold another object, and a variable that "holds" an object actually holds a _reference_ to it, as in [Chapter 6](../part1/06_state-mutation). This has two consequences:
+A field of one object can hold another object, and a variable that "holds" an object actually holds a reference to it, as in Chapter 6. This has two consequences:
 
 1. Two objects are distinct even when their contents match. Each `new` produces a separate object with its own identity:
 
@@ -464,11 +510,11 @@ const b: Playlist = new Playlist();
 // a === b is false: they are different objects
 ```
 
-2. When an object is passed to a function or stored in a field, the _reference_ is copied, not the object. The caller and the callee then share one object, so a change made through either is visible to both. This is the aliasing from [Chapter 6](../part1/06_state-mutation#copies-and-references), and as that chapter showed, primitives behave differently.
+2. When an object is passed to a function or stored in a field, the reference is copied, not the object. The caller and the callee then share one object, so a change made through either is visible to both. This is the aliasing from [Chapter 6](../part1/06_state-mutation#copies-and-references), and as that chapter showed, primitives behave differently.
 
 ## Working with Objects
 
-A class declaration only describes what its objects look like. To do work, we instantiate objects and call their methods with dot notation: in `playlist.next()`, the `.` separates the object from the method called on it. Because every object holds its own fields, a method call on one object does not affect another.
+We call an object's methods with dot notation: in `playlist.next()`, the `.` separates the object from the method called on it.
 
 The following program uses two independent playlists:
 
@@ -528,20 +574,9 @@ digraph objects {
 ```
 <!-- caption="favourites and workout are distinct objects; the songs cells reference separate Song objects, while currentIndex contains a primitive value." -->
 
-<!--
-<details class="tooltip exercise">
-<summary>Exercise: Testing</summary>
-
-The code above puts several checks in one block. The verification chapter argues that a test should focus on one behaviour at a time. How would you split these checks into separate tests, and what makes that harder for stateful objects than for the pure functions of Part 1?
-
-</details>
--->
-
 ## Testing Classes
 
-In [Chapter 9](../part1/09_validation), we tested pure functions by passing them arguments and inspecting the return value.
-
-Testing a class is different, because an object carries _state_ between calls. A test usually constructs an object, performs a sequence of operations, and then checks the resulting state: the object's observable behaviour, not a single return value. This test adds two songs to a `Playlist`, moves to the second, and removes it:
+In Chapter 9, we tested functions by passing them arguments and inspecting the result. Testing a class is different, because an object carries state between calls. A test usually constructs an object, performs a sequence of operations, and then checks the resulting state: the object's observable behaviour, not a single return value. This test adds two songs to a `Playlist`, moves to the second, and removes it:
 
 ```typescript
 const songA: Song = { title: "Aubade", artist: "Dawn Quartet", durationSeconds: 180 };
@@ -557,7 +592,7 @@ test("removing the current song keeps the position valid", () => {
 });
 ```
 
-The test-design ideas from Part 1 still apply. Equivalence classes and boundaries now describe _sequences of method calls_ rather than single arguments: an empty playlist, a one-song playlist, and removing the current song versus another song. Layered assertions apply to whatever state the object exposes.
+The test-design ideas from Part 1 still apply. Equivalence classes and boundaries now describe sequences of method calls rather than single arguments: an empty playlist, a one-song playlist, and removing the current song versus another song.
 
 Almost every test of a class starts by building a fresh object. Writing `new Playlist()` at the top of every test is repetitive, but sharing one object across tests is worse, because one test's changes would leak into the next. A `beforeEach` hook inside a `describe` block, as in [Chapter 9](../part1/09_validation#shared-setup), is the natural place to create a fresh object:
 
@@ -580,13 +615,13 @@ describe("Playlist", () => {
 });
 ```
 
-Each test now gets its own `playlist`, unaffected by any other, so the tests are independent and can run in any order.
+Each test now gets its own `playlist`, so the tests stay independent of one another.
 
 #### The Value of Class Abstractions
 
 A class is a unit of abstraction because it bundles state with the operations that maintain it. A client reasons about what a `Playlist` does, through its methods, without needing to know how it keeps the current index valid. Because those methods live alongside the state they protect, a client that uses only the methods cannot leave a `Playlist` in an inconsistent state, and the rest of the program no longer has to keep that state consistent.
 
-To use a class, a client only needs to find one that models what they care about and call its methods. Naming therefore matters in class design, because a good name lets an engineer find the abstraction they need without reading the code that implements it.
+To use a class, a client only needs to find one that models what they care about and call its methods. Class names therefore deserve care: a good name lets an engineer find the abstraction they need without reading the code that implements it.
 
 <!--
 So far this is the class _offering_ an interface that a client has no need to look past. It is not yet a guarantee. Nothing in this chapter stops a determined caller from reaching in and writing `favourites.currentIndex = 99` directly, breaking the invariant from outside. Guaranteeing that a client _cannot_ reach past the interface, so that an object's state is truly the class's own, is the role of [encapsulation](./03_encapsulation).
@@ -600,6 +635,125 @@ Design a class for the scenario below, following the same path this chapter used
 > As a homeowner, I want a thermostat whose target temperature I can nudge up or down but never set outside a safe range, so that the house is never driven dangerously hot or cold.
 
 For this task, design a class, name it, and determine its invariants. Decide what fields it should hold, and design the methods that update that state. There are many possible designs for a problem like this, so try to come up with more than one and compare their strengths and weaknesses.
+
+<!-- Potential unverified solution:
+
+```typescript
+import { describe, test, expect, beforeEach } from "vitest";
+
+/**
+ * A thermostat whose target temperature can be nudged up or down but
+ * never leaves a safe range.
+ *
+ * Class invariant: minTarget <= target <= maxTarget.
+ */
+class Thermostat {
+    /** The lowest safe target, in degrees Celsius. */
+    minTarget: number;
+    /** The highest safe target, in degrees Celsius; never below minTarget. */
+    maxTarget: number;
+    /** The current target, in degrees Celsius; between minTarget and maxTarget. */
+    target: number;
+
+    /**
+     * Creates a thermostat with the given safe range, starting at the
+     * middle of that range.
+     *
+     * @param {number} minTarget the lowest safe target.
+     * @param {number} maxTarget the highest safe target.
+     * @throws {Error} "minTarget must not exceed maxTarget" when the range is empty.
+     */
+    constructor(minTarget: number, maxTarget: number) {
+        if (minTarget > maxTarget) {
+            throw new Error("minTarget must not exceed maxTarget");
+        }
+        this.minTarget = minTarget;
+        this.maxTarget = maxTarget;
+        this.target = (minTarget + maxTarget) / 2;
+    }
+
+    /**
+     * Raises the target by one degree, stopping at the highest safe target.
+     */
+    nudgeUp(): void {
+        if (this.target + 1 > this.maxTarget) {
+            this.target = this.maxTarget;
+        } else {
+            this.target = this.target + 1;
+        }
+    }
+
+    /**
+     * Lowers the target by one degree, stopping at the lowest safe target.
+     */
+    nudgeDown(): void {
+        if (this.target - 1 < this.minTarget) {
+            this.target = this.minTarget;
+        } else {
+            this.target = this.target - 1;
+        }
+    }
+
+    /**
+     * Returns the current target temperature.
+     *
+     * @returns {number} the target, in degrees Celsius.
+     */
+    currentTarget(): number {
+        return this.target;
+    }
+}
+
+describe("Thermostat", () => {
+    let thermostat: Thermostat;
+
+    beforeEach(() => {
+        thermostat = new Thermostat(15, 25);
+    });
+
+    test("starts in the middle of the safe range", () => {
+        expect(thermostat.currentTarget()).to.equal(20);
+    });
+
+    test("nudging up raises the target by one degree", () => {
+        thermostat.nudgeUp();
+        expect(thermostat.currentTarget()).to.equal(21);
+    });
+
+    test("nudging up stops at the highest safe target", () => {
+        thermostat.nudgeUp();
+        thermostat.nudgeUp();
+        thermostat.nudgeUp();
+        thermostat.nudgeUp();
+        thermostat.nudgeUp();
+        thermostat.nudgeUp();                        // a sixth nudge would pass 25
+        expect(thermostat.currentTarget()).to.equal(25);
+    });
+
+    test("nudging down stops at the lowest safe target", () => {
+        thermostat.nudgeDown();
+        thermostat.nudgeDown();
+        thermostat.nudgeDown();
+        thermostat.nudgeDown();
+        thermostat.nudgeDown();
+        thermostat.nudgeDown();                      // a sixth nudge would pass 15
+        expect(thermostat.currentTarget()).to.equal(15);
+    });
+
+    test("an empty range is refused", () => {
+        expect(() => new Thermostat(25, 15)).to.throw("minTarget must not exceed maxTarget");
+    });
+});
+```
+
+One design, with the trade-offs a second design would change:
+
+1. Clamping versus refusing. The nudges above stop at the limit, as a physical dial does. The alternative refuses a nudge that would leave the range (a `Result`, as in Chapter 4, or an error) and so tells the caller the limit was hit; it costs every caller a check.
+2. Limits per thermostat versus fixed. Constructor arguments let each house choose its safe range; fixed limits remove a constructor argument and the empty-range check.
+3. Step size. `nudgeUp(amount)` is more flexible but adds a second rule to protect (the amount must be positive); a fixed one-degree step has none.
+
+In every design the invariant is `minTarget <= target <= maxTarget`, established by the constructor and preserved by both nudges. Nothing yet stops a caller writing `thermostat.target = 100`; Chapter 12 closes that gap.
+-->
 
 </details>
 

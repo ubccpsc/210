@@ -241,7 +241,7 @@ The expression evaluates to the value stored under `<propertyName>`. If that val
 <object>.<propertyName>.<propertyName>
 ```
 
-The name after each dot is fixed in the source and checked against the type of the value on its left, so naming a property the type does not declare is a compile-time error rather than a value that is absent at run time.
+The name after each dot is fixed in the source and checked against the type of the value on its left, so naming a property the type does not declare is a compile-time error rather than a value that is absent at runtime.
 
 </details>
 

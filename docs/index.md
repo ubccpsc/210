@@ -4,13 +4,13 @@ The goal of this course is to teach you to design, build, and update multi-file 
  
 Core to doing all these tasks is the skill of **code fluency**. When you are fluent in a natural language, you can write, read, listen, and speak in that language without requiring lengthy translation in your head. Code fluency aims to get you to the same place with code. We want you to be able to easily translate ideas in your head to concrete code; we want you to be able to read code and grasp the underlying logic and design. As with any natural language, getting to this place requires you to read and write a lot of code.
 
-Unlike a natural language, you probably won't be *speaking* code or *listening* code, per-se. But software rarely exists in a vacuum: it exists to accomplish some task. Users will use it without looking at the code. But fellow maintainers will interact with the code directly. To *speak* code and design to others, you'll need to get familiar with language *about* code. In CPSC 210, you'll learn this language as you go. We'll introduce you to both the practice of coding and the language to describe that practice. 
+Unlike a natural language, you probably won't be speaking or listening to code, per se. But software rarely exists in a vacuum: it exists to accomplish some task. Users will use it without looking at the code. But fellow maintainers will interact with the code directly. To speak code and design to others, you'll need to get familiar with language about code. In CPSC 210, you'll learn this language as you go. We'll introduce you to both the practice of coding and the language to describe that practice. 
 
 <details class="tooltip deep-dive">
   <summary>The Language of Coding
   </summary>
   
-  By the end of the course, you'll understand what these terms mean: *type-driven development*, *test-driven development*, *functional programming*, *imperative programming*, *object-oriented programming*, *functions*, *expressions*, *statements*, *types*, *structs*, *values*, *classes*, *recursion*, *iteration*, *object*, *primitives*, *unit test*, *cohesion*, *coupling*.
+  By the end of the course, you'll understand what these terms mean: *invariants*, *test-driven development*, *functional programming*, *imperative programming*, *object-oriented programming*, *functions*, *expressions*, *statements*, *types*, *contracts*, *values*, *classes*, *recursion*, *iteration*, *object*, *primitives*, *unit test*, *cohesion*, *coupling*.
     
    Don't worry, we won't quiz you on these! We want you to learn these terms for the long run through applying them, rather than through flash card definitions.    
  
@@ -24,19 +24,19 @@ Unlike a natural language, you probably won't be *speaking* code or *listening* 
 </details>
 </details>
 
-If you've ever become fluent in a natural language as an adult, you'll know this takes time. We expect you'll continue developing code fluency throughout your studies. To jump-start your code fluency in CPSC 210, we'll be asking you to read and write *a lot* of code.
+If you've ever become fluent in a natural language as an adult, you'll know this takes time. We expect you'll continue developing code fluency throughout your studies. To jump-start your code fluency in CPSC 210, we'll be asking you to read and write a lot of code.
 
 ## Course Structure
 
-The course is separated into 3 parts. Each chapter corresponds to one in-class lecture, and each lecture will be accompanied by an active learning activity, provided to registered students through a PrairieLearn workspace (see course webpage for links). While the chapters are standalone resources, they are most effective if read prior to the lecture they accompany.
+The course is separated into three parts. Each chapter corresponds to one in-class lecture, and each lecture will be accompanied by an active learning activity, provided to registered students through a PrairieLearn workspace (see course webpage for links). While the chapters are standalone resources, they are most effective if read prior to the lecture they accompany.
 
-In [Part 1](./part1/index), you will learn how to build software that is correct even when developers make mistakes. Along the way, you will learn the core of a new programming language, TypeScript. You will also learn *imperative programming*, a programming style which is common to many programming languages. Some keywords for [Part 1](./part1/index) include: *types*, *statements* (`if`, `return`, `for`), *pre-conditions*, *post-conditions*, *assertion*, *arrays*, *iteration*, *mutation*, *side effects*, *asynchronous* development, *exception*, and *tests*.
+In [Part 1](./part1/index), you will learn how to build software that is correct even when developers make mistakes. Along the way, you will learn the core of a new programming language, TypeScript. You will also learn *imperative programming*, a programming style which is common to many programming languages. Some keywords for [Part 1](./part1/index) include: *types*, *statements* (`if`, `return`, `for`), *preconditions*, *postconditions*, *assertion*, *arrays*, *iteration*, *mutation*, *side effects*, *asynchronous* development, *exception*, and *tests*.
 
-In [Part 2](./part2/index), you will learn how to design software split into distinct components, and how to make those components *interact* with each other without *negatively interfering* with each other. Along the way, you will learn *object-oriented programming*, a programming style Java is well-known for, but that exists in most popular programming languages. Some keywords for [Part 2](./part2/index) include: *classes*, *constructor*, *method*, *cohesion*, *information hiding*, *interface*, *inheritance*, *polymorphism*.
+In [Part 2](./part2/index), you will learn how to design software split into distinct components, and how to make those components interact with each other without negatively interfering with each other. Along the way, you will learn *object-oriented programming*, a programming style Java is well-known for, but that exists in most popular programming languages. Some keywords for [Part 2](./part2/index) include: *classes*, *constructor*, *method*, *cohesion*, *information hiding*, *interface*, *inheritance*, *polymorphism*.
 
-In [Part 3](./part3/index), you will learn how to work with and on software systems that interact with software in wholly different code bases. Here we will scale to handling software you did not fully write yourself: nearly all software engineering done in practice is of this type. Some keywords for [Part 3](./part3/index) include: *coupling*, *readability*, *complexity*, *refactoring*, *API*, *REST*, and *fault localization*.
+In [Part 3](./part3/index), you will learn how to work with and on software systems that interact with software in wholly different code bases. Here we will scale to handling software you did not fully write yourself: nearly all software engineering done in practice is of this type. Some keywords for [Part 3](./part3/index) include: *coupling*, *dependency injection*, *API*, *REST*, *serialisation*, *code smells*, *refactoring*, and *fault localisation*.
 
-The [Reference](./reference/index) section at the end is not read in order. It collects a [Glossary](./reference/glossary) of every term the textbook defines, each linked to the section that introduces it, alongside a guide to the [parts of TypeScript this course leaves out](./reference/language-features).
+The [Reference](./reference/index) section at the end is not read in order. It reviews the [prerequisite knowledge](./reference/prerequisite-knowledge) from CPSC 110 and CPSC 121 that the textbook builds on, collects a [Glossary](./reference/glossary) of every term the textbook defines, each linked to the section that introduces it, and describes the [parts of TypeScript this course leaves out](./reference/language-features).
 
 ## Language Choice
 
@@ -49,7 +49,7 @@ As of 2026, TypeScript is also used widely in the software industry, particularl
 <details class="tooltip deep-dive">
   <summary>Typed Languages</summary>
   
-   Nearly all programming languages have types; any variable `x` takes on a value (say, `3`) that has a type (say, `number` or `integer`). A **typed language** (more precisely: **statically-typed** or **strongly-typed**), in contrast with an **untyped language** (more precise: **dynamically-typed**) has those types written in the code explicitly. These types allow us to catch more bugs before the program runs, and communicate more precisely what the code does.
+   Nearly all programming languages have types: any variable `x` holds a value (say, `3`) that has a type (say, `number`). In a **statically-typed** language, the compiler checks types before the program runs. In a **dynamically-typed** language, such as Python or the CPSC 110 teaching languages, a type mistake surfaces only while the program runs. TypeScript is statically typed, and in this course we write the types out explicitly. These types let us catch more bugs before the program runs, and communicate more precisely what the code does.
 </details>
 
 If you don't know TypeScript, this textbook will introduce relevant TypeScript syntax as we go. Beyond that, it's up to you to learn: we won't dwell on explaining the syntax in lecture or exercises. 
@@ -77,7 +77,7 @@ If you don't know TypeScript, this textbook will introduce relevant TypeScript s
    
 </details>
 
-That being said, we *will* explain the coding concepts *behind* the syntax. Those concepts will help you learn new programming languages as you go on in your studies.
+That being said, we will explain the coding concepts behind the syntax. Those concepts will help you learn new programming languages as you go on in your studies.
 
 
 ## Using This Textbook
@@ -89,7 +89,7 @@ You'll have noticed this textbook includes some nested content. All this nested 
 <details class="tooltip deep-dive">
   <summary>Deep Dives</summary>
   
-  Deep dives are our catch-all parenthetical: they're things we would *like* to tell you, but we recognise are divergent from the main point we are trying to make.
+  Deep dives are our catch-all parenthetical: they're things we would like to tell you, but we recognise are divergent from the main point we are trying to make.
 </details>
 
  <details class="tooltip exercise">
@@ -118,7 +118,7 @@ You'll have noticed this textbook includes some nested content. All this nested 
 </details>
 
 <details class="tooltip link-110">
-  <summary>Links To Prior Knowledge</summary>
+  <summary>Links to Prior Knowledge</summary>
  
  These links will explicitly remind you of CPSC 110 concepts that are relevant to the material at hand. If you've taken CPSC 103+107, the high-level concepts should be familiar to you. However, any code examples we'll give here will be in the CPSC 110 teaching languages.\* 
  
