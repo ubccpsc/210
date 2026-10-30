@@ -618,7 +618,7 @@ Because a subclass builds on its base class's implementation, a change inside th
 
 #### Sharing and Varying Behaviour
 
-This chapter added a new way for classes to relate. Class extension lets one class be a more specific kind of another, inheriting a base's implementation and refining it through overriding and `super`, while an abstract base defines a shared sequence of steps and leaves the varying ones to its subclasses. Polymorphism and dynamic dispatch let a single call do different work for different actual types, so code written against a supertype works with every subtype, present and future, as long as each honours the contract. Because inheritance ties classes together more tightly, it is reserved for true is-a relationships, and composition remains the default way for classes to work together.
+Class extension lets one class be a more specific kind of another, inheriting a base's implementation and refining it through overriding and `super`. An abstract base defines a shared sequence of steps and leaves the varying ones to its subclasses. Polymorphism and dynamic dispatch let a single call do different work for different actual types, so code written against a supertype works with every subtype, present and future, as long as each honours the contract. Because inheritance ties classes together more tightly than collaboration, you should use it only for true is-a relationships.
 
 <details class="tooltip exercise">
   <summary>Exercise: Quiz Scoring Schemes</summary>
