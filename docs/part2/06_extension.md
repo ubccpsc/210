@@ -1,22 +1,141 @@
 # Extending Behaviour Through Polymorphism
 
-**Polymorphism** is the ability of one piece of code to work with many types and to behave, for each, according to that type. [Chapter 14](./05_boundaries#many-implementations) achieved it with interfaces, and classes have a second way to relate to each other that supports it too.
+**Polymorphism** is the ability of one piece of code to do multiple things. In particular, it is used in object-oriented programming to describe how a piece of code using a particular *apparent* type can actually dispatch to implementations from multiple *actual* types. In [Chapter 14](./05_boundaries#many-implementations), we saw how interfaces lead to polymorphism. But classes have a second way to relate to each other that will also lead to polymorphism.
 
-An interface lets unrelated classes commit to the same contract, but does not say that one class is a kind of another, or let a class reuse another's implementation: these are both the domain of class **extension**. A class can extend another, taking on its behaviour through **inheritance** and refining it, and an instance of the extending class can be used wherever the original is expected. Both mechanisms reduce duplication: an interface lets one piece of calling code work with many types, and extension lets many types share one implementation. Both also make a system easier to change, since a new type can be added behind an existing contract without rewriting the code that uses it.
+An interface lets unrelated classes commit to the same contract, but does not say that one class is a kind of another, or let a class reuse another's implementation: these are both the domain of class **extension**. A class can *extend* another, taking on its behaviour through **inheritance**. An instance of the extending class can be used wherever the original is expected. 
+
+Both interfaces and extension reduce duplication: an interface lets one piece of calling code work with many types, and extension lets many types share one implementation. Both also make a system easier to change, since a new type can be added behind an existing contract without rewriting the code that uses it.
 
 ## Abstract Base Classes
 
-In the previous chapter each notifier implemented `send(..)` itself. The two methods repeat the same opening steps before doing anything specific to the channel: reject an empty message, then format the alert text. Copying that logic into every channel is contrary to the **don't repeat yourself** (DRY) principle. Each copy is another place the rule has to be changed, and copies drift apart as some are updated and others are missed. An interface cannot hold that shared work, because it has signatures and no bodies, but a class can.
-
-Shared work goes in a **base class**, which holds the functionality common to a family of related classes so that each can build on it instead of repeating it. A class that builds on a base class is a **subclass** of it. Our base class is also **abstract**, meaning it cannot be created on its own and exists only to be built on. An abstract class can have two kinds of member: concrete ones, with a body that the whole family shares, and abstract ones, declared without a body for each class in the family to fill in.
-
+In the previous chapter each notifier implemented `send(..)` itself. The bodies of `send(...)` looked like this:
 ```typescript
-abstract class <Name> implements <Interface> {
-    // concrete members shared by every subclass, and
-    // abstract members that each subclass must provide:
-    protected abstract <methodName>(<parameters>): <ReturnType>;
+    // EmailNotifier
+    public send(message: string): void {
+        assert(message.length > 0, "message must not be empty");
+        const text: string = "[ALERT] " + message;
+        // deliver `text` to this.address over email
+    }
+```
+and
+like this:
+```typescript
+    // SMSNotifier
+    public send(message: string): void {
+        assert(message.length > 0, "message must not be empty");
+        const text: string = "[ALERT] " + message;
+        // deliver `text` to this.address over SMS
+    }
+```
+Notice the two methods repeat the same opening steps before doing anything specific to the channel. Copying that logic into every channel is contrary to the **don't repeat yourself** (DRY) principle. If we ever need to change these opening steps, we need to change them in each copy. Copies  easily drift apart as some are updated and others are missed. 
+
+An interface cannot hold this shared work, because it has no function bodies---but a *class* can.
+
+Shared work goes in a **base class**, which holds the functionality common to a family of related classes so that each can build on it instead of repeating it. A class that builds on a base class is a **subclass** of it. 
+
+<details class="tooltip ts-tips">
+<summary> <code>extends</code></summary>
+
+The following creates a new class `X` that extends `Y`:
+```typescript
+class X extends Y {
+    /** class X's body **/
 }
 ```
+
+Any `public` method/field declared on Y can now be used directly on `X`, without writing any additional code. (`protected` methods/fields can be used within `X`---see the tooltip on `protected`).
+
+Say `Y` is defined as follows:
+
+```typescript
+class Y {
+   public foo(): number {
+      return 5;
+   }
+}
+```
+
+Then we can write:
+```typescript
+class X extends Y {
+}
+
+const x: X = new X();
+x.foo(); // runs, returns 5
+```
+
+</details>
+
+
+<details class="tooltip ts-tips">
+<summary> <code>protected</code></summary>
+
+[Chapter 12](./03_encapsulation#hiding-the-representation) introduced `public` and `private`; `protected` is a third access modifier. `protected` means that the method/field is accessible by this class *and all its subclasses*. A `private` method/field in a base class will not be accessible by its subclasses. For example:
+
+```typescript
+class Y {
+   private bar(): number {
+      return 4;
+   }
+   protected baz(): number {
+      return 5;
+   }
+}
+```
+
+Then we can write:
+```typescript
+class X extends Y {
+   public foo(): number {
+      // Property 'bar' is private and only accessible within class 'Y'.
+      // this.bar(); // won't compile
+      return this.baz(); // legal
+   }
+}
+
+const x: X = new X();
+x.foo(); // runs, returns 5
+// x.baz(); // won't compile; protected members can't be accessed outside a class and its subclasses
+```
+
+</details>
+
+A base class can be a regular class, or an **abstract** class. An **abstract** class cannot be created on its own and exists only to be built on.  An abstract class can have two kinds of member: concrete ones, with a body that the whole family shares, and abstract ones, declared without a body for each class in the family to fill in.
+
+<details class="tooltip ts-tips">
+<summary>Abstract Classes </summary>
+Declare an abstract class with:
+
+```typescript
+abstract class X {
+	// concrete members shared by every subclass
+	<access-modifier> concreteMethod1(<parameters>): <ReturnType> {
+	  /** Method Body Here**/
+	}
+	
+   // abstract members that each subclass must provide:
+	<access-modifier> abstract abstractMethod1(<parameters>): <ReturnType>;
+}
+```
+
+`new X()` does not compile, because an abstract class exists only to be extended. A concrete subclass that does not provide a body for each inherited abstract method will not compile either, so every concrete subclass must in the abstract class's 'holes' (`abstractMethod1` above). 
+
+An abstract class can use `extends` and `implements`, just like a regular class. 
+
+</details>
+
+<details class="tooltip deep-dive">
+<summary>Should my base class be abstract or not?</summary>
+
+Extending a regular class makes sense when both classes can exist (say, a `ShowDog` extends a `Dog` with dog-show-related functionality); extending an abstract class makes sense when the base class can hold some functionality but doesn't make sense on its own (say, a `Dog` extends a `Pet`, where we can never create an abstract `Pet` that's not some type of animal). 
+
+An interface makes sense when only the method signatures matter, and there's no functionality to share.
+</details>
+
+
+
+
+
 
 For the notifiers, the shared `send(..)` and a default formatting step go in the base class, and the delivery step specific to each channel is left abstract:
 
@@ -53,12 +172,7 @@ abstract class BaseNotifier implements Notifier {
 
 `BaseNotifier` provides `send(..)` and a default `decorate(..)`, and declares `deliver(..)` as abstract: it does not have a body, and every concrete subclass must supply its own. Only `send(..)` is `public`, because it is part of the `Notifier` contract. `decorate(..)` and `deliver(..)` are internal steps, so they are `protected`, reachable inside the class and its subclasses but not from outside.
 
-<details class="tooltip ts-tips">
-<summary>Abstract Classes and <code>protected</code></summary>
 
-`new BaseNotifier()` does not compile, because an abstract class exists only to be extended. A concrete subclass that does not provide a body for each inherited abstract method will not compile either, so every concrete subclass fills in the abstract class's 'holes'. [Chapter 12](./03_encapsulation#hiding-the-representation) introduced `public` and `private`; `protected` is a third access modifier.
-
-</details>
 
 ### Extending the Base Class
 
@@ -87,9 +201,76 @@ class EmailNotifier extends BaseNotifier {
 
 `EmailNotifier` has no `send(..)` method of its own. It inherits `BaseNotifier`'s. The `super()` call in its constructor calls the base class constructor, which a subclass must do before using `this`.
 
+<details class="tooltip ts-tips">
+<summary> <code>super</code></summary>
+
+`super` allows us to call the constructor or methods of a base class. 
+
+`super(<superclass-constructor-args>)` call's the base class's construtor. For example:
+
+```typescript
+class Y {
+   private readonly myData: number;
+   
+   public constructor(n: number) {
+       this.myData = n;
+   }
+
+   public baz(): number {
+      return 5 + this.myData;
+   }
+}
+
+class AddsXToData extends Y {
+
+   public constructor(n: number, x: number) {
+       super(n + x);
+   }
+
+}
+
+const axtd: AddsXToData = new AddsXToData(7, 11);
+axtd.baz() // returns 23
+```
+
+
+
+`super.method(<superclass-method-args>)` call's the base class's method `method`. For example:
+
+```typescript
+class Y {
+   private readonly myData: number;
+   
+   public constructor(n: number) {
+       this.myData = n;
+   }
+
+   public baz(): number {
+      return 5 + this.myData;
+   }
+}
+
+class DoublesBaz extends Y {
+
+   // no constructor declared; so inherits Y's constructor
+
+   public doublebaz(): number {
+       return 2 * super.baz();
+   }
+
+}
+
+const db: DoublesBaz = new DoublesBaz(2);
+db.doublebaz() // returns 14
+```
+
+</details>
+
+
+
 ### Overriding Methods
 
-A subclass can also **override** an inherited method, replacing it with its own version. SMS messages have a length limit, so `SmsNotifier` refines `decorate(..)`, calling the base version through `super` and then shortening the result:
+A subclass can **override** an inherited method, replacing it with its own version. SMS messages have a length limit, so `SmsNotifier` overrides `decorate(..)`, calling the base version through `super` and then shortening the result:
 
 ```typescript
 class SmsNotifier extends BaseNotifier implements Confirmable {
@@ -136,7 +317,7 @@ class SmsNotifier extends BaseNotifier implements Confirmable {
 }
 ```
 
-`super.decorate(message)` calls the base class's version, and the subclass shortens its result, so the shared formatting is reused rather than copied. Overriding a method, and calling `super` to build on the inherited version, are the two basic ways to refine a base class.
+`super.decorate(message)` calls the base class's `decorate`. `SMSNotifier`'s `decorate` shortens its result, so the shared formatting is reused rather than copied. Overriding a method, and calling `super` to build on the inherited version, are the two basic ways to refine a base class.
 
 ```plantuml
 @startuml
@@ -176,15 +357,16 @@ const channel: Notifier = new SmsNotifier("+1-555-0100");
 channel.send("disk almost full");
 ```
 
-The apparent type of `channel` is `Notifier`, so the compiler checks only that `Notifier` has a `send(..)`. At runtime the object is an `SmsNotifier`, and the call resolves in steps:
+The apparent type of `channel` is `Notifier`, so the compiler checks only that `Notifier` has a `send(..)`. At runtime the object is an `SmsNotifier`, and the call resolves as follows (you can see these steps in action by running the code through a debugger):
 
 1. `send(..)` is not defined on `SmsNotifier`. It is inherited from `BaseNotifier`, so `BaseNotifier`'s `send(..)` runs.
 2. That `send(..)` calls `this.decorate(message)`. `this` is the `SmsNotifier`, which overrides `decorate(..)`, so the _subclass's_ `decorate(..)` runs and truncates the formatted text.
 3. That `send(..)` then passes the decorated text to `this.deliver(..)`. `deliver(..)` is abstract in the base, and `this` is the `SmsNotifier`, so the _subclass's_ `deliver(..)` runs and sends over SMS.
 
-In steps 2 and 3, the calls to `decorate(..)` and `deliver(..)` are written inside `BaseNotifier`, but the versions that run are the ones belonging to the actual object. When a method calls `this.something()`, dispatch finds the right `something` for whatever object `this` is. This lets a base class lay out a sequence of steps and leave the steps themselves to its subclasses.
+In steps 2 and 3, the calls to `decorate(..)` and `deliver(..)` are inside `BaseNotifier`'s code, but the versions that run are the ones written in `SMSNotifier`. When a method calls `this.something()`, dynamic dispatch finds the right `something` for whatever object `this` is. This lets a base class lay out a sequence of steps and leave the steps themselves to its subclasses.
 
-Dynamic dispatch also lets `alertAll(..)` work across a mixed list:
+
+Dynamic dispatch is what lets `alertAll(..)` work across a mixed list:
 
 ```typescript
 const channels: Notifier[] = [
@@ -198,14 +380,31 @@ alertAll(channels, "deploy finished");
 
 ## Honouring the Contract
 
-A class that extends another class or implements an interface is a **subtype** of it, and the class or interface it extends or implements is its **supertype**. Subtyping carries through a hierarchy, so `EmailNotifier` is a subtype of both `BaseNotifier` and `Notifier`. Because a subtype instance can stand in wherever its supertype is expected, `alertAll(..)` will give a message to whatever `Notifier` it receives and trust it to deliver. The subtype takes on a responsibility: it must honour the contract callers depend on, or code written against the supertype will be wrong even though it compiles.
+A class that extends another class or implements an interface is a **subtype** of it, and the class or interface it extends or implements is its **supertype**. Subtyping carries through a hierarchy, so `EmailNotifier` is a subtype of both `BaseNotifier` and `Notifier`. Because a subtype instance can stand in wherever its supertype is expected, `alertAll(..)` will give a message to whatever `Notifier` it receives and trust it to deliver. 
 
-`SmsNotifier` meets that responsibility. Its `decorate(..)` shortens the text, but `send(..)` still delivers the message, which is all the `Notifier` contract promises: the recipient gets the alert, within the limits of the channel. A subclass that silently _dropped_ messages longer than 160 characters would break the contract, because callers of `alertAll(..)` rely on every channel being told, and this one would fail to deliver without saying so. The signatures would still match, so the compiler would say nothing. The violation would be in behaviour, not types. A subtype may specialise _how_ it does a job, but it must still do the job the supertype describes.
+This means the subtype it must honour the supertype's method contracts, or code written against the supertype will be wrong even though it compiles. `SMSNotifier` does this correctly: the `Notifier` contract for `send(..)` is that it "Formats `message` and delivers it over this channel.". `SMSNotifier`'s send shortens the text with `decorate(..)`, but still delivers the message. 
+
+By contrast, a `DropSMSNotifier` that silently _dropped_ messages longer than 160 characters would break the contract. Callers of `alertAll(..)` assume every channel they call send on will be alerted, and `DropSMSNotifier` would fail to alert its channel. The signatures would still match, so the compiler would say nothing. The violation would be in behaviour, not types. A subtype may specialise _how_ it does a job, but it must still do the job the supertype describes.
 
 <details class="tooltip deep-dive">
 <summary>Demanding No More, Promising No Less</summary>
 
-The contracts from [Chapter 3](../part1/03_checking-invariants#identifying-invariants) make the rule precise. A method's precondition is what it demands of callers, and its postcondition is what it guarantees in return. A subtype honours the supertype's contract when it demands no more and guarantees no less. If a subclass's `send(..)` rejected messages the base accepted, for example by also forbidding whitespace, it would _strengthen_ the precondition, and a caller relying on the base's looser rule would break. If it delivered less than the base promised, it would _weaken_ the postcondition. A subclass must also preserve any invariant the base maintains. Under these conditions, substituting a subtype for its supertype is always safe. This rule is known as the **Liskov Substitution Principle**, after the computer scientist Barbara Liskov, who stated it.
+What does it mean to honour contracts? We can make this precise using invariants, preconditions and postconditions from [Chapter 3](../part1/03_checking-invariants#identifying-invariants). 
+
+First, a subclass must preserve any invariant the base maintains. 
+
+A method's precondition is what it demands of callers. A subtype honours the supertype's precondition when it demands no more. If a subclass's `send(..)` rejected messages the base accepted, for example by also forbidding whitespace, it would _strengthen_ the precondition, and a caller relying on the base's looser rule would break. 
+
+A method's postcondition is what it guarantees to callers. A subtype honours the supertype's postcondition when it guarantees no less. If a subclass's `send(..)` does not deliver messages as the base promised, it would _weaken_ the postcondition. A `send(..)` that delivers messages and does some logging, by contrast, does not weaken the postcondition.
+
+
+In summary, substituting a subtype for its supertype is safe if:
+- subclass preserves any invariant the base maintains;
+- for every method a subclass overrides, it demands no more than the supertype's precondition
+- for every method a subclass overrides, it guarantees no less than the supertype's postcondition
+
+ 
+This rule is known as the **Liskov Substitution Principle**, after the computer scientist Barbara Liskov, who stated it.
 
 </details>
 
