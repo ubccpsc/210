@@ -410,11 +410,13 @@ This rule is known as the **Liskov Substitution Principle**, after the computer 
 
 ## Is-a and Can-do
 
-There are now two ways for a class to take on a type, and the difference guides which to use. `EmailNotifier` _extends_ `BaseNotifier`: it is a kind of notifier, and it inherits the base's implementation along with its type. `RecordingNotifier` from the previous chapter _implements_ `Notifier` directly: it can do what a notifier does, committing to the contract while sharing none of the base's code. Both can be used as a `Notifier`, but they relate to the hierarchy differently.
+A class can either extend another (base) class or implement an interface.
 
-`extends` is usually used when one class is a more specific kind of another and can reuse its implementation. `implements` is more appropriate when a class only needs to satisfy a contract, with an implementation of its own. A test double like `RecordingNotifier` needs the type and none of the implementation, which is why it implements rather than extends.
+`EmailNotifier` _extends_ `BaseNotifier`: it _is a_ kind of notifier, and it inherits the base's implementation along with its type. `RecordingNotifier` from the previous chapter _implements_ `Notifier` directly: it _can do_ what a notifier does, committing to the contract while sharing none of the base's code. 
 
-A test double can also extend a base class, when the test needs the inherited behaviour. This one records what the inherited pipeline delivers, so the pipeline can be checked without sending anything:
+`extends` is usually used when one class _is a_ more specific kind of another and can reuse its implementation. `implements` is more appropriate when a class _can do_ everything in a contract, with an implementation of its own. A test double  like `RecordingNotifier` _can do_ a version of everything in the contract, but doesn't share *real* implementation, which is why it implements rather than extends.
+
+That said, a test double can also extend a base class, when the test needs the inherited behaviour. This one records what the inherited pipeline delivers, so the pipeline can be checked without sending anything:
 
 ```typescript
 class CapturingNotifier extends BaseNotifier {
@@ -440,7 +442,7 @@ test("a subclass inherits the send pipeline and supplies only delivery", () => {
 
 `CapturingNotifier` has no `send(..)` of its own, yet calling `send(..)` formats the message with the base's `decorate(..)` and then dispatches to the subclass's `deliver(..)`. Extending the abstract class lets the test confirm that the prefix added by `decorate(..)` arrives in what `deliver(..)` receives.
 
-A class may extend at most one class, but it may implement any number of interfaces. Interfaces themselves can extend other interfaces, composing a larger contract from smaller ones:
+A class may extend at most one class, but it may implement any number of interfaces. However, interfaces _themselves_ can extend other interfaces, composing a larger contract from smaller ones:
 
 ```typescript
 interface ConfirmingNotifier extends Notifier, Confirmable {
@@ -452,7 +454,7 @@ A class implementing `ConfirmingNotifier` must satisfy both `Notifier` and `Conf
 
 ## Replacing Branches
 
-Without polymorphism, sending over a channel chosen at runtime means branching on a tag:
+Without polymorphism, sending over a channel chosen at runtime needs to branch on a tag:
 
 ```typescript
 function notify(channel: string, target: string, message: string): void {
@@ -466,7 +468,7 @@ function notify(channel: string, target: string, message: string): void {
 
 Every channel is a branch in one function, and `notify(..)` has to be modified each time a new channel is added.
 
-Instead, the caller holds a `Notifier`, already constructed as the right kind of channel, and asks it to act:
+With polymorphism, the caller can hold a `Notifier`, already constructed as the right kind of channel, and asks it to act:
 
 ```typescript
 function notify(channel: Notifier, message: string): void {
@@ -485,9 +487,11 @@ In CPSC 110 you handled a data type with several variants by branching on which 
 
 ## Composition Over Inheritance
 
-Class extension has dedicated syntax, but it is used more often than it should be. Most relationships between classes are better expressed by holding a collaborator, through composition or aggregation, and delegating to it, as described in [Chapter 11](./02_decomposition#delegation-through-composition-and-aggregation). The guideline's name uses "composition" in a broad sense that covers both, and so does the rest of this section. Classes more often have a has-a relationship with each other than an is-a one.
+Classes more often have a has-a relationship with each other than an is-a one. Most relationships between classes are better expressed by holding a collaborator, through composition or aggregation, and delegating to it, as described in [Chapter 11](./02_decomposition#delegation-through-composition-and-aggregation). The rest of this section uses "composition" in a broad sense to cover both composition and aggregation. 
 
-To see when composition fits better, suppose the alert text needs more than one format, such as terse and verbose, and any channel should be able to use any format. Building formatting into the class hierarchy through `decorate(..)` ties each format to a class. Holding a formatter keeps the two concerns separate. The revised base class below still owns the shared steps, including the empty-message rule, and delegates formatting to whichever `Formatter` the channel was built with:
+To see when composition fits better, suppose the alert text needs more than one format, such as terse and verbose, and any channel should be able to use any format. We could build formatting into the class hierarchy, tying each format to a class with a different `decorate(..)` method. 
+
+But it is more natural to think of a verbose vs terse formatter as something a `Notifer` _has_, than something a notified _is_. The revised base class below delegates formatting to whichever `Formatter` the channel was built with:
 
 <CollapsibleCode>
 
@@ -557,7 +561,9 @@ class EmailNotifier extends BaseNotifier {
 
 </CollapsibleCode>
 
-Any formatter can now be paired with any channel by passing a different `Formatter` when the notifier is built, and a new format is a new `Formatter` class that no channel needs to know about. Inheritance cannot offer this, because a class's base is fixed when the class is written, while a held collaborator can be chosen when the object is created and, unless the field is `readonly`, even swapped while the program runs. The design uses both mechanisms: inheritance shares the steps every channel performs, and composition supplies the part that varies independently of the channel. The rest of this part keeps the simpler `BaseNotifier` from the start of the chapter, since its notifiers need only one format.
+Any formatter can now be paired with any channel by passing a different `Formatter` when the notifier is built. We can add a new format by adding a new `Formatter` class, without changing the code for any notifier. If we had `Notifier`s _be_ formatters, we could not have this flexibility. We fix a base class when writing the class. In contrast, we can choose aheld collaborator can be chosen when the object is _created_. And if the field isn't `readonly`, we can even swap the collaborator during execution! 
+
+The final `EmailNotifier` design includes both `is-a` and `has-a` relationships: inheritance shares the steps every channel performs, and composition supplies the part that varies independently of the channel. 
 
 ```plantuml
 @startuml
@@ -593,11 +599,15 @@ VerboseFormatter : +format(..)
 ```
 <!-- caption="The base class holds a Formatter and delegates formatting to it, while each channel still inherits the shared steps." -->
 
-The gap widens as the system grows. Suppose it must support _c_ channels in _f_ formats. Building formatting into the hierarchy needs a class for each combination, _c_ times _f_ of them, and every new channel or format multiplies the count again. Holding the formatter as a collaborator needs only _c_ channel classes and _f_ formatter classes, _c_ plus _f_ in all, and a new format is a single class that works with every existing channel without changing any of them.
+<!---
+% CL: I like this but seems repetitive
+The gap widens as the system grows. Suppose it must support _c_ channels in _f_ formats. Building formatting into the hierarchy needs a class for each combination, _c_ times _f_ of them, and every new channel or format multiplies the count again. Holding the formatter as a collaborator needs only _c_ channel classes and _f_ formatter classes, _c_ plus _f_ in all, and a new format is a single class that works with every existing channel without changing any of them. 
+--->
 
-Composition is the more flexible default for other reasons too. A class may extend only one base, but it can hold as many collaborators as it needs, so capabilities that could never share one inheritance line can sit side by side.
 
-Composition also ties classes together less tightly, which extends the implementation freedom of [Chapter 13](./04_flexibility#what-makes-a-change-safe) to collaborators. A subclass depends on its base class's _implementation_, not only its contract, so it is affected by changes in how the base works. A collaborator is used only through its public contract, the boundary [Chapter 14](./05_boundaries#many-implementations) argued for. For these reasons, use inheritance only when one class is a kind of another and shares a stable core of behaviour, and prefer composition everywhere else.
+If you're not sure what makes sense in your design, composition is a more flexible default. A class may extend only one base, but it can hold as many collaborators as it needs, so capabilities that could never share one inheritance line can sit side by side. Further,  subclass depends on its base class's _implementation_, not only its contract, so it is affected by changes in how the base works. A collaborator is used only through its public contract, the boundary [Chapter 14](./05_boundaries#many-implementations) argued for. 
+
+For these reasons, use inheritance only when one class is a _kind_ of another and shares a stable core of behaviour, and prefer composition everywhere else.
 
 <details class="tooltip deep-dive">
 <summary>Fragile Base Classes</summary>
