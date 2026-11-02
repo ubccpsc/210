@@ -1,32 +1,58 @@
 # Growing Systems with the Open/Closed Principle
 
-Successful software systems keep changing. New kinds of users, delivery channels, and pricing rules are added throughout a system's life, and each addition risks breaking what already works unless the design can absorb it. Polymorphism makes a system extensible by supporting the **Open/Closed Principle**.
+Successful software systems keep changing. We've seen allusions to these changes over the past few chapters, and in the lecture demo code: new delivery channels, new pricing methods. Each addition risks breaking what already works unless the design was built with change in mind. 
 
 ## Open and Closed
 
-A unit of code is **open for extension** when new behaviour can be added to it, and **closed for modification** when adding that behaviour does not require existing code to change. Interfaces and polymorphism make both possible at once. When code depends on an abstraction rather than on concrete types, we can add new behaviour by writing a new implementation of that abstraction, and leave any code already written against the abstraction unchanged.
+A unit of code is **open for extension** when new behaviour can be added to it, and **closed for modification** when adding that behaviour does not require existing code to change. 
+Polymorphism, whether through interfaces or class extension, allows for both.
 
-The notifier system already has this shape. `alertAll(..)` depends on the `Notifier` interface, and each channel is an implementation of it:
+In particular, when code depends on an abstraction rather than on concrete types, we can add new behaviour by writing a new implementation of that abstraction, and leave any code already written against the abstraction unchanged.
+
+<details class="tooltip link-110">
+<summary>Abstraction</summary>
+
+In very broad terms, abstraction means removing details so that one piece of code can do many things.
+
+CPSC 110 defined abstraction as follows: 
+
+> Abstraction means taking two or more expressions or functions that are very similar, and turning those differences into parameters of a more general-purpose abstract function. The Abstraction From Examples and Abstraction From Type Comments recipes cover the design of abstract functions. It is also possible to design abstract types, but we do not do that in this course.
+
+We've now seen abstract types via interfaces, class extension, and generics. 
+
+The word abstraction is used very broadly in computer science; 
+[Wikipedia](https://en.wikipedia.org/wiki/Abstraction_(computer_science)) has more examples. 
+</details>
+
+#### Adding a Channel
+
+Suppose alerts must now also go out as push notifications:
+
+> As a DevOps engineer, I want to add push notification delivery to the alert system, so that on-call engineers are reached on their mobile devices even when they are not monitoring email.
+
+
+Say `alertAll` followed the tag-switching approach we mentioned in [Chapter 15](./06_extension.html#replacing-branches):
 
 ```typescript
-function alertAll(channels: Notifier[], message: string): void {
+function alertAll(channels: string, message: string): void {
     for (const channel of channels) {
-        channel.send(message);
+        notify(channel, message);
+    }
+}
+
+function notify(channel: string, message: string): void {
+    if (channel === "email") {
+        // format and deliver by email
+    } else if (channel === "sms") {
+        // format and deliver by SMS 
     }
 }
 ```
 
-`alertAll(..)` names no concrete channel. Whether it can accept a new kind of channel without being changed tests whether the design is open in the way the principle describes.
+We would have to add a new `else if` branch to `notify` to support push notifications. In a real system the channel tag checking would probably occur in multiple places (formatting, validation, logging...), and we'd have to change all those too. This design is not closed for modification. 
+  But we were able to add a new type of notification, so the design *is* open for extension. 
 
-#### Adding a Channel
-
-> As a DevOps engineer, I want to add push notification delivery to the alert system, so that on-call engineers are reached on their mobile devices even when they are not monitoring email.
-
-Suppose alerts must now also go out as push notifications. There are two ways to meet the requirement.
-
-One is the tag-switching approach from the previous chapter. The `notify(..)` function that branches on a channel string gains an `else if` branch for push, which means editing code that already works and is already tested. In a real system the channel tag is rarely checked in only one place. Formatting, validation, and logging tend to branch on it too, so a single conceptual change is spread across every function that switches on the tag.
-
-The other is the design we have been building, where a new channel is a new implementation of `Notifier`. Because the channels share a delivery skeleton, it extends `BaseNotifier` and supplies only its own delivery:
+Contrast this with the polymorphic `Notifier`-based design we've been building. To add push notifications, we'd make a new extension of `BaseNotifier`:
 
 ```typescript
 class PushNotifier extends BaseNotifier {
@@ -49,7 +75,7 @@ class PushNotifier extends BaseNotifier {
 }
 ```
 
-Adding `PushNotifier` requires no change to any existing class or function. `Notifier`, `BaseNotifier`, `EmailNotifier`, `SmsNotifier`, and `alertAll(..)` are all unchanged, and a push channel can be added to any list of notifiers:
+Then we'd add this new channel at the one relevant place we call `alertAll`:
 
 ```typescript
 alertAll([
@@ -59,7 +85,14 @@ alertAll([
 ], "deploy finished");
 ```
 
-The first design meets the new requirement by editing code that already works, and the second by adding new code. The second is open for extension and closed for modification. The first is not closed for modification.
+
+Notice we didn't need to change  `Notifier`, `BaseNotifier`, `EmailNotifier`, `SmsNotifier`, or `alertAll(..)`. This design is both open for extension _and_ closed for modification. 
+
+<details class="tooltip deep-dive">
+<summary>But is it really closed?</summary>
+
+You may have noticed our "closed" system has a change beyond `PushNotifier`. Wherever the list of channels is assembled, some code must still name `EmailNotifier`, `SmsNotifier`, and now `PushNotifier` to create them. In [Part 3](../part3/index), we'll discuss which code should construct concrete objects, and where, so that only one place in the program names them. 
+</details>
 
 ```plantuml
 @startuml
@@ -99,9 +132,14 @@ end note
 
 ## Why Add Instead of Edit
 
-The reason to prefer adding code to editing it comes from [Chapter 9](../part1/09_validation#regression-testing). Code that already works has been tested, and every edit to it risks breaking something that worked before, a regression. Editing `notify(..)` to add push reopens the email and SMS branches, which then have to be read, possibly disturbed, and re-tested. Adding `PushNotifier` touches none of that. The existing channels and their tests are left alone, so they cannot regress. The only new tests are for `PushNotifier`, and the existing suite still passes.
+Why do we favour designs where we can add new features via addition, without direct editing? [Chapter 9](../part1/09_validation#regression-testing) already motivated this. Think of all the effort it takes you to test a system. Code that has been well-tested works. Every edit we make risks breaking something that worked before---what we call a regression. 
 
-"Closed for modification" is easy to overstate. Bugs are still fixed and contracts are still refined; the principle asks only that adding a foreseen kind of new behaviour should not require reopening code that already works. A system with this property can grow safely as it gets larger, because a new feature's impact is contained in the new code rather than spread through previously tested code.
+When we added a new branch to `notify(...)` in our tag-based design, we introduced a risk to the email and SMS branches. Perhaps we had to change some function-wide variables before setting up the push branch; if this disturbed the existing code, we'd have to reconsider our tests for it. You might better understand how severe a disturbance this would be if you consider just how many changes we'd have to make if our system had this tag-based design in all its other parts too: logging, formatting, delivery checking...
+
+By contrast, when we added a `PushNotifier`, we only added code. We touched no existing code, so with high probability, the tests will continue passing with no issue. We only need to add  new tests are for `PushNotifier`.
+
+
+Note that "closed for modification" doesn't mean the code will _never_ change. We might still have to fix bugs or refine contracts. But a "closed for modification" system  can grow safely as it gets larger, because a new feature's impact is contained in the new code rather than spread through previously tested code.
 
 <details class="tooltip deep-dive">
 <summary>Many Clients, One Change</summary>
@@ -130,23 +168,28 @@ Adding a new channel means writing one new class and adding it to the configurat
 
 ## The Axis of Change
 
-Openness has a cost. Depending on an abstraction adds indirection: the interface, the dispatch, the extra class. That indirection buys flexibility along one axis of change, and the skill is in choosing the right axis. For the notifier system the axis was clear from the start. New channels are the kind of thing that gets added over time, so the `Notifier` interface is drawn across that axis and the indirection is justified. The runtime cost of the indirection is small. The main cost is the extra concepts an engineer has to understand.
+Openness has a cost. Depending on an abstraction adds cost through _indirection_. For the performance of the system, we have mildly slower function calls, as the runtime needs to find out which exact method to call (this will be insignificant for all the software we write in this class, but can effect certain performance-critical systems). The cost for our human readers is more important: they (maybe us in the future) may now have to wade through multiple class files to find what notifier code we're acually wokring with. 
 
-This applies the advice from [Chapter 12](./03_encapsulation#choosing-what-to-expose) to hide what is most likely to change, now to whole behaviours: put the abstraction boundary where new variants will appear. A boundary placed this way is an **extension point**, a place where behaviour can be varied by adding code rather than by editing code that already works, and extension points are how a design is open for extension in practice. It also means we should not add extension points where new variants are unlikely. Building an elaborate one for variation that never arrives adds indirection without any value.
+So, we need to choose where to add this flexibilty-through-abstraction carefully. For the notifier system, the axis of the system most likely to change was quite clear. We might not always want to alert via email **and** SMS, and we might want to alert over new channels. So, we wrote up the `Notifier` interface to allow for change along that axis.
+
+It will take practice, and most likely, painful experiences with refactoring, to get a good sense of when it's useful to add abstraction, and where the indirection cost is too much. 
+
+But you can get started by following the advice from [Chapter 12](./03_encapsulation#choosing-what-to-expose). Hide what is most likely to change, including not just a background representation, but whole behaviours. Put the abstraction boundary where new variants are likely to appear. We call a boundary placed this way an **extension point**: a place where behaviour can be varied by adding code rather than by editing code that already works. 
 
 <details class="tooltip deep-dive">
 <summary>Speculative Generality</summary>
 
-The opposite of a rigid design is an over-flexible one. Adding interfaces, base classes, and extension points for variation you only imagine you might need is a recognised design mistake, usually called _speculative generality_: the indirection is real while the flexibility is hypothetical.
+The opposite of a rigid design is an over-flexible one. Adding interfaces, base classes, and extension points for variation you only imagine you might need is a recognised design mistake, usually called _speculative generality_: the indirection adds real cost while the flexibility gives hypothetical benefits.
 
 </details>
 
-No design is open to every change. The notifier system is open along the axis of new channels, and says nothing about other axes. If the new requirement were to deliver a single alert to a whole group, or to schedule one for later, `Notifier` would not help, and meeting it might require modification. Choosing the axis well, and accepting that a design cannot be open along every axis at once, is the judgement the principle requires.
+No design is open to every change. The notifier system is open along the axis of new channels. If the new requirement were to deliver a single alert to a whole group, or to schedule one for later, `Notifier` alone would not help. That's alright. When we accept that we can't build software to support change on every axis, we can better focus on which of its axes we should keep following the open/closed principle.
 
 ## The Principles Together
 
-The Open/Closed Principle is the last of a set of principles this part of the course has built up, and each one supports the others:
+There's a named principle we've been hinting at in this chapter: the **Dependency Inversion Principle**. This principle states that high-level policy should depend on an abstraction, and so should  the low-level classes that implement it. This inverts the usual arrangement in which high-level code depends directly on the low-level code it calls.  For instance, `alertAll(..)` depends on `Notifier`, never on `EmailNotifier` or `SmsNotifier`, so the policy of "alert all channels" is separate from how any one channel delivers. 
 
+We got to our open/closed design by following this principle, along with the other we've seen in Part 2:
 - **Cohesion** ([Chapter 11](./02_decomposition#single-responsibility)): each class, and each interface, is responsible for one thing.
 - **Encapsulation** ([Chapter 12](./03_encapsulation#hiding-the-representation)): a class hides its representation behind a contract, so its internals can change without its callers changing.
 - **Implementation freedom** ([Chapter 13](./04_flexibility#what-makes-a-change-safe)): what a class means is kept separate from how it is built, so the implementation stays free to change, and each commitment a class avoids is one more thing that can vary.
@@ -155,27 +198,25 @@ The Open/Closed Principle is the last of a set of principles this part of the co
 - **Dependency inversion** (this chapter): high-level code depends on abstractions rather than on concrete classes.
 - **Open and closed** (this chapter): together, the principles above let a system grow by adding implementations rather than by editing existing code.
 
-Dependency inversion is new in this chapter. `alertAll(..)` depends on `Notifier`, never on `EmailNotifier` or `SmsNotifier`, so the policy of "alert all channels" is separate from how any one channel delivers. This is called the **Dependency Inversion Principle**: high-level policy depends on an abstraction, and so do the low-level classes that implement it, which inverts the usual arrangement in which high-level code depends directly on the low-level code it calls.
 
-Each of these principles was introduced separately, with its own example and argument, which can make them look like seven unrelated pieces of advice. They work together as a single mechanism, which is easiest to see by re-examining something we have already designed.
 
 ### One Addition, Taken Apart
 
-Adding `PushNotifier` earlier in this chapter cost one class and one line where the channels are assembled. Each part of that small change depended on a decision made in an earlier chapter.
+To add a `PushNotifier` earlier in this chapter, we needed only add one class and one line where the channels are assembled. Let's look at how the principles above led to an open/closed design that kept this change small and self-contained.
 
-_That the change is one class at all_ is because the design is cohesive. Delivering an alert over a channel is a single responsibility, held by a single kind of unit, so "support one more channel" means "write one more class". Had delivery been spread across several classes, or bundled with formatting and retry policy, a new channel would have needed changes in several places, and polymorphism could not have reduced it to one.
+Because our design was *cohesive*, we could  _keep the change to only one class_. Delivering an alert over a channel is a single responsibility, held by a single kind of unit. Had delivery been spread across several classes, or bundled with a formatting and retry policy, a new channel would have needed changes in several places.
 
-_That it can store a `deviceId`_ is encapsulation providing implementation freedom. A push channel needs to remember something unlike an email address or a phone number, and it can, because no code outside a channel class has ever been able to see what the channel stores. Each channel's representation was private from the start, so the new channel was free to store whatever it needed.
+Because our notifiers' representations were *encapsulated*, and we hid the details of how notifiers deliver to the target to preserve _implementation freedom_, `PushNotifer` could easily _store a `deviceId`_. If Notifiers' target details were public, it might be tricky to change the email/phone representation to support a deviceId. Luckily, because we kept the representations of all our notifiers hidden, it can store this different target representation with no issue! 
 
-_That it had to write only `deliver(..)`_ is because of the small contract, together with the shared base from [Chapter 15](./06_extension#abstract-base-classes). `Notifier` requires one operation, so conforming to it is cheap, and `BaseNotifier` already holds the steps every channel performs identically, so the new class supplies only the step that differs.
+Because we kept notifier to supporting only a _small contract_, together with the shared base from [Chapter 15](./06_extension#abstract-base-classes), we only had to _write `deliver(..)`_. `Notifier` requires one operation (`send`), so conforming to it is cheap. `BaseNotifier` already holds the steps of `send` every channel performs identically, so the new class onlt needs to supply the step that differs.
 
-_That `alertAll(..)` accepts it_ is because of substitutability. `PushNotifier` demands no more of its callers than `Notifier` does and promises no less, so code written against the interface is correct for an implementation that did not exist when the code was written.
+Because of _substitutability_, _`alertAll(..)` accepted our new notifier_ with no changes. `PushNotifier` demands no more of its callers than `Notifier` does and promises no less, so code written against the interface is correct for an implementation that did not exist when the code was written.
 
-_That `alertAll(..)` did not have to change_ is because `alertAll(..)` was written against the abstraction rather than against any channel, so nothing in it could become out of date when a channel was added.
+Because `alertAll(..)` was written against the abstraction rather than against any channel (_dependency inversion_),  _`alertAll(..)` did not have to change_.
 
 ### Removing a Principle
 
-One way to see that these principles depend on one another is to remove them one at a time and watch the same change become harder. For each case below, assume the other principles still hold.
+We can gain a clearer perspective on how everything in Part 2 has built up to the open/closed principle, by considering how the `PushNotifier` change would have looked if we removed one design principle at a time.
 
 _Without cohesion._ Suppose `EmailNotifier` had also owned message formatting and the system's retry policy, because those were added to it when email was the only channel. Adding push now means adding push delivery, push formatting, and push retry, wherever those responsibilities ended up. The interface is still there and still polymorphic, but the change, and its potential to affect existing code, is now spread across three places.
 
@@ -195,21 +236,22 @@ The addition was easy only because every one of these principles held in the exi
 
 The principles do not always agree. Applied without judgement, several of them pull against each other.
 
-Cohesion says to split a class that owns two invariants, but [Chapter 11](./02_decomposition#judgement-calls) also warned that every split adds a name to learn and a file to navigate, and that extracting a class for a rule that will never grow fragments a design without clarifying it. Interface segregation says to prefer many small interfaces, but a system with twenty single-method interfaces can be harder to learn than one with five coherent ones. This chapter says to put an extension point where change is expected, and the speculative generality tooltip says that building an abstraction where change never comes is a mistake.
+Cohesion says to split a class that owns two invariants, but [Chapter 11](./02_decomposition#judgement-calls) also warned that every split adds a name to learn and a file to navigate, and that extracting a class for a rule that will never grow fragments a design without clarifying it. Small contracts says to prefer many small interfaces, but a system with twenty single-method interfaces can be harder to learn than one with five coherent ones. This chapter says to put an extension point where change is expected, but the speculative generality tooltip says that building an abstraction where change never comes is a mistake.
 
-These tensions have a common source, and it is the central idea of this part of the course. Every design decision answers the same question: _what is likely to change?_ Split a class where its reasons to change differ. Draw an interface where new variants will appear. Hide what will vary and expose what will not. When you have a confident answer to that question, the principles agree, because they all follow from it. When they seem to conflict, the disagreement is usually about a prediction, not about design, and it is better argued in those terms than by citing principles at each other. The judgement this part has asked for is a prediction about which parts of a system will need to change, made with incomplete information and revised as the system shows you where you were wrong.
+Usually, when the principles conflict, it is because there is a disagreement in the answer  to the question _what is likely to change?_ All our design decision are made following this question. We split a class where its reasons to change differ. We draw an interface where new variants are likely to appear. We hide what will vary and expose what will not. When we have a confident answer to the question _what is likely to change?_, the principles tend to agree, because they all follow from it. 
 
-Predicting the future is hard, and a design decision made today is a claim about requirements that have not yet arrived. There are two ways to get it wrong, and over a career you will make both mistakes. You will build an abstraction for a kind of change that never comes, leaving unnecessary indirection in the design. You will also leave code concrete in the one place a change eventually lands, and the new requirement will have to work around the missing abstraction. The two errors cost different things. An unnecessary abstraction adds indirection, a small cost that every reader pays for as long as it exists. A missing abstraction forces a modification to working code, a larger cost that is paid once.
+But answering "_what is likely to change?_" means predicting the future, and predicting the future is hard. There are two directions to get it wrong, and over a career you will make "mistakes" in both direction. You will build an abstraction for a kind of change that never comes, leaving unnecessary indirection in the design.  An unnecessary abstraction adds indirection, a small cost that every reader pays for as long as it exists.  You will also leave code concrete in the one place a change eventually lands, and the new requirement will have to work around the missing abstraction. A missing abstraction forces a modification to working code, a larger cost that is paid once.
 
-Prediction draws on evidence you can look for. Parts of a system that have changed before tend to change again. Some variation is inherent in the domain rather than specific to this release: there will be another payment provider, another export format, another delivery channel, and people who work in the domain can usually point these out. Some is visible in the requirements, in a request that says "for now" or names one case out of an obvious family. Reading these signals improves with experience of real systems. Experienced engineers often seem to predict well because they have seen similar systems before, and remember where the last design turned out to be rigid.
+There are some signals we can use to answer the question more accurately Parts of a system that have changed before tend to change again. Some variation is inherent in the domain: there will be another payment provider, another export format, another delivery channel. People who work in the domain can usually point these out, regardless of their knowledge of software design. Some variation is visible in the requirements, in a request that says "for now" or names one case out of an obvious family. 
 
-For this reason, the principles cannot be applied as a checklist. A checklist can be followed without understanding the system, but a prediction depends on this system, this domain, and what this team has reason to expect. You get better at design by practising it, and by noticing why a design turned out to be wrong. The same reason explains why the judgement stays with the engineer however much of the code is written by tools: deciding which axis of change a system should be open along is not a question about syntax, and no tool can answer it without knowing what the system is for.
+You'll get better at reading these signals as you gain more experience. Experienced engineers often seem to predict well not because they've memorized a checklist, but because they have seen similar systems before, and remember where the last design turned out to be rigid.
+
+We introduced the principles to you not so you could apply them as a checklist to your system, but to give you _language_ to describe systems. Humans create knowledge by giving names to things, so we can talk about them more precisely. When you find yourself making a tricky change or regretting an abstraction---perhaps in your project---having the language of these principles will allow you to link this tricky experience to all the other similar tricky experiencea you have had and will had. 
 
 #### Toward Evolution and Scale
 
 A system organised around contracts and polymorphic implementations grows by addition: a new requirement of an anticipated kind is a new class, and the working system around it is left alone. This is how software can keep changing over a long life, which is the subject of the next part of the course.
 
-This chapter leaves one question open. The notifier system depends on `Notifier` everywhere except in one place: wherever the list of channels is assembled, some code must still name `EmailNotifier`, `SmsNotifier`, and now `PushNotifier` to create them. [Part 3](../part3/index) answers which code should construct concrete objects, and where, so that only one place in the program names them. It then turns to the work of changing a system that already exists: managing how its parts depend on one another, consuming and publishing contracts across its boundaries, and improving, repairing, and extending code that already works.
 
 <details class="tooltip exercise">
   <summary>Exercise: A Text Transformation Pipeline</summary>
