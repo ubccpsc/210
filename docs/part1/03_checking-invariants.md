@@ -1,10 +1,8 @@
 # Checking Invariants
 
-In [Chapter 1](./01_new-language) we introduced the distinction between the _static_ and _dynamic_ views of a program. The compiler checks the static view: it reads your source code, analyses your types, and flags inconsistencies before the program runs. But a program that passes the type checker can still produce the wrong results. Types tell you what _kind_ of value a function returns, but not whether that value is _correct_.
+In [Chapter 1](./01_new-language#static-and-dynamic-views) we introduced the distinction between the static and dynamic views of a program. The compiler checks the static view: it reads your source code, analyses your types, and flags inconsistencies before the program runs. But a program that passes the type checker can still produce the wrong results. Types tell you what kind of value a function returns, but not whether that value is correct.
 
-The properties a correct program must maintain beyond its types are called **invariants**. This chapter is about working with them: what an invariant is, how to identify the invariants in a problem, how to record them in a function's documentation so that others can find them, and how to test whether they hold.
-
-This course focuses on **unit tests**, which test individual units of a program, usually single functions.
+The properties a correct program must maintain beyond its types are called invariants. This chapter is about working with them: what an invariant is, how to identify the invariants in a problem, how to record them in a function's documentation so that others can find them, and how to test whether they hold.
 
 ## What Is an Invariant?
 
@@ -16,7 +14,8 @@ We have already met an invariant. In the previous chapter, the `Song` type carri
 type Song = {
   title: string;
   artist: string;
-  durationSeconds: number; // must be positive
+  // Must be positive.
+  durationSeconds: number;
 };
 ```
 
@@ -31,12 +30,13 @@ const broken: Song = {
 };
 ```
 
-This object has the right _shape_, so the static type check passes. But its _meaning_ is wrong, because it violates the invariant. Any code that trusts the invariant can now behave incorrectly. Imagine a function summing the durations in a playlist: a negative duration would make the running total go down, when it should only ever grow. When an invariant fails, a value can no longer be trusted by the operations built on it, even though the code may type check.
+This object has the right shape, so the static type check passes. But its meaning is wrong, because it violates the invariant. Any code that trusts the invariant can now behave incorrectly. Imagine a function summing the durations in a playlist: a negative duration would make the running total go down, when it should only ever grow.
 
 Invariants are everywhere once you look for them: durations are positive, percentage scores sit between 0 and 100, counts are whole numbers. None of these facts appear in the types `number`, `number`, `number`. They are constraints that exist in the space between what the type allows and what the problem requires.
 
 <details class="tooltip deep-dive">
 <summary>Course Preview: Could We Statically Check Invariants?</summary>
+
 The previous chapters showed how types enforce what CPSC 110 could only trust. Invariants capture what types alone cannot check, and in this course they cannot be enforced statically. Instead, we check them dynamically, through testing.
 
 But some of the invariants we have aren't too complicated: if we can enforce that `x` is a `number` statically, why can we not enforce that `x > 10` statically? We won't cover that in CPSC 210, but if this question is interesting to you, you may be interested in learning more about the fields of _formal verification_ (CPSC 513, 539S) and _programming languages_ (CPSC 311, 411, 509, 511) in the future.
@@ -44,7 +44,7 @@ But some of the invariants we have aren't too complicated: if we can enforce tha
 
 ## Identifying Invariants
 
-At the function level, invariants attach in two places: to a function's inputs and to its output. For the rest of this chapter we will work with a single running example:
+At the function level, invariants are stated as conditions, which attach in two places: to a function's inputs and to its output. For the rest of this chapter we will work with a running example from a campus library:
 
 > As the campus library, I want late fees computed from how many days late a book is returned, with a short grace period and a capped maximum, so that patrons are charged fairly and predictably.
 
@@ -56,26 +56,26 @@ A function computing the fee will have this signature:
 lateFee(daysLate: number): number
 ```
 
-A **precondition** is an invariant that must be true of the arguments when the function is called. The parameter type admits any number: `-4`, `3.7`, `40000`. But `daysLate` is a count of days, so the function is only meaningful when `daysLate` is a whole number and at least 0. That restriction is the **precondition** on `daysLate`.
+A **precondition** is a condition that must be true of the arguments when the function is called. The parameter type admits any number: `-4`, `3.7`, `40000`. But `daysLate` is a count of days, so the function is only meaningful when `daysLate` is a whole number and at least 0. That restriction is the precondition on `daysLate`.
 
-A **postcondition** is an invariant about what the function guarantees about its result, _assuming the precondition held_. The return type says only `number`, but the policy promises more: the fee is never negative, and it never exceeds $10. Each of those guarantees is a **postcondition**.
+A **postcondition** is a condition the function guarantees about its result, assuming the precondition held. The return type says only `number`, but the policy promises more: the fee is never negative, and it never exceeds $10. Each of those guarantees is a postcondition.
 
-To identify these in your own functions, examine the _gap_ between the _type_ you have included in a signature and the type's _meaning_:
+To identify these in your own functions, examine the gap between the type in a signature and what the problem requires of the value:
 
-- Identifying **preconditions**: For each parameter, ask: _of all the values this type allows, which are meaningful?_ Any restriction you state is a precondition. Look for ranges, wholeness, non-empty strings, and relationships between parameters (for example, `min <= max`).
-- Identifying **postconditions**: For the result, ask: _what can the caller rely on beyond the return type?_ Any guarantee you state is a postcondition.
+- Identifying preconditions: For each parameter, ask: _of all the values this type allows, which are meaningful?_ Any restriction you state is a precondition. Look for ranges, wholeness, non-empty strings, and relationships between parameters (for example, `min <= max`).
+- Identifying postconditions: For the result, ask: _what can the caller rely on beyond the return type?_ Any guarantee you state is a postcondition.
 
-A useful invariant statement has three qualities. It is _precise_: terms must be backed by definitions, and words like "valid" or "sensible" without qualification are not useful. It is _testable_: you can programmatically validate whether the invariant is true. And it is _operational_: it is strong enough that an implementation can rely on it.
+A useful condition has three qualities. It is _precise_: terms must be backed by definitions, and words like "valid" or "sensible" without qualification are not useful. It is _testable_: you can programmatically validate whether the condition is true. And it is _operational_: it is strong enough that an implementation can rely on it.
 
-For example, consider the invariant stated as: `daysLate is reasonable`. This is not precise, testable, or operational: it cannot be checked or relied upon.
+For example, consider the precondition stated as: `daysLate is reasonable`. This is not precise, testable, or operational: it cannot be checked or relied upon.
 
-In contrast, the invariant `daysLate is a whole number and daysLate >= 0` can be turned directly into tests.
+In contrast, the precondition `daysLate is a whole number and daysLate >= 0` can be turned directly into tests.
 
 ## Documenting Invariants
 
-The compiler checks types, but it does not know about the invariants that restrict the values in your code. A caller, a test author, or a future maintainer can only find these invariants if they are _written down where the function lives_, in its documentation.
+The compiler checks types, but it does not know about the invariants that restrict the values in your code. A caller, a test author, or a future maintainer can only find these invariants if they are written down where the function lives, in its documentation.
 
-We record invariants in the function's **doc comment**, alongside its purpose. Doc comments precede function declarations, and are formatted within `/** <text comments> */`. The comment also describes each parameter (`@param`) and the return value (`@returns`). For `lateFee`, the full documented function is:
+We record them as preconditions and postconditions in the function's **doc comment**, alongside its purpose. Doc comments precede function declarations, and are formatted within `/** <text comments> */`. The comment also describes each parameter (`@param`) and the return value (`@returns`). For `lateFee`, the full documented function is:
 
 ```typescript
 /**
@@ -87,9 +87,10 @@ We record invariants in the function's **doc comment**, alongside its purpose. D
  * day. The total fee never exceeds $10.
  *
  * Precondition: daysLate is a whole number and daysLate >= 0.
+ * Postcondition: the result is between 0 and 10.
  *
- * @param {number} daysLate the number of days past the due date
- * @returns {number} the fee in dollars, between 0 and 10
+ * @param {number} daysLate the number of days past the due date.
+ * @returns {number} the fee in dollars, between 0 and 10.
  */
 function lateFee(daysLate: number): number
 ```
@@ -107,15 +108,15 @@ For function doc comments in this course, we'll use syntax that's consistent wit
  * Precondition: list any preconditions
  * Postcondition: list any postconditions
  *
- * @param {typeofParam1} param1Name a description of param1Name's purpose
- * @param {typeofParam2} param2Name a description of param2Name's purpose
- * @returns {typeofReturn} describe what the return value expresses
+ * @param {typeofParam1} param1Name a description of param1Name's purpose.
+ * @param {typeofParam2} param2Name a description of param2Name's purpose.
+ * @returns {typeofReturn} describe what the return value expresses.
  */
 function foo(param1Name: typeofParam1, param2Name: typeofParam2): typeofReturn
 ```
 </details>
 
-The `Precondition:` line restricts `daysLate` to the meaningful subset of `number`, and the clause "the total fee never exceeds $10" is a postcondition on the result.
+The `Precondition:` line restricts `daysLate` to the meaningful subset of `number`, and the `Postcondition:` line states what the caller can rely on in return.
 
 Together, a function's documented preconditions and postconditions are often called its **contract**: the caller promises the preconditions, and the function promises the postconditions in return. Writing the contract down makes the invariants visible to others. The doc comment is where a test author will look to decide what to check, and as we will see below, every clause of a well-written contract becomes a test.
 
@@ -135,9 +136,11 @@ was an invariant statement: the type is Number, and the meaningful subset is 0 t
 
 ## Testing Invariants
 
-Tests are commonly kept separate from the code they validate. In all of the code we look at in this course, in line with common best practice, production code is stored in the `src/` directory and all tests are stored in the `test/` directory. The `test/` directory can contain any number of test files, often in 1:1 correspondence with the files being tested in `src/`.
+This course focuses on **unit tests**, which test individual units of a program, usually single functions.
 
-Each test file contains a number of test cases. As in [Chapter 1](./01_new-language#testing-the-dynamic-view), each test case has a name and a body. The name describes what the test is checking, and the body is a single **assertion**. The `checkExpect` calls we have been writing are **assertions**.
+Tests are commonly kept separate from the code they validate. In all of the code we look at in this course, as is common practice, production code is stored in the `src/` directory and all tests are stored in the `test/` directory. The `test/` directory can contain any number of test files, often in 1:1 correspondence with the files being tested in `src/`.
+
+Each test file contains a number of test cases. As in [Chapter 1](./01_new-language#testing-the-dynamic-view), each test case has a name and a body. The name describes what the test is checking, and the body is a single **assertion**. The `checkExpect` calls we have been writing are assertions.
 
 In the contract above, the late fee grace period is two days long. A test case that checks this, by ensuring that `lateFee(2)` returns `0`, looks like:
 
@@ -174,12 +177,12 @@ import {
 
 To run the tests, you can either open the testing feature within your IDE (we will demo this in class), or open the terminal view within your IDE (also an in-class demo) and execute `pnpm test`. The **terminal** is a text-based interface where you type commands for the computer to run and read their output.
 
-When executed by either your IDE or your terminal command, the test framework executes every test case it can find in the `test/` directory. Passing test cases are printed in green, and failing test cases are printed in red, along with what was expected and what was returned.
+When executed by either your IDE or your terminal command, the test framework finds every test file in the `test/` directory, runs each file from top to bottom, which registers its test cases, and then runs the registered cases in order. Passing test cases are printed in green, and failing test cases are printed in red, along with what was expected and what was returned.
 </details>
 
 ## The Testing Process
 
-So far we have treated tests as something you write for code that already exists. While you are learning, we strongly recommend writing the tests _first_. Writing tests first forces you to think about the expected behaviours of the **code under test** (the code your test case is validating) before you spend time implementing it.
+So far we have treated tests as something you write for code that already exists. While you are learning, we strongly recommend writing the tests first. Writing tests first forces you to think about the expected behaviours of the **code under test** (the code your test case is validating) before you spend time implementing it.
 
 A precise set of input/output pairs is very helpful when implementing the code. Before writing the implementation, run your tests to confirm they fail. Once the implementation is correct, the tests should pass. A test that passes before you have implemented the function tells you nothing.
 
@@ -207,7 +210,7 @@ test("fee never exceeds the maximum",
 );
 ```
 
-The precondition also marks inputs that have no specified output. Since the precondition says `daysLate >= 0`, what happens if we pass `-5` is unspecified: the caller has broken their half of the bargain, and the function promises nothing in return. We return to what a function should do about inputs like this at the end of this chapter.
+The precondition also marks inputs that have no specified output, such as `lateFee(-5)`. We return to these at the end of this chapter.
 
 To run these tests, `lateFee` must at least exist, or the compiler reports an error for every test that calls it. So we begin with a **stub**: a function with the right signature that returns a clearly wrong value.
 
@@ -217,7 +220,7 @@ function lateFee(daysLate: number): number {
 }
 ```
 
-We chose `-1` deliberately. A fee is never negative, so every test is guaranteed to fail against the stub. (Had the stub returned `0`, the grace-period tests would have passed before we wrote any real code.) Running the suite shows all five tests failing, which confirms that each of them can fail:
+We chose `-1` deliberately. A fee is never negative, so every test is guaranteed to fail against the stub. (Had the stub returned `0`, the grace-period tests would have passed before we wrote any real code.) Running the suite shows all five tests failing, which confirms that each of them can fail. In simplified form, the report looks like this:
 
 ```
 ✗ no fee on the day a book comes due
@@ -243,7 +246,7 @@ We chose `-1` deliberately. A fee is never negative, so every test is guaranteed
 This is the same ordering as the How to Design Functions recipe from CPSC 110: signature, purpose, and stub first, then _examples_, written as `check-expect`s, before you write the function body. What CPSC 110 called examples, we now call tests. The discipline of recording expected behaviour before implementing it carries over unchanged.
 </details>
 
-Now we implement the function. The preconditions and postconditions give us an idea of which conditions to put in our `if` statement.
+Now we implement the function. The contract suggests which conditions our `if` statements need.
 
 ```typescript
 function lateFee(daysLate: number): number {
@@ -271,7 +274,7 @@ function lateFee(daysLate: number): number {
     if (daysLate <= 2) {
         return 0;
     }
-    const fee = 0.5 * (daysLate - 2);
+    const fee: number = 0.5 * (daysLate - 2);
     if (fee > 10) {
         return 10;
     }
@@ -282,6 +285,33 @@ function lateFee(daysLate: number): number {
 <summary>Where's <code>else</code>?</summary>
 
 `lateFee` is written with no `else` cases, but this is not the only way to write the function. Rewrite `lateFee` such that all statements are nested within an `if` or `else`. You'll need more than one statement in some of the blocks.
+
+<!-- Potential unverified solution:
+
+```typescript
+function lateFee(daysLate: number): number {
+    if (daysLate <= 2) {
+        return 0;
+    } else {
+        const fee: number = 0.5 * (daysLate - 2);
+        if (fee > 10) {
+            return 10;
+        } else {
+            return fee;
+        }
+    }
+}
+
+test("no fee on the day a book comes due", checkExpect(() => lateFee(0), 0));
+test("no fee at the end of the grace period", checkExpect(() => lateFee(2), 0));
+test("fee accrues on the first charged day", checkExpect(() => lateFee(3), 0.5));
+test("fee accrues for each further day", checkExpect(() => lateFee(12), 5));
+test("fee never exceeds the maximum", checkExpect(() => lateFee(30), 10));
+```
+
+The two `else` blocks make the three outcomes explicit; the chapter's version relies on each `return` leaving the function before the next statement runs. Both pass the five tests.
+-->
+
 </details>
 
 All five tests now pass:
@@ -293,13 +323,7 @@ All five tests now pass:
 ✓ fee never exceeds the maximum
 ```
 
-The tests did _not_ change. They were correct all along, because they were written from the specification, so they already checked the requirement our implementation forgot. If we had written our tests _after_ the implementation, by reading our own code and checking that it does what it appears to do, we would probably not have thought to test the maximum: the first prototype of `lateFee` contained no hint that a maximum should exist. Tests written first follow the specification, while tests written afterwards tend to mirror the code, mistakes included.
-
-<details class="tooltip ts-tips">
-<summary>Recall: <code>const</code> </summary>
-
-`const` introduces a named value. Here `fee` names the result of the per-day calculation so it can be compared against the maximum and then returned. A `const` cannot be reassigned after it is defined.
-</details>
+The tests did not change. They were correct all along, because they were written from the specification, so they already checked the requirement our implementation forgot. If we had written our tests after the implementation, by reading our own code and checking that it does what it appears to do, we would probably not have thought to test the maximum: the first prototype of `lateFee` contained no hint that a maximum should exist. Tests written first follow the specification, while tests written afterwards tend to mirror the code, mistakes included.
 
 <details class="tooltip deep-dive">
 <summary>Tests as Executable Specifications</summary>
@@ -319,11 +343,11 @@ The full process, then:
 
 ## Deriving Tests
 
-We wrote the `lateFee` suite by instinct: read the specification, turn each clause into a test. That instinct served us well, but instinct alone does not tell you when a suite is _complete enough_. Two systematic techniques, **equivalence class partitioning** and **boundary value analysis**, turn that instinct into a method.
+We wrote the `lateFee` suite by instinct: read the specification, turn each clause into a test. That instinct served us well, but instinct alone does not tell you when a suite is complete enough. Two systematic techniques, **equivalence class partitioning** and **boundary value analysis**, turn that instinct into a method.
 
 ### Equivalence Classes
 
-The most direct way to choose test inputs is to divide the input space into **equivalence classes**: groups of inputs that the specification says should be handled the same way. You then choose at least one **representative** from each class.
+A direct way to choose test inputs is to divide the input space into **equivalence classes**: groups of inputs that the specification says should be handled the same way. You then choose at least one **representative** from each class.
 
 The `lateFee` specification divides its input into three classes:
 
@@ -333,7 +357,7 @@ The `lateFee` specification divides its input into three classes:
 | Accruing | 3 to 21 | Fee grows by $0.50 per day |
 | Capped | 22 and up | Fee is exactly $10 |
 
-The table starts at 0, with no negative inputs anywhere, because of the precondition `daysLate >= 0`. The invariant we wrote in the doc comment defines the input space the suite must cover. Without it, we would not know whether `lateFee(-5)` was a missing class or a meaningless input.
+The table starts at 0, with no negative inputs anywhere, because of the precondition `daysLate >= 0`. The precondition we wrote in the doc comment defines the input space the suite must cover. Without it, we would not know whether `lateFee(-5)` was a missing class or a meaningless input.
 
 The suite we wrote has a representative from each class: `lateFee(0)` and `lateFee(2)` for the grace period, `lateFee(3)` and `lateFee(12)` for accrual, and `lateFee(30)` for the cap. It caught our missing-maximum fault because it had a representative from the capped class, the class the implementation forgot.
 
@@ -342,14 +366,14 @@ Within a class, one representative is as informative as another. `lateFee(12)` a
 <details class="tooltip deep-dive">
 <summary>Equivalence Classes are Only Derived From the Specification</summary>
 
-In [Chapter 1](./01_new-language), we defined a **branch** as the side of an if-statement that was taken when executed on an input. A **path** is the sequence of branches that are taken when a program executes on a given input.
+In [Chapter 1](./01_new-language#if-statements), we defined a branch as the side of an `if` statement that was taken when executed on an input. A **path** is the sequence of branches that are taken when a program executes on a given input.
 
-Two inputs belong to the same class when the _specification_ says they should behave the same way, not when they happen to take the same path through the code you wrote. In our buggy implementation, `lateFee(12)` and `lateFee(30)` took the same path through the code, so classes derived from that implementation would have merged them, and the fault would have survived. Classes derived from the specification kept them apart, which is why the fault was caught.
+Two inputs belong to the same class when the specification says they should behave the same way, not when they happen to take the same path through the code you wrote. In our buggy implementation, `lateFee(12)` and `lateFee(30)` took the same path through the code, so classes derived from that implementation would have merged them, and the fault would have survived. Classes derived from the specification kept them apart, which is why the fault was caught.
 </details>
 
 ### Boundary Value Analysis
 
-Equivalence class partitioning identifies the regions to test. **Boundary value analysis** identifies _where_ within those regions to look most carefully: at the edges, where one class meets the next.
+Equivalence class partitioning identifies the regions to test. Boundary value analysis identifies where within those regions to look most carefully: at the edges, where one class meets the next.
 
 Bugs cluster at boundaries, because boundaries are implemented with comparisons, and comparisons are easy to get wrong by one. `lateFee` has two boundaries: between days 2 and 3 (grace ends, accrual begins) and between days 21 and 22 (accrual reaches the maximum). A boundary-focused suite checks the last input on each side:
 
@@ -367,7 +391,7 @@ function lateFee(daysLate: number): number {
     if (daysLate <= 3) { // bug here
         return 0;
     }
-    const fee = 0.5 * (daysLate - 2);
+    const fee: number = 0.5 * (daysLate - 2);
     if (fee > 10) {
         return 10;
     }
@@ -396,7 +420,7 @@ grace       accruing ( $0.50 / day )             capped ( $10 )
 
 ## Erroneous Outcomes
 
-Every call to a function has one of two outcomes. A **successful outcome** is the one the function exists to produce. An **erroneous outcome** is any other result. Think about a bank account. A customer trying to withdraw more than their balance is not unusual, and the design must anticipate it. An erroneous outcome like this is not a bug. It is a foreseeable result that belongs in the function's contract, so the caller knows it can happen and what they will receive when it does. Because it is part of the contract, it is tested like every other clause.
+A call that respects a function's preconditions has one of two outcomes. A **successful outcome** is the one the function exists to produce. An **erroneous outcome** is any other result. Think about a bank account. A customer trying to withdraw more than their balance is not unusual, and the design must anticipate it. An erroneous outcome like this is foreseeable, so unlike a bug it belongs in the function's contract, where the caller can see that it can happen and what they will receive when it does. Because it is part of the contract, it is tested like every other clause.
 
 To see both outcomes in one place, we extend the library example. The library allows each book loan to be renewed at most twice:
 
@@ -412,13 +436,13 @@ Renewing a loan that still has renewals left is the successful outcome. Trying t
 
 How do we encode an erroneous outcome? We could return `null`, but `null` says nothing about what went wrong, and it means different things in different languages. We could return a special value, say a `Loan` whose `renewalsRemaining` is `-1`. But a special value is easy to mistake for a real one: a caller who forgets to check for `-1` carries on computing with a loan that does not exist, and nothing in the types warns them.
 
-So that we can be clear about the outcome, and rely on the type checker to check that both outcomes are handled, we introduce a _result type_:
+So that we can be clear about the outcome, and rely on the type checker to check that both outcomes are handled, we introduce a **result type**:
 
 ```typescript
 type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
 ```
 
-`Result` is generic over two type parameters: `T` is the type of a successful value, and `E` is the type of the error. This is the same tagged-union idea from the previous chapter, with `ok` as the discriminator: a caller checks `ok` to learn whether it received a `value` or an `error`. A successful outcome is an `ok: true` result carrying the value, and an erroneous outcome is an `ok: false` result carrying an explanation. Because the function's return type is `Result<Loan, string>` rather than `Loan`, the compiler will not let a caller use the `value` without first checking `ok`, so the erroneous outcome cannot be overlooked by accident.
+`Result` is generic over two type variables: `T` is the type of a successful value, and `E` is the type of the error. This is the same tagged-union idea from the previous chapter, with `ok` as the discriminator: a caller checks `ok` to learn whether it received a `value` or an `error`. A successful outcome is an `ok: true` result carrying the value, and an erroneous outcome is an `ok: false` result carrying an explanation. Because the function's return type is `Result<Loan, string>` rather than `Loan`, the compiler will not let a caller use the `value` without first checking `ok`, so the erroneous outcome cannot be overlooked by accident.
 
 ```typescript
 /**
@@ -429,9 +453,9 @@ type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
  * Loan with one fewer renewal remaining; otherwise returns ok: false
  * with an explanatory error.
  *
- * @param {Loan} loan the loan to renew
+ * @param {Loan} loan the loan to renew.
  * @returns {Result<Loan, string>} the renewed Loan on success, or an
- * error explaining why the loan could not be renewed
+ * error explaining why the loan could not be renewed.
  */
 function renew(loan: Loan): Result<Loan, string> {
     if (loan.renewalsRemaining === 0) {
@@ -471,7 +495,7 @@ test("renewal is refused when no renewals remain",
 
 The values each check needs are named above the tests rather than inside them, because the body of a test case is a single check.
 
-The second test confirms that a refused renewal produces the result the contract specifies. Testing an erroneous outcome is no different from testing a successful one: if the contract describes the outcome, check the outcome.
+The second test confirms that a refused renewal produces the result the contract specifies.
 
 ### Precondition Violations
 
@@ -488,7 +512,7 @@ function lateFee(daysLate: number): number {
     if (daysLate <= 2) {
         return 0;
     }
-    const fee = 0.5 * (daysLate - 2);
+    const fee: number = 0.5 * (daysLate - 2);
     if (fee > 10) {
         return 10;
     }
@@ -496,24 +520,31 @@ function lateFee(daysLate: number): number {
 }
 ```
 
-The first condition uses the remainder operator `%` from [Chapter 1](./01_new-language): `daysLate % 1` is the remainder after dividing `daysLate` by 1, which is `0` exactly when `daysLate` is a whole number. With these two lines, `lateFee(5.5)` stops with the message `daysLate must be a whole number` instead of returning `1.75`, so the mistake is reported at the call that made it. `renew` could check the `Loan` invariant in the same way.
+<details class="tooltip ts-tips">
+<summary>The Remainder Operator <code>%</code></summary>
 
-The condition states what _should_ hold, and the description is printed only when it does not, so the description usually says what went wrong. Note also where `assert` lives. A `checkExpect` sits in `test/` and checks the inputs a test chose. An `assert` sits in the source code in `src/`, and runs on every call to the function, whoever the caller is.
+`%` produces the remainder left after division, the role that `remainder` played in ISL: `7 % 2` is `1`, and `6 % 2` is `0`. Unlike `remainder`, it also works on numbers that are not whole: `5.5 % 2` is `1.5`, which is why `daysLate % 1 === 0` tests for a whole number. A second common use is keeping a value inside a fixed range. To step through a list of `n` items and wrap back to the beginning, write `(i + 1) % n`, which returns to `0` as soon as `i + 1` reaches `n`.
+
+</details>
+
+The first condition uses the remainder operator `%` from [Chapter 1](./01_new-language#types-in-typescript): `daysLate % 1` is the remainder after dividing `daysLate` by 1, which is `0` exactly when `daysLate` is a whole number. With these two lines, `lateFee(5.5)` stops with the message `daysLate must be a whole number` instead of returning `1.75`, so the mistake is reported at the call that made it. `renew` could check the `Loan` invariant in the same way.
+
+The condition states what should hold, and the description is printed only when it does not, so the description usually says what went wrong. Note also where `assert` lives. A `checkExpect` sits in `test/` and checks the inputs a test chose. An `assert` sits in the source code in `src/`, and runs on every call to the function, whoever the caller is.
 
 <details class="tooltip ts-tips">
 <summary><code>assert</code></summary>
 
-`assert` is not part of the TypeScript language. In this course we use the standard `assert` function provided by the Node runtime, which a source file imports at the top:
+`assert` is not part of the TypeScript language. In this course we use the standard `assert` function provided by Node, the **runtime environment** (usually just called the runtime) that runs our compiled programs. A source file imports it at the top:
 
 ```typescript
 import assert from "node:assert/strict";
 ```
 
-The description is optional: `assert(daysLate >= 0)` also works, but when it fails it only reports that a condition was false. [Chapter 8](./08_errors) shows how `assert` stops the program, using a mechanism called an exception.
+The description is optional: `assert(daysLate >= 0)` also works, but when it fails it reports only the expression that was false, not what the failure means. [Chapter 8](./08_errors#throwing-an-exception) shows how `assert` stops the program, using a mechanism called an exception.
 
 </details>
 
-An assertion is part of what the function does, so it can be tested. The test checks that a call breaking the precondition is refused. There is no value to compare against, because the correct behaviour is to produce no value at all, so `checkExpect` cannot express it. For this we use `checkError`, which runs the call it is given and passes only if the call stops with an error:
+An `assert` call is part of what the function does, so it can be tested. The test checks that a call breaking the precondition is refused. There is no value to compare against, because the correct behaviour is to produce no value at all, so `checkExpect` cannot express it. For this we use `checkError`, which runs the call it is given and passes only if the call stops with an error:
 
 ```typescript
 test("a negative number of days is refused",
@@ -527,7 +558,7 @@ test("a fraction of a day is refused",
 
 Run against the earlier version of `lateFee` without assertions, both tests fail, because `lateFee(-5)` returns `0` and `lateFee(5.5)` returns `1.75`.
 
-Like `checkExpect`, `checkError` takes the call wrapped in `() =>`. Without the wrapper, `lateFee(-5)` would run, and stop the program, before `checkError` was ever called. `checkError` checks only _that_ an error occurred, not which one, so the test's description should say what is being refused.
+Like `checkExpect`, `checkError` takes the call wrapped in `() =>`. Without the wrapper, `lateFee(-5)` would run, and stop the program, before `checkError` was ever called. `checkError` checks only that an error occurred, not which one, so the test's description should say what is being refused.
 
 <details class="tooltip ts-tips">
 <summary><code>checkError</code></summary>
@@ -544,9 +575,11 @@ import {
 
 You may also see `checkError` given a second argument naming the expected message, as in `checkError(() => lateFee(-5), "daysLate must not be negative")`. The current toolkit records that message for readers but does not check it.
 
+`checkExpect` treats an `ok: false` result the same way: it checks that the result is an error, but does not compare the message.
+
 </details>
 
-So a restriction on an input can be handled in two ways, and choosing between them is a design decision. A precondition, enforced with `assert`, keeps the function simple. It is appropriate when every caller is code you control and can trust to respect the restriction, so that a violation means a bug and stopping is the right response. An erroneous outcome costs a check and a `Result`, and is appropriate when callers cannot be trusted to respect the restriction. This is especially important when a value arrives from somewhere you cannot trust: a user, a file, a network, or another system. In that case the function checks the input and returns `ok: false`, so the caller receives a result it can act on. Whichever you choose, write it down: a restriction that appears in neither the precondition nor the postcondition protects no one.
+So a restriction on an input can be handled in two ways, and choosing between them is a design decision. A precondition, enforced with `assert`, keeps the function simple. It is appropriate when every caller is code you control and can trust to respect the restriction, so that a violation means a bug and stopping is the right response. An erroneous outcome costs a check and a `Result`, and is appropriate when callers cannot be trusted to respect the restriction. This is especially important when a value arrives from somewhere you cannot trust: a user, a file, a network, or another system. In that case the function checks the input and returns `ok: false`, so the caller receives a result it can act on. Whichever you choose, write the restriction down in the precondition or the postcondition, where callers and test authors will look for it.
 
 <details class="tooltip deep-dive">
 <summary>Failing with User-Specified Inputs: Give More Detail</summary>
@@ -556,13 +589,11 @@ Functions that take _user-specified input_ should almost always report bad input
 
 #### Triangulating Quality: Type Checking, Testing, and Assertions
 
-The type checker and the test suite operate at different times. The type checker works _statically_ on the source code, ruling out whole categories of invalid calls before the program runs. Tests work _dynamically_, checking specific behaviours by executing the function. They are complementary approaches: a program that passes every type check can still return the wrong value for a given input. And a program that passes all its tests may still fail on an input the test suite did not evaluate. Together they give confidence. Types narrow the space of programs that can even be written, and tests validate that the program you wrote does what you intended.
+The type checker and the test suite operate at different times. The type checker works statically on the source code, ruling out whole categories of invalid calls before the program runs. Tests work dynamically, checking specific behaviours by executing the function. They are complementary approaches: a program that passes every type check can still return the wrong value for a given input. And a program that passes all its tests may still fail on an input the test suite did not evaluate. Together they give confidence. Types narrow the space of programs that can even be written, and tests validate that the program you wrote does what you intended.
 
-Assertions add a third check. Like tests, they run dynamically, but they run on every call instead of only on the inputs a test chose, so a broken precondition is reported wherever it happens, including in calls no test anticipated.
+`assert` calls add a third check. Like tests, they run dynamically, but on every call instead of only on the inputs a test chose, so a broken precondition is reported wherever it happens, including in calls no test anticipated.
 
-Documented invariants connect all three. The preconditions and postconditions in a function's doc comment record the part of the specification the compiler cannot see. They are what the tests should check, and the preconditions are what assertions can enforce.
-
-An invariant that is written down can be turned into a test suite, but one that lives only in someone's head cannot be checked by anything.
+The preconditions and postconditions in a function's doc comment connect all three. They record the part of the specification the compiler cannot see, they are what the tests should check, and the preconditions are what `assert` calls can enforce. An invariant that is written down can be turned into a test suite, but one that lives only in someone's head cannot be checked by anything.
 
 <details class="tooltip exercise">
   <summary>Exercise: Parking Fees</summary>
@@ -579,5 +610,89 @@ Parking is free for the first hour. After that, each additional hour costs $4, a
 4. Implement `parkingFee`, run the tests again, and confirm they pass.
 5. Enforce the precondition. Add `assert` calls to `parkingFee` that check its precondition, and write `checkError` tests confirming that <span class="hint">`parkingFee(-1)` and `parkingFee(1.5)`</span> are refused. Run the new tests against your version without assertions first, and confirm that they fail.
 6. Handle bad input as an erroneous outcome instead. Suppose the hours come from a ticket machine that sometimes misreads a ticket, so `parkingFee` cannot trust its input. Change the return type to <span class="hint">`Result<number, string>`</span>, replace the assertions with checks that return `ok: false`, document the error in the contract, and write a `checkExpect` test that confirms `parkingFee(-1)` returns `ok: false`.
+
+<!-- Potential unverified solution:
+
+```typescript
+import assert from "node:assert/strict";
+import { test, checkExpect, checkError } from "@ubccpsc/210-toolkit/testing";
+
+// Exercise: Parking Fees, steps 1 to 5
+/**
+ * Computes the parking fee for a stay of the given number of whole hours.
+ *
+ * Precondition: hours is a whole number and hours >= 0.
+ * Postcondition: the first hour is free, each further hour costs $4,
+ * and the fee is between 0 and 24.
+ *
+ * @param {number} hours the number of whole hours the car was parked.
+ * @returns {number} the fee in dollars, from 0 to 24.
+ */
+function parkingFee(hours: number): number {
+    assert(hours % 1 === 0, "hours must be a whole number");
+    assert(hours >= 0, "hours must not be negative");
+    if (hours <= 1) {
+        return 0;
+    }
+    const fee: number = 4 * (hours - 1);
+    if (fee > 24) {
+        return 24;
+    }
+    return fee;
+}
+
+// equivalence classes: the free hour, accruing hours, the cap
+test("a short stay is free", checkExpect(() => parkingFee(0), 0));
+test("each hour after the first is charged", checkExpect(() => parkingFee(4), 12));
+test("a long stay is capped", checkExpect(() => parkingFee(10), 24));
+// boundaries: where the free hour ends, and where the cap is reached
+test("the whole first hour is free", checkExpect(() => parkingFee(1), 0));
+test("the second hour is the first charged", checkExpect(() => parkingFee(2), 4));
+test("the last hour under the cap", checkExpect(() => parkingFee(6), 20));
+test("the first hour at the cap", checkExpect(() => parkingFee(7), 24));
+// step 5: the precondition is enforced
+test("a negative number of hours is refused", checkError(() => parkingFee(-1)));
+test("a fraction of an hour is refused", checkError(() => parkingFee(1.5)));
+
+// Exercise: Parking Fees, step 6
+/**
+ * Computes the parking fee for a stay of the given number of whole hours,
+ * as read from a ticket that may have been misread.
+ *
+ * Postcondition: returns ok: true with the fee, from 0 to 24, when hours
+ * is a whole number and hours >= 0; otherwise returns ok: false with an
+ * explanatory error.
+ *
+ * @param {number} hours the number of whole hours the car was parked.
+ * @returns {Result<number, string>} the fee in dollars on success, or an
+ * error explaining why the hours could not be used.
+ */
+function parkingFeeFromTicket(hours: number): Result<number, string> {
+    if (hours % 1 !== 0) {
+        return { ok: false, error: "hours must be a whole number" };
+    }
+    if (hours < 0) {
+        return { ok: false, error: "hours must not be negative" };
+    }
+    if (hours <= 1) {
+        return { ok: true, value: 0 };
+    }
+    const fee: number = 4 * (hours - 1);
+    if (fee > 24) {
+        return { ok: true, value: 24 };
+    }
+    return { ok: true, value: fee };
+}
+
+test("a misread negative ticket is an erroneous outcome",
+    checkExpect(() => parkingFeeFromTicket(-1), { ok: false, error: "hours must not be negative" })
+);
+test("a valid ticket is charged as before",
+    checkExpect(() => parkingFeeFromTicket(4), { ok: true, value: 12 })
+);
+```
+
+Step 2: the policy treats three classes alike: the free first hour (`0` and `1`), accruing hours (`2` to `6`) and the cap (`7` and above). The boundaries are `1`/`2`, where the free hour ends, and `6`/`7`, where the cap is reached. Step 3: with `return -1;` as the body, all seven `checkExpect` tests fail. Step 5: against the version without the `assert` calls, both `checkError` tests fail, because `parkingFee(-1)` returns `0` and `parkingFee(1.5)` returns `2`. Step 6 is shown as a second function so both versions can sit in one file; the student replaces `parkingFee`.
+-->
 
 </details>

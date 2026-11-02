@@ -1,10 +1,10 @@
 # Arrays and Iteration
 
-It is common for programs to work with data represented as a _sequence_. The messages in an inbox, the transactions on an account, the students in a course, and the readings from a sensor are all naturally sequences of items. Because sequences are so common, most programming languages provide a built-in data structure for them, usually called an **array**: an ordered collection of elements that can be accessed by position. C, Java, Rust, Python, and TypeScript all provide arrays (Python calls them lists), and every language has similar features for working with them.
+It is common for programs to work with data represented as a sequence. The messages in an inbox, the transactions on an account, the students in a course, and the readings from a sensor are all naturally sequences of items. Because sequences are so common, most programming languages provide a built-in data structure for them, usually called an **array**: an ordered collection of elements that can be accessed by position. C, Java, Rust, Python, and TypeScript all provide arrays (Python calls them lists), and every language has similar features for working with them.
 
-We have already hand-built a mechanism for tracking a sequence. In [Using Types to Model Problems](./02_model-types) we defined a recursive `Playlist` and wrote a recursive function every time we wanted to count, total, or search it. That worked, but we had to rewrite the same traversal pattern in every function. Languages provide built-in support for the most common traversal patterns.
+We have already hand-built a mechanism for tracking a sequence. In [Chapter 2](./02_model-types#playlists) we defined a recursive `Playlist` and wrote a recursive function every time we wanted to count, total, or search it. That worked, but we had to rewrite the same traversal pattern in every function. Languages provide built-in support for the most common traversal patterns.
 
-In TypeScript, arrays come with the traversal operations already written for transforming, selecting, and searching sequences. This chapter introduces arrays, those built-in operations, and then iteration, the general mechanism underneath them all.
+In TypeScript, arrays come with the traversal operations already written for transforming, selecting, and searching sequences. Underneath those operations is iteration, the general mechanism they are all built from.
 
 #### A Day of Temperature Readings
 
@@ -44,7 +44,7 @@ const empty: number[] = [];
 <details class="tooltip ts-tips">
 <summary>Array Types and Literals</summary>
 
-The type `X[]` designates an array of elements of type `X`. `X[]` can also be written `Array<X>`. The two notations mean the same type, the second using the generics syntax from [Chapter 2](./02_model-types). In this course we use the shorter and more common `X[]` form.
+The type `X[]` designates an array of elements of type `X`. `X[]` can also be written `Array<X>`. The two notations mean the same type, the second using the generics syntax from [Chapter 2](./02_model-types#playlists). In this course we use the shorter and more common `X[]` form.
 
 An array literal is an expression:
 ```typescript
@@ -58,19 +58,19 @@ which creates an array with `<expression-i>` as the `i`-th element. It can conta
 <details class="tooltip link-110">
 <summary>Lists in ISL</summary>
 
-The array literal plays the role of `list` from CPSC 110: `[ -4, -1, 3 ]` is the counterpart of `(list -4 -1 3)`. ISL lists were built from `cons` cells, which is exactly the recursive structure we rebuilt as `LinkedList` previously. Arrays package the same idea as a single built-in type, with direct access to any position by index.
+The array literal plays the role of `list` from CPSC 110: `[ -4, -1, 3 ]` is the counterpart of `(list -4 -1 3)`. ISL lists were built from `cons` cells, which is the recursive structure we rebuilt as `LinkedList` in Chapter 2. Arrays package the same idea as a single built-in type, with direct access to any position by index.
 
 </details>
 
-The compiler enforces that every element of an array has the same type. Trying to put a `string` into a `Reading[]` is a type error, and anything you take _out_ of a `Reading[]` is guaranteed to be a `Reading`. Array elements are accessed by their **index**, their position counting from zero. The number of elements in the array is available through its `length` property:
+The compiler enforces that every element of an array has the same type. Trying to put a `string` into a `Reading[]` is a type error, and every element of a `Reading[]` is a `Reading`. Array elements are accessed by their **index**, their position counting from zero. The number of elements in the array is available through its `length` property:
 
 ```typescript
-const first = day[0];        // { hour: 6, tempCelsius: -4 }
-const second = day[1];       // { hour: 9, tempCelsius: -1 }
-const count = day.length;    // 6
+const first: Reading = day[0];    // { hour: 6, tempCelsius: -4 }
+const second: Reading = day[1];   // { hour: 9, tempCelsius: -1 }
+const count: number = day.length; // 6
 ```
 
-The `day` array is represented in memory as a row of six cells, one per index. The cells do not contain the `Reading` objects themselves. Each cell holds a _reference_ to a separate `Reading` that lives elsewhere. `day[0]` names the cell at index 0, and that cell holds a reference to where the `Reading` object is stored. We will introduce _references_ in detail in [Chapter 6](./06_state-mutation).
+The `day` array is represented in memory as a row of six cells, one per index. The cells do not contain the `Reading` objects themselves. Each cell holds a reference to a separate `Reading` that lives elsewhere. `day[0]` names the cell at index 0, and that cell holds a reference to where the `Reading` object is stored. [Chapter 6](./06_state-mutation#copies-and-references) introduces references in detail.
 
 <!-- graph playground:
 https://dreampuf.github.io/GraphvizOnline/?engine=dot
@@ -112,19 +112,12 @@ digraph readingArray {
 
 ## Array Operations
 
-TypeScript provides _operations_ that cover the most common things a program does with a sequence. Each operation takes a function as its input. The input function describes what should happen to _one element_, and the operation applies the function across the whole array. The input functions will usually be declared with arrow functions (lambdas), which we saw in [Chapter 1](./01_new-language).
+TypeScript provides operations that cover the most common things a program does with a sequence. Most of them take a function as their input. The input function describes what should happen to one element, and the operation applies the function across the whole array. The input functions will usually be declared with arrow functions (lambdas), which we saw in [Chapter 1](./01_new-language#testing-the-dynamic-view). We call an operation on an array `a` as `a.operation(fun)`, where `fun` says what to do with each element.
 
-The four most commonly used operations are `map`, `filter`, `reduce`, and `find`. `map` transforms every element, `filter` keeps a subset, `find` locates one element, and `reduce` summarises the array. A fifth, `toSorted`, puts the elements in order.
-
-<details class="tooltip ts-tips">
-<summary>Calling Array Operations</summary>
-
-Given an array `a`, we call an operation with `a.operation(fun)`. `fun` is the function that says what to do with each element, usually an arrow function: `(elem: ElemType) => <expression>`.
-
-</details>
+The four most commonly used operations are `map`, `filter`, `reduce`, and `find`. `map` transforms every element, `filter` keeps a subset, `find` locates one element, and `reduce` summarises the array. A fifth, `toSorted`, puts the elements in order. The section ends with four more: `slice` takes a range, `includes` and `indexOf` take a value, and `findIndex` takes a function, like `find`, but returns a position.
 
 <details class="tooltip link-110">
-<summary> <code>map</code>, <code>filter</code>, <code>foldr</code> </summary>
+<summary><code>map</code>, <code>filter</code>, <code>foldr</code></summary>
 
 CPSC 110 also had built-in sequence abstractions: `map`, `filter`, and `foldr`, with `lambda` for writing the per-element function. The TypeScript versions are the same ideas with different syntax: the operation is called with dot notation on the array, and `lambda` becomes the arrow.
 
@@ -138,7 +131,7 @@ CPSC 110 also had built-in sequence abstractions: `map`, `filter`, and `foldr`, 
 
 ### `map`: Transforming
 
-`map` applies a function to every element and returns a _new array_ containing the results, in the same order. The original array is not changed. For example, our forecasters publish in Fahrenheit, so we convert every Celsius reading to Fahrenheit:
+`map` applies a function to every element and returns a new array containing the results, in the same order. The original array is not changed. For example, our forecasters publish in Fahrenheit, so we convert every Celsius reading to Fahrenheit:
 
 ```typescript
 const fahrenheit: number[] = day.map((reading: Reading) => reading.tempCelsius * 9 / 5 + 32);
@@ -150,9 +143,16 @@ The result of a `map` always has the same length as the input. Mapping a `Readin
 <details class="tooltip deep-dive">
 <summary>Replacing Recursion With <code>map</code></summary>
 
-For the recursive `LinkedList<T>` from [Chapter 2](./02_model-types), the same operation had to be written by hand. The parameter `f` has type `(t: T) => U`, which denotes a function converting from `T` to `U`.
+For the recursive `LinkedList<T>` from [Chapter 2](./02_model-types#playlists), the same operation had to be written by hand. The parameter `f` has type `(t: T) => U`, which denotes a function converting from `T` to `U`.
 
 ```typescript
+/**
+ * Applies a function to every element of a list.
+ *
+ * @param {LinkedList<T>} list the list to transform.
+ * @param {(t: T) => U} f the function to apply to each element.
+ * @returns {LinkedList<U>} the results, in the same order as list.
+ */
 function mapList<T, U>(list: LinkedList<T>, f: (t: T) => U): LinkedList<U> {
     if (list.kind === "empty") {
         return { kind: "empty" };
@@ -194,8 +194,8 @@ With `reduce` and `length` we can write a summary function in the style of the p
  *
  * Precondition: day contains at least one reading.
  *
- * @param {Reading[]} day the readings to summarise
- * @returns {number} the mean of the temperatures in day
+ * @param {Reading[]} day the readings to summarise.
+ * @returns {number} the mean of the temperatures in day.
  */
 function meanTemp(day: Reading[]): number {
     const total: number = day.reduce((sum: number, reading: Reading) => sum + reading.tempCelsius, 0);
@@ -209,14 +209,14 @@ test("mean temperature over the day", checkExpect(() => meanTemp(day), 1));
 
 ### `find`: Searching
 
-`find` returns the _first_ element for which the given function returns `true`. If no element matches, `find` returns `undefined` as specified by its return type. For example, if we wanted to find the first hour the temperature rose above freezing:
+`find` returns the first element for which the given function returns `true`. If no element matches, `find` returns `undefined`, as its return type says. For example, if we wanted to find the first hour the temperature rose above freezing:
 
 ```typescript
 const thaw: Reading | undefined = day.find((reading: Reading) => reading.tempCelsius > 0);
 // { hour: 12, tempCelsius: 3 }
 ```
 
-[Chapter 2](./02_model-types) introduced two absence values: `null`, which we choose when designing our own types, and `undefined`, the language's own value for "nothing was provided". TypeScript's built-in operations use `undefined` for "not found", and `find` follows that convention. The union type forces every caller to consider the case where nothing matched.
+[Chapter 2](./02_model-types#branching-on-the-case) introduced two absence values: `null`, which we choose when designing our own types, and `undefined`, the language's own value for "nothing was provided". TypeScript's built-in operations use `undefined` for "not found", and `find` follows that convention. The union type forces every caller to consider the case where nothing matched.
 
 ```typescript
 test("find returns undefined when nothing matches",
@@ -233,7 +233,7 @@ In the examples above, the function argument is always an anonymous function who
 
 ```typescript
 const totalTemps: number = day.reduce((sum: number, reading: Reading) => {
-    const total = sum + reading.tempCelsius;
+    const total: number = sum + reading.tempCelsius;
     return total;
 }, 0);
 ```
@@ -241,6 +241,13 @@ const totalTemps: number = day.reduce((sum: number, reading: Reading) => {
 or the name of a function with the right signature:
 
 ```typescript
+/**
+ * Adds one reading's temperature to a running total.
+ *
+ * @param {number} sum the total so far.
+ * @param {Reading} reading the reading to add.
+ * @returns {number} sum plus the reading's temperature.
+ */
 function addTemp(sum: number, reading: Reading): number {
     return sum + reading.tempCelsius;
 }
@@ -265,7 +272,7 @@ Each named operation tells the reader the shape of the step: a `filter` produces
 
 ### `toSorted`: Ordering
 
-`toSorted` returns a _new array_ containing the same elements in a chosen order. Like `map` and `filter`, it leaves the original array unchanged. Its function argument is different from the others: a **comparator** takes _two_ elements and returns a number saying which should come first. A negative number means the first argument comes before the second, a positive number means it comes after, and zero means either order is fine. For numbers, `a - b` orders ascending and `b - a` orders descending. For example, to list the day's readings coldest first:
+`toSorted` returns a new array containing the same elements in a chosen order. Like `map` and `filter`, it leaves the original array unchanged. Its function argument is different from the others: a **comparator** takes two elements and returns a number saying which should come first. A negative number means the first argument comes before the second, a positive number means it comes after, and zero means either order is fine. For numbers, `a - b` orders ascending and `b - a` orders descending. For example, to list the day's readings coldest first:
 
 ```typescript
 const coldestFirst: Reading[] = day.toSorted(
@@ -280,9 +287,16 @@ test("readings ordered coldest first",
 );
 ```
 
-When two elements compare as equal, `toSorted` keeps them in the order they had in the input. If that is not the order you want, the comparator needs a second rule for breaking ties, and a comparator with several rules is clearer as a named function. This one orders warmest first and, among equal temperatures, the earlier hour first:
+When two elements compare as equal, `toSorted` keeps them in the order they had in the input. If that is not the order you want, the comparator needs a second rule for breaking ties, and a comparator with several rules is clearer as a named function. This one orders warmest first and, among equal temperatures, the earlier hour first. The test for a tie uses `!==`, the negation of `===`, which is `true` when two values differ:
 
 ```typescript
+/**
+ * Orders two readings warmest first and, for equal temperatures, earliest first.
+ *
+ * @param {Reading} a the first reading.
+ * @param {Reading} b the second reading.
+ * @returns {number} negative if a comes first, positive if b comes first, zero if they are equal.
+ */
 function warmerThenEarlier(a: Reading, b: Reading): number {
     if (a.tempCelsius !== b.tempCelsius) {
         return b.tempCelsius - a.tempCelsius;
@@ -324,9 +338,31 @@ test("includes reports a value that is absent",
 );
 ```
 
-`includes` compares elements with `===`, the strict equality from [Chapter 2](./02_model-types). Strings have an `includes` too, which checks for a substring: `"CPSC210".includes("210")` is `true`.
+`includes` compares elements with `===`, the strict equality from [Chapter 2](./02_model-types#branching-on-the-case). Strings have an `includes` too, which checks for a substring: `"CPSC210".includes("210")` is `true`.
 
-Arrays have many other useful operations that this chapter does not cover.
+### `indexOf` and `findIndex`: Finding a Position
+
+`includes` and `find` report whether something matched and which element it was. Sometimes the position is what you need, for example to look at the reading taken just before a given one. `indexOf` takes a value, like `includes`, compares the elements with `===`, and returns the index of the first match, or `-1` when there is none:
+
+```typescript
+test("indexOf finds the first position of a value",
+    checkExpect(() => temperatures.indexOf(10), 3)
+);
+
+test("indexOf returns -1 for a value that is absent",
+    checkExpect(() => temperatures.indexOf(20), -1)
+);
+```
+
+`findIndex` takes a function, like `find`, and returns the index of the first element for which the function returns `true`, or `-1` when no element matches:
+
+```typescript
+test("findIndex finds the first temperature above 12 degrees",
+    checkExpect(() => temperatures.findIndex((t: number) => t > 12), 6)
+);
+```
+
+Both use `-1` for "not found" because it can never be a valid index, so the result is always a `number`.
 
 ## Writing Your Own Loops
 
@@ -341,7 +377,7 @@ for (const reading of day) {
 ```
 
 <details class="tooltip ts-tips">
-<summary><code>for of</code> loops</summary>
+<summary><code>for of</code> Loops</summary>
 
 A `for of` loop of the form:
 
@@ -360,18 +396,25 @@ This means the body of the `for of` loop will execute `n` times, where `n` is th
 
 </details>
 
-Like the `if` statement from the first chapter, `for of` is a statement. It produces no value and only directs the flow of execution. This is a _new construct_ relative to CPSC 110.
+Like the `if` statement from the first chapter, `for of` is a statement. It produces no value and only directs the flow of execution. This is a new construct relative to CPSC 110.
 
 <details class="tooltip link-110">
 <summary>Loops Replace Recursive Traversal</summary>
 
-In CPSC 110 you traversed a list by calling the function again on `(rest lst)` until you reached `empty`. A `for of` loop performs the same traversal as a statement. The loop visits each element in order, then stops. The traversal you used to spell out with a recursive call is performed by the statement itself.
+In CPSC 110 you traversed a list by calling the function again on `(rest lst)` until you reached `empty`. A `for of` loop performs that traversal as a statement: it visits each element in order, then stops.
 
 </details>
 
 The loop below does what `find` does:
 
 ```typescript
+/**
+ * Finds the first reading warmer than a threshold.
+ *
+ * @param {Reading[]} day the readings to search, in order.
+ * @param {number} threshold the temperature to exceed.
+ * @returns {Reading | undefined} the first reading above threshold, or undefined if there is none.
+ */
 function firstAbove(day: Reading[], threshold: number): Reading | undefined {
     for (const reading of day) {
         if (reading.tempCelsius > threshold) {
@@ -382,17 +425,17 @@ function firstAbove(day: Reading[], threshold: number): Reading | undefined {
 }
 ```
 
-The `return` inside the loop body exits the whole function the moment a match is found, so later elements are never visited. Knowing how to write the loop means you can build the patterns the language does not provide.
+The `return` inside the loop body exits the whole function the moment a match is found, so later elements are never visited.
 
-Every operation above examines elements one at a time: the function you hand to `map`, `filter`, or `find` receives a single element and nothing else. Some questions are about how elements relate to _each other_. Suppose quality control asks: did the station ever report the same temperature at two different hours?
+Every operation above examines elements one at a time: the function you hand to `map`, `filter`, or `find` receives a single element and nothing else. Some questions are about how elements relate to each other. Suppose quality control asks: did the station ever report the same temperature at two different hours?
 
 ```typescript
 /**
  * Determines whether any two readings taken at different hours
  * report the same temperature.
  *
- * @param {Reading[]} day the readings to examine
- * @returns {boolean} true if any temperature repeats, false otherwise
+ * @param {Reading[]} day the readings to examine.
+ * @returns {boolean} true if any temperature repeats, false otherwise.
  */
 function hasRepeatedTemperature(day: Reading[]): boolean {
     for (const first of day) {
@@ -408,7 +451,7 @@ function hasRepeatedTemperature(day: Reading[]): boolean {
 }
 ```
 
-Here the loops nest: for each `first` reading, the inner loop walks the whole array looking for a _different_ hour (the outer `if`) reporting the _same_ temperature. The comparison involves two elements at once, which the named operations cannot express because their functions see one element at a time.
+Here the loops nest: for each `first` reading, the inner loop walks the whole array looking for a different hour (the outer `if`) reporting the same temperature. The comparison involves two elements at once, which the named operations cannot express because their functions see one element at a time.
 
 ```typescript
 const repeats: Reading[] = [
@@ -428,13 +471,13 @@ test("a repeated temperature is detected",
 
 Which should you use? Prefer the named operation whenever the task is a transform (`map`), a selection (`filter`), a summary (`reduce`), or a first-match search (`find`). The operation tells every reader what the computation does, and it is less error-prone than a hand-written loop.
 
-In contrast, write a loop when the computation does not fit a named pattern: when it relates elements to one another, or when one pass must answer a question no single named operation can. The named operations say _what_ they are doing. Loops are for when you must control _how_ it is done.
+In contrast, write a loop when the computation does not fit a named pattern: when it relates elements to one another, or when one pass must answer a question no single named operation can. Loops are for when you must control how it is done.
 
 #### On Iteration
 
 Arrays give sequences built-in support in the language, and their operations package the traversals we used to write by hand: `map` to transform, `filter` to select, `reduce` to summarise, `find` to search, `toSorted` to order, with `for of` underneath them all for the computations that fit no named pattern.
 
-One property everything in this chapter shared: none of these operations changed `day`, our array of daily temperatures. Every `map`, `filter`, and `toSorted` produced a new array, every `reduce` produced a new value, and even our hand-written loops only read the elements they visited. The original readings were never changed. What happens when programs _do_ change existing values, and why that calls for so much care, is the subject of the next chapter.
+One property everything in this chapter shared: none of these operations changed `day`, our array of daily temperatures. Every `map`, `filter`, and `toSorted` produced a new array, every `reduce` produced a new value, and even our hand-written loops only read the elements they visited. The original readings were never changed.
 
 <details class="tooltip exercise">
   <summary>Exercise: Summarising an Order</summary>
@@ -448,8 +491,10 @@ Each item in an order records a name, a unit price, and a quantity:
 ```typescript
 type Item = {
     name: string;
-    price: number;    // unit price in dollars
-    quantity: number; // how many were ordered
+    // unit price in dollars
+    price: number;
+    // how many were ordered
+    quantity: number;
 };
 ```
 
@@ -463,5 +508,135 @@ Write a small example `order` of three or four items to test against, then write
 6. `hasDuplicateName(order: Item[]): boolean`. Return `true` if any two items share the same `name`. <span class="hint">This one compares items to one another, which the named operations cannot express, so you will want to use a `for of` loop for this task.</span>
 
 Write a `test` holding a single `checkExpect` for each function against your example order, <span class="hint">including a case for `firstOutOfStock` where nothing is out of stock</span>.
+
+<!-- Potential unverified solution:
+
+```typescript
+import { test, checkExpect } from "@ubccpsc/210-toolkit/testing";
+
+const order: Item[] = [
+    { name: "notebook", price: 4, quantity: 3 },
+    { name: "pen", price: 2, quantity: 10 },
+    { name: "backpack", price: 40, quantity: 0 },
+    { name: "eraser", price: 2, quantity: 1 }
+];
+
+const inStock: Item[] = order.filter((item: Item) => item.quantity > 0);
+
+/**
+ * Lists the name of every item in an order.
+ *
+ * @param {Item[]} order the items ordered.
+ * @returns {string[]} the names, in order.
+ */
+function names(order: Item[]): string[] {
+    return order.map((item: Item) => item.name);
+}
+
+/**
+ * Selects the items whose unit price is at most a limit.
+ *
+ * @param {Item[]} order the items ordered.
+ * @param {number} max the highest acceptable unit price.
+ * @returns {Item[]} the items priced at most max, in order.
+ */
+function affordable(order: Item[], max: number): Item[] {
+    return order.filter((item: Item) => item.price <= max);
+}
+
+/**
+ * Totals the cost of an order.
+ *
+ * @param {Item[]} order the items ordered.
+ * @returns {number} the sum of price times quantity over every item.
+ */
+function orderTotal(order: Item[]): number {
+    return order.reduce((total: number, item: Item) => total + item.price * item.quantity, 0);
+}
+
+/**
+ * Finds the first item that is out of stock.
+ *
+ * @param {Item[]} order the items ordered.
+ * @returns {Item | undefined} the first item with a quantity of 0, or undefined if there is none.
+ */
+function firstOutOfStock(order: Item[]): Item | undefined {
+    return order.find((item: Item) => item.quantity === 0);
+}
+
+/**
+ * Orders two items cheapest first and, for equal prices, by name alphabetically.
+ *
+ * @param {Item} a the first item.
+ * @param {Item} b the second item.
+ * @returns {number} negative if a comes first, positive if b comes first, zero if they are equal.
+ */
+function cheaperThenAlphabetical(a: Item, b: Item): number {
+    if (a.price !== b.price) {
+        return a.price - b.price;
+    }
+    if (a.name < b.name) {
+        return -1;
+    }
+    if (a.name > b.name) {
+        return 1;
+    }
+    return 0;
+}
+
+/**
+ * Orders the items cheapest first, breaking ties alphabetically by name.
+ *
+ * @param {Item[]} order the items ordered.
+ * @returns {Item[]} a new array of the same items, cheapest first.
+ */
+function cheapestFirst(order: Item[]): Item[] {
+    return order.toSorted(cheaperThenAlphabetical);
+}
+
+/**
+ * Determines whether any two items in an order share a name.
+ *
+ * @param {Item[]} order the items ordered.
+ * @returns {boolean} true if two items at different positions have the same name, false otherwise.
+ */
+function hasDuplicateName(order: Item[]): boolean {
+    for (const first of order) {
+        for (const second of order) {
+            if (order.indexOf(first) !== order.indexOf(second)) {
+                if (first.name === second.name) {
+                    return true; // a shared name; stop the whole search
+                }
+            }
+        }
+    }
+    return false; // every pair was checked; no shared names
+}
+
+const withDuplicate: Item[] = [
+    { name: "pen", price: 2, quantity: 1 },
+    { name: "pen", price: 3, quantity: 1 }
+];
+
+test("names lists every item", checkExpect(() => names(order), ["notebook", "pen", "backpack", "eraser"]));
+test("affordable keeps items priced at most the limit",
+    checkExpect(() => names(affordable(order, 4)), ["notebook", "pen", "eraser"])
+);
+test("orderTotal sums price times quantity", checkExpect(() => orderTotal(order), 34));
+test("firstOutOfStock finds the backpack",
+    checkExpect(() => firstOutOfStock(order), { name: "backpack", price: 40, quantity: 0 })
+);
+test("firstOutOfStock is undefined when everything is in stock",
+    checkExpect(() => firstOutOfStock(inStock), undefined)
+);
+test("cheapestFirst orders by price, then name",
+    checkExpect(() => names(cheapestFirst(order)), ["eraser", "pen", "notebook", "backpack"])
+);
+test("no duplicate names in the order", checkExpect(() => hasDuplicateName(order), false));
+test("a repeated name is detected", checkExpect(() => hasDuplicateName(withDuplicate), true));
+```
+
+`hasDuplicateName` tells two items apart by their positions, with `indexOf`, the way `hasRepeatedTemperature` used the hour. The second order, `withDuplicate`, exercises the `true` case, and `inStock` is the case where nothing is out of stock.
+-->
 
 </details>

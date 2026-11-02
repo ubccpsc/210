@@ -4,11 +4,11 @@
 
 You already know how to program, and you already know that programs can go wrong. Part 1 builds on that groundwork and lays the foundations of software construction that apply across a broad set of programming languages.
 
-We will cover two concerns across Part 1. The first concern is **capability**: the building blocks a real program needs, from structured data to collections, changing state, and communication with files and services. You know many building blocks already. The new ones signal a shift to **imperative programming**. We will see how far these building blocks can go in [Chapter 4](./04_maintaining-invariants), which will motivate the introduction of object-oriented programming in [Part 2](../part2/index). Along the way we will learn TypeScript, a language that can do more than the teaching languages in CPSC 110 and checks far more of your work.
+We will cover two concerns across Part 1. The first concern is capability: the building blocks a real program needs, from structured data to collections, changing state, and communication with files and services. You know many building blocks already. The new ones signal a shift to imperative programming. Along the way we will learn TypeScript, a language that can do more than the teaching languages in CPSC 110 and checks far more of your work.
 
-The second concern is **correctness**: specifying what a program should do precisely enough that the language, the tests, or you can confirm that it does. In CPSC 110 you learned to defend against mistakes through _discipline_: you documented each function's signature, you wrote examples before the function bodies, and you followed design recipes carefully. That discipline worked, but almost none of it was _enforced_. A signature that said `(@signature Number -> String)` was a promise you made to yourself, but the language did not check it. TypeScript will allow us to _enforce_ many more correctness properties. We will be careful to separate three kinds of assurance: guarantees the compiler can check before the program runs, behaviours that can only be confirmed by running it, and promises that still rest on the discipline of the programmer.
+The second concern is correctness: specifying what a program should do precisely enough that the language, the tests, or you can confirm that it does. In CPSC 110 you learned to defend against mistakes through _discipline_: you documented each function's signature, you wrote examples before the function bodies, and you followed design recipes carefully. That discipline worked, but almost none of it was enforced. A signature that said `(@signature Number -> String)` was a promise you made to yourself, but the language did not check it. TypeScript will allow us to enforce many more correctness properties. We will be careful to separate three kinds of assurance: guarantees the compiler can check before the program runs, behaviours that can only be confirmed by running it, and promises that still rest on the discipline of the programmer.
 
-Our programs in Part 1 stay small enough that one person can hold the whole design in their head. That assumption is what allows personal discipline to uphold the promises the language cannot. [Part 2](../part2/index) moves beyond this size restriction and asks what happens when programs, teams, and lifetimes outgrow any one person.
+Our programs in Part 1 stay small enough that one person can hold the whole design in their head. That assumption lets personal discipline uphold the promises the language cannot. Part 2 moves beyond this size restriction and asks what happens when programs, teams, and lifetimes outgrow any one person.
 
 ## Intended Learning Objectives
 
@@ -22,9 +22,9 @@ By the end of Part 1, you will be able to:
 
 ## Layered Correctness
 
-A type communicates _intent_: a well-designed type tells the next reader exactly which values are valid, and the compiler enforces that intent before the program runs. But types describe _structure_, and many correctness properties are about _meaning_. A balance must stay non-negative, a course grade must sit between 0 and 100, and a binary search tree must keep its keys in order. A value can have exactly the right shape and still be meaningless. The properties that must hold beyond the types are called **invariants**, and the assumptions and guarantees a function documents, its preconditions and postconditions, are its **contract**.
+A type communicates intent: a well-designed type tells the next reader exactly which values are valid, and the compiler enforces that intent before the program runs. But types describe structure, and many correctness properties are about meaning. A balance must stay non-negative, a course grade must sit between 0 and 100, and a binary search tree must keep its keys in order. A value can have exactly the right shape and still be meaningless. The properties that must hold beyond the types are called invariants, and the assumptions and guarantees a function documents, its preconditions and postconditions, are its contract.
 
-Identifying these properties and confirming them are separate tasks. The separation follows the boundary between the **static** and **dynamic** views of a program. The static view is the source text, which the compiler can analyse without running it. That is where types are checked. The dynamic view is the program as it runs, taking on actual values and following particular paths. Whether it computes the _right_ answer is a dynamic question, and can only be answered by running the code. These mechanisms form layers, and each guards against a failure the others cannot see:
+Identifying these properties and confirming them are separate tasks. The separation follows the boundary between the static and dynamic views of a program. The static view is the source text, which the compiler can analyse without running it. That is where types are checked. The dynamic view is the program as it runs, taking on actual values and following particular paths. Whether it computes the right answer is a dynamic question, and can only be answered by running the code. These mechanisms form layers, and each guards against a failure the others cannot see:
 
 - **Types** establish what shapes of data are allowed.
 - **Contracts** state what behaviour each function assumes and promises.
@@ -32,7 +32,7 @@ Identifying these properties and confirming them are separate tasks. The separat
 - **Tests** execute the code, choosing which inputs and paths to exercise.
 - **Assertions** check that the code's behaviour matches what was expected.
 
-No layer is sufficient on its own. A program can be correctly typed and still compute the wrong answer. A contract can be precisely worded and still be violated. A test suite can pass while another part of the program produces invalid data. A passing test is evidence about the particular runs you tried, while a type check or a maintained invariant is a claim about every run. Knowing which kind of assurance you actually have is an important part of engineering.
+No layer is sufficient on its own. A program can be correctly typed and still compute the wrong answer. A contract can be precisely worded and still be violated. A test suite can pass while another part of the program produces invalid data. A passing test is evidence about the particular runs you tried, while a type check or a maintained invariant is a claim about every run. Knowing which kind of assurance you have is an important part of engineering.
 
 <details class="tooltip deep-dive">
 <summary>How Guarantees Fail</summary>
@@ -48,29 +48,29 @@ Five common failure modes break guarantees, and each corresponds to a missing la
 When you find a bug that "should have been impossible," ask which of these five is responsible.
 </details>
 
-One concern remains. An invariant the language cannot check must still be kept true, and this requires control over creation. If any code can build a value, every such place is an opportunity to break the invariant. [Chapter 4](./04_maintaining-invariants) uses encapsulation to hide values using _only the language features_ you already know from CPSC 110. In [Part 2](../part2/index), we learn about a new language feature that provides encapsulation more directly, but the idea is the same as in [Chapter 4](./04_maintaining-invariants): protecting an invariant shapes how the code is organised.
+One concern remains. An invariant the language cannot check must still be kept true, and this requires control over creation. If any code can build a value, every such place is an opportunity to break the invariant. [Chapter 4](./04_maintaining-invariants) uses encapsulation to hide values using only the language features you already know from CPSC 110. In Part 2, we learn about a new language feature that provides encapsulation more directly, but the idea is the same as in Chapter 4: protecting an invariant shapes how the code is organised.
 
 ## Chapter Overview
 
 Part 1 covers four broad themes across nine chapters.
 
-#### The language and its data:
+#### The Language and Its Data
 
 1. [Learning a New Programming Language](./01_new-language) introduces TypeScript from Intermediate Student Language: types as a checked mechanism, the compiler, statements like `if` and `return`, and the static and dynamic views the rest of the part builds on.
 2. [Using Types to Model Problems](./02_model-types) designs precise data: compound types, unions for distinct cases, and recursive structure, with functions whose shape follows the shape of the data.
 
-#### Correctness:
+#### Correctness
 
 3. [Checking Invariants](./03_checking-invariants) records contracts and invariants, derives tests from them using equivalence classes and boundary values, and reports erroneous outcomes with a result type.
 4. [Maintaining Invariants](./04_maintaining-invariants) keeps an invariant true for the life of a program by controlling creation with a constructor function and hiding state inside a closure.
 
-#### The capabilities of real programs:
+#### The Capabilities of Real Programs
 
 5. [Arrays and Iteration](./05_arrays) introduces collections and the operations over them: `map`, `filter`, `reduce`, and `find`, with the `for of` loop beneath them.
 6. [Mutation and Side Effects](./06_state-mutation) adds state that changes over time, along with the references, aliasing, scope, and side effects that come with it.
 7. [Asynchronous Effects and Time](./07_async) reaches outside the program to files and web services, where a result arrives only after a wait, using promises and `async`/`await`, and exchanges data with them as JSON.
 
-#### Handling and verifying failure:
+#### Handling and Verifying Failure
 
 8. [Designing for Failure](./08_errors) treats failure as part of a function's contract, choosing between returning a failure the type checker forces callers to confront and throwing an exception that propagates to a handler above.
 9. [Validating Behaviour](./09_validation) moves from the course toolkit to the assertion vocabulary of a real test framework, partitions inputs and outputs, and uses coverage and regression to judge whether a suite checks enough.
