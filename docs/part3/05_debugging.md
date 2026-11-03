@@ -241,18 +241,22 @@ A change can also affect parts of the system it was not meant to touch, so run t
 
 Our tracker is a published library, so this fix changes a contract that other teams have written code against. Clients now receive `exception` where they used to receive `delivered`, which corrects the fault, and they receive `ok: false` where an unrecognised status used to appear as `in-transit`. Neither change alters a type, so the compiler cannot warn clients, and a client may have adapted to the wrong answer, for example by checking a second field to work out the real status. [Chapter 19](./03_api_design#breaking-changes) lists the options: release the fix as a breaking change, add a corrected version of the operation and deprecate the old one, or document the behaviour and leave the code alone. A tracker that reports undelivered parcels as delivered cannot be left as it is, so this fix ships as a breaking change, with release notes that describe both changes.
 
-The severity of a bug can override all of this. A bug that loses data, exposes information, or lets someone do what they should not be able to do is fixed immediately, even if clients depend on it and get no notice, because the alternative is worse. The Falador example below shows this decision being made in real time. Significant functionality was disabled within hours, and the more careful design came later.
+The severity of a bug can override all of this. A bug that loses data, exposes information, or lets someone do what they should not be able to do is fixed immediately, even if clients depend on it and get no notice, because the alternative is worse. The deep-dive example below shows this decision being made in real time. Significant functionality was disabled within hours, and the more careful design came later.
 
 <details class="tooltip deep-dive">
 <summary>When Are Breaking Bug Fixes Allowed?</summary>
 
-The [Falador Massacre](https://en.wikipedia.org/wiki/RuneScape#Falador_Massacre) was the dramatic name given to the result of a bug in the [MMORPG](https://en.wikipedia.org/wiki/Massively_multiplayer_online_role-playing_game) RuneScape. In RuneScape, player-versus-player (PvP) combat was disabled in most of the game. It was only allowed in special areas, such as "The Wilderness" and some parts of player-owned houses. Cities such as Falador were meant to be safe from PvP combat. A player killed by another player loses most of the items they were carrying.
+The [Falador Massacre](https://en.wikipedia.org/wiki/RuneScape#Falador_Massacre) was the dramatic name given to the result of a bug in the [MMORPG](https://en.wikipedia.org/wiki/Massively_multiplayer_online_role-playing_game) RuneScape. In RuneScape, player-versus-player (PvP) combat was disabled in most of the game. It was only allowed in special areas, such as "The Wilderness" and some parts of player-owned houses. Cities such as Falador were meant to be safe from PvP combat. 
+
+In this game, a player killed by another player (in PvP) loses most of the items they were carrying. In many MMORPGs, obtaining some items takes many hours, often mapping to days and weeks of real-world time investment, of repetitive gameplay. Thus, losing items unexpectedly---as was possible with this bug---can be devastating.
 
 The bug was that when players were removed from a player-owned house while PvP was enabled for them, PvP stayed enabled. Some players were therefore able to attack other players in areas that were supposed to be safe, which caused a great deal of chaos.
 
 The bug happened in the middle of the night for the game's developers. The developer on call [deployed a simple fix](https://youtu.be/ukbkU_dPKrU?si=A1QEkVbFlnZG5Jn_&t=3560): houses could no longer turn on PvP, and the PvP state no longer had any effect. This disabled significant PvP features in the game, but disabling them cost less than letting the "massacre" continue.
 
 The game code was later updated to [add a notion of "areas" to the game](https://youtu.be/ukbkU_dPKrU?si=l1K9BgG4NC9AYwYT&t=3650). Areas could be checked to ensure that states such as PvP were not enabled where they should not be.
+
+We talk about video game examples not because we expect you have played them, but because they are large, complex---and often poorly-designed---pieces of software whose high-level meaning can be explained easily. An example of another bug that required a devastating fix is the [Corrupted Blood](https://en.wikipedia.org/wiki/Corrupted_Blood_incident) incident.
 
 </details>
 
