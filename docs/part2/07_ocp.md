@@ -179,7 +179,7 @@ But you can get started by following the advice from [Chapter 12](./03_encapsula
 <details class="tooltip deep-dive">
 <summary>Speculative Generality</summary>
 
-The opposite of a rigid design is an over-flexible one. Adding interfaces, base classes, and extension points for variation you only imagine you might need is a recognised design mistake, usually called _speculative generality_: the indirection adds real cost while the flexibility gives hypothetical benefits.
+The opposite of a rigid design is an over-flexible one. Adding interfaces, base classes, and extension points for variation you only imagine you might need is a recognised design mistake, usually called _speculative generality_: the indirection adds real cost while the flexibility gives only hypothetical benefits.
 
 </details>
 
@@ -246,7 +246,7 @@ There are some signals we can use to answer the question more accurately Parts o
 
 You'll get better at reading these signals as you gain more experience. Experienced engineers often seem to predict well not because they've memorized a checklist, but because they have seen similar systems before, and remember where the last design turned out to be rigid.
 
-We introduced the principles to you not so you could apply them as a checklist to your system, but to give you _language_ to describe systems. Humans create knowledge by giving names to things, so we can talk about them more precisely. When you find yourself making a tricky change or regretting an abstraction---perhaps in your project---having the language of these principles will allow you to link this tricky experience to all the other similar tricky experiencea you have had and will had. 
+We introduced the principles to you not so you could apply them as a checklist to your system, but to give you _language_ to describe systems. Humans create knowledge by giving names to things, so we can talk about them more precisely. When you find yourself making a tricky change or regretting an abstraction---perhaps in your project---having the language of these principles will allow you to link this tricky experience to all the other similar tricky experiences you have had and will have. 
 
 #### Toward Evolution and Scale
 
