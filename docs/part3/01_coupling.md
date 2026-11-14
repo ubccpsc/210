@@ -1,18 +1,20 @@
 # Coupling and Dependencies
 
-Cohesion, from [Chapter 11](../part2/02_decomposition#single-responsibility), judges a design one class at a time: it asks whether everything inside a class belongs together, and guides designers towards one invariant per class. Cohesion is necessary, but it is not sufficient. A system can be built entirely from cohesive classes and still be difficult to change, because the difficulty lies in the connections between the classes rather than inside any one of them.
+Cohesion, from [Chapter 11](../part2/02_decomposition#single-responsibility), judges a design one class at a time: it asks whether everything inside a class belongs together, and guides designers towards one invariant per class. Cohesion is necessary for a good design, but it is not sufficient. A system can be built entirely from cohesive classes and still be difficult to change, because the difficulty lies in the connections *between* the classes. Tightly-connected classes, or classes with many connection points, are hard to change.
 
-The connections between classes decide what a change costs, and software keeps changing. It is tempting to treat careful design as insurance: if the design is good enough at the outset, the code will not need to change later. In practice, code changes throughout its life. Requirements arrive after release, libraries publish new major versions, the services a program calls change their responses, platforms deprecate the interfaces a system was built against, and the rules governing the data are rewritten. None of these changes are failures of the original design, because the pressure to change comes from outside the program. Design cannot prevent these changes, but it can make them cheaper to carry out.
+You might think that if software is sufficiently well-designed, the code will not need to change later. But code changes throughout its life. Requirements arrive after release, libraries publish new major versions, the services a program calls change their responses, platforms deprecate the interfaces a system was built against, and the rules governing the data are rewritten. None of these changes are failures of the original design, because the pressure to change comes from outside the program. Design cannot prevent these changes, but it can make them easier to carry out.
 
-**Coupling** describes how tightly one class is bound to another. The principle that follows from it is that a class should _depend on as little as possible, as loosely as possible_. Cohesion and coupling are the two criteria used to judge a decomposition, and each is incomplete without the other.
+**Coupling** describes how tightly one class is bound to another. The principle that follows from it is that a class should _depend on as little as possible, as loosely as possible_. To judge a decomposition, we need to consider both cohesion and coupling.
 
 ## The Ripple Effect
 
-This chapter returns to the music app from [Chapter 11](../part2/02_decomposition#decomposing-the-playlist). `Playlist` still owns the navigation invariant, and `PlayHistory` still owns the history invariant. Both classes are as cohesive as when they were designed, but the rest of the system has changed around them.
+Let's go back to the music app from [Chapter 11](../part2/02_decomposition#decomposing-the-playlist). `Playlist` still owns the navigation invariant, and `PlayHistory` still owns the history invariant. Both classes are as cohesive as when they were designed.
+
+But the rest of the system has changed around them:
 
 > As a listener, I want to see a summary of what I played this week, so that I can rediscover songs I enjoyed recently.
 
-A new `WeeklyRecap` class is written to implement this story. The history is already recorded, so the quickest implementation asks `Playlist` for the history and summarises it:
+Let's say we write a new `WeeklyRecap` class to implement this. The history is already recorded, so the quickest implementation asks `Playlist` for the history and summarises it:
 
 <CollapsibleCode>
 
@@ -48,16 +50,21 @@ class WeeklyRecap {
 
 </CollapsibleCode>
 
-Nothing here is obviously wrong. `WeeklyRecap` is cohesive: it has one job and provides only that feature. It does not touch the navigation invariant or the history invariant. The code compiles and works, and it would probably pass a code review. The problem is what `WeeklyRecap` has to assume about its dependencies. The implementation is short, but it makes several small assumptions:
+Nothing here is obviously wrong. `WeeklyRecap` is cohesive: it has one job and provides only that feature. It does not touch the navigation invariant or the history invariant. The code compiles and works, and it would probably pass a code review. 
+
+But let's consider what `WeeklyRecap` has assumed about `Playlist` and `PlayHistory`:
 
 * It assumes that the history comes back as an array.
 * It assumes that the array is ordered with the most recent play first.
 * It assumes that its elements are `Song` objects.
 * It assumes that each `Song` has a `title`.
 
-Most of these facts are written in the contract of `PlayHistory.songs()`, which `recentlyPlayedSongs()` forwards: it returns a `Song[]`, most recent first. But that contract is `PlayHistory`'s representation made public, because `songs()` hands out the array the class stores. The facts are implementation details of how `PlayHistory` currently stores its data, and `WeeklyRecap` now depends on all of them.
+Most of these facts are written in the contract of `PlayHistory.songs()`. But that contract leaks  `PlayHistory`'s representation! So now, `WeeklyRecap` depends on _implementation details_ of `PlayHistory`, rather than the _abstract value_ of `PlayHistory`.
 
-These dependencies cause no problems until something changes. The user story asks for what was played this week. The current design cannot answer that question, because a list of songs does not record when each song was played. `PlayHistory` needs to store the time of each play:
+Let's see what happens when something changes. The user story asks for what was played this week. The current design cannot answer that question, because there's only a list of recent songs, with no information of when they were played. 
+
+
+What might we do now? Perhaps get `PlayHistory` needs to store the time of each play, not just the `Song`? We can get it to store `PlayRecord`s instead:
 
 ```typescript
 type PlayRecord = {
@@ -67,17 +74,22 @@ type PlayRecord = {
 };
 ```
 
-This is a small, correct change, made in the class that owns the history invariant. A cohesive decomposition is supposed to make this kind of change safe. Instead, the change breaks:
+Changing the internal representation from `Song[]` to `PlayRecord[]` is a small change, made in the class that owns the history invariant. A cohesive decomposition is supposed to make this kind of change safe. But the change will break many things:
 
 - `PlayHistory.songs()`, whose return type no longer matches what the class stores.
 - `Playlist.recentlyPlayedSongs()`, which forwards that return value.
 - `WeeklyRecap.summary()`, which indexes the result and reads `.title` from it.
-- Every test that built a history and asserted on the array that came back.
+- Every test that built up a history and asserted on the array that came back.
 - Any other screen, exporter, or report that asks for the history in the same way.
 
-One change to one cohesive class forced edits in code that has no interest in how the history is stored. `PlayHistory` could hide the change by converting its records back into songs, but then callers could not see when each song was played, which was the reason for the change. Either way, what `PlayHistory` stores decides what its callers see. This is the **ripple effect**: a change that should have been local propagates outward along the dependencies. The cost of the change then depends on the number of places that have to be revisited, rather than on the size of the change itself. An engineer might estimate "add timestamps to the history" as an afternoon's work, and then find that most of the afternoon goes to fixing other classes.
+One change to one cohesive class has forced edits incode that has no interest in how the history is stored. We could hide the change by making `PlayHistory` return the songs behind the `PlayRecord`s... but then callers could not see when each song was played, which was the reason for the change. 
 
-The ripple effect has three costs. The edits themselves are the most visible cost once the work begins, but also the smallest. The second cost is _regression risk_. Each of those edits modifies code that already worked and was already tested, and every modification is an opportunity to break behaviour that had nothing to do with the original request. The Open/Closed Principle makes a related argument in [Chapter 16](../part2/07_ocp#why-add-instead-of-edit): a change that cannot be contained puts working code at risk. The third cost is _coordination_. In a large system, the classes that must be revisited are not all yours. They may be owned by other developers, reviewed by other people, covered by other people's tests, and scheduled against other deadlines. A change that reaches across those boundaries requires coordinating with other people as well as editing code.
+All thesee things that break are the **ripple effect**: a change that should have been local propagates outward along the dependencies. The cost of the change depends on the _number of places that have to be revisited_, rather than on the size of the change itself. An engineer might estimate "add timestamps to the history" as an afternoon's work, and then find that most of the afternoon goes to fixing other classes.
+
+The ripple effect has three costs. 
+1. The edits themselves are the most visible cost once the work begins, but also the smallest. 
+2. The second cost is _regression risk_. Each of those edits modifies code that already worked and was already tested, and every modification is an opportunity to break behaviour that had nothing to do with the original request. The Open/Closed Principle makes a related argument in [Chapter 16](../part2/07_ocp#why-add-instead-of-edit): a change that cannot be contained puts working code at risk. 
+3. The third cost is _coordination_. In a large system, the classes that must be revisited are not all yours. They may be owned by other developers, reviewed by other people, covered by other people's tests, and scheduled against other deadlines. A change that reaches across those boundaries requires coordinating with other _people_ as well as editing code.
 
 <details class="tooltip link-110">
 <summary>Data Definitions and the Ripple</summary>
@@ -88,9 +100,9 @@ You saw this effect in CPSC 110, although it was not named. A function's templat
 
 ## What Coupling Is
 
-Two classes are tightly coupled when a change to one is likely to force a change to the other. They are loosely coupled when each can change without requiring changes to the other.
+Two classes are _tightly_ coupled when a change to one is likely to force a change to the other. They are _loosely_ coupled when each can change without requiring changes to the other.
 
-A practical way to assess coupling is to ask: _how much must you know about B to write or change A?_ `WeeklyRecap` had to know the shape of the array `PlayHistory` stores, so the two classes are tightly coupled even though `WeeklyRecap` never mentions `PlayHistory` by name. In principle, `WeeklyRecap` only needs one thing: the list of songs played since a given time.
+A practical way to assess coupling is to ask: _how much must you know about B to write or change A?_  In principle, `WeeklyRecap` only needs one thing: the list of songs played since a given time. But `WeeklyRecap` above had to know the shape of the array `PlayHistory` stores, so the two classes are tightly coupled (even though `WeeklyRecap` never mentions `PlayHistory` by name!). 
 
 Coupling complements cohesion, and the two are best considered together:
 
@@ -99,7 +111,10 @@ Coupling complements cohesion, and the two are best considered together:
 
 Both serve the same goal: keeping changes local. High cohesion keeps a change local by placing everything one invariant needs in one class, so there is a single place to edit. Low coupling keeps a change local by limiting how far the effects of that edit can spread.
 
-Coupling is easier to reason about when the dependencies are drawn as a diagram. A **dependency** exists from A to B when A needs B to compile or run. For example, A might construct a B, hold one as a field, take one as a parameter, call one of its methods, or read its data. In a dependency graph, the classes are nodes and the dependencies are arrows. Each arrow points from the dependent class to the class it relies on.
+Coupling is easier to reason about when the dependencies are drawn as a diagram.A **dependency** exists from A to B when A needs B to compile or run. For example, A might construct a B, hold one as a field, take one as a parameter, call one of its methods, or read its data. 
+
+Draw all your classes, and draw a line between A and B when A has a dependency to B. Now you have a dependency graph! The classes are nodes and the dependencies are arrows. Each arrow points from the dependent class to the class it relies on.
+
 
 ```plantuml
 @startuml
@@ -127,7 +142,7 @@ end note
 ```
 <!-- caption="Dependencies in the music app. Every arrow is a path a change can travel along." -->
 
-Following an arrow in the direction it points tells you what a class needs. Following it backwards tells you what a change to a class can break, which is usually more useful. `Playlist` depends on `PlayHistory` directly, and three more classes depend on `Playlist`. A change to `PlayHistory` can therefore affect all four of those classes, as well as any classes that depend on them.
+Following an arrow backwards tells you what a change to a class can break. `Playlist` depends on `PlayHistory` directly, and three more classes depend on `Playlist`. A change to `PlayHistory` can therefore affect all four of those classes, as well as any classes that depend on them.
 
 <details class="tooltip deep-dive">
 <summary>Fan-In and Fan-Out</summary>
@@ -147,7 +162,7 @@ In TypeScript, a file's dependencies are listed at the top of the file. Each `im
 
 ## Degrees of Coupling
 
-Coupling is a matter of degree, and some kinds of coupling have specific names. Understanding each kind, its impact and how it arises is more useful than memorising the names. The table below lists the forms from tightest (worst) to loosest (best). The goal is to move each dependency as far down the list as the design allows.
+Coupling is a matter of degree, and some kinds of coupling have specific names. Understanding each kind, its impact and how it arises is more useful than memorising the names. The table below lists the forms from tightest (worst) to loosest (best). The goal is to move each dependency as far down the list as the design allows (ideally, *data coupling*, where the two classes exchange only the values the operation need).
 
 | Form | What it looks like | In the music app |
 |---|---|---|
@@ -157,7 +172,7 @@ Coupling is a matter of degree, and some kinds of coupling have specific names. 
 | Stamp | A caller passes a whole object when only part of it is needed. | `new WeeklyRecap(playlist)` when only the history is used. |
 | Data | A caller passes exactly the values the callee needs. | `songsSince(startOfWeek)` |
 
-The original `WeeklyRecap` is stamp coupled: it is given an entire `Playlist` when it only needs the history. It is also close to content coupling, because the array it receives exposes how `PlayHistory` stores its data internally. The goal is data coupling, where the two classes exchange only the values the operation needs.
+The original `WeeklyRecap` is stamp coupled: it is given an entire `Playlist` when it only needs the history. It is also close to content coupling, because the array it receives exposes how `PlayHistory` stores its data internally. 
 
 Control coupling is easy to miss because it looks harmless. When a parameter selects which behaviour a method performs, the caller is steering the callee's internal logic. The caller must understand the callee's branches, and adding a third mode requires changing both the caller and the callee. A method that takes a flag is usually two methods that have not yet been separated.
 
@@ -207,7 +222,7 @@ At the call site, that reads:
 recap.summary(now, true);
 ```
 
-This design has two shortcomings. The first is readability. The argument `true` says nothing about what was requested, so a reader has to open `summary(..)` to find out, and a mistaken `false` looks just like a correct one.
+This design has two shortcomings. The first is readability. The argument `true` says nothing about what was requested, so a reader has to open `summary(..)` to find out.
 
 The second shortcoming appears when a monthly recap is requested. A boolean cannot represent three modes, so the signature has to change, and every existing call has to change with it. The usual next step is to add a second flag, which makes things worse. A signature that allows `summary(now, false, true)` also allows `summary(now, true, true)`, a combination with no meaning that the type checker will still accept.
 
@@ -280,9 +295,9 @@ This design supports every period, including ones nobody has asked for yet, with
 
 ## Loosening `WeeklyRecap`
 
-To reduce the coupling in the original design, `WeeklyRecap` should state what it needs, and `PlayHistory` should answer that question itself.
+To reduce the coupling in the original design, we should figure out exactly what `WeeklyRecap` needs---what questions it needs answered. Then, we should  have `PlayHistory` provide only the information necessary to answer these questions.
 
-The first step is to define the contract. `WeeklyRecap` needs one operation, so the interface has one method:
+The first step is to define the contract. `WeeklyRecap` needs to know what songs have played since last week. We can encode that need in an interface:
 
 ```typescript
 /**
@@ -299,7 +314,9 @@ interface PlayLog {
 }
 ```
 
-`PlayHistory` implements the interface. The knowledge of how the history is stored, which leaked out when `PlayHistory` handed over its whole array, now stays inside the class. Because `PlayHistory` answers a question instead of exposing a list, it is free to store its data however it likes:
+`PlayHistory` implements the interface. The knowledge of how the history is stored, which leaked out when `PlayHistory` handed over its whole array, now stays inside the class. 
+
+Because `PlayHistory` answers a question instead of exposing a list, it is free to store its data however it likes:
 
 <CollapsibleCode>
 
@@ -351,7 +368,7 @@ class PlayHistory implements PlayLog {
 
 </CollapsibleCode>
 
-`WeeklyRecap` now depends only on the contract:
+`WeeklyRecap` now depends only on the `Playlog` contract:
 
 ```typescript
 class WeeklyRecap {
@@ -411,7 +428,9 @@ end note
 ```
 <!-- caption="WeeklyRecap depends on the PlayLog contract rather than on the class that keeps the data." -->
 
-Consider the next change to the history. `PlayHistory` could now switch from an array to a map, limit itself to fifty entries, or save its data to disk, and `WeeklyRecap` would not change. The only remaining dependency is on one method signature, which is the smallest agreement the two classes need to work together.
+#### Looking Forward
+
+`PlayHistory` could now switch from an array to a map, limit itself to fifty entries, or save its data to disk, and `WeeklyRecap` would not change. The only remaining dependency is on one method signature. A single method signature is the smallest agreement the two classes need to work together.
 
 The direction of the dependency has also changed. `WeeklyRecap` does not depend on `PlayHistory`, and `PlayHistory` does not depend on `WeeklyRecap`. Both depend on `PlayLog`, which has no implementation to change. Arranging dependencies so that they point at abstractions rather than concrete classes is the Dependency Inversion Principle from [Chapter 16](../part2/07_ocp#the-principles-together). Following it is a reliable way to keep coupling low.
 
@@ -949,3 +968,4 @@ Model answers for the discussion parts.
 -->
 
 </details>
+n
