@@ -428,7 +428,7 @@ end note
 ```
 <!-- caption="WeeklyRecap depends on the PlayLog contract rather than on the class that keeps the data." -->
 
-#### Looking Forward
+#### What if the Code Changes Again?
 
 `PlayHistory` could now switch from an array to a map, limit itself to fifty entries, or save its data to disk, and `WeeklyRecap` would not change. The only remaining dependency is on one method signature. A single method signature is the smallest agreement the two classes need to work together.
 
@@ -473,13 +473,15 @@ test("the recap names the count and the most recent song", () => {
 
 ### Reaching Past a Neighbour
 
-One clear sign is a chain of calls that goes through one object to reach a second object, and then a third:
+The **Law of Demeter** states: a method should only call methods on its own object, on its own fields, on its parameters, and on objects it creates.
+
+Violations of this law result in a chain of calls that goes through one object to reach a second object, and then a third:
 
 ```typescript
 const city: string = order.customer().address().city();
 ```
 
-Each step follows a relationship that the caller should not need to know about. This code depends on orders having customers, customers having addresses, and addresses having cities. A change to any of those three classes can break this line, even though the caller only wanted one string. The **Law of Demeter** is a guideline against this kind of code: a method should only call methods on its own object, on its own fields, on its parameters, and on objects it creates.
+Each step follows a relationship that the caller should not need to know about. This code depends on orders having customers, customers having addresses, and addresses having cities. A change to any of those three classes can break this line, even though the caller only wanted one string. 
 
 The fix is to ask the immediate neighbour for the value you want, rather than for the object that has it:
 
@@ -489,16 +491,15 @@ const city: string = order.shippingCity();
 
 `Order` already knows how to find its shipping city, so it is the right class to provide it. The caller now depends on one class instead of three.
 
-<details class="tooltip deep-dive">
-<summary>When a Chain of Calls Is Not Problematic</summary>
+Not all chains of calls are problematic: the expression `songs.filter(isRecent).map(toTitle).slice(0, 5)` chains three calls, but it does not couple you to anything new. Every call returns an array, the same kind of value you started with, and no relationship between separate objects is followed.
 
-The Law of Demeter is about following relationships between objects to reach an object the caller does not know about, however many dots a line contains. The expression `songs.filter(isRecent).map(toTitle).slice(0, 5)` chains three calls, but it does not couple you to anything new. Every call returns an array, the same kind of value you started with, and no relationship between separate objects is followed. The same is true of a builder whose methods return the builder itself so that calls can be chained.
+To evaluate the Law of Demeter, rather than asking, "how many dots?", you should ask "how many classes must this line know about?" A chain over one type needs to know about one class, however long the chain is. `order.customer().address().city()` needs to know about three.
 
-A better question than "how many dots?" is "how many classes must this line know about?" A chain over one type needs to know about one class, however long the chain is. `order.customer().address().city()` needs to know about three.
+---
 
-</details>
+A related guideline is **Tell, Don't Ask**: tell an object what you need done and let it decide how to do it, rather than asking for its state and making the decision for it.
 
-A related sign is code that extracts an object's data to make a decision that the object itself is better placed to make:
+Here's some code that violates Tell, Don't Ask:
 
 ```typescript
 if (account.balance() >= amount) {
@@ -512,17 +513,20 @@ The caller has taken on a rule that belongs to `Account`: when a withdrawal is a
 account.withdraw(amount);
 ```
 
-This guideline is called **Tell, Don't Ask**: tell an object what you need done and let it decide how to do it, rather than asking for its state and making the decision for it. The `PlayLog` design above follows the same guideline. `PlayHistory` answers a question about the history, instead of handing over its list for another class to interpret. A method whose body mostly calls other objects' getters usually belongs in a different class.
+Note the `PlayLog` design above follows the Tell, Don't Ask guideline. `PlayHistory` answers a question about the history itself, rather than passing internal state. A method whose body mostly calls other objects' getters usually belongs in a different class.
 
-### Depending on Too Much
+### Interfaces and Extension
 
-A dependency on a concrete class exposes the dependent class to everything that class does, and to every way it might change in the future. The original `WeeklyRecap` declared its field as a `Playlist`, so it was exposed to all of `Playlist`'s public methods, even though it only needed a single query.
+Strategic use of interfaces (or supertypes more generally) in client code can help us reduce coupling. 
 
-[Chapter 14](../part2/05_boundaries#apparent-and-actual-types) introduced the tool for this: depend on a contract rather than a class. A dependency on an interface only exposes your code to the operations that the interface declares, which is a smaller and more stable thing to depend on. The size of the interface matters for the same reason. An interface that bundles operations a client never calls couples that client to changes it does not care about. This is why the Interface Segregation Principle is also a rule about coupling.
+A dependency on a concrete class exposes the dependent class to everything that class does, and to every way it might change in the future. The original `WeeklyRecap` declared its field as a `Playlist`, so it was exposed to all of `Playlist`'s public methods, even though it only needed a single query. Instead, we'd like `WeeklyRecap` to only depend on the query it needs. How do we do this? Go back to [Chapter 14](../part2/05_boundaries#apparent-and-actual-types): write an interface, and depend only on this interface. We still need to keep the interface minimal to reduce coupling. 
 
-Class extension is the tightest form of coupling the language offers. It does not appear in the table above because it works at a different level. A subclass depends on its base class's implementation as well as its public contract: its protected members, and the order in which the base class calls its own methods. [Chapter 15](../part2/06_extension#composition-over-inheritance) described the result, the fragile base class problem: a change inside a base class can alter the behaviour of subclasses that were never edited.
+What about extension? Extension helped us reduce code duplication between related clasess. But consider a class `SubClass` that extends a class `SuperClass`. How tightly are `SubClass` and `SuperClass` coupled? 
 
-Composition is therefore the default, and extension is reserved for true is-a relationships. A collaborator held in a field is used only through its public methods, so its internals are free to change. A base class is used through inheritance, so its internals are part of what every subclass depends on.
+They are _very tightly_ coupled, more than any type of coupling in the table at the start of the chapter. A subclass depends on its base class's implementation as well as its public contract: its protected members, and the order in which the base class calls its own methods. [Chapter 15](../part2/06_extension#composition-over-inheritance) described the result, the fragile base class problem: a change inside a base class can alter the behaviour of subclasses that were never edited.
+
+So, make sure you use extension only for true is-a relationships. A subclass ends up depending on _all_ the  internals of a base class. If what you want instead is for a class to be able to use a few methods of another class, and especially if there is not clear _is-a_ relationship between the classes, add a [collaborator](../part2/02_decomposition.html#delegation-through-composition-and-aggregation) instead. 
+
 
 ## Dependency Cycles
 
@@ -567,9 +571,11 @@ end note
 
 `Playlist` already depended on `PlayHistory`, so this creates a cycle. A reader tracing what happens when a song is played now has to move back and forth between the two files, and neither class can be tested without the other.
 
-There are three ways to break a cycle. Try them in this order.
+There are three ways to break a cycle, from simplest to most complex.
 
-_Reverse the direction of the question._ The cheapest fix is usually to use the dependency that already exists, and let the class on that side ask the question. `Playlist` already depends on `PlayHistory`, so `PlayHistory` does not need to know about playlists at all. It only needs to answer questions about plays:
+### Cycle Fix 1: Reverse the Direction of the Question
+
+The cheapest fix is usually to use the dependency that already exists, and let the class on that side ask the question. `Playlist` already depends on `PlayHistory`, so `PlayHistory` does not need to know about playlists at all. It only needs to answer questions about plays:
 
 ```typescript
 class PlayHistory {
@@ -599,7 +605,10 @@ class Playlist {
 
 This removes the cycle without introducing any new types, and the rule about what counts as a favourite now sits in `Playlist` with the playlist's other rules. The behaviour changes slightly: a song counts as a favourite only while it has three plays in the past week, instead of staying marked once it qualifies. Prefer this approach whenever the dependent class can pull the information it needs, rather than having its collaborator push it.
 
-_Invert one direction with an interface._ Sometimes the collaborator has to start the interaction, because it is the only class that knows when the event occurred. In that case, the class sending the notification should define an interface for what it needs and depend on that interface. The other class then implements it:
+
+### Cycle Fix 2: Invert One Direction with an Interface
+
+Sometimes the collaborator has to start the interaction, because it is the only class that knows when the event occurred. In that case, the class sending the notification should define an interface for what it needs and depend on that interface. The other class then implements it:
 
 ```typescript
 interface PlayObserver {
@@ -639,41 +648,50 @@ PlayObserver <|.. Playlist
 
 `PlayHistory` still calls `Playlist` at runtime, but at compile time it depends only on `PlayObserver`, and `PlayObserver` does not depend on `Playlist`. The interface does not know which class implements it, so the cycle is broken. `PlayHistory` can now be tested with a recording observer, a test double like `RecordingNotifier`.
 
-_Extract a third class._ When both classes are doing work that belongs to neither of them, that logic can move into a new class that depends on both, and that neither depends on. This is the right choice when the rule "three plays in a week makes a favourite" is a policy in its own right.
+### Cycle Fix 3: Extract a Third Class
 
-In each case, the goal is to make the compile-time dependencies point in one direction, so the graph forms a hierarchy with no cycles. A dependency graph without cycles can be understood one layer at a time, and any class in it can be tested together with only the classes it depends on.
+When both classes are doing work that belongs to neither of them, that logic can move into a new class that depends on both, and that neither depends on. This is the right choice when the rule "three plays in a week makes a favourite" is a policy in its own right.
+
+In each case, the goal is to make the compile-time dependencies point in one direction, so the dependency graph forms a hierarchy with no cycles. A dependency graph without cycles can be understood one layer at a time, and any class in it can be tested together with only the classes it depends on.
 
 ## Cohesion and Coupling
 
-Cohesion and coupling both support a more general principle. A **concern** is a single thing the system must address, such as a rule, a responsibility, or a reason the code might need to change. **Separation of concerns** is the principle that each concern should be handled in exactly one place in the design. A design can violate separation of concerns in two ways, and these match the two problems described in Chapter 11 and in this chapter.
+A **concern** is a single thing the system must address, such as a rule, a responsibility, or a reason the code might need to change. **Separation of concerns** is the principle that each concern should be handled in exactly one place in the design. A design can violate separation of concerns in two ways:  
 
-**Tangling** occurs when several concerns share one place in the design. The god class from Chapter 11 is tangled. Navigation, history, ratings, and sharing are all mixed together in a single `Playlist`, so no one concern can be read or changed on its own.
+- **Tangling** occurs when several concerns share one place in the design. The god class from Chapter 11 is _tangled_. Navigation, history, ratings, and sharing were all mixed together in a single `Playlist`, so we couldn't read about or change a single concern without  caring about them all.
+- **Scattering** occurs when one concern is spread across several places in the design. The `WeeklyRecap` we started with was _scattered_. Knowledge of the play history's representation was not confined to `PlayHistory`: it was spread across every class that asked for the list of songs in the history. So a single change in representation affected all these user classes. is why a single change to that representation affected all of them.
 
-**Scattering** occurs when one concern is spread across several places in the design. The original `WeeklyRecap` design is scattered. Knowledge of how the play history is represented was not confined to `PlayHistory`. It was spread across every class that asked for the list, which is why a single change to that representation affected all of them.
+We detect and fix the problems differently. You find tangling by looking inside one class and noticing several unrelated reasons to change it, and you fix it by splitting the class. You find scattering by making one change and counting the files it touched, and you fix it by giving the concern a single owner with a contract. High cohesion means there is no tangling, and low coupling means there is no scattering. Together they achieve separation of concerns.
 
-The two problems are detected and fixed differently. You find tangling by looking inside one class and noticing several unrelated reasons to change it, and you fix it by splitting the class. You find scattering by making one change and counting the files it touched, and you fix it by giving the concern a single owner with a contract. High cohesion means there is no tangling, and low coupling means there is no scattering. Together they achieve separation of concerns.
+<details class="tooltip deep-dive">
+<summary>How Cohesion and Coupling Affect Each Other</summary>
 
-Cohesion and coupling also affect each other. High cohesion tends to produce low coupling. When a class owns one invariant and all the state that the invariant constrains, it can answer questions about that state by itself, and other classes have no reason to reach past it. `PlayHistory` could offer `songsSince` because it owned the play history.
+High cohesion tends to produce low coupling. When a class owns one invariant and all the state that the invariant constrains, it can answer questions about that state by itself, and other classes have no reason to reach past it. `PlayHistory` could offer `songsSince` because it owned the play history.
 
 Poor cohesion tends to produce high coupling. A class that holds two invariants is used by two sets of collaborators, so its fan-in, the number of classes that depend on it, is higher than it needs to be. Splitting a class in the wrong place causes a different problem. It separates state from the logic that maintains it, and the two resulting classes have to call each other constantly to stay consistent. Two classes that call each other on every operation have increased coupling without improving cohesion.
+</details>
 
-Chapter 11 asked where the boundaries between classes should be. This chapter asks how much communication crosses those boundaries. At a good boundary, everything inside the class serves one invariant, and everything that crosses the boundary goes through a small, stable contract. When the two criteria conflict, prefer the design with less communication across the boundary, because communication across a boundary makes future changes expensive.
+
+
+In Chapter 11, we thought about where the boundaries between classes should be. In this chapter, we looked at these boundaries in more detail and thought about how much communication crosses those boundaries. At a good boundary, everything inside the class serves one invariant, and everything that crosses the boundary goes through a small, stable contract. 
+
+When there seems to be a conflict between cohesion and coupling, prefer the design with less communication across the boundary, because communication across a boundary makes future changes expensive.
 
 ## Judgement Calls
 
-Some coupling is always present, and it is not a defect to be eliminated. Every collaboration in a design is a dependency, and parts of a system with no dependencies could never work together.
+It is impossible to completely remove coupling in any non-toy software system. Every collaboration in a design is a dependency, and parts of a system with no dependencies could never work together.
 
-The important distinction is between coupling that is _necessary_ and coupling that is _incidental_. `WeeklyRecap` must depend on some source of play history. That dependency is inherent in what it does, and no design can remove it. However, it does not need to depend on how that history is stored, on the class that stores it, or on the chain of objects used to reach it. The necessary dependency was one method. Everything else was incidental, and was added only because it was the quickest code to write.
+What we tried to understand in this chapter is the difference between _necessary_ and _incidental_ coupling. `WeeklyRecap` must depend on some source of play history: this is a _necessary_ dependency, and if we tried to remove it, we'd lose functionality.   However,  `WeeklyRecap` does not need to depend on how that history is stored, on the class that stores it, or on the chain of objects used to reach it: all of this is _incidental_ coupling.
 
-Treating low coupling as a goal on its own is also a mistake. Coupling between classes can always be reduced to zero by merging the classes, and a single class containing the entire program has no coupling between classes at all. That design is the god class from Chapter 11. Merging classes only hides the dependencies inside one class, where they are harder to see and reason about. Over-decomposition also has a cost: each class adds its own cognitive overhead, which makes the design as a whole harder to reason about.
+Like many metrics, trying to optimize for low coupling in isolation from the other design principles can lead to a worse design. Sure, we can reduce coupling to zero by merging all the classes: a class containing the entire program has no coupling between classes at all! But it's probably now a god class, whose issues we dicussed in [Chapter 11](../part2/02_decomposition.html).
 
-The same judgement applies as with decomposition. Adding an interface for every collaboration produces a system where every call goes through an abstraction, and readers struggle to find the code that runs. Define an interface when the dependency is likely to change, when a second implementation is plausible, or when a test needs a stand-in. When a class collaborates with one stable class that no one expects to replace, depending on that class directly is often clearer.
+Further, each interface we add adds indirection for future readers of the code: we discussed this abstraction cost at length in [Chapter 16](../part2/07_ocp.html). So we have the same advice on where to add this extra indirection: when the dependency is likely to change, when a second implementation is plausible, or when a test needs a stand-in. When a class collaborates with one stable class that no one expects to replace, depending on that class directly is often clearer.
 
 #### Designing for Low Coupling
 
-Low coupling allows a system to be changed by someone who does not understand all of it. When each class depends on a small number of stable contracts, the effects of a change have clear limits, and one person can reason about whether the change is safe.
+When a system has low coupling, someone can change its parts without understanding the system as a whole. When each class depends on a small number of stable contracts, the effects of a change have clear limits, and one person can reason about whether the change is safe.
 
-This chapter described several habits that keep coupling low:
+In summary, this chapter described several coding patterns that help us reduce coupling:
 
 - Ask a neighbour for what you want, instead of going through it to reach another object.
 - Tell an object what you need done, and let it make the decision.
@@ -681,7 +699,6 @@ This chapter described several habits that keep coupling low:
 - Pass only the values an operation needs.
 - Keep dependencies pointing in one direction, and point them at abstractions where change is likely.
 
-Each habit reduces what one class must know about another.
 
 <details class="tooltip exercise">
   <summary>Exercise: A Bike-Share Maintenance Report</summary>
@@ -968,4 +985,3 @@ Model answers for the discussion parts.
 -->
 
 </details>
-n
