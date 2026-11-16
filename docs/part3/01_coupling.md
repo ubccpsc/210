@@ -515,6 +515,13 @@ Cycles are rarely designed deliberately. They usually appear when a class needs 
 class PlayHistory {
     private readonly playlist: Playlist;   // a back-reference
 
+    /**
+     * Records that a song was played, and marks it as a favourite once it
+     * has been played three times in a week.
+     *
+     * @param {Song} song the song that was played.
+     * @param {number} playedAt milliseconds since the epoch.
+     */
     public record(song: Song, playedAt: number): void {
         // ... record the play ...
         const weekInMs: number = 7 * 24 * 60 * 60 * 1000;
@@ -584,7 +591,11 @@ _Invert one direction with an interface._ Sometimes the collaborator has to star
 
 ```typescript
 interface PlayObserver {
-    /** Called when a song crosses the frequent-play threshold. */
+    /**
+     * Called when a song crosses the frequent-play threshold.
+     *
+     * @param {Song} song the song that crossed the threshold.
+     */
     songBecameFrequent(song: Song): void;
 }
 
@@ -594,6 +605,11 @@ class PlayHistory {
 }
 
 class Playlist implements PlayObserver {
+    /**
+     * Marks a song that crossed the frequent-play threshold as a favourite.
+     *
+     * @param {Song} song the song that crossed the threshold.
+     */
     public songBecameFrequent(song: Song): void {
         // mark the song as a favourite
     }
@@ -620,7 +636,31 @@ PlayObserver <|.. Playlist
 
 `PlayHistory` still calls `Playlist` at runtime, but at compile time it depends only on `PlayObserver`, and `PlayObserver` does not depend on `Playlist`. The interface does not know which class implements it, so the cycle is broken. `PlayHistory` can now be tested with a recording observer, a test double like `RecordingNotifier`.
 
-_Extract a third class._ When both classes are doing work that belongs to neither of them, that logic can move into a new class that depends on both, and that neither depends on. This is the right choice when the rule "three plays in a week makes a favourite" is a policy in its own right.
+_Extract a third class._ When the feature belongs to neither class, it can move into a new class that depends on both. This is the right choice when "three plays in a week makes a favourite" is a feature on its own.
+
+```typescript
+class FavouritePolicy {
+    private readonly history: PlayHistory;
+    private readonly playlist: Playlist;
+    // ...
+
+    /**
+     * Marks a song as a favourite if it has been played at least three
+     * times in the week ending at the given time. Call it after each play.
+     *
+     * @param {Song} song the song that was just played.
+     * @param {number} playedAt milliseconds since the epoch.
+     */
+    public songPlayed(song: Song, playedAt: number): void {
+        const weekInMs: number = 7 * 24 * 60 * 60 * 1000;
+        if (this.history.playsSince(song, playedAt - weekInMs) >= 3) {
+            this.playlist.markFavourite(song);
+        }
+    }
+}
+```
+
+`PlayHistory` loses its back-reference and only has `playsSince`. `Playlist` keeps `markFavourite` and does not know about this feature. The cost is that the code calling `play` must now also call `songPlayed`.
 
 In each case, the goal is to make the compile-time dependencies point in one direction, so the graph forms a hierarchy with no cycles. A dependency graph without cycles can be understood one layer at a time, and any class in it can be tested together with only the classes it depends on.
 
