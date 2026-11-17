@@ -55,7 +55,7 @@ This chapter and the rest of Part 3 use one running example. Later chapters foll
 
 > As an online shopper, I want to see where all of my parcels are in one place, so that I do not have to visit a different website for every carrier.
 
-A parcel tracker uses both kinds of API. Each carrier publishes its own web service, with its own URL scheme, its own JSON format, and its own vocabulary for what has happened to a parcel. The tracker also uses a library to check that a carrier's response has the shape its documentation describes. Everything the tracker shows a user therefore depends on code from outside the program.
+Our parcel tracker uses both kinds of API. Each carrier publishes its own web service, with its own URL scheme, its own JSON format, and its own vocabulary for what has happened to a parcel. The tracker also uses a library to check that a carrier's response has the shape its documentation describes. Everything the tracker shows a user depends on code from outside our program.
 
 ```typescript
 type ShipmentStatus = "in-transit" | "delivered" | "exception";
@@ -63,27 +63,27 @@ type ShipmentStatus = "in-transit" | "delivered" | "exception";
 type Shipment = {
     trackingNumber: string;
     status: ShipmentStatus;
-    /** When the carrier last saw the parcel. */
+    /** Timestamp when the carrier last saw the parcel. */
     lastSeenAt: number;
 };
 ```
 
 ## Data Without Invariants
 
-Until now, nearly every value we worked with was built by code we controlled. A `GuestList` could only come from the `GuestList` constructor, which let the constructor establish an invariant and the class preserve it. If a value existed, code we wrote had created it and checked it. A value that arrives from external code has no such guarantee. None of our constructors ran, and its type annotation is a claim rather than a fact. The carrier's response is a sequence of bytes that we hope describes a shipment. It might instead be an error page, an older version of the format, or a shipment whose status is a word we have never seen.
+In this textbook so far, nearly every value we worked with was built by code we controlled or at least type checked. A `GuestList` could only come from the `GuestList` constructor, which let the constructor establish an invariant and the class preserve it. The code we wrote had created it and checked it. Values that arrive from external code has no such guarantees. None of our constructors ran, and its type annotation is only a claim, since our compiler never validated them. The carrier's response is a sequence of bytes that we hope describes a shipment. It could just as well be an error page or an older version of the format.
 
-[Chapter 8](../part1/08_errors#results-or-exceptions) recommended checking data as soon as it enters your program, and turning it into either a trusted value or a clear error where it enters. This chapter calls that place the **edge**: the point in the code where data of unknown shape is converted into either a validated value or an error. As a design rule for this chapter:
+[Chapter 8](../part1/08_errors#results-or-exceptions) recommended checking data as soon as it enters your program, and turning it into either a trusted value or a clear error where it enters. In this chapter we'll call that place the **edge**: the point in the code where data of unknown shape is converted into either a validated value or an error. The guiding principle for this is:
 
-Convert once, at the edge, into a typed value whose invariant holds. After that point, the rest of the program works only with values it can trust.
+> Convert data once, at the edge, into a typed value whose invariant holds. This ensures the program only has to work with values it can trust.
 
-Code after the edge works with `Shipment` objects and never needs to consider JSON. A program without such an edge still needs the checks, but they end up spread throughout the program. Every function that touches a shipment then has to consider whether the status field is one of the three values the type promises.
+Code after the edge works with `Shipment` objects and never needs to consider JSON. A program without such an edge still needs the checks, but they end up spread throughout the program.
 
 <details class="tooltip link-110">
 <summary>Data You Did Not Build</summary>
 
 In CPSC 110, every value your functions consumed was constructed by your own code, usually a few lines earlier in the same file. A function that consumed a `ListOfSong` could rely on receiving one, because the only way to get a `ListOfSong` was to build it with the constructors from the data definition.
 
-That reliability came from the setting rather than from the code. Once data arrives from a file, a service, or a user, the guarantee is gone. The value has whatever shape the outside world sent, and nothing ensures that it matches its data definition until some code checks it. Writing data definitions is still a useful habit. The new habit to add is checking that incoming values match them.
+That reliability came from the setting rather than from the code. Once data arrives from a user, a file, or a web service, the guarantee is gone. The value has whatever shape the outside world sent, and nothing ensures that it matches its data definition until some code checks it. Writing data definitions is still a useful habit. The new habit to add is checking that incoming values match them.
 
 </details>
 
@@ -91,7 +91,7 @@ That reliability came from the setting rather than from the code. Once data arri
 
 Carriers do not send us `Shipment` objects. They send text, usually in JSON, which you have already used in [Chapter 7](../part1/07_async#reading-and-writing-json) to move data between a program and a file. `JSON.stringify` turns a value into text, and `JSON.parse` turns text back into a value.
 
-Two properties of JSON matter for this chapter. The first is what JSON can represent: strings, numbers, booleans, `null`, arrays, and objects with string keys. JSON has no `Date`, no `undefined`, no `Map` or `Set`, and no functions, so any other kind of value has to be encoded using those forms. This is why timestamps arrive as strings or numbers, and have to be interpreted when they are received.
+Two properties of JSON matter for this chapter. The first is what JSON can represent: strings, numbers, booleans, `null`, arrays, and objects with string keys. JSON has no `Date`, no `undefined`, no `Map` or `Set`, no custom types, and no functions, so any other kind of value has to be encoded using those forms.
 
 The second property is what happens to our types when text is turned back into values. `JSON.parse` returns `any`, because the text is not known until runtime, so the compiler has nothing to inspect. The same is true of `response.json()`, which reads the body of a web service response. [Chapter 7](../part1/07_async#calling-web-services) used a line like this one:
 
@@ -99,16 +99,16 @@ The second property is what happens to our types when text is turned back into v
 const report: StationReport = await response.json();
 ```
 
-That line compiles, and it looks like every other typed assignment in the textbook, but the annotation is only a claim. We have told the compiler that `report` is a `StationReport`, and the compiler accepts this. From that point on, it type-checks every use of `report` without ever verifying that the claim is true. If the service returns a field named `temp` where we expected `tempCelsius`, the program compiles without errors. It then fails somewhere else, when code reads `tempCelsius` and gets an `undefined` that the type system said was a number.
+That line compiles, and it looks like every other typed assignment in the textbook, but the annotation is only a _claim_. We have told the compiler that `report` is a `StationReport`, and the compiler accepts this. From that point on, it type-checks every use of `report` without verifying that the claim is true. If the service returns a field named `temp` where we expected `tempCelsius`, the program compiles without errors. It then fails somewhere else, when code reads `tempCelsius` and gets an `undefined` that the type system said was a number.
 
 <details class="tooltip ts-tips">
 <summary><code>unknown</code> Versus <code>any</code></summary>
 
-TypeScript has two types for a value whose type is not known, and they behave very differently.
+TypeScript has two types for a value whose type is not known, and they behave differently.
 
-`any` turns off the type checker for that value. Every property access, call, and assignment involving an `any` value compiles, whether or not it makes sense. `JSON.parse` returns `any`, which is why type safety is lost when JSON is parsed.
+`any` turns off the type checker for a value. Every property access, call, and assignment involving an `any` value compiles, whether it makes sense or not. `JSON.parse` returns `any`, which is why type safety is lost when JSON is parsed.
 
-You have seen little of `any` so far because this course configures TypeScript and its lint rules to reject it, so the type checker cannot be turned off by accident in code you write. `any` can still enter your code through the return type of a function someone else wrote, such as `JSON.parse`, which is why this chapter discusses it.
+You haven't seen a lot of `any` so far in this course because we have configured TypeScript and our lint rules to reject it, so the type checker cannot be turned off by accident in code you write. `any` can still enter your code though through the return type of a function someone else wrote, such as `JSON.parse`.
 
 `unknown` is the safe alternative. A value of type `unknown` can be stored and passed around, but it cannot be used for anything else until its type has been checked:
 
@@ -117,7 +117,7 @@ const raw: unknown = JSON.parse(text);
 raw.trackingNumber;                    // compile error: 'raw' is of type 'unknown'
 ```
 
-This compile error is useful. `unknown` forces the check that `any` lets you skip. Annotating incoming data as `unknown` turns a hidden problem into a compile error on the line where validation is missing. Give incoming data the type `unknown`, and use a conversion function as the only way to turn it into a more specific type.
+This error is useful. `unknown` forces the check that `any` lets you skip. Annotating incoming data as `unknown` turns a hidden problem into a compilation error on the line where validation is missing. Give incoming data the type `unknown`, and use a conversion function as the only way to turn it into a more specific type.
 
 </details>
 
@@ -127,20 +127,20 @@ The same problem occurs whenever `as` is used on data from outside the program:
 const shipment: Shipment = JSON.parse(text) as Shipment;   // a claim, not a check
 ```
 
-`as Shipment` tells the compiler something that has not been checked. It does not inspect the value, convert it, or reject anything. It skips the one check that matters here, whether the value has the claimed type, at the point where the data is least trustworthy. When a claim is applied to data from outside the program, any fault in that data will show up far from where it entered.
+`as Shipment` tells the compiler something that has not been checked. It does not inspect the value or convert it properly. It skips the one check that matters here:  whether the value has the claimed type. When a claim is applied to data from outside the program, it enables faults from the data to propagate far from where the data first originated.
 
 <details class="tooltip ts-tips">
 <summary>The <code>as</code> Operator</summary>
 
-This is the first time we have needed `as`. It tells the compiler that a value has a type the compiler could not work out on its own:
+This is the first time we have needed `as`, and we would recommend using it absolutely as little as possible. `as` tells the compiler that a value has a type the compiler could not work out on its own:
 
 ```typescript
 <expression> as <Type>
 ```
 
-`as` does much less than it appears to. It performs no conversion and runs no check. It produces no code at all. After compilation, the expression is unchanged, and the only difference is that the compiler no longer reports an error. At runtime, the value is whatever it was before, whether or not it has the claimed shape.
+`as` does much less than it appears to. It performs no conversion and runs no check. It produces no code at all. After compilation, the expression is unchanged, and the only difference is that the compiler no longer reports an error.
 
-TypeScript calls this operator a _type assertion_. This chapter calls it a _claim_ instead, to avoid confusion with the `assert` checks from [Chapter 3](../part1/03_checking-invariants#precondition-violations). Those do the opposite. An `assert` tests a condition while the program runs, and halts when the condition is false. `as` tests nothing and cannot fail.
+TypeScript calls this operator a _type assertion_. For clarity, this chapter calls it a _claim_ instead. An `assert` tests a condition while the program runs, and halts when the condition is false. `as` tests nothing and cannot fail.
 
 There is one narrow legitimate use, described in the next section, where the surrounding code has already established the fact being claimed. Everywhere else, using `as` to make a type error go away replaces a compile-time error with a failure at runtime.
 
@@ -204,7 +204,7 @@ function toShipment(raw: unknown): Result<Shipment, string> {
 <details class="tooltip ts-tips">
 <summary><code>typeof</code> and Index Signatures</summary>
 
-`typeof x` produces a string naming the kind of value `x` holds at runtime, such as `"string"`, `"number"`, `"boolean"` or `"object"`. Checking it narrows the type, as checking a discriminator did in [Chapter 2](../part1/02_model-types#branching-on-the-case). One quirk: `typeof null` is `"object"`, which is why the converter checks for `null` separately. The type `{ [key: string]: unknown }` describes an object with any string keys, whose values are not yet known.
+`typeof x` produces a string naming the kind of value `x` holds at runtime, such as `"string"`, `"number"`, `"boolean"` or `"object"`. Checking it narrows the type, as checking a discriminator did in [Chapter 2](../part1/02_model-types#branching-on-the-case). One warning: `typeof null` is `"object"`, which is why the converter checks for `null` separately. The type `{ [key: string]: unknown }` describes an object with any string keys, whose values are not yet known.
 
 </details>
 
@@ -217,15 +217,15 @@ The error messages are also useful. The message "unrecognised status: held-at-de
 
 The converter uses `as` twice, even though the previous section argued against it. Both uses come after a check that establishes the fact being claimed. `raw as { [key: string]: unknown }` follows two tests confirming that `raw` is a non-null object, and `status as ShipmentStatus` follows a test confirming that `status` is one of the three permitted strings. In each case, the claim tells the compiler something the code has already checked. The claim is needed because TypeScript's type narrowing cannot work out these particular conclusions on its own.
 
-The important distinction is between a claim used instead of a check and a claim used after one. A claim used instead of a check is unverified, and nothing will ever verify it. A claim used after a check works around a limitation of the type checker, and the check makes the claim true. To tell them apart, look at the code above the `as` and ask whether it has already established what is being claimed.
+The important distinction is between a claim used _instead_ of a check and a claim used _after_ a check. A claim used instead of a check is unverified, and nothing will ever verify it. A claim used after a check works around a limitation of the type checker, and the check makes the claim true. To tell them apart, look at the code above the `as` and ask whether it has already established what is being claimed.
 
 </details>
 
 ## Using a Schema Library
 
-Very little of `toShipment` is specific to shipments. It confirms that a value is an object, that a field is present, that the field holds a string rather than a number, and that the string is one of a permitted set. None of these checks are about parcel tracking. A converter for a different type would have almost the same lines, with different names.
+Very little of `toShipment` is specific to shipments. It confirms that a value is an object, that a field is present, that the field holds a string rather than a number, and that the string is one of a permitted set. These checks are not about parcel tracking. A converter for a different type would have almost the same lines, with different names.
 
-Work that is repetitive, mechanical, and costly when done wrong is a good candidate for a library. Zod is a library for this job. A Zod **schema** is a value that describes the shape data must have:
+Work that is repetitive, mechanical, and costly when done wrong is a good candidate for a library. In this case, we want a library that can compare the expected shape of a value with an actual value to see if they agree. Zod is a library that can do this job. A Zod **schema** is a value that describes the shape data must have:
 
 ```typescript
 import { z } from "zod";
@@ -249,7 +249,7 @@ type Shipment = z.infer<typeof ShipmentSchema>;
 
 In a type position, `typeof ShipmentSchema` means the type of the `ShipmentSchema` value, and `z.infer` computes the TypeScript type that the schema accepts.
 
-A hand-written type and a hand-written validator are two descriptions of the same data, and over time they tend to diverge. For example, someone might remove a status from `ShipmentStatus` and forget to remove it from the `known` array in `toShipment`. The converter would then accept a status that the type no longer allows, and the `as ShipmentStatus` claim would hide the problem from the compiler. Ordinary maintenance has reopened the type hole, and the code still looks correct. Deriving the type from the schema prevents this, because there is only one description, and the type is computed from it.
+A handwritten type and a handwritten validator are two descriptions of the same data, and over time they tend to diverge. For example, someone might remove a status from `ShipmentStatus` and forget to remove it from the `known` array in `toShipment`. The converter would then accept a status that the type no longer allows, and the `as ShipmentStatus` claim would hide the problem from the compiler. Ordinary maintenance has reopened the type hole, and the code still looks correct. Deriving the type from the schema prevents this, because there is only one description, and the type is computed from it.
 
 Validation then takes one call:
 
@@ -265,9 +265,9 @@ function toShipment(raw: unknown): Result<Shipment, string> {
 
 The return type of `safeParse` has the same structure as the `Result` type, with different field names. It is a tagged union with a boolean field that says which case applies. One case carries the validated value, and the other carries an error. Both designs have this shape because it is a good way for an operation that can fail to make its caller handle the failure.
 
-Zod also offers `parse`, which returns the value directly and throws when validation fails. These are the two mechanisms from [Chapter 8](../part1/08_errors#results-or-exceptions), and Zod lets the caller choose between them. Use `safeParse` when invalid data is a routine outcome that the immediate caller should handle. Use `parse` when invalid data should abort the current operation and be handled much further up. A well-designed library leaves this decision to its caller, and the next chapter returns to this idea when we design a library of our own.
+Zod also offers `parse`, which returns the value directly and throws when validation fails. These are the two mechanisms from [Chapter 8](../part1/08_errors#results-or-exceptions), and Zod lets the caller choose between them. Use `safeParse` when invalid data is a routine outcome that the immediate caller should handle. Use `parse` when invalid data should abort the current operation and be handled much further up the callstack. A well-designed library leaves this decision to its caller, and the next chapter returns to this idea when we design a library of our own.
 
-The cost of using the library is a new dependency, and everything this chapter says about dependencies applies to it. Zod has versions, a new version can break existing code, and the library could be abandoned. The code shown here targets Zod 4, including the type names in its annotations, so check the current documentation before relying on this page. Deciding whether to use it is the usual trade-off. Validation is repetitive, easy to get subtly wrong, and harmful when wrong, so a well-maintained library is usually the better choice. Adding a dependency just to check that one number is positive is not.
+The cost of using the library is a new dependency, and all of the dangers we have warned bout for dependencies also applies here. Zod has versions, a new version can break existing code, and the library could be abandoned. The code shown here targets Zod 4, including the type names in its annotations, so check the current documentation before relying on this page. But validation is repetitive, easy to get subtly wrong, and harmful when wrong, and boring task, so a well-maintained library is often the better choice for any non-trivial validation.
 
 <details class="tooltip deep-dive">
 <summary>Schemas Beyond Shape</summary>
@@ -307,12 +307,12 @@ Serialisation records an object's fields, but not its class or its methods. Dese
 
 An object with behaviour therefore needs an explicit reconstruction step, which is another conversion function. The function reads the deserialised fields, validates them, and passes them to the real constructor. The object is then created the same way as every other instance, and its invariant is established the same way. Saving state to a file and reading it back is the same problem as reading a carrier's response, and it has the same solution.
 
-A schema library does not change this. `safeParse` returns validated data and nothing more. Turning that data into an object with methods and a class invariant is still our job. It is easy to assume that a validation library has done more than it has, so be clear about the division of work. The schema establishes that the deserialised fields are present and well formed. The class's constructor establishes everything else the class guarantees.
+A schema library does not change this. `safeParse` returns validated data and nothing more. Turning that data into an object with methods and a class invariant is still our job. It is easy to assume that a validation library has done more than it has, so be clear about the division of work. The schema establishes that the deserialised fields are present and well-formed. The class's constructor establishes everything else the class guarantees.
 
 <details class="tooltip deep-dive">
 <summary>Other Exchange Formats</summary>
 
-JSON is common but not universal. _XML_ is older than JSON. It represents a similar tree of data with a more verbose syntax, and is still widespread in older enterprise systems and in document formats. _Protocol buffers_ take a different approach. The message shape is declared in a schema file, both sides generate code from that schema, and the data is sent in a compact binary form rather than as text. Because of the schema, both sides agree on the shape in advance. The binary encoding is smaller and faster to parse, but it cannot be read without special tools.
+JSON is common but not universal. _XML_ represents a similar tree of data with a more verbose syntax, and is still widespread in older formats. _Protocol buffers_ take a different approach. The message shape is declared in a schema file, both sides generate code from that schema, and the data is sent in a compact binary form rather than as text. Because of the included schema, both sides agree on the shape in advance. The binary encoding is smaller and faster to parse, but it cannot be read without special tools.
 
 The format changes the mechanics but not the principle. Whatever the format, the data came from somewhere you do not control, and some code has to check that it means what you expect before the rest of the program relies on it.
 
@@ -320,9 +320,10 @@ The format changes the mechanics but not the principle. Whatever the format, the
 
 ## Calling a Web Service
 
-With a conversion function in place, we can call the web service. Most web service APIs roughly follow a convention called **REST**. Knowing the convention makes an unfamiliar API partly predictable before you read its documentation.
+With a conversion function in place, we can call the web service. Most web service APIs roughly follow a convention called **REST**, which stands for Representational State Transfer and provides a common mechanism for communicating between remote systems.
+Knowing the convention makes an unfamiliar API partly predictable before you read its documentation.
 
-The central idea in REST is the **resource**: a thing the service knows about, identified by a URL. For example, a shipment might be identified by `/shipments/9K4T`. Operations on a resource are expressed with different HTTP methods on the same URL:
+The central idea in REST is the **resource**, which represents a thing the service knows about, identified by a URL. For example, a shipment might be identified by `/shipments/9K4T`. Operations on a resource are expressed with different HTTP methods on the same URL:
 
 | Method | Means | Same effect if repeated? |
 |---|---|---|
