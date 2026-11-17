@@ -1,20 +1,23 @@
 # Consuming Data and Services by Using APIs
 
-The previous chapter was about dependencies between classes we wrote. We could edit all of those classes. If a contract was wrong, we changed it, and if a class was awkward to depend on, we redesigned it. This chapter is about dependencies we cannot edit. The same habits apply: depend on a contract we own rather than on the class behind it, and receive dependencies through the constructor instead of creating them. An **API** is the contract that a body of code publishes for other code to call. In this chapter the API belongs to someone else: we call it, but we do not own it. APIs allow large systems to be built from code written by many different people. An API exposes functionality without exposing its implementation, so a program can use code written by others without having to understand how it works. Engineers spend much of their time reading, evaluating, and depending on APIs, and using them well is a distinct skill.
+The previous chapter was about dependencies between classes we wrote. If a contract was wrong, we changed it, and if a class was awkward to depend on, we redesigned it. This chapter is about dependencies we cannot change. 
+The same principles apply: depend on a contract rather than on the class behind it, and receive dependencies through the constructor instead of creating them. 
+An **API** is the contract that a body of code publishes for other code to call. In this chapter the API belongs to someone else: we call it, but we do not own it. APIs allow large systems to be built from code written by many different people and teams. An API exposes functionality without exposing its implementation, so a program can use code written by others without having to understand how it works. 
+Engineers spend much of their time reading, evaluating, and depending on APIs, and using them well is a distinct skill.
 
-The next chapter takes the provider's position and designs an API for other clients to use. Being the client raises two problems. First, the data an API returns was constructed by code we did not write, so we cannot assume it satisfies our invariants until we check them. Second, the API we depend on can change, fail, or disappear.
+Being the client of an API raises two problems. First, the data an API returns was constructed by code we did not write, so we cannot assume it satisfies our invariants until we check them. Second, the API we depend on can change, fail, or disappear. The next chapter takes the opposite position and designs an API for other clients to use.
 
 ## Two Kinds of API
 
 The term API covers two situations that look different but share the same underlying idea.
 
-A **library API** is code we `import` and call in our own process. Most systems use many libraries, for everything from date arithmetic to encryption, so that their authors do not have to build that functionality themselves. Library calls are fast and behave like any other function call: the code runs in our process, and either returns or throws. You will often need to judge whether a library is appropriate, and to work out quickly how it should and should not be used.
+A **library API** is code we `import` and call directly. Most systems use many libraries, for everything from date arithmetic to encryption, so that their authors do not have to build that functionality themselves. Library calls are fast and behave like any other function call: the code runs in our system, and either returns or throws. It is common practice to need to evaluate whether a library is appropriate, and to figure out how to use it correctly. 
 
-You have been using this skill since [Chapter 9](../part1/09_validation#from-checkexpect-to-expect). Every `expect(...).to.equal(...)` you have written is a call into Chai's `expect`, part of a library other engineers wrote, which the Vitest runner includes. You read its documentation when you chose between `to.equal` and `to.deep.equal`, and again when you looked up whether the assertion you wanted was `to.include` or `to.have.members`. You depended on its contract when you wrote `to.throw` and trusted it to run your function, catch the error, and compare the message. You have never seen its implementation, and have not needed to. The same is true of `readFile`, of `JSON.parse`, and of every array operation from Part 1. This chapter looks more closely at a skill you have been practising all term.
+You have been using this skill since [Chapter 9](../part1/09_validation#from-checkexpect-to-expect). Every `expect(...).to.equal(...)` you have written is a call into Chai's `expect`, part of a library other engineers wrote. You read [its documentation](https://www.chaijs.com/api/bdd/) when you chose between `to.equal` and `to.deep.equal`, and again when you looked up whether the assertion you wanted was `to.include` or `to.have.members`. You depended on its contract when you wrote `to.throw` and trusted it to run your function, catch the error, and compare the message. You have not looked at its implementation, and never will. The same is true of `readFile`, of `JSON.parse`, and of every array operation from Part 1. 
 
-A **web service API** is code we call over HTTP. It runs in someone else's process, usually on a different machine. Web services usually provide higher-level operations than libraries. A library might parse a date, while a web service might report where a parcel is. A web service call leaves our machine and crosses a network. It may take a second or more, fail partway through, or return something we did not expect.
+A **web service API** is code we call over HTTP. It usually runs on someone else's physical machine. Web services usually provide higher-level operations than libraries. A library might parse a date, while a web service might report where a parcel is. A web service call leaves our computer and crosses a network. It may take a second or more, fail partway through, or return something we did not expect.
 
-The design advice is the same for both kinds of API: depend only on what is documented, keep what you depend on small, and do not let the dependency spread through your code. The ways they fail are very different:
+The design advice is the same for both kinds of API: depend only on what is documented, keep what you depend on small, and do not let the dependency spread through your code. The ways these different API fail differ:
 
 | | Library API | Web service API |
 |---|---|---|
@@ -24,27 +27,26 @@ The design advice is the same for both kinds of API: depend only on what is docu
 | Changing under you | When you choose to install a new version. | Whenever the provider deploys. |
 | Testing | Call it directly. | Needs a stand-in, unless tests call the real service over the network. |
 
-The difference in how each kind of API changes drives much of the design in this chapter. A library changes only when we upgrade it, so we choose when that happens, and we can read its release notes before we decide. A web service changes when its provider deploys, which can happen at any time. The first sign of the change is often an error in production or a support ticket from a user.
+The difference in how each kind of API changes drives many of our decisions in this chapter. A library changes only when we upgrade it, so we choose when that happens, and we can read its release notes before we decide, and can defer an upgrade until we are ready. A web service changes when its provider deploys, which can happen at any time. The first sign of the change is often a problem in production or an error reported by a user.
 
 ## Unfamiliar APIs
 
-Before depending on an API, you have to work out what it does.
+Before depending on an API, you have to figure out what it does:
 
-_Start from the official documentation._ It is the only description of the API that the provider has committed to. Look for the available operations, the exact shapes of requests and responses, the errors that can be returned, the limits on how often you can make calls, and which version the documentation describes.
+_Start from the official documentation._ This is the only description of the API that the provider has committed to. Look for the available operations, the exact shapes of requests and responses, the errors that can be returned, the limits on how often you can make calls, and which version of the API the documentation describes.
 
-_The implementation is not the documentation._ For an open-source library, you can usually read the source code, which is useful when the documentation is unclear. However, behaviour you find in the source was never promised. If the documentation says a function returns the matching items, and the source happens to return them sorted, sorting is not part of the contract. Code that depends on the sorting depends on something the author can change without warning.
+_The implementation is not the documentation._ For an open-source library, you can usually read the source code, which can be useful when the documentation is unclear. However, behaviour you find in the source was never promised. If the documentation says a function returns the matching items, and the source happens to return them sorted, sorting is not part of the contract. Code that depends on the sorting depends on something the author can change without warning.
 
-_Assume it will change._ Libraries publish new versions, and a new major version signals that something you rely on may have changed or been removed. A web service can change behind the same URL without any announcement. For both reasons, keep the part of the API you use small, and keep it behind an interface of your own, as the tracker does later in this chapter. Adapting to a change is then one edit rather than many.
+_Assume it will change._ Commonly-used libraries frequently publish new versions. A new major version signals that something you rely on may have changed or been removed. A web service can change behind the same URL without any announcement. To minimize the impact of a change, keep the part of the API you use small, and keep it behind an interface of your own, as the tracker does later in this chapter. Adapting to a change is then one edit rather than many.
 
 <details class="tooltip deep-dive">
 <summary>Using AI to Learn an API</summary>
 
-An AI assistant can help you get started quickly with an unfamiliar API, but it can also mislead you. These tools can produce plausible code that calls functions that do not exist, passes parameters in the wrong order, or relies on behaviour from an out-of-date version. They present this code with the same confidence as correct code.
+While AI assistants can help you get started quickly with an unfamiliar API, it can also be misleading. These tools can produce plausible code that calls functions that do not exist, passes parameters in the wrong order, or relies on behaviour from an out-of-date version. They often also examine the implementation and can end up depending on more than the documentation promises. 
 
-To use them well, treat their output as a starting point rather than an answer. Ask for links to the official documentation, then follow them and confirm that the function exists, takes those arguments, and behaves as described. If the assistant cannot provide a citation, or the documentation does not say what the assistant claimed, do not trust the code either.
+To use them well, only treat their output as a starting point. Ask for links to the official documentation, then follow them and confirm that the function exists, takes those arguments, and behaves as described. If the assistant cannot provide a citation, or the documentation does not say what the assistant claimed, do not trust the code either.
 
 This is the same rule as the rest of this section: depend on what the provider documents, regardless of how you found out about it.
-
 </details>
 
 #### A Tracker Across Several Carriers
