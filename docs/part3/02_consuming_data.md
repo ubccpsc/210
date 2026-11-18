@@ -247,7 +247,7 @@ The annotation names the type that Zod 4 gives this schema, field by field. The 
 type Shipment = z.infer<typeof ShipmentSchema>;
 ```
 
-In a type position, `typeof ShipmentSchema` means the type of the `ShipmentSchema` value, and `z.infer` computes the TypeScript type that the schema accepts.
+In a type position, `typeof ShipmentSchema` means the type of the `ShipmentSchema` value, and `z.infer` computes the TypeScript type that the schema accepts. This `typeof` is a different operator from the one `toShipment` used earlier: that one runs at runtime and produces a string, while this one exists only at compile time and produces a type.
 
 A handwritten type and a handwritten validator are two descriptions of the same data, and over time they tend to diverge. For example, someone might remove a status from `ShipmentStatus` and forget to remove it from the `known` array in `toShipment`. The converter would then accept a status that the type no longer allows, and the `as ShipmentStatus` claim would hide the problem from the compiler. Ordinary maintenance has reopened the type hole, and the code still looks correct. Deriving the type from the schema prevents this, because there is only one description, and the type is computed from it.
 
@@ -267,7 +267,7 @@ The return type of `safeParse` has the same structure as the `Result` type, with
 
 Zod also offers `parse`, which returns the value directly and throws when validation fails. These are the two mechanisms from [Chapter 8](../part1/08_errors#results-or-exceptions), and Zod lets the caller choose between them. Use `safeParse` when invalid data is a routine outcome that the immediate caller should handle. Use `parse` when invalid data should abort the current operation and be handled much further up the callstack. A well-designed library leaves this decision to its caller, and the next chapter returns to this idea when we design a library of our own.
 
-The cost of using the library is a new dependency, and all of the dangers we have warned bout for dependencies also applies here. Zod has versions, a new version can break existing code, and the library could be abandoned. The code shown here targets Zod 4, including the type names in its annotations, so check the current documentation before relying on this page. But validation is repetitive, easy to get subtly wrong, and harmful when wrong, and boring task, so a well-maintained library is often the better choice for any non-trivial validation.
+The cost of using the library is a new dependency, and all of the dangers we have warned about for dependencies also apply here. Zod has versions, a new version can break existing code, and the library could be abandoned. The code shown here targets Zod 4, including the type names in its annotations, so check the current documentation before relying on this page. But validation is repetitive, boring, easy to get subtly wrong, and harmful when wrong, so a well-maintained library is often the better choice for any non-trivial validation.
 
 <details class="tooltip deep-dive">
 <summary>Schemas Beyond Shape</summary>
@@ -292,9 +292,9 @@ This connects to [Chapter 12](../part2/03_encapsulation#maintaining-the-invarian
 
 </details>
 
-## What Serialisation Loses
+## What Serialization Loses
 
-Turning a value into text so it can be stored or transmitted is called **serialisation**, and turning that text back into a value is **deserialisation**. `JSON.stringify` and `JSON.parse` are the serialisation functions we have been using.
+Turning a value into text so it can be stored or transmitted is called **serialization**, and turning that text back into a value is **deserialization**. `JSON.stringify` and `JSON.parse` are the serialization functions we have been using.
 
 JSON holds data but not behaviour, which causes problems whenever a class is involved, such as the `Set`-based `GuestList` from [Chapter 12](../part2/03_encapsulation#changing-representations):
 
@@ -303,11 +303,48 @@ const stored: string = JSON.stringify(guests);                 // {"capacity":2,
 const restored: GuestList = JSON.parse(stored) as GuestList;   // no methods on this
 ```
 
-Serialisation records an object's fields, but not its class or its methods. Deserialisation returns a plain object with the right property names and none of the behaviour. Calling a method on it fails at runtime, even though the claim made the code compile. The `Set` is worse: it serialises to `{}`, silently losing every guest. A `Map` does the same.
+Serialization records an object's fields, but not its class or its methods. Deserialization returns a plain object with the right property names and none of the behaviour. Calling a method on it fails at runtime, even though the claim made the code compile. The `Set` is worse: it serializes to `{}`, silently losing every guest. A `Map` does the same.
 
-An object with behaviour therefore needs an explicit reconstruction step, which is another conversion function. The function reads the deserialised fields, validates them, and passes them to the real constructor. The object is then created the same way as every other instance, and its invariant is established the same way. Saving state to a file and reading it back is the same problem as reading a carrier's response, and it has the same solution.
+An object with behaviour therefore needs an explicit reconstruction step, which is another conversion function. The function reads the deserialized fields, validates them, and passes them to the real constructor. The object is then created the same way as every other instance, and its invariant is established the same way. Saving state to a file and reading it back is the same problem as reading a carrier's response, and it has the same solution.
 
-A schema library does not change this. `safeParse` returns validated data and nothing more. Turning that data into an object with methods and a class invariant is still our job. It is easy to assume that a validation library has done more than it has, so be clear about the division of work. The schema establishes that the deserialised fields are present and well-formed. The class's constructor establishes everything else the class guarantees.
+A schema library does not change this. `safeParse` returns validated data and nothing more. Turning that data into an object with methods and a class invariant is still our job. It is easy to assume that a validation library has done more than it has, so be clear about the division of work. The schema establishes that the deserialized fields are present and well-formed. The class's constructor establishes everything else the class guarantees.
+
+For example, suppose a guest list is saved as its capacity and an array of guest ids, such as `{"capacity":2,"guests":["ada","grace"]}`. The schema checks the shape of the data, and the conversion function builds the object through the constructor and `add`:
+
+```typescript
+const StoredGuestListSchema: z.ZodObject<{
+    capacity: z.ZodNumber;
+    guests: z.ZodArray<z.ZodString>;
+}> = z.object({
+    capacity: z.number(),
+    guests: z.array(z.string())
+});
+
+type StoredGuestList = z.infer<typeof StoredGuestListSchema>;
+
+/**
+ * Rebuilds a guest list from deserialized data.
+ *
+ * @param {unknown} raw the deserialized data.
+ * @returns {Result<GuestList, string>} the guest list, or a description of what is wrong with the data.
+ */
+function toGuestList(raw: unknown): Result<GuestList, string> {
+    const parsed: z.ZodSafeParseResult<StoredGuestList> = StoredGuestListSchema.safeParse(raw);
+    if (parsed.success === false) {
+        return { ok: false, error: parsed.error.message };
+    }
+    if (parsed.data.capacity < 1 || parsed.data.guests.length > parsed.data.capacity) {
+        return { ok: false, error: "capacity does not fit the guests" };
+    }
+    const list: GuestList = new GuestList(parsed.data.capacity);
+    for (const guestId of parsed.data.guests) {
+        list.add(guestId);
+    }
+    return { ok: true, value: list };
+}
+```
+
+The second check covers the two conditions under which the constructor or `add` would throw, so malformed data produces an error result instead of an exception.
 
 <details class="tooltip deep-dive">
 <summary>Other Exchange Formats</summary>
