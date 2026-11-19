@@ -508,6 +508,8 @@ class CarrierAClient implements CarrierClient { /* as written above */ }
 class CarrierBClient implements CarrierClient { /* the same job, a different carrier */ }
 ```
 
+A real adapter does a lot more than just `track`. It manages carrier-specific functionality, retry calls as each carrier requires, translate the carrier's status words/date/timezones, and move to a new versions of the carrier's API as it changes. Each carrier does these things differently, and each can change at any time. All the client using a `CarrierClient` depends upon is that the `track` method keeps working. An adapter can therefore be rewritten, or grow from thirty lines to three hundred, and no code that holds a `CarrierClient` has to change at all.
+
 The tracker depends on the interface, never on a specific carrier:
 
 <CollapsibleCode>
@@ -543,21 +545,14 @@ class ParcelTracker {
             }
             problems.push(found.error);
         }
-        let reasons: string = "";
-        for (const problem of problems) {
-            if (reasons !== "") {
-                reasons = reasons + "; ";
-            }
-            reasons = reasons + problem;
-        }
-        return { ok: false, error: "no carrier recognised " + trackingNumber + " (" + reasons + ")" };
+        return { ok: false, error: "no carrier recognised " + trackingNumber + " (" + problems.join("; ") + ")" };
     }
 }
 ```
 
 </CollapsibleCode>
 
-When every carrier fails, `locate` keeps each carrier's reason in its message, so the distinctions the previous section argued for survive.
+When every carrier fails, `locate` keeps each carrier's reason in its message, so the distinctions the previous section argued for survive. `join` combines an array's strings into one, with the given separator between them.
 
 ```plantuml
 @startuml
