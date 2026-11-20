@@ -1,20 +1,20 @@
 # Code Quality and Refactoring
 
-Types rule out malformed programs, tests show that behaviour matches its contract, and the previous two chapters examined whether a published contract serves the people who depend on it. All of these judge a program's behaviour, which is what users and clients experience. The design principles of Part 2 and Chapter 17 judged something else: how easy code is to work on.
+Types help us ensure our programs are not malformed. Tests demonstrate that behaviour matches its contract. Each of the previous two chapters examined whether a published contract serves the people who depend on it. These all judge a program's behaviour, which is what users and clients experience. But correctness isn't the only lens through which we can consider the system. Another viewpoint is in terms of evolvable the code is.
 
-Unlike behaviour, that property has no check that runs on its own. A program can pass every test in its suite and honour every contract it publishes, and still cost a team a week to make a change that should take an hour. The build does not report this problem, and no test will ever fail because of it. The cost appears later, in every subsequent change, and it is paid by whoever maintains the system.
+Unlike behaviour, there is no direct check to validate the evolvability of a system. A program can pass every test in its suite and honour every contract it publishes, and still be resistant to change. Change friction is never visible at the time it is introduced, it appears over time as subsequent changes get harder and harder to make.
 
 Refactoring is most often performed to prepare for fixing a bug or adding a new feature. Its purpose is to reduce the cost of that upcoming change.
 
 #### A Tracker That Grew
 
-The running example continues, some months later.
+Our running example continues (some months later).
 
-> As the team maintaining the tracker, we want adding a carrier to be a day's work again, so that we can take on the integrations our customers are asking for. The last two took a week each.
+> As the team maintaining the tracker, we want adding a carrier to only take a day (like it originally did), so that we can take on the integrations our customers are asking for. The last two took a week each.
 
 The design from the earlier chapters was sound. Each carrier had an adapter, the adapters implemented `CarrierClient`, and the tracker depended on the interface and knew nothing about any particular carrier. Adding a carrier was supposed to require a new class, plus one line where the carriers are assembled.
 
-Three carriers later, adding a carrier requires much more. Nobody set out to break the design, and no single change broke it. Each carrier introduced a small complication, each complication was handled where it appeared, and together they have moved carrier-specific knowledge out of the adapters and into the middle of the system. Carrier A, which used the tracker's own status words when the tracker was written, now sends codes of its own, such as `DEL`. The adapters now copy each carrier's own status word into `Shipment.status` with an `as ShipmentStatus` claim, and `ParcelTracker` converts it afterwards:
+Three carriers later, adding a carrier requires much more. Nobody set out to break the design, and no single change on its own was responsible for the system being resistant to change. Each carrier introduced a small complication, each complication was handled where it appeared, and together they have moved carrier-specific knowledge out of the adapters and into the middle of the system. Carrier A, which used the tracker's own status words when the tracker was written, now sends codes of its own, such as `DEL`. The adapters now copy each carrier's own status word into `Shipment.status` with an `as ShipmentStatus` claim, and `ParcelTracker` converts it afterwards:
 
 ```typescript
 // in ParcelTracker.ts: applied to the status of every shipment the built-in adapters return
@@ -42,23 +42,23 @@ function normaliseStatus(carrierId: string, raw: string): ShipmentStatus {
 }
 ```
 
-Every test passes. The tracker is correct, the carriers all work, and no client has complained. The trouble is in the structure: a function in the middle of the system now knows the status vocabulary of every carrier, so adding a sixth carrier means editing this function, and editing it means re-reading the five branches that already work.
+Every test passes. The tracker is correct, the carriers all work. The trouble is in the structure: a function in the middle of the system now knows the status vocabulary of every carrier, so adding a sixth carrier means editing this function, and editing it means re-reading the five branches that already work.
 
-Two earlier decisions have quietly been undone. [Chapter 18](./02_consuming_data#data-without-invariants) converted carrier data once, at the edge, and the adapters' `as ShipmentStatus` is the claim that chapter warned against: between an adapter and `normaliseStatus`, a `Shipment` can hold `"DEL"`, a status its type does not allow. The extension point the adapters provided has also stopped working, because a new carrier now needs an edit in the middle of the system.
+Two earlier decisions have quietly been undone. The adapters' `as ShipmentStatus` makes a claim that makes it so between an adapter and `normaliseStatus`, a `Shipment` can hold `"DEL"`, a status its type does not allow. The extension point the adapters provided has also stopped working, because a new carrier now needs an edit in the middle of the system.
 
-The goal is concrete: refactor until adding the sixth carrier is a small addition rather than a week's work.
+Our goal is concrete: refactor until adding the sixth carrier is a small addition rather than a sprawling change.
 
 ## Two Kinds of Quality
 
 The tracker illustrates a distinction between two kinds of quality.
 
-**External quality** is whether the software does what it should: correct results, honoured contracts, and acceptable speed. Users notice external quality, and Part 1 was mostly about establishing it. It can be measured, and a test suite measures it every time it runs.
+**External quality** is whether the software does what it should. Users notice external quality, and Part 1 was mostly about establishing it. It can be measured, and a test suite measures it every time it runs.
 
-**Internal quality** is whether a person can read the code, reason about it, and change it safely. Users never see it, and no test reports on it. It has no effect until somebody needs to make a change, and then it determines what that change costs.
+**Internal quality** is whether a person can read the code, reason about it, and change it safely. Users can't evaluate it and tests do not report on it. It has no effect until somebody needs to make a change, and then it determines what that change costs.
 
-The tracker has high external quality and declining internal quality. The two are independent enough that neither predicts the other. Code can be correct and unreadable, or well organised and wrong.
+The tracker has high external quality and declining internal quality. The two are independent enough that neither predicts the other. Code can be correct and unreadable, or well-organised and wrong.
 
-Internal quality is paid for by whoever reads the code next, usually without the design in mind. The properties that matter are the ones that help that reader:
+The cost of poor internal quality is paid for by whoever works with the code next. Some properties that influence internal quality that matter are the ones that help that reader:
 
 - _Names that describe._ A reader learns a system mostly by reading its names. A misleading name costs more than an unhelpful one.
 - _Units small enough to hold in mind._ A function that fits on one screen can be understood as a whole. A function that runs for three hundred lines has to be understood in pieces, and the pieces interact.
