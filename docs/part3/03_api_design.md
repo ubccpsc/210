@@ -98,8 +98,6 @@ Clients still need working carriers, so `createTracker` returns a `ParcelTracker
 ```typescript
 // exported: what a client implements to supply its own carrier
 export interface CarrierClient {
-    /** The name a TrackingRequest uses for this carrier, such as "carrier-a". */
-    readonly id: string;
     /**
      * Looks up the current state of one shipment.
      *
@@ -111,7 +109,7 @@ export interface CarrierClient {
 }
 ```
 
-Publishing `CarrierClient` makes its shape a promise as well, so before it is exported it gains the `id` a `TrackingRequest` names, and it reports failures with `TrackingError` instead of a string.
+Notice `CarrierClient` reports failures with `TrackingError` instead of a string---that's to make errors easier to handle in the client, see [Designing the Failures](#designing-the-failures) below. 
 
 When choosing what to export, there are two common mistakes to avoid.
 
