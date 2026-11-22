@@ -86,81 +86,76 @@ This invisibility makes technical debt dangerous. Debt taken on deliberately sho
 
 A **code smell** is a visible sign of a possible design problem. The term is deliberately weak. A smell does not always indicate a problem and does not require you to change anything; it is a hint that the design of a piece of code deserves a second look.
 
-You already know many of the standard code smells. Earlier chapters were about design, and most smells describe what code looks like when one of those design principles has not been followed.
+You've already seen many of common code smells this term. Earlier design chapters covered code shortcomings that arise when design principles has not been followed.
 
 | Smell | Where it came up already |
 |---|---|
-| Large class | The god class, in [Chapter 11](../part2/02_decomposition#how-classes-lose-cohesion). |
-| Duplicated code | Don't repeat yourself, in [Chapter 15](../part2/06_extension#abstract-base-classes). |
-| Long parameter list | The options object, in [Chapter 19](./03_api_design#easy-to-use-hard-to-misuse). |
-| Feature envy: a method more interested in another object's data than its own | Tell, Don't Ask, in [Chapter 17](./01_coupling#reaching-past-a-neighbour). |
-| Message chains: `a.b().c().d()` | The Law of Demeter, in [Chapter 17](./01_coupling#reaching-past-a-neighbour). |
-| Shotgun surgery: one change, many files | Scattering, in [Chapter 17](./01_coupling#cohesion-and-coupling). |
-| Divergent change: one file, many unrelated reasons to change | Tangling, in [Chapter 17](./01_coupling#cohesion-and-coupling). |
-| Primitive obsession: strings and numbers where a type belongs | Value objects, in [Chapter 13](../part2/04_flexibility#immutable-values). |
-| Conditional on a type tag | Polymorphism instead of tag switching, in [Chapter 15](../part2/06_extension#replacing-branches). |
+| Large class | The god class ([Chapter 11](../part2/02_decomposition#how-classes-lose-cohesion)). |
+| Duplicated code | Don't repeat yourself ([Chapter 15](../part2/06_extension#abstract-base-classes)). |
+| Long parameter list | The options object ([Chapter 19](./03_api_design#easy-to-use-hard-to-misuse)). |
+| Feature envy: a method more interested in another object's data than its own | Tell, Don't Ask ([Chapter 17](./01_coupling#reaching-past-a-neighbour)). |
+| Message chains: `a.b().c().d()` | The Law of Demeter ([Chapter 17](./01_coupling#reaching-past-a-neighbour)). |
+| Shotgun surgery: one change, many files | Scattering ([Chapter 17](./01_coupling#cohesion-and-coupling)). |
+| Divergent change: one file, many unrelated reasons to change | Tangling ([Chapter 17](./01_coupling#cohesion-and-coupling)). |
+| Primitive obsession: strings and numbers where a type belongs | Value objects ([Chapter 13](../part2/04_flexibility#immutable-values)). |
+| Conditional on a type tag | Polymorphism instead of tag switching ([Chapter 15](../part2/06_extension#replacing-branches)). |
 
-Two rows in the table explain most of the others. Divergent change is how tangling appears when you arrive to make an edit, and shotgun surgery is how scattering appears. These are the two ways a design can fail separation of concerns, as described in Chapter 17, and most of the other smells are forms of one or the other. A large class is tangled, and so is a conditional on a type tag, which puts every variant's behaviour into one function. Duplicated code is scattered, and so is primitive obsession, which leaves a rule without a home of its own.
+Two rows in the table are root causes of several others. A divergent change is how tangling appears when you try to make an edit, and shotgun surgery is how scattering manifests in a system. These are two ways a design can fail to separate concerns, and most of the other smells derive from these. A large class is tangled, and so is a conditional on a type tag, which puts every variant's behaviour into one function. Duplicated code is scattered, and so is primitive obsession.
 
-Tangling and scattering are fixed in opposite ways. Tangling is fixed by splitting: extracting a function, extracting a class, or replacing a conditional with polymorphism, so that each concern gets its own place. Scattering is fixed by consolidating: moving a method to the data it works on, introducing a parameter object, or replacing a primitive with a type, so that something spread across the code is gathered into one place. It is therefore important to diagnose which problem you have. Splitting code that is already scattered leaves more fragments to keep consistent, and consolidating code that is already tangled produces a larger tangle.
+Tangling and scattering are fixed in opposite ways. Tangling is fixed by splitting: extracting a function, extracting a class, or replacing a conditional with polymorphism, so that each concern is better isolated. Scattering is fixed by consolidating: moving a method to the data it works on, introducing a parameter object, or replacing a primitive with a type, so that something spread across the code is gathered into one place. It is therefore important to diagnose which problem you are trying to address. Splitting code that is already scattered leaves more fragments to keep consistent, and consolidating code that is already tangled can result in an even bigger mess.
 
-The `normaliseStatus` function above is an example of the last row of the table. In these terms it is both. It is tangled, because five carriers' status vocabularies share one function, and scattered, because each carrier's knowledge is now split between its adapter and that function. The fix therefore does both: it splits the function by carrier, and consolidates each piece in the adapter that already holds the rest of that carrier's knowledge. Chapter 15 argued against conditionals that branch on a tag, and one has reappeared in a system that was designed to avoid them.
+The `normaliseStatus` function above demonstrates both. It is tangled, because five carriers' status vocabularies share one function, and scattered, because each carrier's knowledge is now split between its adapter and that function. The fix therefore has two parts: it splits the function by carrier, and consolidates each piece in the adapter that already holds the rest of that carrier's knowledge. We have previously argued against conditionals that branch on a tag, and one has reappeared in a system that was designed to avoid them.
 
-Smells are heuristics, and treating them as rules causes its own problems. A long function that reads from top to bottom as a sequence of clearly named steps may be easier to follow than the six small functions it could be split into.
+Smells should just be considered heuristics or rules of thumb, and treating them as inviolable rules causes its own problems. A long function that reads from top to bottom as a sequence of clearly named steps may be easier to follow than the six small functions it could be split into.
 
 ## What Refactoring Is
 
-**Refactoring** is changing the structure of code without changing its behaviour. The second half of that definition distinguishes refactoring from editing in general.
+**Refactoring** is changing the structure of code _without_ changing its behaviour. The second half of that definition distinguishes refactoring from other kinds of code editing.
 
-Four kinds of change are commonly confused, and keeping them separate is most of the discipline of refactoring:
+Three kinds of change are commonly intertwined, and keeping them separate is most of the discipline of refactoring:
 
-- _Refactoring_ changes structure and preserves behaviour.
+- _Refactoring_ changes structure without changing behaviour.
 - _Adding a feature_ changes behaviour and should not change structure at the same time.
 - _Fixing a bug_ changes behaviour to what it should have been.
-- _Rewriting_ discards the structure and the behaviour together, and starts again.
 
-Doing two of these in one change is how refactoring gained its reputation for being risky. If a commit, the unit of change your version control records, reorganises three files and also changes what the code does, a failing test afterwards does not tell you which half caused it, and reverting the commit loses both.
+Doing two of these in one change is how refactoring gained its reputation for being risky. If a commit, the unit of change your version control records, reorganises three files and also changes what the code does, a failing test afterwards does not tell you whether the problem is due to the restructuring or the new feature.
 
 <details class="tooltip link-110">
 <summary>Why This Did Not Come Up in CPSC 110</summary>
 
-Nothing in CPSC 110 asked you to improve code that already worked. The design recipe produced code in a standard shape. The data definition determined the template, the template determined the function's structure, and following the recipe meant the result was already organised. There was nothing to clean up, because the recipe did the organising.
+CPSC 110 never asked you to improve code that already worked. The design recipe produced code in a standard shape. The data definition determined the template, the template determined the function's structure, and following the recipe meant the result was already organised. There was nothing to clean up, because the recipe did the organising.
 
-The recipe also assumed that the problem did not change. Real systems change after they are written, and no recipe tells you where each change belongs. Code drifts out of shape because the structure that fitted the original problem no longer fits the problem the system now solves, even when nobody has been careless. Refactoring restores a design to a shape that fits what the system now has to do.
+The recipe also assumed that the problem did not change. Real systems constantly change after they are written, and the recipes do not tell you where each change belongs. Code drifts out of shape because the structure that fitted the original problem no longer fits the problem the system now solves, even when nobody has been careless. Refactoring restores a design to a shape that fits what the system now has to do.
 
 </details>
 
 ### Risk Now, Benefit Later
 
-Refactoring is different from every other kind of work in this textbook.
+Refactoring is different from every other kind of work in this textbook. Every other kind of change has a functional benefit. A feature gives users something they did not have. A bug fix restores behaviour that was supposed to exist. Each change carries risk, and each has a benefit to weigh against that risk.
 
-Every other kind of change has an immediate benefit. A feature gives users something they did not have. A bug fix restores behaviour that was supposed to exist. Each change carries risk, and each has a benefit to weigh against that risk.
+Refactoring has no immediate benefit. You take working code and restructure it, and if everything goes to plan, the result behaves exactly as it did before. No user or client notices, and it's not even better for you (yet). You have taken on the full risk of modifying a working system in exchange for a benefit that only arrives with the next change: the bug fix or feature you are preparing for will be easier to make. That benefit is real, and it is the reason this chapter exists, but it is not realized during the refactoring itself.
 
-Refactoring has no immediate benefit. You take working code and change it, and if everything goes to plan, the result behaves exactly as it did before. No user or client notices, and nothing observable improves. You have taken on the full risk of modifying a working system in exchange for a benefit that only arrives with the next change: the bug fix or feature you are preparing for will be cheaper to make. That benefit is real, and it is the reason this chapter exists, but it does not appear in the refactoring itself.
+Because the benefit is deferred and the risk is immediate, the risk has to be actively managed. Regression suites from [Chapter 9](../part1/09_validation#regression-testing) reduces this risk, when it is used in a specific workflow:
 
-Because the benefit is deferred and the risk is immediate, the risk has to be actively managed. The regression suite from [Chapter 9](../part1/09_validation#regression-testing) manages it, when it is used in a specific order:
-
-1. _Run the suite first, before touching anything._ Confirm that it passes. This step is easy to skip, and skipping it is costly. If a test was already failing when you started, a failure afterwards tells you nothing, and you can spend an afternoon looking for a break you did not cause.
+1. _Run the suite first, before touching anything._ Confirm the tests pass. This step is easy to skip, but is always the wrong choice. If a test was already failing when you started, a failure afterwards doesn't tell you whether your change is at fault.
 2. _Make the change._
-3. _Run the suite again._ It must pass exactly as it did before. If any result changed, you altered the behaviour, which means either the restructuring was wrong or it was not a pure restructuring.
+3. _Run the suite again._ It must pass exactly as it did before. If any result changed, you altered the behaviour, which means either the refactoring was wrong (or it was not a pure refactor).
 
 This sequence gives you confidence in a change that would otherwise be impossible to verify. Without a suite, "the behaviour is unchanged" is only a belief, held by the person who has just rearranged the code and who is least able to judge it objectively. With a suite, the claim has been checked, and a mistake appears immediately, rather than weeks later as a defect report that nobody connects to the cleanup.
 
-The rest of the discipline, covered later in this chapter, is about keeping each use of the sequence small enough that a failure at step 3 has an obvious cause.
+The rest of the discipline, covered later in this chapter, is about keeping each use of the sequence small enough that a failure at step 3 has an obvious cause. The advice above has an obvious gap. The code that most needs refactoring is often the code least likely to have tests. Advice to "write tests first" does not help when the code is hard to test because of the structure you are trying to fix.
 
-The advice above has an obvious gap. The code that most needs restructuring is often the code least likely to have tests. Advice to "write tests first" does not help when the code is hard to test because of the structure you are trying to fix.
+The solution is a **characterisation test**: a test that records what the code does now, rather than what it should do. You call the existing code, observe the result, and write that result into the test as the expected value, even when it looks wrong. The goal is to detect changes in behaviour, not to establish correctness, so that a refactoring that alters behaviour is caught.
 
-The solution is a **characterisation test**: a test that records what the code does now, rather than what it should do. You call the existing code, observe the result, and write that result into the test as the expected value, even when it looks wrong. The goal is to detect changes in behaviour, not to establish correctness, so that a restructuring that alters behaviour is caught.
-
-If the observed behaviour is a bug, the characterisation test documents it. The bug is then fixed separately, after the restructuring, as its own change with its own test. Fixing it as part of the restructuring would mix two of the four kinds of change listed above.
+If the observed behaviour is a bug, the characterisation test documents it. The bug is then fixed separately, after the refactoring, as its own change with its own test. Fixing it as part of the refactoring would mix two of the four kinds of change listed above.
 
 ## Common Refactorings
 
-Most refactoring is made up of a small number of standard changes, each with a name. The names are used across the industry, and several of these changes are built into editors.
+Most refactoring is made up of a small number of standard program transformations. The names are used across the industry, and many of these changes are built into IDEs.
 
-The names are worth learning because a named change tells a reader what to expect, including what should not have changed. A reviewer who reads "extract class" and finds an altered comparison operator has found a defect, which they would have had no way to notice in a change described as "cleaned up the tracker". Names also let a plan be discussed before any code is written. "Copy each carrier's status mapping into its adapter, switch over to it, then remove what is left" is a sequence that somebody can follow, question, or disagree with. "Tidy up the carrier code" cannot be reviewed, because it does not say what is going to happen.
+The names are worth learning because a named change tells a reader what to expect, including what should not have changed. A reviewer who reads "extract class" and finds an altered comparison operator has found a defect, which they would have had no way to notice in a change described as "cleaned up the tracker". Names also let a plan be discussed before any code is written. "Copy each carrier's status mapping into its adapter, switch over to it, then remove what is left" is a sequence that somebody can follow, question, or disagree with. 
 
-- _Rename_ something to describe what it is. Renaming carries little risk, especially with editor support, and a better name helps every later reader.
+- _Rename_ something (e.g., a class, interface, field, method, parameter, variable) to describe what it is. Renaming carries little risk, especially with editor support, and a better name helps every later reader.
 - _Extract function_ from a fragment that has a describable job, giving the fragment a name.
 - _Extract class_ when a group of fields and the methods that use them form a responsibility of their own.
 - _Inline_ a function or variable whose indirection no longer helps.
@@ -171,7 +166,7 @@ The names are worth learning because a named change tells a reader what to expec
 - _Replace a primitive with a value object_, giving an invariant a home.
 - _Replace conditional with polymorphism_ when a conditional is choosing between different kinds of thing.
 
-Each of these names describes a sequence of steps, not just an outcome. The sequence matters, because it keeps the program working while the change is half done. You will use _extract function_ often, and its steps are:
+Each of these names describes a sequence of steps, not just an outcome. The sequence matters, because it keeps the program working while the change is half done. For example, for the commonly-used _extract function_ refactoring its steps are:
 
 1. Create an empty function, and name it for what it does rather than how it does it.
 2. Copy the fragment into the new function's body.
@@ -179,9 +174,9 @@ Each of these names describes a sequence of steps, not just an outcome. The sequ
 4. Replace the original fragment with a call to the new function.
 5. Run the tests.
 
-Apart from choosing the name, no step in that sequence requires understanding how the fragment computes its result. A refactoring you can perform mechanically is one you can perform on code you do not yet understand, and most of the code you work on will be code you did not write.
+Apart from choosing the name, no step in that sequence requires understanding how the fragment computes its result. A refactoring you can perform mechanically is one you can perform on code you do not yet understand, and most of the code you work on will be code you did not write. Most IDEs will also perform extract function automatically: select a block of code, choose 'refactor' and then 'extract function'. 
 
-The tracker needs the last refactoring in the list, replace conditional with polymorphism. The knowledge in `normaliseStatus` is specific to each carrier, and there is already one class per carrier, so the fix is to move each branch into the class for its carrier. A refactoring of this size is carried out as a sequence of the smaller ones in the list, and the next section works through that sequence for the tracker.
+The tracker needs the last refactoring in the list above, replace conditional with polymorphism. The knowledge in `normaliseStatus` is specific to each carrier, and there is already one class per carrier, so the fix is to move each branch into the class for its carrier. A refactoring of this size is carried out as a sequence of the smaller ones in the list, and the next section works through that sequence for the tracker.
 
 ## Working in Small Steps
 
@@ -194,18 +189,14 @@ The way to avoid this is a simple, repeated process:
 3. Commit while the tests all pass.
 4. Repeat.
 
-Each step leaves the system working. The work can be interrupted at any point without leaving a mess, a failure can only have been caused by the last small step, and any step can be reverted on its own.
-
-Here is that process applied to the tracker, with one named refactoring per step and the test suite passing at every commit:
+Each step leaves the system working. The work can be interrupted at any point without leaving a mess, a failure can only have been caused by the last small step, and any step can be reverted on its own. Here is that process applied to the tracker, with one named refactoring per step and the test suite passing at every commit:
 
 1. _Move method, first half._ Add a private `toStatus` to `CarrierAClient`, holding a copy of carrier A's branches from `normaliseStatus`. Nothing calls it yet, so no behaviour can have changed.
 2. _Move method, second half._ Have `CarrierAClient` convert its own status before returning, and have `ParcelTracker` skip `normaliseStatus` for carrier A's shipments. The skip is needed because `normaliseStatus` expects carrier A's own words: given an already converted `"delivered"`, carrier A's branch returns `"in-transit"`. That branch is now unused, so delete it. The skip stays, because without it the final `return "in-transit"` would do the same.
 3. Repeat those two steps for each remaining carrier. This takes four more pairs of commits, each covering one carrier.
 4. _Remove dead code._ `ParcelTracker` now skips `normaliseStatus` for every carrier, so nothing calls it. Delete it, along with the skip and the `carrierId` argument that existed only to feed it.
 
-This is the plan described earlier, "copy each carrier's status mapping into its adapter, switch over to it, then remove what is left", with the tests run and a commit made after every step.
-
-The result restores the structure the tracker was supposed to have. The `CarrierClient` interface, which the library publishes, has not changed, but each adapter has stopped passing raw status strings through it with a claim, and converts them itself:
+This is the plan described earlier, "copy each carrier's status mapping into its adapter, switch over to it, then remove what is left", with the tests run and a commit made after every step. The result restores the structure the tracker was supposed to have. The `CarrierClient` interface, which the library publishes, has not changed, but each adapter has stopped passing raw status strings through it with a claim, and converts them itself:
 
 ```typescript
 class CarrierAClient implements CarrierClient {
@@ -281,16 +272,14 @@ stop
 ```
 <!-- caption="Refactoring as preparation: the test-refactor-test loop runs until the change that prompted it becomes easy. Orange marks the change that prompted the refactoring, green marks steps that move the work forward, and red marks a step that is undone." -->
 
-The diagram adds one point to the process described above: the loop stops for a reason outside the refactoring itself, when the change you originally came to make has become easy.
-
-Two habits support this process. First, keep each diff focused, so that a restructuring commit contains the restructuring and nothing else. Leave out incidental reformatting and unrelated tidying, so that a reviewer does not have to search for the actual change. Second, read your own diff before anyone else does. It is easier to ask "would a stranger understand why this changed?" while your reasoning is still fresh.
+The diagram adds one point to the process described above: the loop stops for a reason outside the refactoring itself, when the change you originally came to make has become easy. Two habits support this process. First, keep each diff focused, so that a refactoring commit contains the restructuring and nothing else. Leave out incidental reformatting and unrelated tidying, so that a reviewer does not have to search for the actual change. Second, read your own diff before anyone else does. It is easier to ask "would a stranger understand why this changed?" while your reasoning is still fresh.
 
 <details class="tooltip ts-tips">
 <summary>Let the Editor Do It</summary>
 
 Editors with TypeScript support can perform several of these refactorings automatically. The automated version is safer than a manual edit, because the tool works with the structure of the program rather than with its text.
 
-Renaming a symbol updates every reference to it across the project, and leaves alone anything that merely has the same spelling. A find-and-replace cannot make this distinction. Extracting a function works out which variables the fragment uses, turns them into parameters, and returns what the surrounding code needs. Both are standard editor commands.
+Renaming a symbol updates every reference to it across the project, and leaves alone anything that merely has the same spelling. Rename in particular is so common it is typically not hidden in a refactoring menu, you will often see it called 'rename symbol', 'rename identifier', or just simply 'rename'. A find-and-replace cannot make this distinction. Extracting a function works out which variables the fragment uses, turns them into parameters, and returns what the surrounding code needs. Both are standard editor commands.
 
 Look for an automated version before making a structural edit by hand. Hand edits are where missed call sites come from, and a missed call site is one way a refactoring can change behaviour.
 
@@ -298,15 +287,15 @@ Look for an automated version before making a structural edit by hand. Hand edit
 
 ## When Not to Refactor
 
-The advice in this chapter has limits.
+Refactoring is not always the answer.
 
-_Do not refactor code you have no reason to change._ Leaving working code alone costs nothing, however unpleasant it is to read. Internal quality is worth paying for where change is expected. Paying for it everywhere means paying for changes that will never come.
+_Do not refactor code you have no reason to change._ Leaving working code alone costs nothing, however unpleasant it is to read. Internal quality is worth paying for where change is expected.
 
 _Do not refactor without a way to detect behaviour change._ Without an effective test suite, or characterisation tests written first, you are only hoping that the behaviour is preserved.
 
-_Do not refactor past the point where the upcoming change becomes easy._ The goal is the change you came to make, not a design you find satisfying. Restructuring beyond that point has a cost and no request to justify it.
+_Do not refactor past the point where the upcoming change becomes easy._ The goal is the change you came to make, not a design you find satisfying. 
 
-_Do not refactor and change behaviour in the same commit._ This is the same rule as before, and it is easiest to break while a feature is half written.
+_Do not refactor and change behaviour in the same commit._ This is the most commonly-violated guideline around the refactoring process.
 
 #### Refactoring as Preparation
 
