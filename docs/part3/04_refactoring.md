@@ -61,22 +61,22 @@ The tracker has high external quality and declining internal quality. The two ar
 The cost of poor internal quality is paid for by whoever works with the code next. Some properties that influence internal quality that matter are the ones that help that reader:
 
 - _Names that describe._ A reader learns a system mostly by reading its names. A misleading name costs more than an unhelpful one.
-- _Units small enough to hold in mind._ A function that fits on one screen can be understood as a whole. A function that runs for three hundred lines has to be understood in pieces, and the pieces interact.
+- _Units small enough to hold in memory._ A function that fits on one screen can be understood as a whole. A function that runs for three hundred lines has to be understood in pieces, and the pieces interact.
 - _Shallow nesting._ Each level of nesting adds another condition the reader has to keep in mind while reading the code inside it.
 - _Comments that explain why._ A reader can find out what the code does by reading it. Why the code does it, and what would break if it stopped, is often not recorded anywhere else.
 
 ## Technical Debt
 
-Another common way to talk about internal quality is **technical debt**. A shortcut taken today creates a debt, and the debt is repaid later, when future changes are harder than they would otherwise have been. The metaphor is useful when it is taken seriously, including the fact that taking on debt is sometimes the right decision. Two distinctions sharpen it.
+A common way to think about internal quality is in terms of **technical debt**. Any time a shortcut is taken, some debt is incurred on the system or its design. This debt must be repaid later, when future changes are harder than they would otherwise have been. The metaphor is useful because it captures that debt is a cost that must be paid, that it is a cost that can be avoided, but also that debt is sometimes an intentional choice at the time it is incurred.
 
-The first is whether the debt was deliberate. Shipping a simpler design to meet a deadline, while knowing what has been deferred and why, is a decision. Discovering a year later that a better design existed is different: nobody made a decision, and the team has simply learned more about the problem. Most debt in a long-lived system is of this second, inadvertent kind, and it should not be treated as a sign of carelessness. The tracker's debt is of this inadvertent kind: nobody decided to move carrier knowledge into `ParcelTracker`, and each step looked reasonable when it was taken.
+Sometimes accruing debt is deliberate. Shipping a simpler design to meet a deadline, while knowing what has been deferred and why, can be a rational decision. Realizing a year later that the design conflicted with the rest of the system is different: the team has simply learned about the difference as time passed. Most debt in a long-lived system is of this second, inadvertent kind. The tracker's debt is of this inadvertent kind: nobody decided to move carrier knowledge into `ParcelTracker`, and that decision seemed reasonable when it was made.
 
-The second is whether the debt was prudent. Deliberate and prudent debt means the trade-off was considered and the reasoning was recorded. Deliberate and reckless debt means the shortcut was taken without considering its cost. Inadvertent and reckless debt means there was no real design to begin with. Inadvertent and prudent debt is the learning case described above.
+Debt taken deliberately and prudently means the trade-off was considered and the reasoning was written down. Deliberate and reckless debt means the shortcut was taken without considering its cost. Inadvertent and reckless debt means there was no real design to begin with. Inadvertent and prudent debt is the learning case described above.
 
 <details class="tooltip deep-dive">
 <summary>Debt That Is Never Repaid</summary>
 
-The metaphor has a limit, and it can be used to justify almost anything. Financial debt has a schedule: the payments are known in advance, and somebody notices when they stop. Technical debt has no schedule. The build does not fail because a design is poor, and no report says that the interest is rising. The cost appears only as changes taking longer than they should, which is easy to blame on the changes rather than on the design.
+The metaphor of technical debt has a limit, and it can be used to justify almost anything. Financial debt has a schedule: the payments are known in advance, and somebody notices when they stop. Technical debt has no schedule: the build does not fail because a design is poor, and no report says that the interest is rising. The cost appears only as changes taking longer than they should, which is easy to blame on the changes rather than on shortcomings of a degraded design.
 
 This invisibility makes technical debt dangerous. Debt taken on deliberately should be recorded where a future maintainer will look: a comment in the code, an entry in the issue tracker, or a note in the documentation that says what was deferred and when it should be revisited. Six months later, debt that was never written down looks the same as a design somebody intended.
 
