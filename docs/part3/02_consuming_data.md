@@ -180,7 +180,7 @@ function toShipment(raw: unknown): Result<Shipment, string> {
     }
     const known: string[] = ["in-transit", "delivered", "exception"];
     if (known.includes(status) === false) {
-        return { ok: false, error: "unrecognised status: " + status };
+        return { ok: false, error: "unrecognized status: " + status };
     }
 
     const lastSeenAt: unknown = fields.lastSeenAt;
@@ -208,9 +208,9 @@ function toShipment(raw: unknown): Result<Shipment, string> {
 
 </details>
 
-The function is tedious to write, but its checks make the result trustworthy. It confirms that every field the type describes exists and has the right type. It also checks for an unrecognised status, because carriers do add new statuses over time. A value that passes these checks is a `Shipment` in the full sense that the rest of the program assumes, because its shape has been verified rather than claimed.
+The function is tedious to write, but its checks make the result trustworthy. It confirms that every field the type describes exists and has the right type. It also checks for an unrecognized status, because carriers do add new statuses over time. A value that passes these checks is a `Shipment` in the full sense that the rest of the program assumes, because its shape has been verified rather than claimed.
 
-The error messages are also useful. The message "unrecognised status: held-at-depot" tells a maintainer what changed at the carrier and what to add. A claim would have produced a `Shipment` whose status was `held-at-depot`, even though the type does not allow that value. The failure would have appeared later, in code that reasonably assumed the status was one of the three allowed values.
+The error messages are also useful. The message "unrecognized status: held-at-depot" tells a maintainer what changed at the carrier and what to add. A claim would have produced a `Shipment` whose status was `held-at-depot`, even though the type does not allow that value. The failure would have appeared later, in code that reasonably assumed the status was one of the three allowed values.
 
 <details class="tooltip deep-dive">
 <summary>Claiming After Checking</summary>
@@ -452,7 +452,7 @@ class CarrierAClient {
 
 Carrier A's responses use the tracker's three status words, so `CarrierAClient` can check them directly. The class for a carrier with its own words also translates them.
 
-Each failure produces a different message, which a maintainer reading a log will need. The messages "could not reach the carrier", "carrier returned status 500", and "unrecognised status: held-at-depot" each call for a different response. Collapsing them into a single "tracking failed" message would discard the information that tells them apart.
+Each failure produces a different message, which a maintainer reading a log will need. The messages "could not reach the carrier", "carrier returned status 500", and "unrecognized status: held-at-depot" each call for a different response. Collapsing them into a single "tracking failed" message would discard the information that tells them apart.
 
 Network calls have two other properties that local calls do not have.
 
@@ -472,7 +472,7 @@ An operation is **idempotent** when performing it twice has the same effect as p
 In practice:
 
 - Retry idempotent operations freely.
-- Retry non-idempotent operations only when the API documents a way to make them safe. This is usually a key supplied by the caller, which the server uses to recognise a duplicate request.
+- Retry non-idempotent operations only when the API documents a way to make them safe. This is usually a key supplied by the caller, which the server uses to recognize a duplicate request.
 - Wait between retries. A service that is already overloaded gets worse if every failed request is immediately sent three more times.
 
 </details>
@@ -545,7 +545,7 @@ class ParcelTracker {
             }
             problems.push(found.error);
         }
-        return { ok: false, error: "no carrier recognised " + trackingNumber + " (" + problems.join("; ") + ")" };
+        return { ok: false, error: "no carrier recognized " + trackingNumber + " (" + problems.join("; ") + ")" };
     }
 }
 ```
@@ -631,7 +631,7 @@ class StubCarrier implements CarrierClient {
     }
 }
 
-test("the tracker reports the first carrier that recognises the number", async () => {
+test("the tracker reports the first carrier that recognizes the number", async () => {
     const delivered: Shipment = {
         trackingNumber: "9K4T",
         status: "delivered",
@@ -650,7 +650,7 @@ test("the tracker reports the first carrier that recognises the number", async (
 
 </CollapsibleCode>
 
-`StubCarrier` is a test double, like the ones in [Chapter 14](../part2/05_boundaries#test-doubles), and test doubles are especially useful for external services. A stub can also produce situations that a real service will not produce on request, such as a carrier that cannot be reached, a carrier that reports a status we do not recognise, or every carrier failing at once. These paths are easy to get wrong in production and hard to exercise with a test that calls a live service.
+`StubCarrier` is a test double, like the ones in [Chapter 14](../part2/05_boundaries#test-doubles), and test doubles are especially useful for external services. A stub can also produce situations that a real service will not produce on request, such as a carrier that cannot be reached, a carrier that reports a status we do not recognize, or every carrier failing at once. These paths are easy to get wrong in production and hard to exercise with a test that calls a live service.
 
 #### Consuming Deliberately
 

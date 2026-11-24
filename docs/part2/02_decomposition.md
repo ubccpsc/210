@@ -76,7 +76,7 @@ Left unchecked, a class that keeps absorbing responsibilities becomes a **god cl
 
 A god class is hard to maintain: there is no one invariant to reason about, so any change risks disturbing something unrelated. It is also hard to use.
 
-This usage cost is easy to overlook. Clients use a class by finding the one that models what they care about, and calling the methods that provide that behaviour. Effective reuse depends on a class having a clear, single purpose. When disparate functionality is included in one class with no organising invariant, an engineer cannot predict where a feature lives. In a god class, it could be anywhere! The engineer is left scrolling a long list of unrelated methods, hoping to recognise the right one.
+This usage cost is easy to overlook. Clients use a class by finding the one that models what they care about, and calling the methods that provide that behaviour. Effective reuse depends on a class having a clear, single purpose. When disparate functionality is included in one class with no organising invariant, an engineer cannot predict where a feature lives. In a god class, it could be anywhere! The engineer is left scrolling a long list of unrelated methods, hoping to recognize the right one.
 
 The name of the class confirms whether we have found the right place. A system of many small, cohesive classes is easier to navigate than one of a few large ones, even though it has more parts.
 
@@ -130,7 +130,7 @@ Some classes are not built around an explicit invariant. Both a class that only 
 
 Cohesion shapes how a system responds to change. When each invariant lives in exactly one class, a bug fix or a new feature for that invariant stays inside the class that owns it. The change stays local, which makes it easier to make and less likely to force matching changes in many other places.
 
-There is rarely a single good decomposition. The same system can usually be split in several reasonable ways, and competent engineers will sometimes disagree about which is best. Cohesion does not give us the one right split, but it does give us a reliable way to recognise poor ones.
+There is rarely a single good decomposition. The same system can usually be split in several reasonable ways, and competent engineers will sometimes disagree about which is best. Cohesion does not give us the one right split, but it does give us a reliable way to recognize poor ones.
 
 <details class="tooltip deep-dive">
   <summary>When One Class Legitimately Manages Several Invariants</summary>
@@ -145,7 +145,7 @@ That is still cohesion, where the unit is the smallest set of state that must st
 
 ## Diagnosing a Class
 
-A poorly decomposed class can be recognised from its code: it enforces more than one invariant, it has fields the invariant never mentions, it has methods that maintain some other invariant, or its name does not match the fields and methods it contains.
+A poorly decomposed class can be recognized from its code: it enforces more than one invariant, it has fields the invariant never mentions, it has methods that maintain some other invariant, or its name does not match the fields and methods it contains.
 
 
 How do we spot these symptoms of poor decomposition? First, try to name the invariant the class claims to protect. Then, look at each part of the class (fields and methods), and analyse whether each of those parts serves the invariant. If a field is not used in the class invariant at all, this is an early symptom that a second responsibility has snuck into the class. (One common exception: a field that holds the object's identity, such as a name or id.)

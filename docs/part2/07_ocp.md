@@ -179,7 +179,7 @@ But you can get started by following the advice from [Chapter 12](./03_encapsula
 <details class="tooltip deep-dive">
 <summary>Speculative Generality</summary>
 
-The opposite of a rigid design is an over-flexible one. Adding interfaces, base classes, and extension points for variation you only imagine you might need is a recognised design mistake, usually called _speculative generality_: the indirection adds real cost while the flexibility gives only hypothetical benefits.
+The opposite of a rigid design is an over-flexible one. Adding interfaces, base classes, and extension points for variation you only imagine you might need is a recognized design mistake, usually called _speculative generality_: the indirection adds real cost while the flexibility gives only hypothetical benefits.
 
 </details>
 

@@ -61,7 +61,7 @@ Some errors also offer a quick fix, which the VSCode documentation calls a [Code
 ![Quick Fix Hover](img/quickFixError.png)
 ![Quick Fix Options](img/quickFixErrorOpt.png)
 
-In this case the first two options fix the code and the last two do not. Read the options before choosing one; with practice you will recognise which kind of fix applies.
+In this case the first two options fix the code and the last two do not. Read the options before choosing one; with practice you will recognize which kind of fix applies.
 
 ### Lint Errors
 

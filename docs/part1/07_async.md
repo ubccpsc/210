@@ -194,7 +194,7 @@ readFile("report.txt", "utf8").then((contents: string) => {
 
 This is how callbacks and promises connect. A promise is an object that runs callbacks for you when its value arrives, and the `await` syntax in the next section is built on this mechanism.
 
-We show `then` here so you will recognise it in documentation and in other people's code, but we will not use it in this course. `await` is _syntactic sugar_ for `then`: syntax that adds no new meaning, but makes the same thing easier to write and read. (In ISL, `(define (f x) ...)` is syntactic sugar for `(define f (lambda (x) ...))` in the same way.)
+We show `then` here so you will recognize it in documentation and in other people's code, but we will not use it in this course. `await` is _syntactic sugar_ for `then`: syntax that adds no new meaning, but makes the same thing easier to write and read. (In ISL, `(define (f x) ...)` is syntactic sugar for `(define f (lambda (x) ...))` in the same way.)
 
 </details>
 

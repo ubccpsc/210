@@ -89,7 +89,7 @@ You'll have noticed this textbook includes some nested content. All this nested 
 <details class="tooltip deep-dive">
   <summary>Deep Dives</summary>
   
-  Deep dives are our catch-all parenthetical: they're things we would like to tell you, but we recognise are divergent from the main point we are trying to make.
+  Deep dives are our catch-all parenthetical: they're things we would like to tell you, but we recognize are divergent from the main point we are trying to make.
 </details>
 
  <details class="tooltip exercise">
