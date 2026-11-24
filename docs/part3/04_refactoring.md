@@ -1,20 +1,27 @@
 # Code Quality and Refactoring
 
-Types help us ensure our programs are not malformed. Tests demonstrate that behaviour matches its contract. Each of the previous two chapters examined whether a published contract serves the people who depend on it. These all judge a program's behaviour, which is what users and clients experience. But correctness isn't the only lens through which we can consider the system. Another viewpoint is in terms of evolvable the code is.
+Types help us ensure our programs are not malformed. Tests demonstrate that behaviour matches its contract. In the previous two chapters, we examined whether a published contract serves the people who depend on it. All of these things judge a program's _behaviour_ (in short, the outputs observed for given inputs). 
 
-Unlike behaviour, there is no direct check to validate the evolvability of a system. A program can pass every test in its suite and honour every contract it publishes, and still be resistant to change. Change friction is never visible at the time it is introduced, it appears over time as subsequent changes get harder and harder to make.
+But two codebases that have the same behaviour, can differ in their capacity to evolve. Unlike behaviour, there is no direct check to validate the evolvability of a system. A program can pass every test in its suite and honour every contract it publishes, and still be resistant to change. The resistance to change is never visible at the time it is introduced: it appears over time as subsequent changes get harder and harder to make.
 
-Refactoring is most often performed to prepare for fixing a bug or adding a new feature. Its purpose is to reduce the cost of that upcoming change.
+_Refactoring_ is the process of changing a software system without altering its behaviour, usually to improve the evolvability of a software system. It is most often performed to prepare for [fixing a bug](./05_debugging.html) or [adding a new feature](./06_new_features.html), to  help reduce the cost of that change.
 
 #### A Tracker That Grew
 
-Our running example continues (some months later).
+Months pass, and we continue to work our package tracking system from the previuos chapters:
 
 > As the team maintaining the tracker, we want adding a carrier to only take a day (like it originally did), so that we can take on the integrations our customers are asking for. The last two took a week each.
 
 The design from the earlier chapters was sound. Each carrier had an adapter, the adapters implemented `CarrierClient`, and the tracker depended on the interface and knew nothing about any particular carrier. Adding a carrier was supposed to require a new class, plus one line where the carriers are assembled.
 
-Three carriers later, adding a carrier requires much more. Nobody set out to break the design, and no single change on its own was responsible for the system being resistant to change. Each carrier introduced a small complication, each complication was handled where it appeared, and together they have moved carrier-specific knowledge out of the adapters and into the middle of the system. Carrier A, which used the tracker's own status words when the tracker was written, now sends codes of its own, such as `DEL`. The adapters now copy each carrier's own status word into `Shipment.status` with an `as ShipmentStatus` claim, and `ParcelTracker` converts it afterwards:
+Three carriers later, adding a carrier requires much more. Each carrier introduced a small complication, which we handled where it appeared, but together the complications have moved carrier-specific knowledge out of the adapters and into the middle of the system. 
+
+Recall from [Chapter 18](./02_consuming_data.html) we had a `ShipmentStatus` type:
+```typescript
+type ShipmentStatus = "in-transit" | "delivered" | "exception";
+```
+
+We built this type because Carrier A returned these exact statuc codeswhen we first wrote the tracker. But somewhere over the past few months, it changed and sends different codes, e.g. `DEL` for delivered. To deal with this, we used `as ShipmentStatus` to copy each carrier's status words into `Shipment.status`, then added a method to `ParcelTracker` to normalize this to actual `ShipmentStatus`es later:
 
 ```typescript
 // in ParcelTracker.ts: applied to the status of every shipment the built-in adapters return
@@ -42,41 +49,54 @@ function normaliseStatus(carrierId: string, raw: string): ShipmentStatus {
 }
 ```
 
-Every test passes. The tracker is correct, the carriers all work. The trouble is in the structure: a function in the middle of the system now knows the status vocabulary of every carrier, so adding a sixth carrier means editing this function, and editing it means re-reading the five branches that already work.
+These changes have ruined some of our earlier design decisions. The adapters' `as ShipmentStatus` makes it so before `normaliseStatus` is called, a `Shipment` can hold `"DEL"` (a status its type does not allow!). The extension point the adapters provided has also stopped working, because a new carrier now needs an edit in the middle of the system.
 
-Two earlier decisions have quietly been undone. The adapters' `as ShipmentStatus` makes a claim that makes it so between an adapter and `normaliseStatus`, a `Shipment` can hold `"DEL"`, a status its type does not allow. The extension point the adapters provided has also stopped working, because a new carrier now needs an edit in the middle of the system.
+Yet, every test passes. The tracker is correct, the carriers all work. The trouble is in the structure: a function in the middle of the system now knows the status vocabulary of every carrier, so adding a sixth carrier means editing this function, and editing it means re-reading the five branches that already work. (If adding a new carrier takes two weeks of work, this is surely not the only place where we have such patchy structure, but for the purpose of the chapter, we'll stick to this one issue.)
 
-Our goal is concrete: refactor until adding the sixth carrier is a small addition rather than a sprawling change.
+Thus the goal of the user story: refactor until adding the sixth carrier is a small addition rather than a sprawling change.
 
 ## Two Kinds of Quality
 
 The tracker illustrates a distinction between two kinds of quality.
 
-**External quality** is whether the software does what it should. Users notice external quality, and Part 1 was mostly about establishing it. It can be measured, and a test suite measures it every time it runs.
+**External quality** is whether the software does what it should. This is what users notice. Part 1 was mostly about establishing external quality, and we could measure it with a test suite.
 
-**Internal quality** is whether a person can read the code, reason about it, and change it safely. Users can't evaluate it and tests do not report on it. It has no effect until somebody needs to make a change, and then it determines what that change costs.
+**Internal quality** is whether a person can read the code, reason about it, and change it safely. Users can't evaluate it and tests do not report on it. It has no effect until somebody needs to make a change, and then it determines what that change costs. We spent a lot of time in Part 2 on this.  
 
-The tracker has high external quality and declining internal quality. The two are independent enough that neither predicts the other. Code can be correct and unreadable, or well-organised and wrong.
+The tracker has high external quality and declining internal quality. The two are relatively independent, meaing you can have correct and unreadable code, or well-organised and wrong code. 
 
-The cost of poor internal quality is paid for by whoever works with the code next. Some properties that influence internal quality that matter are the ones that help that reader:
 
-- _Names that describe._ A reader learns a system mostly by reading its names. A misleading name costs more than an unhelpful one.
-- _Units small enough to hold in memory._ A function that fits on one screen can be understood as a whole. A function that runs for three hundred lines has to be understood in pieces, and the pieces interact.
-- _Shallow nesting._ Each level of nesting adds another condition the reader has to keep in mind while reading the code inside it.
-- _Comments that explain why._ A reader can find out what the code does by reading it. Why the code does it, and what would break if it stopped, is often not recorded anywhere else.
+In fact, you'll notice that properties that influence internal quality are distinct from the logic encoded in the program (which influences external quality):
+
+- _Names:_ A reader learns a system mostly by reading its names. A misleading name costs more than an unhelpful one.
+- _Length of functions/files/classes:_ A function that fits on one screen can be understood as a whole. A function that runs for three hundred lines has to be understood in pieces, which is hard when the pieces interact (which in most functions, they do).
+- _Nesting depth:_ Each level of nesting (i.e. through another if statement) adds another condition the reader has to keep in mind while reading the code inside it.
+- _"Why" Comments:_ It can be tempted to comment every line of code to explain what it does. But, an experienced reader can find out _what_ the code does by reading it. _Why_ the code does it, and what would break if it stopped, is often not recorded anywhere else. Without _why_ comments, it's easy for future maintainers to delete something a past maintainer realized was important. 
+
+<details class="tooltip deep-dive">
+<summary> "Why" Comments Provide Context. </summary>
+
+Comments, in particular function-level documentation, are the best place to communicate information that is necessary to understand the purpose of a piece of code, when it is not obvious
+
+Consider the `findSubVariable` [function](https://github.com/apache/hadoop/blob/765078ecf561f039112e072c33718d37557f867f/hadoop-common-project/hadoop-common/src/main/java/org/apache/hadoop/conf/Configuration.java#L1048) in Apache [Hadoop](https://hadoop.apache.org/). While it documents the parameters and return values, you'll notice it mostly details that this function exists because it's more performant than the first thing you'd think to do. Without this context, a future maintainer could look at the extra complication and decide to simplify the software system and get rid of this.  
+
+</details>
+
 
 ## Technical Debt
 
+While users can suffer from poor external quality, it's maintainers of the code that pay the cost of poor internal quality. 
+
 A common way to think about internal quality is in terms of **technical debt**. Any time a shortcut is taken, some debt is incurred on the system or its design. This debt must be repaid later, when future changes are harder than they would otherwise have been. The metaphor is useful because it captures that debt is a cost that must be paid, that it is a cost that can be avoided, but also that debt is sometimes an intentional choice at the time it is incurred.
 
-Sometimes accruing debt is deliberate. Shipping a simpler design to meet a deadline, while knowing what has been deferred and why, can be a rational decision. Realizing a year later that the design conflicted with the rest of the system is different: the team has simply learned about the difference as time passed. Most debt in a long-lived system is of this second, inadvertent kind. The tracker's debt is of this inadvertent kind: nobody decided to move carrier knowledge into `ParcelTracker`, and that decision seemed reasonable when it was made.
+Sometimes we deliberately accrue debt. Shipping a simpler design to meet a deadline, while knowing what has been deferred and why, can be a rational decision. Realizing a year later that the design conflicted with the rest of the system is different: the team has simply learned about the difference as time passed. Most debt in a long-lived system is of this second, inadvertent kind. For example, in our tracker, the debt is inadvertent: nobody decided to move carrier knowledge into `ParcelTracker`, and that decision seemed reasonable when it was made.
 
 Debt taken deliberately and prudently means the trade-off was considered and the reasoning was written down. Deliberate and reckless debt means the shortcut was taken without considering its cost. Inadvertent and reckless debt means there was no real design to begin with. Inadvertent and prudent debt is the learning case described above.
 
 <details class="tooltip deep-dive">
 <summary>Debt That Is Never Repaid</summary>
 
-The metaphor of technical debt has a limit, and it can be used to justify almost anything. Financial debt has a schedule: the payments are known in advance, and somebody notices when they stop. Technical debt has no schedule: the build does not fail because a design is poor, and no report says that the interest is rising. The cost appears only as changes taking longer than they should, which is easy to blame on the changes rather than on shortcomings of a degraded design.
+The metaphor of technical debt has a limit. Financial debt has a schedule: the payments are known in advance, and somebody notices when they stop. Technical debt has no schedule: the build does not fail because a design is poor, and no report says that the interest is rising. The cost appears only as changes taking longer than they should, which is easy to blame on the changes rather than on shortcomings of a degraded design.
 
 This invisibility makes technical debt dangerous. Debt taken on deliberately should be recorded where a future maintainer will look: a comment in the code, an entry in the issue tracker, or a note in the documentation that says what was deferred and when it should be revisited. Six months later, debt that was never written down looks the same as a design somebody intended.
 
@@ -84,41 +104,45 @@ This invisibility makes technical debt dangerous. Debt taken on deliberately sho
 
 ## Reading the Symptoms
 
-A **code smell** is a visible sign of a possible design problem. The term is deliberately weak. A smell does not always indicate a problem and does not require you to change anything; it is a hint that the design of a piece of code deserves a second look.
+A **code smell** is a visible sign of possible technical debt. A code smell does not always indicate a problem and does not require you to change anything; it is a hint that the design of a piece of code deserves a second look. (It's called a *smell* rather than something more precise because it's really just a hint)
 
-You've already seen many of common code smells this term. Earlier design chapters covered code shortcomings that arise when design principles has not been followed.
+You've seen many common code smells in this class. A _divergent change_ when you try to make an edit indicates [tangling](./01_coupling.html#cohesion-and-coupling), and _shotgun surgery_ when you try to make an edit indicates [scattering](./01_coupling.html#cohesion-and-coupling). These are two ways a design can fail to separate concerns, and most of the other smells derive from these top two:
 
-| Smell | Where it came up already |
+| Smell | Where discussed |
 |---|---|
+| Shotgun surgery: one change, many files | Scattering ([Chapter 17](./01_coupling#cohesion-and-coupling)). |
+| Divergent change: one file, many unrelated reasons to change | Tangling ([Chapter 17](./01_coupling#cohesion-and-coupling)). |
 | Large class | The god class ([Chapter 11](../part2/02_decomposition#how-classes-lose-cohesion)). |
 | Duplicated code | Don't repeat yourself ([Chapter 15](../part2/06_extension#abstract-base-classes)). |
 | Long parameter list | The options object ([Chapter 19](./03_api_design#easy-to-use-hard-to-misuse)). |
 | Feature envy: a method more interested in another object's data than its own | Tell, Don't Ask ([Chapter 17](./01_coupling#reaching-past-a-neighbour)). |
 | Message chains: `a.b().c().d()` | The Law of Demeter ([Chapter 17](./01_coupling#reaching-past-a-neighbour)). |
-| Shotgun surgery: one change, many files | Scattering ([Chapter 17](./01_coupling#cohesion-and-coupling)). |
-| Divergent change: one file, many unrelated reasons to change | Tangling ([Chapter 17](./01_coupling#cohesion-and-coupling)). |
 | Primitive obsession: strings and numbers where a type belongs | Value objects ([Chapter 13](../part2/04_flexibility#immutable-values)). |
 | Conditional on a type tag | Polymorphism instead of tag switching ([Chapter 15](../part2/06_extension#replacing-branches)). |
 
-Two rows in the table are root causes of several others. A divergent change is how tangling appears when you try to make an edit, and shotgun surgery is how scattering manifests in a system. These are two ways a design can fail to separate concerns, and most of the other smells derive from these. A large class is tangled, and so is a conditional on a type tag, which puts every variant's behaviour into one function. Duplicated code is scattered, and so is primitive obsession.
+For instance, a _large class_ and a _conditional on a type tag_ are both tangled.  On the other hand, _duplicated code_ and _primitive obsession_ are scattered.
 
-Tangling and scattering are fixed in opposite ways. Tangling is fixed by splitting: extracting a function, extracting a class, or replacing a conditional with polymorphism, so that each concern is better isolated. Scattering is fixed by consolidating: moving a method to the data it works on, introducing a parameter object, or replacing a primitive with a type, so that something spread across the code is gathered into one place. It is therefore important to diagnose which problem you are trying to address. Splitting code that is already scattered leaves more fragments to keep consistent, and consolidating code that is already tangled can result in an even bigger mess.
+Tangling and scattering are fixed in opposite ways. Tangling is fixed by splitting: extracting a function, extracting a class, or replacing a conditional with polymorphism, so that each concern is better isolated. Scattering is fixed by consolidating: moving a method to the data it works on, introducing a parameter object, or replacing a primitive with a type, so that something spread across the code is gathered into one place. 
 
-The `normaliseStatus` function above demonstrates both. It is tangled, because five carriers' status vocabularies share one function, and scattered, because each carrier's knowledge is now split between its adapter and that function. The fix therefore has two parts: it splits the function by carrier, and consolidates each piece in the adapter that already holds the rest of that carrier's knowledge. We have previously argued against conditionals that branch on a tag, and one has reappeared in a system that was designed to avoid them.
+So, before you plan for a refactor, you must diagnose which problem you are trying to address. Splitting code that is already scattered leaves more fragments to keep consistent, and consolidating code that is already tangled can result in an even bigger mess.
 
-Smells should just be considered heuristics or rules of thumb, and treating them as inviolable rules causes its own problems. A long function that reads from top to bottom as a sequence of clearly named steps may be easier to follow than the six small functions it could be split into.
+For instance, the `normaliseStatus` function is tangled (because five carriers' status vocabularies share one function, _and_ scattered (because each carrier's knowledge is now split between its adapter and that function). The fix therefore has two parts: split the function by carrier (to address the tangling), and consolidate each piece in the adapter that already holds the rest of that carrier's knowledge (to address the scattering). 
+<!--- CL: not sure what the point is
+We have previously argued against conditionals that branch on a tag, and one has reappeared in a system that was designed to avoid them. --->
+
+Smells should just be considered heuristics or rules of thumb. A long function that reads from top to bottom as a sequence of clearly named steps may be easier to follow than the six small functions it could be split into. The goal of smells is to tell you there's a few suspicious things to look at, not to say you _must_ operate on these things. 
 
 ## What Refactoring Is
 
-**Refactoring** is changing the structure of code _without_ changing its behaviour. The second half of that definition distinguishes refactoring from other kinds of code editing.
+**Refactoring** is changing the structure of code _without_ changing its behaviour. The second half of the definition distinguishes refactoring from other kinds of code editing.
 
-Three kinds of change are commonly intertwined, and keeping them separate is most of the discipline of refactoring:
+Three kinds of change are commonly intertwined. Most of the discipline of refactoring is to keep the three kind sof change separate:
 
 - _Refactoring_ changes structure without changing behaviour.
 - _Adding a feature_ changes behaviour and should not change structure at the same time.
 - _Fixing a bug_ changes behaviour to what it should have been.
 
-Doing two of these in one change is how refactoring gained its reputation for being risky. If a commit, the unit of change your version control records, reorganises three files and also changes what the code does, a failing test afterwards does not tell you whether the problem is due to the restructuring or the new feature.
+Doing two of these in one change is how refactoring gained a reputation for being risky. If a single change reorganises three files and also changes what the code does, a failing test afterwards does not tell you whether the problem is due to the reorganisation or the new feature.
 
 <details class="tooltip link-110">
 <summary>Why This Did Not Come Up in CPSC 110</summary>
@@ -131,9 +155,9 @@ The recipe also assumed that the problem did not change. Real systems constantly
 
 ### Risk Now, Benefit Later
 
-Refactoring is different from every other kind of work in this textbook. Every other kind of change has a functional benefit. A feature gives users something they did not have. A bug fix restores behaviour that was supposed to exist. Each change carries risk, and each has a benefit to weigh against that risk.
+A feature gives users something they did not have. A bug fix restores behaviour that was supposed to exist. Each change carries risk, and each has a benefit to weigh against that risk.
 
-Refactoring has no immediate benefit. You take working code and restructure it, and if everything goes to plan, the result behaves exactly as it did before. No user or client notices, and it's not even better for you (yet). You have taken on the full risk of modifying a working system in exchange for a benefit that only arrives with the next change: the bug fix or feature you are preparing for will be easier to make. That benefit is real, and it is the reason this chapter exists, but it is not realized during the refactoring itself.
+Refactoring has no immediate benefit. You take working code and restructure it, and if everything goes to plan, the result behaves _exactly as it did before_. So what? No user or client notices, and it's not even better for you (yet). You have taken on the full risk of modifying a working system in exchange for a benefit that does not yet exist (i.e., hoping the refactor will make your next bug fix or feature  easier). 
 
 Because the benefit is deferred and the risk is immediate, the risk has to be actively managed. Regression suites from [Chapter 9](../part1/09_validation#regression-testing) reduces this risk, when it is used in a specific workflow:
 
@@ -141,19 +165,17 @@ Because the benefit is deferred and the risk is immediate, the risk has to be ac
 2. _Make the change._
 3. _Run the suite again._ It must pass exactly as it did before. If any result changed, you altered the behaviour, which means either the refactoring was wrong (or it was not a pure refactor).
 
-This sequence gives you confidence in a change that would otherwise be impossible to verify. Without a suite, "the behaviour is unchanged" is only a belief, held by the person who has just rearranged the code and who is least able to judge it objectively. With a suite, the claim has been checked, and a mistake appears immediately, rather than weeks later as a defect report that nobody connects to the cleanup.
+This sequence gives you confidence in a change that would otherwise be impossible to verify. Without a test suite, "the behaviour is unchanged" is only a belief. With a test suite, the claim has been checked, and a mistake appears immediately, rather than weeks later as a defect report that nobody connects to the cleanup. 
 
-The rest of the discipline, covered later in this chapter, is about keeping each use of the sequence small enough that a failure at step 3 has an obvious cause. The advice above has an obvious gap. The code that most needs refactoring is often the code least likely to have tests. Advice to "write tests first" does not help when the code is hard to test because of the structure you are trying to fix.
+But, there's an obvious issue with Step 1: the code that most needs refactoring is often the code least likely to have tests! Advice to "write tests first" does not help when the code is hard to test because of the structure you are trying to fix.
 
-The solution is a **characterisation test**: a test that records what the code does now, rather than what it should do. You call the existing code, observe the result, and write that result into the test as the expected value, even when it looks wrong. The goal is to detect changes in behaviour, not to establish correctness, so that a refactoring that alters behaviour is caught.
+The solution is a **characterisation test**: a test that records what the code does now, rather than what it should do. You call the existing code, observe the result, and write that result into the test as the expected value, even when it looks wrong. The goal of testing in the workflow above is to detect changes in behaviour, so that a refactoring that alters behaviour is caught.
 
-If the observed behaviour is a bug, the characterisation test documents it. The bug is then fixed separately, after the refactoring, as its own change with its own test. Fixing it as part of the refactoring would mix two of the four kinds of change listed above.
+If the observed behaviour is a bug, the characterisation test documents it. We can then fix the bug  separately, after the refactoring, as its own change with its own new test(s). Anyone looking at the changes later can then clearly distinguish the bug fix from the refactor.
 
 ## Common Refactorings
 
 Most refactoring is made up of a small number of standard program transformations. The names are used across the industry, and many of these changes are built into IDEs.
-
-The names are worth learning because a named change tells a reader what to expect, including what should not have changed. A reviewer who reads "extract class" and finds an altered comparison operator has found a defect, which they would have had no way to notice in a change described as "cleaned up the tracker". Names also let a plan be discussed before any code is written. "Copy each carrier's status mapping into its adapter, switch over to it, then remove what is left" is a sequence that somebody can follow, question, or disagree with. 
 
 - _Rename_ something (e.g., a class, interface, field, method, parameter, variable) to describe what it is. Renaming carries little risk, especially with editor support, and a better name helps every later reader.
 - _Extract function_ from a fragment that has a describable job, giving the fragment a name.
@@ -166,17 +188,20 @@ The names are worth learning because a named change tells a reader what to expec
 - _Replace a primitive with a value object_, giving an invariant a home.
 - _Replace conditional with polymorphism_ when a conditional is choosing between different kinds of thing.
 
-Each of these names describes a sequence of steps, not just an outcome. The sequence matters, because it keeps the program working while the change is half done. For example, for the commonly-used _extract function_ refactoring its steps are:
+It's useful to know these names, because the names tell a reader what to expect, including what should not have changed. A reviewer who reads "extract class" and finds an altered comparison operator has found a defect, but they wouldn't have noticed it if the change was called "cleaned up the tracker". Names also let a plan be discussed before any code is written. 
+
+
+Further, each of these names describes its own sequence of program transformation steps. Adhering to this sequence keeps the program working while the change is half done. For example, for the _extract function_ refactoring, the steps are:
 
 1. Create an empty function, and name it for what it does rather than how it does it.
 2. Copy the fragment into the new function's body.
-3. Work out what the fragment uses. Every variable from the surrounding code that it reads becomes a parameter, and a variable that it writes becomes the return value. If it writes to more than one variable, stop, because the fragment is not ready to be extracted.
+3. Work out what the fragment uses. Turn each variable read from the (original) surrounding code into a parameter. Turn  a variable that it writes into the return value. If it writes to more than one variable, stop, because the fragment is not ready to be extracted.
 4. Replace the original fragment with a call to the new function.
 5. Run the tests.
 
-Apart from choosing the name, no step in that sequence requires understanding how the fragment computes its result. A refactoring you can perform mechanically is one you can perform on code you do not yet understand, and most of the code you work on will be code you did not write. Most IDEs will also perform extract function automatically: select a block of code, choose 'refactor' and then 'extract function'. 
+Apart from choosing the name, no step in that sequence requires understanding how the fragment computes its result. This is intentional. A refactoring you can perform mechanically is one you can perform on code you do not yet understand, and most of the code you work on will be code you did not write. Further, because of this mechnical nature, most IDEs can perform these steps for you automatically: select a block of code, choose 'refactor' and then 'extract function'. 
 
-The tracker needs the last refactoring in the list above, replace conditional with polymorphism. The knowledge in `normaliseStatus` is specific to each carrier, and there is already one class per carrier, so the fix is to move each branch into the class for its carrier. A refactoring of this size is carried out as a sequence of the smaller ones in the list, and the next section works through that sequence for the tracker.
+
 
 ## Working in Small Steps
 
@@ -189,14 +214,18 @@ The way to avoid this is a simple, repeated process:
 3. Commit while the tests all pass.
 4. Repeat.
 
-Each step leaves the system working. The work can be interrupted at any point without leaving a mess, a failure can only have been caused by the last small step, and any step can be reverted on its own. Here is that process applied to the tracker, with one named refactoring per step and the test suite passing at every commit:
+Each step leaves the system working. The work can be interrupted at any point without leaving a mess, a failure can only have been caused by the last small step, and any step can be reverted on its own. 
+
+Here is that process applied to the tracker, with one named refactoring per step and the test suite passing at every commit:
 
 1. _Move method, first half._ Add a private `toStatus` to `CarrierAClient`, holding a copy of carrier A's branches from `normaliseStatus`. Nothing calls it yet, so no behaviour can have changed.
 2. _Move method, second half._ Have `CarrierAClient` convert its own status before returning, and have `ParcelTracker` skip `normaliseStatus` for carrier A's shipments. The skip is needed because `normaliseStatus` expects carrier A's own words: given an already converted `"delivered"`, carrier A's branch returns `"in-transit"`. That branch is now unused, so delete it. The skip stays, because without it the final `return "in-transit"` would do the same.
 3. Repeat those two steps for each remaining carrier. This takes four more pairs of commits, each covering one carrier.
 4. _Remove dead code._ `ParcelTracker` now skips `normaliseStatus` for every carrier, so nothing calls it. Delete it, along with the skip and the `carrierId` argument that existed only to feed it.
 
-This is the plan described earlier, "copy each carrier's status mapping into its adapter, switch over to it, then remove what is left", with the tests run and a commit made after every step. The result restores the structure the tracker was supposed to have. The `CarrierClient` interface, which the library publishes, has not changed, but each adapter has stopped passing raw status strings through it with a claim, and converts them itself:
+Note that we are effectively _replacing conditional with polymorphism_, but since `normaliseStatus` was deleted, we don't explicitly do this change. 
+
+The result restores the structure the tracker was supposed to have. The `CarrierClient` interface, which the library publishes, has not changed, but each adapter has stopped passing raw status strings through it with a claim, and converts them itself:
 
 ```typescript
 class CarrierAClient implements CarrierClient {
@@ -220,13 +249,15 @@ class CarrierAClient implements CarrierClient {
 }
 ```
 
-Each adapter still ends with `return "in-transit"`, so a status a carrier has never sent is reported as in transit. That is a guess, and the converter in [Chapter 18](./02_consuming_data#converting-not-claiming) rejected unknown statuses instead. Removing the guess would change behaviour, so it is not part of this refactoring. It is a fix, to be made separately with its own test.
+Each adapter still ends with `return "in-transit"`, so a status a carrier has never sent is reported as in transit. That is a guess, and the converter in [Chapter 18](./02_consuming_data#converting-not-claiming) rejected unknown statuses instead. But removing the guess would change behaviour, so it is not part of this refactoring. It is a fix, to be made separately with its own test.
 
 Adding the sixth carrier now means writing a class that implements an interface and listing it where the carriers are assembled, which is what the design promised in the first place, and no existing adapter changes. In the vocabulary of [Chapter 16](../part2/07_ocp#the-axis-of-change), the refactoring restored an extension point that had always been there but had stopped working.
 
-The refactoring added no feature, fixed no bug, and changed no behaviour. Every shipment that resolved to `delivered` before still resolves to `delivered`, and the existing suite confirms this. The only change is where the knowledge lives, and therefore what the next change will cost. No exported signature changed, so no client of `@parcel/tracking` can tell that this happened. That is the freedom [Chapter 19](./03_api_design#choosing-the-surface) kept by publishing a small surface.
+The refactoring added no feature, fixed no bug, and changed no behaviour. Every shipment that resolved to `delivered` before still resolves to `delivered`, and the existing suite confirms this. The only change is where the knowledge lives, and therefore what the next change will cost. No exported signature changed, so no client of `@parcel/tracking` can tell that this happened. This was possible because we published a small surface, keeping the implementation freedom we sought in [Chapter 19](./03_api_design#choosing-the-surface) .
 
-As part of the larger task it supports, the process looks like this:
+## Refactoring Process
+
+The process of refactoring looks like this:
 
 ```plantuml
 @startuml
@@ -272,7 +303,9 @@ stop
 ```
 <!-- caption="Refactoring as preparation: the test-refactor-test loop runs until the change that prompted it becomes easy. Orange marks the change that prompted the refactoring, green marks steps that move the work forward, and red marks a step that is undone." -->
 
-The diagram adds one point to the process described above: the loop stops for a reason outside the refactoring itself, when the change you originally came to make has become easy. Two habits support this process. First, keep each diff focused, so that a refactoring commit contains the restructuring and nothing else. Leave out incidental reformatting and unrelated tidying, so that a reviewer does not have to search for the actual change. Second, read your own diff before anyone else does. It is easier to ask "would a stranger understand why this changed?" while your reasoning is still fresh.
+The diagram adds one point to the process described above: the loop stops for a reason outside the refactoring itself, when the change you originally came to make has become easy. 
+
+Two habits support this process. First, keep each diff (what is changed in a commit) focused, so that a refactoring commit contains the restructuring and nothing else. Leave out incidental reformatting and unrelated tidying, so that a reviewer does not have to search for the actual change. Second, read your own diff before anyone else does. It is easier to ask "would a stranger understand why this changed?" while your reasoning is still fresh.
 
 <details class="tooltip ts-tips">
 <summary>Let the Editor Do It</summary>
@@ -303,7 +336,7 @@ Internal quality is invisible until somebody needs to change something, and then
 
 Internal quality is best maintained by improving the structure when you have a specific reason to, rather than through scheduled cleanups or a uniform standard of tidiness. The reason is usually a bug to fix or a feature to add, in a part of the system that is currently awkward to work in. At that point, the upcoming change shows you which improvements you need, and you know you have done enough when the change becomes easy.
 
-The main lesson of this chapter is a sequence that Kent Beck summarised as "make the change easy, then make the easy change". The tracker is now in a state where adding a sixth carrier means writing a new class and adding one line where the carriers are assembled.
+The main lesson of this chapter, as [Kent Beck](https://en.wikipedia.org/wiki/Kent_Beck) once said, is: "make the change easy, then make the easy change". 
 
 <details class="tooltip exercise">
   <summary>Exercise: A Report That Grew</summary>
