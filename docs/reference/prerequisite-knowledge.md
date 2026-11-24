@@ -234,7 +234,7 @@ In the teaching languages, a name is bound once. `(define course-name "CPSC 110"
 
 The stepper was a teaching tool, and it was also the first debugger you may have used: when a value came out wrong, stepping showed the point where it stopped being what you expected.
 
-[Debugging and Fault Localisation](../part3/05_debugging) builds upon the stepper, applied under harder conditions, where the program holds state, the stack is deep, and you have to choose where to look.
+[Debugging Failures and Localizing Faults](../part3/05_debugging) builds upon the stepper, applied under harder conditions, where the program holds state, the stack is deep, and you have to choose where to look.
 
 Giving up single binding is the most significant change in Part 1, which is why [Mutation and Side Effects](../part1/06_state-mutation) works through it slowly. Once a name can be reassigned, it can no longer be replaced by "its value", because which value it holds depends on where the program has got to.
 
@@ -363,7 +363,7 @@ There are some significant changes in how we think about computation in CPSC 210
 | Data you built yourself | [Consuming Data and Services by Using APIs](../part3/02_consuming_data) |
 | Signatures and purpose statements | [Designing APIs to Provide Data and Services](../part3/03_api_design) |
 | Why code never needed cleaning up | [Code Quality and Refactoring](../part3/04_refactoring) |
-| The stepper | [Debugging and Fault Localisation](../part3/05_debugging) |
+| The stepper | [Debugging Failures and Localizing Faults](../part3/05_debugging) |
 | The wish list, in reverse | [Adding New Features](../part3/06_new_features) |
 
 ### 121: Revisited

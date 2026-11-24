@@ -131,14 +131,14 @@ Terms introduced in **bold** throughout the textbook, linked to the section wher
 
 ## F
 
-- **Failure** — [Debugging and Fault Localisation § Failures and Faults](/part3/05_debugging#failures-and-faults)
+- **Failure** — [Debugging Failures and Localizing Faults § Failures and Faults](/part3/05_debugging#failures-and-faults)
 - **Failure, Returned** — [Designing for Failure § Results or Exceptions?](/part1/08_errors#results-or-exceptions)
 - **Failure, Thrown** — [Designing for Failure § Results or Exceptions?](/part1/08_errors#results-or-exceptions)
 - **Falsy** — [Uncovered Language Features § Truthiness](/reference/language-features#truthiness)
 - **Fan-In** — [Coupling and Dependencies § What Coupling Is](/part3/01_coupling#what-coupling-is)
 - **Fan-Out** — [Coupling and Dependencies § What Coupling Is](/part3/01_coupling#what-coupling-is)
-- **Fault** — [Debugging and Fault Localisation § Failures and Faults](/part3/05_debugging#failures-and-faults)
-- **Fault Localisation** — [Debugging and Fault Localisation](/part3/05_debugging#debugging-and-fault-localisation)
+- **Fault** — [Debugging Failures and Localizing Faults § Failures and Faults](/part3/05_debugging#failures-and-faults)
+- **Fault Localization** — [Debugging Failures and Localizing Faults](/part3/05_debugging#debugging-failures-and-localizing-faults)
 - **Field** — [Building Abstractions with Classes § Class State](/part2/01_abstraction#class-state)
 - **Fragile Base Class Problem** — [Extending Behaviour Through Polymorphism § Composition Over Inheritance](/part2/06_extension#composition-over-inheritance)
 - **Fulfilled** — [Asynchronous Effects and Time § Promises: A Future Value](/part1/07_async#promises-a-future-value)
