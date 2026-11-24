@@ -16,17 +16,15 @@ The running example continues.
 
 The report describes something seen on a screen. Between that screen and the source of the problem are the display, the tracker, an adapter, and a carrier's web service, and the fault could be in any of them. It could also be in none of them. The parcel may have been delivered to a neighbour, and the software may be reporting exactly what the carrier said.
 
-## Fault, Error, Failure
+## Failures and Faults
 
-Three words are often used interchangeably, but it is useful to distinguish them, because debugging moves between them in a particular direction. These meanings are narrower than in [Chapter 8](../part1/08_errors#designing-for-failure), where _error_ and _failure_ both meant an erroneous outcome.
+Two words are often used interchangeably, but it is useful to distinguish them, because debugging moves from one to the other.
 
-A **fault** is the defect in the code, such as a wrong comparison, a missing case, or a misplaced assignment. The fault is what you eventually edit.
+A **failure** is the incorrect behaviour that can be seen from outside the program, such as a wrong answer, a crash, or a parcel marked as delivered. The failure is what a user reports.
 
-An **error** is the incorrect state produced when a fault executes, such as a variable holding a value it should not, or an object in a state its invariant forbids. An error exists while the program runs, and it is usually invisible.
+A **fault** is the defect in the code that caused the failure, such as a wrong comparison, a missing case, or a misplaced assignment. The fault is what you eventually edit.
 
-A **failure** is the incorrect behaviour that can be seen from outside the program, such as a wrong answer, a crash, or a parcel marked as delivered. It is the only one of the three that a user would report.
-
-The three can be far apart, both in the code and in time. A fault can sit in a codebase for years without executing. When it does execute, it produces an error. Later code might correct the error, or the error might be stored and appear days later, or it might pass through several layers before anyone notices. Debugging follows this chain backwards, from the failure you can see to the fault you can fix, and the longer the chain, the harder the search.
+The two can be far apart, both in the code and in time. A fault can sit in a codebase for years without executing. When it does execute, it leaves the program in an incorrect state, such as a variable holding a value it should not, or an object in a state its invariant forbids. That state is usually invisible. Later code might correct it, or it might be stored and appear days later, or it might pass through several layers before anyone notices. Debugging follows this chain backwards, from the failure you can see to the fault you can fix, and the longer the chain, the harder the search.
 
 ```graphviz
 digraph faultChain {
@@ -35,15 +33,15 @@ digraph faultChain {
   edge [fontname = "sans-serif", fontsize = 10];
 
   fault   [label = "Fault\nThe defect in the code"];
-  error   [label = "Error\nInvalid state while running"];
+  state   [label = "Incorrect state\nUsually invisible"];
   failure [label = "Failure\nThe behaviour reported"];
 
-  fault -> error   [label = "Executes"];
-  error -> failure [label = "Surfaces"];
+  fault -> state   [label = "Executes"];
+  state -> failure [label = "Surfaces"];
   failure -> fault [label = "Debugging works backwards", style = dashed, constraint = false];
 }
 ```
-<!-- caption="A fault produces an error, which surfaces as a failure. Debugging travels the chain in the opposite direction." -->
+<!-- caption="A fault produces incorrect state, which surfaces as a failure. Debugging travels the chain in the opposite direction." -->
 
 There might also be no fault at all. A report may describe intended behaviour that the user did not expect, or come from a misunderstanding of what the software promises. The problem may also be in configuration or data rather than in code. The first step includes establishing that the failure is real, and deciding who on the technical team should handle it.
 
@@ -90,7 +88,7 @@ _Logging_ is the form of printing that stays in production code. A deployed syst
 
 Two tools from earlier in the textbook also help with debugging. The _type checker_ eliminates whole categories of fault before the program runs, so a fault that survives compilation is already in a narrower category. The _test suite_ helps localise faults: a failing unit test names the unit, which does most of the search for you. This is another argument for the design advice from [Part 2](../part2/index), and it is why a system of small, independently tested units is faster to debug than one that can only be tested end to end.
 
-_Assertions_, from [Chapter 3](../part1/03_checking-invariants#precondition-violations), are especially useful, because they reduce the distance between a fault and a failure. An assertion turns an error into a failure at the moment the error occurs, before it can spread to an unrelated part of the program. A `Shipment` with an invalid status can be caught where it is created, with a stack trace pointing at that code, instead of being noticed three layers away when something tries to display it.
+_Assertions_, from [Chapter 3](../part1/03_checking-invariants#precondition-violations), are especially useful, because they reduce the distance between a fault and a failure. An assertion turns incorrect state into a failure at the moment it occurs, before it can spread to an unrelated part of the program. A `Shipment` with an invalid status can be caught where it is created, with a stack trace pointing at that code, instead of being noticed three layers away when something tries to display it.
 
 <details class="tooltip ts-tips">
 <summary>Reading a Stack Trace</summary>
@@ -174,7 +172,7 @@ The hypothesis is correct. `"NOT_DELIVERED".includes("DELIVERED")` is `true`, so
 
 Each step narrowed the search considerably. Reproduction removed the user interface, the tracker, and four carriers. Round one ruled out the carrier. Round two ruled out everything except a single function, and turned the bug into a failing test that can strengthen our test suite. Each round was cheap because each hypothesis was precise enough to be checked with one observation.
 
-The fault was not introduced by a recent edit. The substring test had been in the code since it was written, and it gave the right answer for every status the carrier sent until the carrier started sending one it had never sent before. Nothing in our repository changed: the new input was the first to turn the fault into an error. Faults do not have to be recent to appear, and "we did not change anything" is not evidence that the fault is somewhere else.
+The fault was not introduced by a recent edit. The substring test had been in the code since it was written, and it gave the right answer for every status the carrier sent until the carrier started sending one it had never sent before. Nothing in our repository changed: the new input was the first to expose the fault. Faults do not have to be recent to appear, and "we did not change anything" is not evidence that the fault is somewhere else.
 
 ## Fixing the Fault
 
@@ -264,7 +262,7 @@ We talk about video game examples not because we expect you have played them, bu
 
 Each step in this chapter either shortens the chain from fault to failure or searches it systematically. Reproduce the failure, so that it can be triggered on demand and is small enough to reason about. Localise the fault by forming hypotheses and halving the search space. Fix the fault where it is, and ask why it was possible, because the answer often points to a design improvement as well as a correction. Validate the fix with a test that you saw fail first, and with a suite that checks everything else.
 
-Little of this process is new. The properties that make a system quick to debug are the same ones earlier chapters argued for, for other reasons: small units that a failing test can name, low coupling so that the chain of dependencies is short, validation at the edge so that bad data is rejected where it enters rather than misinterpreted three layers later, assertions that make silent errors visible, and a regression suite that can check any fix. None of these were introduced as debugging techniques, but all of them help when something goes wrong.
+Little of this process is new. The properties that make a system quick to debug are the same ones earlier chapters argued for, for other reasons: small units that a failing test can name, low coupling so that the chain of dependencies is short, validation at the edge so that bad data is rejected where it enters rather than misinterpreted three layers later, assertions that make incorrect state visible, and a regression suite that can check any fix. None of these were introduced as debugging techniques, but all of them help when something goes wrong.
 
 <details class="tooltip exercise">
   <summary>Exercise: The Overnight Shift Report</summary>
@@ -288,7 +286,7 @@ function shiftLength(startHour: number, endHour: number): number {
 
 Work through the following:
 
-1. _Separate the three._ Identify the fault, the error, and the failure in this report, and say which of them the supervisor observed.
+1. _Separate the two._ Identify the fault and the failure in this report, and say which of them the supervisor observed.
 2. _Reproduce it._ Write the smallest call that triggers the failure, and state the property of overnight shifts that makes them different from day shifts. Explain what your minimal reproduction has already ruled out.
 3. _Form a hypothesis._ State a hypothesis precise enough to be false, and give the observation that would distinguish it from a competing explanation, such as bad data from the time-clock system.
 4. _Fix the fault._ Correct the defect rather than the reported instance. Then describe other failures that the same fault could cause, which nobody has reported yet.
@@ -354,7 +352,7 @@ describe("shiftLength", () => {
 
 Model answers for the discussion parts.
 
-1. _Separate the three._ The fault is `return endHour - startHour`, which ignores that a shift can cross midnight. The error is the negative length that the call produced and whatever stored it. The failure is the report showing `-17` hours and payroll rejecting the run, and the failure is what the supervisor observed.
+1. _Separate the two._ The fault is `return endHour - startHour`, which ignores that a shift can cross midnight. The failure is the report showing `-17` hours and payroll rejecting the run, and the failure is what the supervisor observed. Between them is the incorrect state: the negative length that the call produced and whatever stored it.
 2. _Reproduce it._ `shiftLength(22, 5)` returns `-17`. Overnight shifts are the ones where `endHour < startHour`. Because two valid hours produce the wrong answer from a pure function, the reproduction has already ruled out the time clock, payroll, and anything about the particular employee or day.
 3. _Form a hypothesis._ "For every pair with `endHour < startHour`, `shiftLength` returns `endHour - startHour`, a negative number, instead of the elapsed `endHour - startHour + 24`." A single such pair returning a positive value would falsify it. To distinguish it from bad time-clock data, call the function directly with `(22, 5)` in a test, where no clock is involved, and read the employee's raw clock record: if it holds `22` and `5`, the data is valid and the function is at fault.
 4. _Fix the fault._ See `shiftLength` above. The same fault produces every overnight shift wrong: `23` to `0` reports `-23` instead of `1`, `16` to `2` reports `-14`, weekly totals that add these are wrong by a multiple of 24, and overtime detection never fires for an overnight shift.
