@@ -1,12 +1,18 @@
 # Debugging Failures and Localizing Faults
 
-<!-- The previous chapter left the tracker in a state where changes are cheap again. This chapter covers the first of the two kinds of change that refactoring prepares for: fixing behaviour that is supposed to work but does not. -->
 
-A bug report is a claim that a system is not behaving as expected. It describes a behaviour somebody observed, but it almost never says where in the source code the problem comes from. Navigating from the bug report to the source of the problem is a skill called **fault localization**.
 
-Debugging differs from writing code in terms of where your task begins. When you write a function, you are in a source code file, and the compiler and the tests tell you when you have made a mistake. When you debug, you start from the end of a series of steps and work backwards towards the _cause_ of the final observed behaviour. You will rarely have a failing test for a reported bug, because if a test had caught the problem, it would never have been released.
+A bug report is a claim that a system is not behaving as expected. It describes what somebody saw, but it almost never says where in the source code the problem comes from. Getting from the report to the source of the problem is a skill called **fault localization**.
 
-Debugging is a process that has four high-level steps, each with techniques that can be learned: reproduce the failure, localize the fault, fix it, and validate that the fix worked. Following these steps systematically usually eases the deubgging process.
+Debugging differs from writing code in where you start. When you write a function, you know where you are, and the compiler and the tests tell you when you have made a mistake. When you debug, you start from the end of a chain of consequences and work backwards towards a cause that may not immediately be clear. You rarely have a failing test for a reported bug. If a test had caught the problem, it should already have been fixed.
+
+Debugging is a process with four steps, each of which you can learn:
+1. reproduce the failure, 
+2. localize the fault, 
+3. fix it, and 
+4. validate that the fix worked without introducing new defects. 
+
+
 
 #### A Parcel That Was Never Delivered
 
@@ -18,11 +24,13 @@ The report describes something a user saw on their screen. Between that screen a
 
 ## Failures and Faults
 
-Two words are often used interchangeably, but it is useful to distinguish them, because debugging moves from one to the other.
+
+_Failure_ and _fault_ are often used interchangeably, but it is useful to distinguish them, because debugging moves from one to the other.
 
 A **failure** is the incorrect behaviour that can be observed from outside the program, such as a wrong answer or a crash. The failure is what a user reports.
 
 A **fault** is the defect in the code that caused the failure, such as a wrong comparison or a missing case. The fault is what you eventually fix.
+
 
 The two can be both temporally and spatially distant. A fault can sit in a codebase for years without executing. When it does execute, it leaves the program in an incorrect state. That state is usually invisible. Other code might correct it automatically, or it might pass through several layers of abstraction before becoming visible. Debugging follows this chain backwards, from the failure you can see to the fault you can fix, and the longer the chain, the harder the process.
 
@@ -43,24 +51,29 @@ digraph faultChain {
 ```
 <!-- caption="A fault produces incorrect state, which surfaces as a failure. Debugging travels the chain in the opposite direction." -->
 
-There might also be no fault at all. A report may describe intended behaviour that the user did not expect, or come from a misunderstanding of what the software is supposed to do. The problem may also be in configuration or data rather than in code. The first step of the debugging process is to establish that the failure is real, and deciding who on the technical team should handle it.
+
+There might also be no fault at all. A "bug" report may describe intended behaviour that the user did not expect, or come from a misunderstanding of what the software promises. The problem may also be in configuration or data rather than in code. The first step includes establishing that the failure is real, and deciding who on the technical team should handle it.
 
 ## Reproduction
 
-The first task when fixing a bug is to reproduce it. Some bugs can be localized from a user's description, which is often vague, but most cannot. To reproduce a bug is to trigger it reliably in your own environment. A reproduction lets you use tools like the debugger, and lets you write a test that fails while the fault is present and passes once it is fixed. Until a failure can be reproduced, most of this chapter cannot be applied, and you cannot tell whether a change fixed it or whether the symptom just did not appear that time. A useful reproduction has two properties: that it is deterministic, and that it is minimal.
+The first task when fixing a bug is to reproduce it. Some bugs can be localized from a user's (often vague) description, but most cannot. To **reproduce** a bug is to trigger it reliably in your own environment. Once you've reproduced a bug, you can examine the code execution in a debugger, and write a test that fails while the fault is present and passes once it is fixed. Reproduction is a precondition to all the rest of this chapter: without reproduction, you cannot tell whether a change fixed the bug or whether the symptom just did not appear that time. 
+
+A useful reproduction has two properties: determinism and minimality.
 
 _Deterministic._ A failure that appears on one run in five is much harder to fix than one that appears every time, because every later experiment gives an unreliable answer. If the failure does not appear, you learn nothing. Nondeterminism usually has one of a few causes:
 
 - _Randomness_ can be passed in as parameters which is the controllability argument from [Chapter 12](../part2/03_encapsulation#designing-for-testability).
 - _Remote calls_ can be replaced with the test doubles from [Chapter 18](./02_consuming_data#testing-without-the-network).
 - _Stale test state_ can be removed with the lifecycle hooks from [Chapter 9](../part1/09_validation#shared-setup).
-- _Concurrency_ is another common and difficult source of nondeterministic failures, but it is mostly beyond the scope of this course.
+- [_Concurrency_](https://en.wikipedia.org/wiki/Concurrent_computing) is a common and difficult source of nondeterministic failures, but it is [mostly](../part1/07_async) beyond the scope of this course.
 
 _Minimal._ Start from whatever reproduces the failure and remove things: fewer inputs, fewer steps. Stop when removing anything else makes the failure disappear.
 
-Having a minimal reproducing example useful even when the original reproduction is already reliable, because minimizing is a form of localization. Every element you remove without losing the failure is a part of the system that does not contain the fault. If a reproduction shrinks from a full application run to a single call to one adapter, the search can be narrowed from the whole program to a few key lines.
+
+Minimizing a reproduction is useful even when the original reproduction is already reliable, because minimizing is a form of localization. Every element you remove without losing the failure is an element you don't have to analyze while debugging. If you shrink a reproduction from a full interaction with an application to a single call to one adapter, you've narrowed the search from the whole program to a few dozen lines, before you have read any code.
 
 For our report, we reproduce the failure by asking the customer a few questions: which parcel, which carrier, and what the screen showed. The answers give us a tracking number, and our minimal reproduction is one call:
+
 
 ```typescript
 const carrier: CarrierCClient = new CarrierCClient("https://api.carrier-c.example");
@@ -70,9 +83,9 @@ const found: Result<Shipment, TrackingError> = await carrier.track("Z2200417");
 
 `TrackingError` is the failure type the library has published since [Chapter 19](./03_api_design#designing-the-failures).
 
-This reproduction has no user interface, no tracker, and no other carriers. The failure still occurs with all of those removed, which is already useful: the problem is either in this adapter or in the carrier it communicated with.
+This reproduction has no user interface, no tracker, and no other carriers. The failure still occurs with all of those removed, which is already useful: the problem is either (1) in this adapter or (2) in the carrier it communicated with.
 
-## Debugging Tools
+### Debugging Tools
 
 Before we search for the parcel's fault, we first discuss the tools we will use. Most debugging tools help to answer one of two questions: what is the state at this point, and how did the program get here?
 
@@ -94,6 +107,7 @@ _Logging_ is the form of printing that stays in production code. A deployed syst
 Two tools from earlier in the textbook also help with debugging. The _type checker_ eliminates categories of faults before the program runs, so a fault that survives compilation is already in a narrower category. The _test suite_ localizes faults: a failing unit test names the unit, which does most of the search for you. This is another argument for the design advice from [Part 2](../part2/index), and it is why a system of small, independently tested units is quicker to debug than one that can only be tested end-to-end.
 
 _Assertions_, from [Chapter 3](../part1/03_checking-invariants#precondition-violations), are especially useful, because they reduce the distance between a fault and a failure. An assertion turns incorrect state into a failure the moment it occurs, before it can spread to an unrelated part of the program. A `Shipment` with an invalid status can be caught where it is created, with a stack trace immediately pointing at the offending code.
+
 
 <details class="tooltip ts-tips">
 <summary>Reading a Stack Trace</summary>
@@ -263,13 +277,14 @@ The [Falador Massacre](https://en.wikipedia.org/wiki/RuneScape#Falador_Massacre)
 
 In this game, a player killed by another player (in PvP) loses most of the items they were carrying. In many MMORPGs, obtaining some items takes many hours, often mapping to days and weeks of real-world time investment, of repetitive gameplay. Thus, losing items unexpectedly, as was possible with this bug, can be devastating.
 
-The bug was that when players were removed from a player-owned house while PvP was enabled for them, PvP stayed enabled. Some players were therefore able to attack other players in areas that were supposed to be safe, which caused a great deal of chaos.
+The _fault_ was that when players were removed from a player-owned house while PvP was enabled for them, PvP stayed enabled. Some players were therefore able to attack other players in areas that were supposed to be safe, which caused a great deal of chaos.
 
-The bug happened in the middle of the night for the game's developers. The developer on call [deployed a simple fix](https://youtu.be/ukbkU_dPKrU?si=A1QEkVbFlnZG5Jn_&t=3560): houses could no longer turn on PvP, and the PvP state no longer had any effect. This disabled significant PvP features in the game, but disabling them cost less than letting the "massacre" continue.
+The _failure_ was reported in the middle of the night for the game's developers. The developer on call identified the fault and [deployed a simple fix](https://youtu.be/ukbkU_dPKrU?si=A1QEkVbFlnZG5Jn_&t=3560): houses could no longer turn on PvP, and the PvP state no longer had any effect. This disabled significant PvP features in the game, but disabling them cost less than letting the "massacre" continue.
 
 The game code was later updated to [add a notion of "areas" to the game](https://youtu.be/ukbkU_dPKrU?si=l1K9BgG4NC9AYwYT&t=3650). Areas could be checked to ensure that states such as PvP were not enabled where they should not be.
 
-We talk about video game examples not because we expect you have played them, but because they are large, complex, and often poorly designed pieces of software whose high-level meaning can be explained easily. An example of another bug that required a devastating fix is the [Corrupted Blood](https://en.wikipedia.org/wiki/Corrupted_Blood_incident) incident.
+
+(We talk about video game examples not because we expect you have played them, but because they are large, complex, and often, poorly designed, pieces of software whose high-level meaning can be explained easily. An example of another bug that required a devastating fix is the [Corrupted Blood](https://en.wikipedia.org/wiki/Corrupted_Blood_incident) incident.)
 
 </details>
 
