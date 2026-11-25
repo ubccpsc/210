@@ -6,7 +6,7 @@ Adding a feature draws on everything in Part 3. Most of the work is reasoning: w
 
 #### Two Requests
 
-The tracker has been in production for a year, and two requests arrive in the same week.
+Our tracker has been in production for a year, and two requests arrive in the same week.
 
 > As a shopper, I want parcels from a sixth carrier to appear alongside the others, so that I still have one place to look.
 
@@ -20,7 +20,12 @@ A request states a need. It is neither a specification nor a design, and treatin
 
 People who make requests usually cannot judge what they will cost, and the reason is structural rather than a failure of communication. Software has no physical form that shows its structure. If someone asks to move a wall in a building, everyone in the room understands that this is a bigger request than moving a desk, because the difference is visible. Code gives no such cue. As text, every line looks equally easy to edit, and nothing on the page distinguishes a line that forty other places depend on from a line that nothing calls. A request that cuts across the structure of a design looks exactly like one that follows it.
 
+<details class="tooltip deep-dive">
+<summary>Changeability and Invisibility</summary>
+
 Software can be changed in ways a building cannot, and that is its main advantage. But being able to edit any line is not the same as being able to change any behaviour cheaply, and the difference is invisible from outside the code. Fred Brooks, whose distinction between essential and accidental complexity appeared in the [introduction](../why-this-course), counted both of these properties among the essential difficulties of building software. He called them _changeability_, because software is always under pressure to change, and _invisibility_, because its structure cannot be seen. Better tools will not remove either one, because both come from software having no physical form.
+
+</details>
 
 In practice, part of receiving a request is making its cost visible to the person who asked, as early as possible. Only someone who knows the code can tell them that one request fits what the system was built to accommodate and another does not.
 
@@ -53,17 +58,28 @@ The following approaches are listed roughly in order of how much they return for
 
 _Follow one real path from start to finish._ Pick one operation a user performs, start at the entry point, and trace it through to where it produces a result. One complete path teaches you more about how a system is organised than an hour of reading files in whatever order the editor lists them.
 
-_Read the tests._ A test suite is an executable description of what the code promises, written by somebody who had to be specific. Tests also show the intended way to construct objects and use the system, which is often easier to learn from than the implementation.
+_Read the tests._ A test suite is an executable description of what the code promises, written by somebody who had to be specific. Tests also show the intended way to construct objects and use the system, which is often easier to learn from than the implementation. The tracker's tests show that a `ParcelTracker` is built from a list of carriers, and that a `StubCarrier` can stand in for a real one.
 
 _Read the types and the data first._ The shapes of the data constrain what the logic can do. A `Shipment` with three fields tells you a lot about what the tracker can and cannot report before you read a single function.
 
-_Follow the dependency graph, not the file listing._ The dependency arrows from Chapter 17 show what depends on what, and that is the structure to learn.
+_Follow the dependency graph, not the file listing._ The dependency arrows from [Chapter 17](./01_coupling#what-coupling-is) show what depends on what, and that is the structure to learn. For the tracker, the graph is small: `ParcelTracker` depends on `CarrierClient`, and each adapter implements it.
 
-_Run it in the debugger._ Watching one path execute with real values corrects a mental model faster than reading does.
+_Run it in the debugger._ Watching one path execute with real values corrects a mental model faster than reading does. The previous chapter's reproduction, a single call to `carrier.track`, is a convenient place for a first breakpoint.
 
-Here is the first approach applied to the tracker. The screen calls `tracker.locate({ trackingNumber: "Z2200417" })`. The request names no carrier, so `locate` asks each `CarrierClient` in its list in turn. Each of those is an adapter for one carrier's web service. The one that recognises this number, `CarrierCClient`, builds a URL, calls `fetch`, and converts the response, mapping the carrier's own status words to the `ShipmentStatus` values the rest of the system uses. The adapter returns a `Result<Shipment, TrackingError>`, and `locate` returns the first successful result, or one of the `TrackingError` cases documented in Chapter 19 when no carrier has the parcel.
+Here is the first approach applied to our tracker. Recall from [Chapter 19](./03_api_design#easy-to-use-hard-to-misuse) that a client looks a parcel up by passing `locate` a request. Following one lookup from the screen to the carrier takes four steps:
 
-After four files, there is already enough to work with. A carrier is named in exactly two places: its adapter, and the list of carriers in `createTracker`. A raw status is converted to a `ShipmentStatus` in one place for each carrier, inside its adapter. A shipment first exists as a value this system understands when an adapter returns it, which is the earliest point where anything about it could be noticed. The first request will only need the first of these facts. The second request needs the third.
+1. The screen calls `tracker.locate({ trackingNumber: "Z2200417" })`.
+2. The request names no carrier, so `locate` asks each `CarrierClient` in its list in turn. Each of those is an adapter for one carrier's web service.
+3. The adapter that recognizes this number, `CarrierCClient`, builds a URL, calls `fetch`, and converts the response, mapping the carrier's own status words to the `ShipmentStatus` values the rest of the system uses.
+4. The adapter returns a `Result<Shipment, TrackingError>`, and `locate` returns the first successful result, or one of the `TrackingError` cases from [Chapter 19](./03_api_design#designing-the-failures) when no carrier has the parcel.
+
+After four files, we already have enough to work with:
+
+- A carrier is named in exactly two places: its adapter, and the list of carriers in `createTracker`.
+- A raw status is converted to a `ShipmentStatus` in one place for each carrier, inside its adapter.
+- A shipment first exists as a value this system understands when an adapter returns it, which is the earliest point where anything about it could be noticed.
+
+The first request will only need the first of these facts. The second request needs the third.
 
 Two habits help. First, when a test and a comment disagree, trust the test, because a comment can be years out of date but a passing test describes what the code does today. Second, when you notice the code disagreeing with its documentation, write the disagreement down. It is either a defect or a place where the documentation misled you, and both matter to the next reader.
 
@@ -82,7 +98,7 @@ Once you have a model of the relevant parts, the design question is where the ch
 
 Such a place is an extension point, the term [Chapter 16](../part2/07_ocp#the-axis-of-change) used for a place where behaviour can be varied by adding code rather than editing existing code. That chapter looked at extension points from the point of view of the person creating one, who chooses an axis of change and decides whether the indirection is justified. This chapter looks at them from the point of view of someone who has inherited a design and needs to know what changes it will accept. Much of the industry literature uses a closely related term, _seam_, for a place where behaviour can be changed without editing the code around it.
 
-The last two parts of the textbook have built several kinds of extension point, and they are easy to recognise:
+The last two parts of the textbook have built several kinds of extension point, and they are easy to recognize:
 
 - An interface with more than one implementation. New behaviour is added as a new implementation.
 - An abstract class with subclasses, where the base class defines a sequence of steps and leaves some of them for subclasses to fill in.
@@ -126,9 +142,9 @@ const tracker: ParcelTracker = new ParcelTracker([
 ]);
 ```
 
-As a diff, the change is one new file, one line added where the list of carriers is assembled, and one new test file. `ParcelTracker`, the existing adapters and the existing tests are all unchanged, and the existing suite still passes. The Open/Closed Principle from Chapter 16 promised this benefit. The system grew by addition alone, and the only new tests are the ones for the new carrier.
+As a diff, the change is one new file, one line added where the list of carriers is assembled, and one new test file. `ParcelTracker`, the existing adapters and the existing tests are all unchanged, and the existing suite still passes. The Open/Closed Principle from [Chapter 16](../part2/07_ocp#open-and-closed) promised this benefit. The system grew by addition alone, and the only new tests are the ones for the new carrier.
 
-The work that made this change cheap was done earlier, when somebody defined `CarrierClient` instead of calling carriers directly, and when Chapter 20's refactoring moved the status vocabulary back out of the middle of the system.
+The work that made this change cheap was done earlier, when we defined `CarrierClient` instead of calling carriers directly, and when [Chapter 20](./04_refactoring#working-in-small-steps)'s refactoring moved the status vocabulary back out of the middle of the system.
 
 ## No Extension Point
 
@@ -136,18 +152,14 @@ The notification request has no such extension point, and this is the usual case
 
 ### Forcing the Change In
 
-The tracker has no concept of a shipment being watched over time, no point at which "something happened to this parcel" is treated as an event, and no place from which a message could be sent. One obvious way to force the feature in is:
+Our tracker has no concept of a shipment being watched over time, no point at which "something happened to this parcel" is treated as an event, and no place from which a message could be sent. One obvious way to force the feature in is:
 
 ```typescript
 class ParcelTracker {
     public async locate(request: TrackingRequest, notifier?: Notifier): Promise<Result<Shipment, TrackingError>> {
         // ... find the shipment as before ...
-        if (notifier !== undefined) {
-            if (found.ok === true) {
-                if (found.value.status === "exception") {
-                    notifier.send("Your parcel is delayed");
-                }
-            }
+        if (notifier !== undefined && found.ok === true && found.value.status === "exception") {
+            notifier.send("Your parcel is delayed");
         }
         return found;
     }
@@ -156,9 +168,11 @@ class ParcelTracker {
 
 This works, but it contains three separate mistakes.
 
-First, it gives `locate` a side effect. **Command-query separation** is the guideline that a method should either return a value or change something, but not both: a query answers a question and changes nothing, and a command changes something and returns nothing. `locate` was a query, so it could be called twice, from a test, in a loop, or not at all, and nothing visible changed. Now any caller that passes a `Notifier` sends a message every time it looks up a delayed parcel. If the screen that refreshes every thirty seconds passes one, the shopper is told about the same delay every thirty seconds.
+First, it gives `locate` a side effect. **Command-query separation** is the guideline that a method should either return a value or change something, but not both: a query answers a question and changes nothing, and a command changes something and returns nothing.
 
-Second, it passes a parameter through code that does not need it. Any code that wants notifications has to get a `Notifier` to every place that calls `locate`, so code between the screen and the tracker has to carry a `Notifier` it never uses. This is how the scattering from Chapter 17 is created, one parameter at a time.
+`locate` was a query, so we could call it twice, from a test, in a loop, or not at all, and nothing visible changed. Now any caller that passes a `Notifier` sends a message every time it looks up a delayed parcel. If the screen that refreshes every thirty seconds passes one, the shopper is told about the same delay every thirty seconds.
+
+Second, it passes a parameter through code that does not need it. Any code that wants notifications has to get a `Notifier` to every place that calls `locate`, so code between the screen and the tracker has to carry a `Notifier` it never uses. This is how the scattering from [Chapter 17](./01_coupling#cohesion-and-coupling) is created, one parameter at a time.
 
 Third, it puts the delay rule in the wrong place. What counts as delayed is a policy, and it now lives inside the tracker's lookup method, where the next policy question will be added beside it as another conditional. When a feature seems to require a query to start changing things, that change usually belongs somewhere else.
 
@@ -166,7 +180,7 @@ Third, it puts the delay rule in the wrong place. What counts as delayed is a po
 
 The alternative is the sequence [Chapter 20](./04_refactoring#refactoring-as-preparation) recommended: make the change easy, then make the easy change. That means two pieces of work in a deliberate order, and the first one adds no feature at all.
 
-_First, create the extension point._ The tracker needs a place where it announces each shipment it observes, and anything interested in those observations needs a contract to implement. This is the `PlayObserver` design from [Chapter 17](./01_coupling#dependency-cycles), used here so that the tracker does not need to know what anyone does with the information:
+_First, create the extension point._ Our tracker needs a place where it announces each shipment it observes, and anything interested in those observations needs a contract to implement. This is the `PlayObserver` design from [Chapter 17](./01_coupling#cycle-fix-2-invert-one-direction-with-an-interface), used here so that the tracker does not need to know what anyone does with the information:
 
 ```typescript
 /**
@@ -254,9 +268,18 @@ class DelayAlerter implements ShipmentObserver {
 
 The only other change is one line at the composition root, where the `DelayAlerter` is passed in alongside the carriers.
 
-Compare this result with the version that was forced in. `locate` no longer decides whether to send anything. It announces what it observed, and a repeated lookup of a delayed parcel does not produce repeated messages, because `DelayAlerter` remembers what it has already reported. No caller carries a `Notifier` it does not use. The delay policy lives in one class named for it, so changing what counts as delayed means editing that class and nothing else. The tracker knows nothing about notifications, so the next observer, such as an analytics recorder or an audit log, is another new class, registered at the composition root.
+Compare this result with the version we forced in:
 
-This design leaves two things to settle. First, a delay is noticed only when something looks the parcel up. If only the shopper's screen calls `locate`, the shopper learns of a delay while already looking at it, so the composition root also needs a scheduled job that looks up each tracked parcel, for example every hour. Second, once a `DelayAlerter` is registered, a lookup can send a message, so `locate` is no longer a pure query. What the observer design changes is who owns that effect and how often it happens: no caller asks for a message, and looking up a delayed parcel once or a hundred times sends one message.
+- `locate` no longer decides whether to send anything. It announces what it observed.
+- A repeated lookup of a delayed parcel does not produce repeated messages, because `DelayAlerter` remembers what it has already reported.
+- No caller carries a `Notifier` it does not use.
+- The delay policy lives in one class named for it, so changing what counts as delayed means editing that class and nothing else.
+- The tracker knows nothing about notifications, so the next observer, such as an analytics recorder or an audit log, is another new class, registered at the composition root.
+
+This design leaves two things to settle:
+
+- _A delay is noticed only when something looks the parcel up._ If only the shopper's screen calls `locate`, the shopper learns of a delay while already looking at it, so the composition root also needs a scheduled job that looks up each tracked parcel, for example every hour.
+- _`locate` is no longer a pure query._ Once a `DelayAlerter` is registered, a lookup can send a message. What the observer design changes is who owns that effect and how often it happens: no caller asks for a message, and looking up a delayed parcel once or a hundred times sends one message.
 
 `RecordingNotifier` from [Chapter 14](../part2/05_boundaries#test-doubles) and `StubCarrier` from [Chapter 18](./02_consuming_data#testing-without-the-network) let the feature be tested without a network or a real channel:
 
@@ -278,7 +301,11 @@ describe("DelayAlerter", () => {
 });
 ```
 
-As a diff, the notification feature is larger than the new carrier was. The new carrier changed no existing class. This feature adds a new contract and edits `ParcelTracker` to announce observations through it, although no existing caller or test has to change, because the new constructor parameter has a default value. That structural work changes no behaviour, so it goes in its own commit, separate from the commit that adds `DelayAlerter`. As Chapter 20 argued, two commits that each make one kind of change can be reviewed, and if necessary reverted, one at a time. For clients of the published library, the change adds one export and one optional parameter. Like the new operations and optional parameters in [Chapter 19](./03_api_design#breaking-changes)'s table, both are safe additions, so the change ships as a minor version. The forced-in version would also have passed that test, so compatibility alone does not show that a change is well designed.
+As a diff, the notification feature is larger than the new carrier was. The new carrier changed no existing class. This feature adds a new contract and edits `ParcelTracker` to announce observations through it, although no existing caller or test has to change, because the new constructor parameter has a default value.
+
+That structural work changes no behaviour, so it goes in its own commit, separate from the commit that adds `DelayAlerter`. As [Chapter 20](./04_refactoring#what-refactoring-is) argued, two commits that each make one kind of change can be reviewed, and if necessary reverted, one at a time.
+
+For clients of the published library, the change adds one export and one optional parameter. Like the new operations and optional parameters in [Chapter 19](./03_api_design#breaking-changes)'s table, both are safe additions, so the change ships as a minor version. The forced-in version would also have passed that test, so compatibility alone does not show that a change is well designed.
 
 <details class="tooltip deep-dive">
 <summary>When the Refactoring Is Too Large</summary>
@@ -287,7 +314,7 @@ The advice to refactor first assumes that the refactoring is in proportion to th
 
 This situation requires a decision, and the decision should be made deliberately rather than discovered halfway through the work. The options are to build the feature awkwardly and record the debt, to schedule the restructuring as its own piece of work with the feature waiting for it, or to decline the feature until something else makes the restructuring worthwhile.
 
-Whichever option you choose, make the choice visible. Taking the awkward route knowingly, with the reason written down where the next person will find it, is ordinary engineering. Taking it because nobody considered the alternative is how a system ends up in the state described at the start of Chapter 20.
+Whichever option you choose, make the choice visible. Taking the awkward route knowingly, with the reason written down where the next person will find it, is ordinary engineering. Taking it because nobody considered the alternative is how a system ends up in the state described at the start of [Chapter 20](./04_refactoring).
 
 </details>
 
@@ -318,7 +345,7 @@ stop
 ```
 <!-- caption="Adding a feature. The design either anticipated the change or it must first be made to. The red step changes structure without adding behaviour; the green step adds behaviour without changing working code." -->
 
-Before changing anything, find out who else is affected. Other callers, other teams, and anything published all limit what you can do. If the change affects a published API, apply the compatibility analysis from [Chapter 19](./03_api_design#breaking-changes) before writing any code.
+Before changing anything, find out who else is affected. Other callers, other teams, and anything published all limit what you can do. For our tracker, that is every client of the published library, which is why the observer parameter was added with a default value. If the change affects a published API, apply the compatibility analysis from [Chapter 19](./03_api_design#breaking-changes) before writing any code.
 
 Then break the work into steps that each leave the system working and tested, as Chapter 20 did for structural change. Do the uncertain parts early, while there is still time to change approach. If the delay rule turns out to need data the carriers do not provide, it is much better to discover that on the first afternoon than the last.
 
@@ -328,11 +355,11 @@ Working code is only part of a finished feature, and features are often shipped 
 
 - The new behaviour has tests, including tests for its failure cases. What happens when the notification channel is unavailable is part of the feature.
 - The whole regression suite passes.
-- Documentation and contracts are updated. If a class gained state, its invariant is stated. If a published surface changed, its documentation changed with it.
-- No new code smells were introduced, by the standards of Chapter 20.
+- Documentation and contracts are updated. If a class gained state, as `DelayAlerter` did with its record of each parcel's last status, its invariant is stated. If a published surface changed, its documentation changed with it.
+- No new code smells were introduced, by the standards of [Chapter 20](./04_refactoring#reading-the-symptoms).
 - The next feature is not harder because of this one.
 
-The last criterion distinguishes a feature that was added cleanly from one that was forced in. The tracker now has an observer extension point it did not have before, so the next request of this kind will be cheap. If the notification had been forced in as a parameter and a conditional, the system would have been slightly worse afterwards, and the next request slightly more expensive. Repeated over many features, this is how a codebase becomes one that nobody wants to work in.
+The last criterion distinguishes a feature that was added cleanly from one that was forced in. Our tracker now has an observer extension point it did not have before, so the next request of this kind will be cheap. If we had forced the notification in as a parameter and a conditional, the system would have been slightly worse afterwards, and the next request slightly more expensive. Repeated over many features, this is how a codebase becomes one that nobody wants to work in.
 
 #### What This Was All For
 

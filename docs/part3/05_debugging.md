@@ -74,26 +74,26 @@ This reproduction has no user interface, no tracker, and no other carriers. The 
 
 ## Debugging Tools
 
-Before we search for the parcel's fault, here are the tools the search will use. Most debugging tools answer one of two questions: what is the state at this point, and how did the program get here?
+Before we search for the parcel's fault, we first discuss the tools we will use. Most debugging tools help to answer one of two questions: what is the state at this point, and how did the program get here?
 
-_The debugger_, which [Chapter 6](../part1/06_state-mutation#state-gives-loops-a-memory) introduced, answers both. A breakpoint pauses the program at a line and lets you inspect every variable in scope, which is the most direct way to test a hypothesis about state. Stepping moves through the program one line at a time, either over a call or into it, so you can follow a value as it changes. A conditional breakpoint pauses only when an expression is true, which makes it practical to catch the one parcel out of four hundred that goes wrong.
+_The debugger_, introduced in [Chapter 6](../part1/06_state-mutation#state-gives-loops-a-memory), is useful for both. A breakpoint pauses the program at a line and lets you inspect every variable in scope, which is the most direct way to test a hypothesis about state. Stepping moves through the program one line at a time, either over a call or into it, so you can follow a value as it changes. A conditional breakpoint pauses only when an expression is true, which makes it practical to catch the one parcel out of four hundred that goes wrong.
 
 <details class="tooltip link-110">
 <summary>The Stepper Was a Debugger</summary>
 
 The stepper in CPSC 110 let you watch an expression evaluate one step at a time, showing each intermediate form on the way to a value. It was a teaching tool, but it was also the first debugger you used. When a function produced the wrong answer, stepping showed you the point where the value stopped being what you expected.
 
-The debugger in this chapter does the same job in harder conditions. The stepper could show every step, because ISL programs were small and had no mutable state. A debugger works on a running system with mutable state, many nested calls, and libraries you did not write. It cannot show everything, so you have to choose where to look. The habit the stepper taught still applies: when a value is wrong, find the earliest point at which it is wrong, and look at what happened immediately before.
+The debugger in this chapter does the same job in more complex conditions. The stepper could show every step, because ISL programs were small and had no mutable state. A debugger works on a running system with mutable state, many nested calls, and libraries you did not write. It cannot show everything, so you have to choose where to look. The skill the stepper taught is still the same: when a value is wrong, find the earliest point at which it is wrong, and look at what happened immediately before.
 
 </details>
 
-_Print statements_ give a rough answer to the first question. They remain widely used because they are quick and work everywhere, including places a debugger cannot easily reach. Their output is noisy, though, and adding them changes the program's timing, which can move or hide a failure that depends on timing. They are also easy to forget, because nothing fails when one is left behind: the tests still pass, and the only symptom is output nobody asked for, which makes the important messages harder to notice. Remove them as part of the fix, and prefer the debugger where it is available, because a breakpoint leaves nothing behind.
+_Print statements_ provide a rough answer to the first question (what is the state at this point). They remain widely used because they are quick and work everywhere, including places a debugger cannot easily reach. Their output is noisy though, and they are frequently left behind after a change which makes the important messages harder to notice. Remove them as part of the fix, and prefer the debugger where it is available.
 
 _Logging_ is the form of printing that stays in production code. A deployed system cannot be paused and stepped through, so the only information available afterwards is whatever the program recorded while it ran. Deciding what to log is therefore a design decision, made long before any bug report arrives. Had our tracker logged each carrier's response, we could read what carrier C sent for this parcel without asking the customer to try again.
 
-Two tools from earlier in the textbook also help with debugging. The _type checker_ eliminates whole categories of fault before the program runs, so a fault that survives compilation is already in a narrower category. The _test suite_ helps localize faults: a failing unit test names the unit, which does most of the search for you. This is another argument for the design advice from [Part 2](../part2/index), and it is why a system of small, independently tested units is faster to debug than one that can only be tested end to end.
+Two tools from earlier in the textbook also help with debugging. The _type checker_ eliminates categories of faults before the program runs, so a fault that survives compilation is already in a narrower category. The _test suite_ localizes faults: a failing unit test names the unit, which does most of the search for you. This is another argument for the design advice from [Part 2](../part2/index), and it is why a system of small, independently tested units is quicker to debug than one that can only be tested end-to-end.
 
-_Assertions_, from [Chapter 3](../part1/03_checking-invariants#precondition-violations), are especially useful, because they reduce the distance between a fault and a failure. An assertion turns incorrect state into a failure at the moment it occurs, before it can spread to an unrelated part of the program. A `Shipment` with an invalid status can be caught where it is created, with a stack trace pointing at that code, instead of being noticed three layers away when something tries to display it.
+_Assertions_, from [Chapter 3](../part1/03_checking-invariants#precondition-violations), are especially useful, because they reduce the distance between a fault and a failure. An assertion turns incorrect state into a failure the moment it occurs, before it can spread to an unrelated part of the program. A `Shipment` with an invalid status can be caught where it is created, with a stack trace immediately pointing at the offending code.
 
 <details class="tooltip ts-tips">
 <summary>Reading a Stack Trace</summary>
@@ -119,6 +119,8 @@ A more deliberate approach follows the same pattern as a scientific experiment:
 
 Stating the prediction before observing stops you from accepting a result that does not distinguish between explanations. "The adapter is returning the wrong status" is not a useful hypothesis, because almost any observation is consistent with it. "The adapter maps the carrier's `NOT_DELIVERED` to `delivered`" is useful, because it predicts one specific value from one specific call.
 
+### Narrowing the Search
+
 Several techniques can narrow the search:
 
 _Follow the dependencies._ The failing value is a status. It was displayed by the user interface, which got it from the tracker, which got it from an adapter, which derived it from a carrier's response. That chain is the dependency arrows from [Chapter 17](./01_coupling#what-coupling-is), followed from the user interface in the direction they point, and it lists every place the wrong value could have come from. This is a practical benefit of low coupling. In a loosely coupled system, the chain is short and the search covers one module. In a tightly coupled system, the arrows lead everywhere and the search covers the whole program.
@@ -139,6 +141,8 @@ Pick a commit where the failure does not occur and one where it does. Check out 
 Bisecting finds the commit where the behaviour changed, which is usually, but not always, where the fault is. A commit can expose a fault that was already present.
 
 </details>
+
+### Two Rounds on the Parcel
 
 For the parcel, the reproduction has already narrowed our search to one adapter. Recall from [Chapter 20](./04_refactoring#working-in-small-steps) that each adapter now converts its carrier's status words itself, in a `toStatus` of its own. Carrier C's is a function in the same file as the class instead of a private method, so that a test can call it directly:
 
@@ -201,6 +205,8 @@ _What else could this fault cause?_ One fault usually causes several failures, a
 _Where is the fault?_ The failure appeared in the display, but the display is not wrong, because it showed what it was given. The fault is in the conversion, and that is where the fix belongs. Fixing a symptom where it was observed, rather than where it was caused, tends to leave the fault in place and add a special case on top of it.
 
 _Why was this fault possible?_ The substring test matched an open-ended set of strings to a fixed set of meanings, which cannot be correct in general, because the carrier can always introduce a status we have never seen. The real fix is to match exactly against the statuses the carrier documents, and to reject anything unrecognized rather than guessing. The same guess is in every adapter. Each `toStatus` that [Chapter 20](./04_refactoring#working-in-small-steps) moved into an adapter still ends with `return "in-transit"`, because that refactoring had to preserve behaviour. Each adapter gets the same fix, as its own change, with a failing test first.
+
+### Writing the Test First
 
 Before changing any code, we turn the check from round two into a permanent test, which is why it was worth narrowing the reproduction down to a single function. The test states the correct answer, which the round-two check did not:
 
