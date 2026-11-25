@@ -1,12 +1,18 @@
 # Debugging and Fault Localisation
 
-The previous chapter left the tracker in a state where changes are cheap again. This chapter covers the first of the two kinds of change that refactoring prepares for: fixing behaviour that is supposed to work but does not.
+We motivated refactoring as a preparation step for _fixing bugs_ and _adding features_. In this chapter, we cover _fixing bugs_.
 
-A bug report is a claim that a system is not behaving as expected. It describes what somebody saw, and it almost never says where in the source code the problem comes from. Getting from the report to the source of the problem is a skill called **fault localisation**.
+A bug report is a claim that a system is not behaving as expected. It describes what somebody saw, but it almost never says where in the source code the problem comes from. Getting from the report to the source of the problem is a skill called **fault localisation**.
 
-Debugging differs from writing code in where you start. When you write a function, you know where you are, and the compiler and the tests tell you when you have made a mistake. When you debug, you start from the end of a chain of consequences and work backwards towards a cause you cannot see. The code may have been correct yesterday, and it may have been written by somebody else. You also rarely have a failing test for a reported bug. If a test had caught the problem, it would already have been fixed.
+Debugging differs from writing code in where you start. When you write a function, you know where you are, and the compiler and the tests tell you when you have made a mistake. When you debug, you start from the end of a chain of consequences and work backwards towards a cause that may not immediately be clear. You rarely have a failing test for a reported bug. If a test had caught the problem, it should already have been fixed.
 
-Debugging is a process more than a talent. It has four steps, each with techniques that can be learned: reproduce the failure, localise the fault, fix it, and validate that the fix worked without introducing new defects. Engineers who debug quickly usually follow these steps systematically.
+Debugging is a process, not an innate talent. It has four steps, which you can learn:
+1. reproduce the failure, 
+2. localise the fault, 
+3. fix it, and 
+4. validate that the fix worked without introducing new defects. 
+
+Engineers who debug quickly usually follow these steps systematically.
 
 #### A Parcel That Was Never Delivered
 
@@ -18,7 +24,7 @@ The report describes something seen on a screen. Between that screen and the sou
 
 ## Fault, Error, Failure
 
-Three words are often used interchangeably, but it is useful to distinguish them, because debugging moves between them in a particular direction. These meanings are narrower than in [Chapter 8](../part1/08_errors#designing-for-failure), where _error_ and _failure_ both meant an erroneous outcome.
+Three words are often used interchangeably, but in this chapter we will distinguish them, because it helps us talk about debuggin precisely. These meanings are narrower than in [Chapter 8](../part1/08_errors#designing-for-failure), where _error_ and _failure_ both meant an erroneous outcome.
 
 A **fault** is the defect in the code, such as a wrong comparison, a missing case, or a misplaced assignment. The fault is what you eventually edit.
 
@@ -26,7 +32,7 @@ An **error** is the incorrect state produced when a fault executes, such as a va
 
 A **failure** is the incorrect behaviour that can be seen from outside the program, such as a wrong answer, a crash, or a parcel marked as delivered. It is the only one of the three that a user would report.
 
-The three can be far apart, both in the code and in time. A fault can sit in a codebase for years without executing. When it does execute, it produces an error. Later code might correct the error, or the error might be stored and appear days later, or it might pass through several layers before anyone notices. Debugging follows this chain backwards, from the failure you can see to the fault you can fix, and the longer the chain, the harder the search.
+The three can be far apart, both in the code and in time. A fault can sit in a codebase for years without executing. When it does execute, it produces an error. Later code might correct the error, or the error might be stored and appear days later, or it might pass through several layers before anyone notices. Debugging follows this chain backwards, from the failure you can see to the fault you can fix. 
 
 ```graphviz
 digraph faultChain {
@@ -45,19 +51,24 @@ digraph faultChain {
 ```
 <!-- caption="A fault produces an error, which surfaces as a failure. Debugging travels the chain in the opposite direction." -->
 
-There might also be no fault at all. A report may describe intended behaviour that the user did not expect, or come from a misunderstanding of what the software promises. The problem may also be in configuration or data rather than in code. The first step includes establishing that the failure is real, and deciding who on the technical team should handle it.
+There might also be no fault at all. A "bug" report may describe intended behaviour that the user did not expect, or come from a misunderstanding of what the software promises. The problem may also be in configuration or data rather than in code. The first step includes establishing that the failure is real, and deciding who on the technical team should handle it.
 
 ## Reproduction
 
-The first task when fixing a bug is to reproduce it. Some bugs can be localised from a user's description, which is often vague, but most cannot. To reproduce a bug is to trigger it reliably in your own environment. A reproduction lets you use tools like the debugger, and lets you write a test that fails while the fault is present and passes once it is fixed. Until a failure can be reproduced, most of this chapter cannot be applied, and you cannot tell whether a change fixed it or whether the symptom just did not appear that time. A useful reproduction has two properties.
+The first task when fixing a bug is to reproduce it. Some bugs can be localised from a user's (often vague) description, but most cannot. To __reproduce__ a bug is to trigger it reliably in your own environment. Once you've reproduced a bug, you can examine the code execution in a debugger, and write a test that fails while the fault is present and passes once it is fixed. Reproduction is a precondition to all the rest of this chapter: without reproduction, you cannot tell whether a change fixed the bug or whether the symptom just did not appear that time. 
 
-_It should be deterministic._ A failure that appears on one run in five is much harder to fix than one that appears every time, because every later experiment gives an unreliable answer. If the failure does not appear, you learn nothing. Nondeterminism usually has one of a few causes, and each has a standard fix. Time and randomness can be passed in as parameters rather than read from a global source, which is the controllability argument from [Chapter 12](../part2/03_encapsulation#designing-for-testability). Network calls can be replaced with the test doubles from [Chapter 18](./02_consuming_data#testing-without-the-network). State left over from an earlier test can be removed with the lifecycle hooks from [Chapter 9](../part1/09_validation#shared-setup). Concurrency is another common and difficult source of nondeterministic failures, but it is mostly beyond the scope of this course.
+A useful reproduction has two properties.
 
-_It should be minimal._ Start from whatever reproduces the failure and remove things: fewer inputs, fewer steps, fewer parcels, or one carrier instead of five. Stop when removing anything else makes the failure disappear.
+1. _It should be deterministic._ A deterministic reproduction produces the same result every time you run it. A failure that appears on one run in five is much harder to fix than one that appears every time, because every later experiment gives an unreliable answer. If the failure does not appear, you learn nothing. Nondeterminism usually has one of a few causes, and each has a standard fix:
+	- Time and randomness can be passed in as parameters rather than read from a global source, which is the controllability argument from [Chapter 12](../part2/03_encapsulation#designing-for-testability). 
+	- Network calls can be replaced with the test doubles from [Chapter 18](./02_consuming_data#testing-without-the-network). 
+	- State left over from an earlier test can be removed with the lifecycle hooks from [Chapter 9](../part1/09_validation#shared-setup). 
+	- [Concurrency](https://en.wikipedia.org/wiki/Concurrent_computing) is very common and difficult source of nondeterminism, but it is [mostly](../part1/07_async.html)  beyond the scope of this course.
 
-Minimising a reproduction is useful even when the original reproduction is already reliable, because minimising is a form of localisation. Every element you remove without losing the failure is a part of the system that does not contain the fault. If a reproduction shrinks from a full application run to a single call to one adapter, the search has narrowed from the whole program to a few dozen lines, before you have read any code.
+2. _It should be minimal._ Start from whatever reproduces the failure and remove things: fewer inputs, fewer steps, fewer parcels, or one carrier instead of five. Stop when removing anything else makes the failure disappear.
+	- Minimising a reproduction is useful even when the original reproduction is already reliable, because minimising is a form of localisation. Every element you remove without losing the failure is a part of the system that does not contain the fault. If a reproduction shrinks from a full application run to a single call to one adapter, the search has narrowed from the whole program to a few dozen lines, before you have read any code.
 
-For our report, reproducing the failure requires asking the customer a few questions: which parcel, which carrier, and what the screen showed. The answers give a tracking number, and the minimal reproduction is one call:
+For our report, reproducing the failure requires asking the customer a few questions: which parcel, which carrier, and what the screen showed. Let's assume we get from the customer a tracking number, and we manage to make a minimal reproduction in one call:
 
 ```typescript
 const carrier: CarrierCClient = new CarrierCClient("https://api.carrier-c.example");
@@ -65,13 +76,13 @@ const found: Result<Shipment, TrackingError> = await carrier.track("Z2200417");
 // found.value.status is "delivered"; the parcel is sitting in a depot
 ```
 
-This reproduction has no user interface, no tracker, and no other carriers. The failure still occurs with all of those removed, which is already useful: the problem is in this adapter, or in what the carrier told it.
+This reproduction has no user interface, no tracker, and no other carriers. The failure still occurs with all of those removed, so we already know the problem is (1) in this adapter, or (2) in what the carrier told it.
 
-## Debugging Tools
+### Debugging Tools
 
-Most debugging tools answer one of two questions: what is the state at this point, and how did the program get here?
+Debugging tools help us answer one of two questions: what is the state at this point, and how did the program get here?
 
-_The debugger_, which [Chapter 6](../part1/06_state-mutation#state-gives-loops-a-memory) introduced, answers both. A breakpoint pauses the program at a line and lets you inspect every variable in scope, which is the most direct way to test a hypothesis about state. Stepping moves through the program one line at a time, either over a call or into it, so you can follow a value as it changes. A conditional breakpoint pauses only when an expression is true, which makes it practical to catch the one parcel out of four hundred that goes wrong.
+_The debugger_, which we introduced in [Chapter 6](../part1/06_state-mutation#state-gives-loops-a-memory), answers both. A _breakpoint_ pauses the program at a line and lets you inspect every variable in scope, which is the most direct way to test a hypothesis about state. _Stepping_ moves through the program one line at a time, either over a call or into it, so you can follow a value as it changes. A _conditional breakpoint_ pauses only when an expression is true, which makes it practical to catch the one parcel out of four hundred that goes wrong.
 
 <details class="tooltip link-110">
 <summary>The Stepper Was a Debugger</summary>
@@ -82,13 +93,17 @@ The debugger in this chapter does the same job in harder conditions. The stepper
 
 </details>
 
-_Print statements_ give a rough answer to the first question. They remain widely used because they are quick and work everywhere, including places a debugger cannot easily reach. They have two limitations. Their output is noisy, and adding them changes the program's timing, which can move or hide a failure that depends on timing.
+_Print statements_ give a rough answer to "what is the state at this point?". They remain widely used because they are quick and work everywhere, including places a debugger cannot easily reach. However: (1) their output is noisy, and (2) adding them changes the program's timing, which can move or hide a failure that depends on timing.
 
-A bigger problem is what happens to print statements afterwards. It is easy to add a dozen `console.log` calls while narrowing a search, and easy to forget them, because nothing fails when one is left behind. The tests still pass, the build still succeeds, and the only symptom is output nobody asked for. Over time, forgotten print statements fill the program's output with noise, which makes the important messages harder to notice. Every future reader also has to work out whether each one is deliberate or left over from someone's debugging session. Remove them as part of the fix, and prefer the debugger where it is available, because a breakpoint leaves nothing behind.
+A bigger problem is what happens to print statements afterwards. It is easy to add a dozen `console.log` calls while narrowing a search. It's also easy to leave them there, because (usually) no build or tests fail when one is left behind.  Over time, forgotten print statements fill the program's output with noise, which makes the important messages harder to notice. Every future reader also has to work out whether each one is deliberate or left over from someone's debugging session. If you use print statements to debug, remove them as part of the fix. Prefer the debugger where it is available, because a breakpoint leaves nothing behind.
 
 _Logging_ is the form of printing that stays in production code. A deployed system cannot be paused and stepped through, so the only information available afterwards is whatever the program recorded while it ran. Deciding what to log is therefore a design decision, made long before any bug report arrives.
 
-Two tools from earlier in the textbook also help with debugging. The _type checker_ eliminates whole categories of fault before the program runs, so a fault that survives compilation is already in a narrower category. The _test suite_ helps localise faults: a failing unit test names the unit, which does most of the search for you. This is another argument for the design advice from [Part 2](../part2/index), and it is why a system of small, independently tested units is faster to debug than one that can only be tested end to end.
+A few tools from earlier chapters also help with debugging. 
+
+The _type checker_ eliminates whole categories of fault before the program runs, so a fault that survives compilation is already in a narrower category. 
+
+The _test suite_ helps localise faults: a failing unit test names the unit, which does most of the search for you. This is another argument for the design advice from [Part 2](../part2/index), and it is why a system of small, independently tested units is faster to debug than one that can only be tested end to end.
 
 _Assertions_, from [Chapter 3](../part1/03_checking-invariants#precondition-violations), are especially useful, because they reduce the distance between a fault and a failure. An assertion turns an error into a failure at the moment the error occurs, before it can spread to an unrelated part of the program. A `Shipment` with an invalid status can be caught where it is created, with a stack trace pointing at that code, instead of being noticed three layers away when something tries to display it.
 
@@ -250,13 +265,13 @@ The [Falador Massacre](https://en.wikipedia.org/wiki/RuneScape#Falador_Massacre)
 
 In this game, a player killed by another player (in PvP) loses most of the items they were carrying. In many MMORPGs, obtaining some items takes many hours, often mapping to days and weeks of real-world time investment, of repetitive gameplay. Thus, losing items unexpectedly---as was possible with this bug---can be devastating.
 
-The bug was that when players were removed from a player-owned house while PvP was enabled for them, PvP stayed enabled. Some players were therefore able to attack other players in areas that were supposed to be safe, which caused a great deal of chaos.
+The _fault_ was that when players were removed from a player-owned house while PvP was enabled for them, PvP stayed enabled. Some players were therefore able to attack other players in areas that were supposed to be safe, which caused a great deal of chaos.
 
-The bug happened in the middle of the night for the game's developers. The developer on call [deployed a simple fix](https://youtu.be/ukbkU_dPKrU?si=A1QEkVbFlnZG5Jn_&t=3560): houses could no longer turn on PvP, and the PvP state no longer had any effect. This disabled significant PvP features in the game, but disabling them cost less than letting the "massacre" continue.
+The _failure_ was reported in the middle of the night for the game's developers. The developer on call identified the fault and [deployed a simple fix](https://youtu.be/ukbkU_dPKrU?si=A1QEkVbFlnZG5Jn_&t=3560): houses could no longer turn on PvP, and the PvP state no longer had any effect. This disabled significant PvP features in the game, but disabling them cost less than letting the "massacre" continue.
 
 The game code was later updated to [add a notion of "areas" to the game](https://youtu.be/ukbkU_dPKrU?si=l1K9BgG4NC9AYwYT&t=3650). Areas could be checked to ensure that states such as PvP were not enabled where they should not be.
 
-We talk about video game examples not because we expect you have played them, but because they are large, complex---and often poorly-designed---pieces of software whose high-level meaning can be explained easily. An example of another bug that required a devastating fix is the [Corrupted Blood](https://en.wikipedia.org/wiki/Corrupted_Blood_incident) incident.
+(We talk about video game examples not because we expect you have played them, but because they are large, complex---and often poorly-designed---pieces of software whose high-level meaning can be explained easily. An example of another bug that required a breaking fix is the [Corrupted Blood](https://en.wikipedia.org/wiki/Corrupted_Blood_incident) incident.)
 
 </details>
 
