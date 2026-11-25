@@ -2,7 +2,7 @@
 
 TypeScript is a large, full-featured industrial language. In this course we have taught you the main language features that will translate to most modern programming languages. But we have chosen to leave some aspects of the language out that either are not broadly available in all languages or can complicate learning more than their value is worth.
 
-You will still meet the features below in other people's code, in library documentation, and in whatever a generative tool hands you. This page describes each one and gives the reason we have kept it out of the textbook, so you can recognise them without being surprised by their absence. Nothing here is required.
+You will still meet the features below in other people's code, in library documentation, and in whatever a generative tool hands you. This page describes each one and gives the reason we have kept it out of the textbook, so you can recognize them without being surprised by their absence. Nothing here is required.
 
 The chapters deliberately leave these features out of their examples, and mention a few only in passing:
 
@@ -268,7 +268,7 @@ switch (light) {
 }
 ```
 
-Every `switch` can be written as the `if`/`else if` chain from Chapter 1, so it adds a second construct for a job you can already do. It also brings a failure mode of its own: a case that omits `break` falls through into the next one and runs it too, which is legal, occasionally intended, and a classic source of bugs. The deeper reason is that a `switch` on a tag is usually a design smell rather than a syntax choice. [Chapter 15](../part2/06_extension#replacing-branches) replaces exactly this shape with polymorphism, where each case becomes a class carrying its own behaviour and the branching disappears, so we would rather you learn to recognise the shape than get comfortable writing it.
+Every `switch` can be written as the `if`/`else if` chain from Chapter 1, so it adds a second construct for a job you can already do. It also brings a failure mode of its own: a case that omits `break` falls through into the next one and runs it too, which is legal, occasionally intended, and a classic source of bugs. The deeper reason is that a `switch` on a tag is usually a design smell rather than a syntax choice. [Chapter 15](../part2/06_extension#replacing-branches) replaces exactly this shape with polymorphism, where each case becomes a class carrying its own behaviour and the branching disappears, so we would rather you learn to recognize the shape than get comfortable writing it.
 
 ## `break` and `continue`
 

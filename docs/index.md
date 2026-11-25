@@ -34,7 +34,7 @@ In [Part 1](./part1/index), you will learn how to build software that is correct
 
 In [Part 2](./part2/index), you will learn how to design software split into distinct components, and how to make those components interact with each other without negatively interfering with each other. Along the way, you will learn *object-oriented programming*, a programming style Java is well-known for, but that exists in most popular programming languages. Some keywords for [Part 2](./part2/index) include: *classes*, *constructor*, *method*, *cohesion*, *information hiding*, *interface*, *inheritance*, *polymorphism*.
 
-In [Part 3](./part3/index), you will learn how to work with and on software systems that interact with software in wholly different code bases. Here we will scale to handling software you did not fully write yourself: nearly all software engineering done in practice is of this type. Some keywords for [Part 3](./part3/index) include: *coupling*, *dependency injection*, *API*, *REST*, *serialization*, *code smells*, *refactoring*, and *fault localisation*.
+In [Part 3](./part3/index), you will learn how to work with and on software systems that interact with software in wholly different code bases. Here we will scale to handling software you did not fully write yourself: nearly all software engineering done in practice is of this type. Some keywords for [Part 3](./part3/index) include: *coupling*, *dependency injection*, *API*, *REST*, *serialization*, *code smells*, *refactoring*, and *fault localization*.
 
 The [Reference](./reference/index) section at the end is not read in order. It reviews the [prerequisite knowledge](./reference/prerequisite-knowledge) from CPSC 110 and CPSC 121 that the textbook builds on, collects a [Glossary](./reference/glossary) of every term the textbook defines, each linked to the section that introduces it, and describes the [parts of TypeScript this course leaves out](./reference/language-features).
 
@@ -89,7 +89,7 @@ You'll have noticed this textbook includes some nested content. All this nested 
 <details class="tooltip deep-dive">
   <summary>Deep Dives</summary>
   
-  Deep dives are our catch-all parenthetical: they're things we would like to tell you, but we recognise are divergent from the main point we are trying to make.
+  Deep dives are our catch-all parenthetical: they're things we would like to tell you, but we recognize are divergent from the main point we are trying to make.
 </details>
 
  <details class="tooltip exercise">

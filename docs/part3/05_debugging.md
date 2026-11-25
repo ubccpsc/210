@@ -1,6 +1,6 @@
-# Debugging and Fault Localisation
+# Debugging Failures and Localizing Faults
 
-We motivated refactoring as a preparation step for _fixing bugs_ and _adding features_. In this chapter, we cover _fixing bugs_.
+
 
 A bug report is a claim that a system is not behaving as expected. It describes what somebody saw, but it almost never says where in the source code the problem comes from. Getting from the report to the source of the problem is a skill called **fault localisation**.
 
@@ -12,27 +12,27 @@ Debugging is a process, not an innate talent. It has four steps, which you can l
 3. fix it, and 
 4. validate that the fix worked without introducing new defects. 
 
-Engineers who debug quickly usually follow these steps systematically.
+
 
 #### A Parcel That Was Never Delivered
 
-The running example continues.
+Our running example continues.
 
-> A customer reports that the tracker showed one of their parcels as delivered, and it never arrived.
+> A customer reports that the tracker showed one of their parcels as delivered, but it never arrived.
 
-The report describes something seen on a screen. Between that screen and the source of the problem are the display, the tracker, an adapter, and a carrier's web service, and the fault could be in any of them. It could also be in none of them. The parcel may have been delivered to a neighbour, and the software may be reporting exactly what the carrier said.
+The report describes something a user saw on their screen. Between that screen and the source of the problem are the display, the tracker, an adapter, and a carrier's web service, and the fault could be in any of them. It could also be in none of them. The parcel may have been delivered to a neighbour, and the software may be reporting exactly what the carrier said.
 
-## Fault, Error, Failure
+## Failures and Faults
 
-Three words are often used interchangeably, but in this chapter we will distinguish them, because it helps us talk about debuggin precisely. These meanings are narrower than in [Chapter 8](../part1/08_errors#designing-for-failure), where _error_ and _failure_ both meant an erroneous outcome.
 
-A **fault** is the defect in the code, such as a wrong comparison, a missing case, or a misplaced assignment. The fault is what you eventually edit.
+_Failure_ and _fault_ are often used interchangeably, but it is useful to distinguish them, because debugging moves from one to the other.
 
-An **error** is the incorrect state produced when a fault executes, such as a variable holding a value it should not, or an object in a state its invariant forbids. An error exists while the program runs, and it is usually invisible.
+A **failure** is the incorrect behaviour that can be observed from outside the program, such as a wrong answer or a crash. The failure is what a user reports.
 
-A **failure** is the incorrect behaviour that can be seen from outside the program, such as a wrong answer, a crash, or a parcel marked as delivered. It is the only one of the three that a user would report.
+A **fault** is the defect in the code that caused the failure, such as a wrong comparison or a missing case. The fault is what you eventually fix.
 
-The three can be far apart, both in the code and in time. A fault can sit in a codebase for years without executing. When it does execute, it produces an error. Later code might correct the error, or the error might be stored and appear days later, or it might pass through several layers before anyone notices. Debugging follows this chain backwards, from the failure you can see to the fault you can fix. 
+
+The two can be both temporally and spatially distant. A fault can sit in a codebase for years without executing. When it does execute, it leaves the program in an incorrect state. That state is usually invisible. Other code might correct it automatically, or it might pass through several layers of abstraction before becoming visible. Debugging follows this chain backwards, from the failure you can see to the fault you can fix, and the longer the chain, the harder the process.
 
 ```graphviz
 digraph faultChain {
@@ -41,15 +41,16 @@ digraph faultChain {
   edge [fontname = "sans-serif", fontsize = 10];
 
   fault   [label = "Fault\nThe defect in the code"];
-  error   [label = "Error\nInvalid state while running"];
+  state   [label = "Incorrect state\nUsually invisible"];
   failure [label = "Failure\nThe behaviour reported"];
 
-  fault -> error   [label = "Executes"];
-  error -> failure [label = "Surfaces"];
+  fault -> state   [label = "Executes"];
+  state -> failure [label = "Surfaces"];
   failure -> fault [label = "Debugging works backwards", style = dashed, constraint = false];
 }
 ```
-<!-- caption="A fault produces an error, which surfaces as a failure. Debugging travels the chain in the opposite direction." -->
+<!-- caption="A fault produces incorrect state, which surfaces as a failure. Debugging travels the chain in the opposite direction." -->
+
 
 There might also be no fault at all. A "bug" report may describe intended behaviour that the user did not expect, or come from a misunderstanding of what the software promises. The problem may also be in configuration or data rather than in code. The first step includes establishing that the failure is real, and deciding who on the technical team should handle it.
 
@@ -57,18 +58,22 @@ There might also be no fault at all. A "bug" report may describe intended behavi
 
 The first task when fixing a bug is to reproduce it. Some bugs can be localised from a user's (often vague) description, but most cannot. To __reproduce__ a bug is to trigger it reliably in your own environment. Once you've reproduced a bug, you can examine the code execution in a debugger, and write a test that fails while the fault is present and passes once it is fixed. Reproduction is a precondition to all the rest of this chapter: without reproduction, you cannot tell whether a change fixed the bug or whether the symptom just did not appear that time. 
 
-A useful reproduction has two properties.
+A useful reproduction has two properties: determinism and minimality.
 
-1. _It should be deterministic._ A deterministic reproduction produces the same result every time you run it. A failure that appears on one run in five is much harder to fix than one that appears every time, because every later experiment gives an unreliable answer. If the failure does not appear, you learn nothing. Nondeterminism usually has one of a few causes, and each has a standard fix:
-	- Time and randomness can be passed in as parameters rather than read from a global source, which is the controllability argument from [Chapter 12](../part2/03_encapsulation#designing-for-testability). 
-	- Network calls can be replaced with the test doubles from [Chapter 18](./02_consuming_data#testing-without-the-network). 
-	- State left over from an earlier test can be removed with the lifecycle hooks from [Chapter 9](../part1/09_validation#shared-setup). 
-	- [Concurrency](https://en.wikipedia.org/wiki/Concurrent_computing) is very common and difficult source of nondeterminism, but it is [mostly](../part1/07_async.html)  beyond the scope of this course.
+_Deterministic._ A failure that appears on one run in five is much harder to fix than one that appears every time, because every later experiment gives an unreliable answer. If the failure does not appear, you learn nothing. Nondeterminism usually has one of a few causes:
 
-2. _It should be minimal._ Start from whatever reproduces the failure and remove things: fewer inputs, fewer steps, fewer parcels, or one carrier instead of five. Stop when removing anything else makes the failure disappear.
-	- Minimising a reproduction is useful even when the original reproduction is already reliable, because minimising is a form of localisation. Every element you remove without losing the failure is a part of the system that does not contain the fault. If a reproduction shrinks from a full application run to a single call to one adapter, the search has narrowed from the whole program to a few dozen lines, before you have read any code.
+- _Randomness_ can be passed in as parameters which is the controllability argument from [Chapter 12](../part2/03_encapsulation#designing-for-testability).
+- _Remote calls_ can be replaced with the test doubles from [Chapter 18](./02_consuming_data#testing-without-the-network).
+- _Stale test state_ can be removed with the lifecycle hooks from [Chapter 9](../part1/09_validation#shared-setup).
+- [_Concurrency_](https://en.wikipedia.org/wiki/Concurrent_computing) is a common and difficult source of nondeterministic failures, but it is  [mostly](../part1/07_async.html)  beyond the scope of this course.
 
-For our report, reproducing the failure requires asking the customer a few questions: which parcel, which carrier, and what the screen showed. Let's assume we get from the customer a tracking number, and we manage to make a minimal reproduction in one call:
+_Minimal._ Start from whatever reproduces the failure and remove things: fewer inputs, fewer steps. Stop when removing anything else makes the failure disappear.
+
+
+Minimising a reproduction is useful even when the original reproduction is already reliable, because minimising is a form of localisation. Every element you remove without losing the failure is an element you don't have to analyze while debugging. If you shrink a reproduction from a full interaction with an application to a single call to one adapter, you've narrowed the search from the whole program to a few dozen lines, before you have read any code.
+
+For our report, we reproduce the failure by asking the customer a few questions: which parcel, which carrier, and what the screen showed. The answers give us a tracking number, and our minimal reproduction is one call:
+
 
 ```typescript
 const carrier: CarrierCClient = new CarrierCClient("https://api.carrier-c.example");
@@ -76,11 +81,14 @@ const found: Result<Shipment, TrackingError> = await carrier.track("Z2200417");
 // found.value.status is "delivered"; the parcel is sitting in a depot
 ```
 
-This reproduction has no user interface, no tracker, and no other carriers. The failure still occurs with all of those removed, so we already know the problem is (1) in this adapter, or (2) in what the carrier told it.
+`TrackingError` is the failure type the library has published since [Chapter 19](./03_api_design#designing-the-failures).
+
+This reproduction has no user interface, no tracker, and no other carriers. The failure still occurs with all of those removed, which is already useful: the problem is either (1) in this adapter or (2) in the carrier it communicated with.
+>>>>>>> b198c8496c342a0dbb93e0cf50e9ef70426ef1e6
 
 ### Debugging Tools
 
-Debugging tools help us answer one of two questions: what is the state at this point, and how did the program get here?
+To search for the fault, we will use some debugging tools.  Most debugging tools answer one of two questions: what is the state at this point, and how did the program get here?
 
 _The debugger_, which we introduced in [Chapter 6](../part1/06_state-mutation#state-gives-loops-a-memory), answers both. A _breakpoint_ pauses the program at a line and lets you inspect every variable in scope, which is the most direct way to test a hypothesis about state. _Stepping_ moves through the program one line at a time, either over a call or into it, so you can follow a value as it changes. A _conditional breakpoint_ pauses only when an expression is true, which makes it practical to catch the one parcel out of four hundred that goes wrong.
 
@@ -93,11 +101,12 @@ The debugger in this chapter does the same job in harder conditions. The stepper
 
 </details>
 
-_Print statements_ give a rough answer to "what is the state at this point?". They remain widely used because they are quick and work everywhere, including places a debugger cannot easily reach. However: (1) their output is noisy, and (2) adding them changes the program's timing, which can move or hide a failure that depends on timing.
+_Print statements_ give a rough answer to the first question. They remain widely used because they are quick and work everywhere, including places a debugger cannot easily reach. However, (1) their output is noisy,  and (2) adding them changes the program's timing, which can move or hide a failure that depends on timing. They are also easy to forget, because the tests still pass if one is left behind (the only symptom is output nobody asked for). Remove print statementsas part of the fix, and prefer the debugger where it is available, because a breakpoint leaves nothing behind.
 
-A bigger problem is what happens to print statements afterwards. It is easy to add a dozen `console.log` calls while narrowing a search. It's also easy to leave them there, because (usually) no build or tests fail when one is left behind.  Over time, forgotten print statements fill the program's output with noise, which makes the important messages harder to notice. Every future reader also has to work out whether each one is deliberate or left over from someone's debugging session. If you use print statements to debug, remove them as part of the fix. Prefer the debugger where it is available, because a breakpoint leaves nothing behind.
+_Logging_ is the form of printing that stays in production code. A deployed system cannot be paused and stepped through, so the only information available afterwards is whatever the program recorded while it ran. Deciding what to log is therefore a design decision, made long before any bug report arrives. Had our tracker logged each carrier's response, we could read what carrier C sent for this parcel without asking the customer to try again.
 
-_Logging_ is the form of printing that stays in production code. A deployed system cannot be paused and stepped through, so the only information available afterwards is whatever the program recorded while it ran. Deciding what to log is therefore a design decision, made long before any bug report arrives.
+
+
 
 A few tools from earlier chapters also help with debugging. 
 
@@ -105,7 +114,8 @@ The _type checker_ eliminates whole categories of fault before the program runs,
 
 The _test suite_ helps localise faults: a failing unit test names the unit, which does most of the search for you. This is another argument for the design advice from [Part 2](../part2/index), and it is why a system of small, independently tested units is faster to debug than one that can only be tested end to end.
 
-_Assertions_, from [Chapter 3](../part1/03_checking-invariants#precondition-violations), are especially useful, because they reduce the distance between a fault and a failure. An assertion turns an error into a failure at the moment the error occurs, before it can spread to an unrelated part of the program. A `Shipment` with an invalid status can be caught where it is created, with a stack trace pointing at that code, instead of being noticed three layers away when something tries to display it.
+_Assertions_, from [Chapter 3](../part1/03_checking-invariants#precondition-violations), are especially useful, because they reduce the distance between a fault and a failure. An assertion turns incorrect state into a failure at the moment it occurs, before it can spread to an unrelated part of the program. A `Shipment` with an invalid status can be caught where it is created, with a stack trace pointing at that code, instead of being noticed three layers away when something tries to display it.
+
 
 <details class="tooltip ts-tips">
 <summary>Reading a Stack Trace</summary>
@@ -118,7 +128,7 @@ The second is to read the trace as a description of how the program got there, n
 
 </details>
 
-## Localising the Fault
+## Localizing the Fault
 
 Once you have a reproduction, the next question is where the fault is. It is tempting to start changing things at this point, but this is usually unproductive. Changing code without a hypothesis produces a different program, but it does not help you understand the program any better. If the failure happens to disappear, you do not know why, so you cannot tell whether the fault is fixed or just hidden.
 
@@ -137,7 +147,7 @@ _Follow the dependencies._ The failing value is a status. It was displayed by th
 
 _Start from what changed._ Most faults are recent. If the tracker worked last month and does not work now, the difference is a small set of commits, and reading them is often faster than reasoning about the code.
 
-_Bisect._ When the search space is still large, halve it. The most familiar form is bisecting the input, which is what minimising a reproduction does. The same idea applies to a path through the code, where checking the state at the midpoint tells you which half the value went wrong in. It also applies to a project's history.
+_Bisect._ When the search space is still large, halve it. The most familiar form is bisecting the input, which is what minimizing a reproduction does. The same idea applies to a path through the code, where checking the state at the midpoint tells you which half the value went wrong in. It also applies to a project's history.
 
 <details class="tooltip deep-dive">
 <summary>Bisecting History</summary>
@@ -152,7 +162,7 @@ Bisecting finds the commit where the behaviour changed, which is usually, but no
 
 </details>
 
-For the parcel, the reproduction has already narrowed the search to one adapter. When the status mapping moved into the adapters in [Chapter 20](./04_refactoring#working-in-small-steps), carrier C's became a function in the same file as the class rather than a private method, so that a test can call it directly. The function is not exported from the library's `index.ts`, so it is not part of the published contract. Reading it suggests some guesses about the fault:
+For the parcel, the reproduction has already narrowed our search to one adapter. Recall from [Chapter 20](./04_refactoring#working-in-small-steps) that each adapter now converts its carrier's status words itself, in a `toStatus` of its own. Carrier C's is a function in the same file as the class instead of a private method, so that a test can call it directly:
 
 ```typescript
 // in CarrierCClient.ts, alongside the class
@@ -167,18 +177,18 @@ export function toStatus(raw: string): ShipmentStatus {
 }
 ```
 
-Two rounds of the process above turn these guesses into a diagnosis.
+The function is not exported from the library's `index.ts`, so it is not part of the published contract. Reading it suggests some guesses about the fault, and two rounds of the process above turn these guesses into a diagnosis.
 
-_Round one._ The first hypothesis is the cheapest one to check: _the carrier is reporting the parcel as delivered, and we are correctly passing that on._ If this is true, the raw response contains a status that clearly means delivered. If it is false, the response says something else. The observation needs a breakpoint on the conversion, or one temporary line placed before it:
+_Round one._ Our first hypothesis is the cheapest one to check: _the carrier is reporting the parcel as delivered, and we are correctly passing that on._ If this is true, the raw response contains a status that clearly means delivered. If it is false, the response says something else. The observation needs a breakpoint on the conversion, or one temporary line placed before it:
 
 ```typescript
 const body: unknown = await response.json();
 console.log(body);   // { trackingNumber: "Z2200417", status: "NOT_DELIVERED", ... }
 ```
 
-The prediction fails, so the hypothesis is discarded. This is still a useful result. The carrier is not claiming that the parcel arrived, so our own code is producing the wrong answer.
+The prediction fails, so we discard the hypothesis. This is still a useful result. The carrier is not claiming that the parcel arrived, so our own code is producing the wrong answer.
 
-_Round two._ The next hypothesis is about the conversion itself: _`toStatus` maps `"NOT_DELIVERED"` to `"delivered"`, because it tests for a substring rather than for the whole value._ This prediction is precise enough to be wrong, and checking it needs no carrier, no network, and no parcel:
+_Round two._ Our next hypothesis is about the conversion itself: _`toStatus` maps `"NOT_DELIVERED"` to `"delivered"`, because it tests for a substring rather than for the whole value._ This prediction is precise enough to be wrong, and checking it needs no carrier, no network, and no parcel:
 
 ```typescript
 expect(toStatus("NOT_DELIVERED")).not.to.equal("delivered");
@@ -187,13 +197,13 @@ expect(toStatus("NOT_DELIVERED")).not.to.equal("delivered");
 
 The hypothesis is correct. `"NOT_DELIVERED".includes("DELIVERED")` is `true`, so the first branch matches. The fault is one line, and a test that runs in a millisecond can now reach it.
 
-Each step narrowed the search considerably. Reproduction removed the user interface, the tracker, and four carriers. Round one ruled out the carrier. Round two ruled out everything except a single function, and turned the bug into a failing test that can strengthen our test suite. Each round was cheap because each hypothesis was precise enough to be checked with one observation.
+Each step narrowed our search considerably. Reproduction removed the user interface, the tracker, and four carriers. Round one ruled out the carrier. Round two ruled out everything except a single function, and turned the bug into a failing test that can strengthen our test suite. Each round was cheap because each hypothesis was precise enough to be checked with one observation.
 
-The fault was not introduced by a recent edit. The substring test had been in the code since it was written, and it gave the right answer for every status the carrier sent until the carrier started sending one it had never sent before. Nothing in our repository changed: the new input was the first to turn the fault into an error. Faults do not have to be recent to appear, and "we did not change anything" is not evidence that the fault is somewhere else.
+The fault was not introduced by a recent edit. The substring test had been in the code since it was written, and it gave the right answer for every status the carrier sent until the carrier started sending one it had never sent before. Nothing in our repository changed: the new input was the first to expose the fault. Faults do not have to be recent to appear, and "we did not change anything" is not evidence that the fault is somewhere else.
 
 ## Fixing the Fault
 
-Once the fault is found, the fix can seem obvious, and this is where a second kind of mistake is easy to make. The parcel bug could be fixed like this:
+Once the fault is found, the fix can seem obvious, and this is where a second kind of mistake is easy to make. We could fix the parcel bug like this:
 
 ```typescript
 if (raw === "NOT_DELIVERED") {
@@ -212,9 +222,9 @@ _What else could this fault cause?_ One fault usually causes several failures, a
 
 _Where is the fault?_ The failure appeared in the display, but the display is not wrong, because it showed what it was given. The fault is in the conversion, and that is where the fix belongs. Fixing a symptom where it was observed, rather than where it was caused, tends to leave the fault in place and add a special case on top of it.
 
-_Why was this fault possible?_ The substring test matched an open-ended set of strings to a fixed set of meanings, which cannot be correct in general, because the carrier can always introduce a status we have never seen. The real fix is to match exactly against the statuses the carrier documents, and to reject anything unrecognised rather than guessing. The same guess is in every adapter. Each `toStatus` that [Chapter 20](./04_refactoring#working-in-small-steps) moved into an adapter still ends with `return "in-transit"`, because that refactoring had to preserve behaviour. Each adapter gets the same fix, as its own change, with a failing test first.
+_Why was this fault possible?_ The substring test matched an open-ended set of strings to a fixed set of meanings, which cannot be correct in general, because the carrier can always introduce a status we have never seen. The real fix is to match exactly against the statuses the carrier documents, and to reject anything unrecognized rather than guessing. The same guess is in every adapter. Each `toStatus` that [Chapter 20](./04_refactoring#working-in-small-steps) moved into an adapter still ends with `return "in-transit"`, because that refactoring had to preserve behaviour. Each adapter gets the same fix, as its own change, with a failing test first.
 
-Before changing any code, turn the check from round two into a permanent test, which is why it was worth narrowing the reproduction down to a single function. The test states the correct answer, which the round-two check did not:
+Before changing any code, we turn the check from round two into a permanent test, which is why it was worth narrowing the reproduction down to a single function. The test states the correct answer, which the round-two check did not:
 
 ```typescript
 test("a NOT_DELIVERED status is not reported as delivered", () => {
@@ -224,7 +234,7 @@ test("a NOT_DELIVERED status is not reported as delivered", () => {
 
 Run the test and watch it fail before applying the fix. A test that was written after the fix and never seen to fail may not be checking anything. It passes, but so would an empty test. Seeing the test fail first shows that it detects the fault.
 
-The fix itself must still handle `EXCEPTION`, which the old code recognised, or it would introduce a regression of its own:
+The fix itself must still handle `EXCEPTION`, which the old code recognized, or it would introduce a regression of its own:
 
 ```typescript
 export function toStatus(raw: string): Result<ShipmentStatus, string> {
@@ -240,21 +250,25 @@ export function toStatus(raw: string): Result<ShipmentStatus, string> {
     if (raw === "IN_TRANSIT") {
         return { ok: true, value: "in-transit" };
     }
-    return { ok: false, error: "unrecognised status: " + raw };
+    return { ok: false, error: "unrecognized status: " + raw };
 }
 ```
 
-The fix changes the return type of `toStatus`, so the test's assertion becomes `expect(toStatus("NOT_DELIVERED")).to.deep.equal({ ok: true, value: "exception" })`. The compiler also rejects the place in `CarrierCClient` that used its answer as a status, and `track` now reports an unrecognised status to its caller as a `carrier-unavailable` failure, as it already does when a request fails. This is the same kind of converter as in [Chapter 18](./02_consuming_data#converting-not-claiming). The original bug was possible because an unvalidated value from outside the program was interpreted by guesswork, which is what the edge in that chapter exists to prevent. Debugging often ends in a design change, because the reason a fault was possible usually has a design answer.
+The fix changes the return type of `toStatus`, so the test's assertion becomes `expect(toStatus("NOT_DELIVERED")).to.deep.equal({ ok: true, value: "exception" })`.
+
+The compiler also rejects the place in `CarrierCClient` that used its answer as a status, and `track` now reports an unrecognized status to its caller as a `carrier-unavailable` failure, one of the `TrackingError` cases, as it already does when a request fails.
+
+This is the same kind of converter as in [Chapter 18](./02_consuming_data#converting-not-claiming). The original bug was possible because an unvalidated value from outside the program was interpreted by guesswork, which is what the edge in that chapter exists to prevent. Debugging often ends in a design change, because the reason a fault was possible usually has a design answer.
 
 ## Validating the Fix
 
-The fix is finished when the reported failure is gone and nothing that worked before has changed. Run the new test and watch it pass; it stays in the suite to guard against this fault returning. Then repeat the reproduction from the start of the chapter: `carrier.track("Z2200417")` now reports the parcel as `exception`, which is consistent with a parcel that never arrived.
+The fix is finished when the reported failure is gone and nothing that worked before has changed. Run the new test and watch it pass; it stays in the suite to guard against this fault returning. Then we repeat the reproduction from the start of the chapter: `carrier.track("Z2200417")` now reports the parcel as `exception`, which is consistent with a parcel that never arrived.
 
 A change can also affect parts of the system it was not meant to touch, so run the whole suite, not only the new test. [Chapter 20](./04_refactoring#working-in-small-steps) made the same argument about restructuring, and it is why both chapters depend on the regression suite from [Chapter 9](../part1/09_validation#regression-testing).
 
 ## Fixing a Public API
 
-Our tracker is a published library, so this fix changes a contract that other teams have written code against. Clients now receive `exception` where they used to receive `delivered`, which corrects the fault, and they receive `ok: false` where an unrecognised status used to appear as `in-transit`. Neither change alters a type, so the compiler cannot warn clients, and a client may have adapted to the wrong answer, for example by checking a second field to work out the real status. [Chapter 19](./03_api_design#breaking-changes) lists the options: release the fix as a breaking change, add a corrected version of the operation and deprecate the old one, or document the behaviour and leave the code alone. A tracker that reports undelivered parcels as delivered cannot be left as it is, so this fix ships as a breaking change, with release notes that describe both changes.
+Our tracker is a published library, so this fix changes a contract that other teams have written code against. Clients now receive `exception` where they used to receive `delivered`, which corrects the fault, and they receive `ok: false` where an unrecognized status used to appear as `in-transit`. Neither change alters a type, so the compiler cannot warn clients, and a client may have adapted to the wrong answer, for example by checking a second field to work out the real status. [Chapter 19](./03_api_design#breaking-changes) lists the options: release the fix as a breaking change, add a corrected version of the operation and deprecate the old one, or document the behaviour and leave the code alone. A tracker that reports undelivered parcels as delivered cannot be left as it is, so we ship this fix as a breaking change, with release notes that describe both changes.
 
 The severity of a bug can override all of this. A bug that loses data, exposes information, or lets someone do what they should not be able to do is fixed immediately, even if clients depend on it and get no notice, because the alternative is worse. The deep-dive example below shows this decision being made in real time. Significant functionality was disabled within hours, and the more careful design came later.
 
@@ -263,7 +277,7 @@ The severity of a bug can override all of this. A bug that loses data, exposes i
 
 The [Falador Massacre](https://en.wikipedia.org/wiki/RuneScape#Falador_Massacre) was the dramatic name given to the result of a bug in the [MMORPG](https://en.wikipedia.org/wiki/Massively_multiplayer_online_role-playing_game) RuneScape. In RuneScape, player-versus-player (PvP) combat was disabled in most of the game. It was only allowed in special areas, such as "The Wilderness" and some parts of player-owned houses. Cities such as Falador were meant to be safe from PvP combat. 
 
-In this game, a player killed by another player (in PvP) loses most of the items they were carrying. In many MMORPGs, obtaining some items takes many hours, often mapping to days and weeks of real-world time investment, of repetitive gameplay. Thus, losing items unexpectedly---as was possible with this bug---can be devastating.
+In this game, a player killed by another player (in PvP) loses most of the items they were carrying. In many MMORPGs, obtaining some items takes many hours, often mapping to days and weeks of real-world time investment, of repetitive gameplay. Thus, losing items unexpectedly, as was possible with this bug, can be devastating.
 
 The _fault_ was that when players were removed from a player-owned house while PvP was enabled for them, PvP stayed enabled. Some players were therefore able to attack other players in areas that were supposed to be safe, which caused a great deal of chaos.
 
@@ -271,15 +285,16 @@ The _failure_ was reported in the middle of the night for the game's developers.
 
 The game code was later updated to [add a notion of "areas" to the game](https://youtu.be/ukbkU_dPKrU?si=l1K9BgG4NC9AYwYT&t=3650). Areas could be checked to ensure that states such as PvP were not enabled where they should not be.
 
-(We talk about video game examples not because we expect you have played them, but because they are large, complex---and often poorly-designed---pieces of software whose high-level meaning can be explained easily. An example of another bug that required a breaking fix is the [Corrupted Blood](https://en.wikipedia.org/wiki/Corrupted_Blood_incident) incident.)
+
+(We talk about video game examples not because we expect you have played them, but because they are large, complex, and often, poorly designed, pieces of software whose high-level meaning can be explained easily. An example of another bug that required a devastating fix is the [Corrupted Blood](https://en.wikipedia.org/wiki/Corrupted_Blood_incident) incident.)
 
 </details>
 
 #### Debugging Is a Process
 
-Each step in this chapter either shortens the chain from fault to failure or searches it systematically. Reproduce the failure, so that it can be triggered on demand and is small enough to reason about. Localise the fault by forming hypotheses and halving the search space. Fix the fault where it is, and ask why it was possible, because the answer often points to a design improvement as well as a correction. Validate the fix with a test that you saw fail first, and with a suite that checks everything else.
+Each step in this chapter either shortens the chain from fault to failure or searches it systematically. Reproduce the failure, so that it can be triggered on demand and is small enough to reason about. Localize the fault by forming hypotheses and halving the search space. Fix the fault where it is, and ask why it was possible, because the answer often points to a design improvement as well as a correction. Validate the fix with a test that you saw fail first, and with a suite that checks everything else.
 
-Little of this process is new. The properties that make a system quick to debug are the same ones earlier chapters argued for, for other reasons: small units that a failing test can name, low coupling so that the chain of dependencies is short, validation at the edge so that bad data is rejected where it enters rather than misinterpreted three layers later, assertions that make silent errors visible, and a regression suite that can check any fix. None of these were introduced as debugging techniques, but all of them help when something goes wrong.
+Little of this process is new. The properties that make a system quick to debug are the same ones earlier chapters argued for, for other reasons: small units that a failing test can name, low coupling so that the chain of dependencies is short, validation at the edge so that bad data is rejected where it enters rather than misinterpreted three layers later, assertions that make incorrect state visible, and a regression suite that can check any fix. None of these were introduced as debugging techniques, but all of them help when something goes wrong.
 
 <details class="tooltip exercise">
   <summary>Exercise: The Overnight Shift Report</summary>
@@ -303,7 +318,7 @@ function shiftLength(startHour: number, endHour: number): number {
 
 Work through the following:
 
-1. _Separate the three._ Identify the fault, the error, and the failure in this report, and say which of them the supervisor observed.
+1. _Separate the two._ Identify the fault and the failure in this report, and say which of them the supervisor observed.
 2. _Reproduce it._ Write the smallest call that triggers the failure, and state the property of overnight shifts that makes them different from day shifts. Explain what your minimal reproduction has already ruled out.
 3. _Form a hypothesis._ State a hypothesis precise enough to be false, and give the observation that would distinguish it from a competing explanation, such as bad data from the time-clock system.
 4. _Fix the fault._ Correct the defect rather than the reported instance. Then describe other failures that the same fault could cause, which nobody has reported yet.
@@ -369,7 +384,7 @@ describe("shiftLength", () => {
 
 Model answers for the discussion parts.
 
-1. _Separate the three._ The fault is `return endHour - startHour`, which ignores that a shift can cross midnight. The error is the negative length that the call produced and whatever stored it. The failure is the report showing `-17` hours and payroll rejecting the run, and the failure is what the supervisor observed.
+1. _Separate the two._ The fault is `return endHour - startHour`, which ignores that a shift can cross midnight. The failure is the report showing `-17` hours and payroll rejecting the run, and the failure is what the supervisor observed. Between them is the incorrect state: the negative length that the call produced and whatever stored it.
 2. _Reproduce it._ `shiftLength(22, 5)` returns `-17`. Overnight shifts are the ones where `endHour < startHour`. Because two valid hours produce the wrong answer from a pure function, the reproduction has already ruled out the time clock, payroll, and anything about the particular employee or day.
 3. _Form a hypothesis._ "For every pair with `endHour < startHour`, `shiftLength` returns `endHour - startHour`, a negative number, instead of the elapsed `endHour - startHour + 24`." A single such pair returning a positive value would falsify it. To distinguish it from bad time-clock data, call the function directly with `(22, 5)` in a test, where no clock is involved, and read the employee's raw clock record: if it holds `22` and `5`, the data is valid and the function is at fault.
 4. _Fix the fault._ See `shiftLength` above. The same fault produces every overnight shift wrong: `23` to `0` reports `-23` instead of `1`, `16` to `2` reports `-14`, weekly totals that add these are wrong by a multiple of 24, and overtime detection never fires for an overnight shift.

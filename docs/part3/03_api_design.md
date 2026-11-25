@@ -214,7 +214,7 @@ Failure is part of the contract. Clients have to handle errors when things go wr
 
 In [Chapter 8](../part1/08_errors#results-or-exceptions) we saw two mechanisms for reporting failure: returning a failure value and throwing an exception. Both are reasonable options, but in line with the "be consistent" advice above, we should make the choice consistent across a published API. We also need the errors to carry enough information for clients to respond. We'll choose to keep the `Result` return type from the previous chapter for our tracker, so the capacity for failure appears in each API's signature.  
 
-In the previou chapter, `locate` reported each failure as a string. For a published API, a message alone is likely not enough information. Suppose the only difference between "we do not recognise that tracking number" and "the carrier is not responding" is the English text. A client that wants to retry the second error but not the first has to match on the text, and if we reword the text in the next message (or translate it), the client will break. Instead of a string, we can use a tagged union from [Chapter 2](../part1/02_model-types#playlists), to encode the differences clearly:
+In the previous chapter, `locate` reported each failure as a string. For a published API, a message alone is likely not enough information. Suppose the only difference between "we do not recognize that tracking number" and "the carrier is not responding" is the English text. A client that wants to retry the second error but not the first has to match on the text, and if we reword the text in the next message (or translate it), the client will break. Instead of a string, we can use a tagged union from [Chapter 2](../part1/02_model-types#playlists), to encode the differences clearly:
 
 ```typescript
 export type TrackingError =
@@ -246,7 +246,7 @@ This determines what has to be documented. Each operation needs its purpose, its
  *
  * When the request names a carrier, only that carrier is asked. Otherwise,
  * carriers are consulted in the order they were supplied, and the first
- * recognising the tracking number wins. The result reflects the carrier's
+ * recognizing the tracking number wins. The result reflects the carrier's
  * information at the moment of the call and may be out of date immediately.
  *
  * @param {TrackingRequest} request the tracking number to look up, and
