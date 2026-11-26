@@ -56,13 +56,13 @@ There might also be no fault at all. A "bug" report may describe intended behavi
 
 ## Reproduction
 
-The first task when fixing a bug is to reproduce it. Some bugs can be localized from a user's (often vague) description, but most cannot. To **reproduce** a bug is to trigger it reliably in your own environment. Once you've reproduced a bug, you can examine the code execution in a debugger, and write a test that fails while the fault is present and passes once it is fixed. Reproduction is a precondition to all the rest of this chapter: without reproduction, you cannot tell whether a change fixed the bug or whether the symptom just did not appear that time. 
+The first task when fixing a bug is to reproduce it. Some bugs can be localized from a user's (often vague) description, but most cannot. To **reproduce** a bug is to trigger it reliably in your own environment. Once you've reproduced a bug, you can examine the code execution in a debugger, and write a test that encodes the reproduction and expects() the non-faulty behaviour. Reproduction is a precondition to all the rest of this chapter: without reproduction, you cannot tell whether a change fixed the bug or whether the symptom just did not appear that time. 
 
 A useful reproduction has two properties: determinism and minimality.
 
 _Deterministic._ A failure that appears on one run in five is much harder to fix than one that appears every time, because every later experiment gives an unreliable answer. If the failure does not appear, you learn nothing. Nondeterminism usually has one of a few causes:
 
-- _Randomness_ can be passed in as parameters which is the controllability argument from [Chapter 12](../part2/03_encapsulation#designing-for-testability).
+- _Randomness_ can be passed in as parameters (the controllability argument from [Chapter 12](../part2/03_encapsulation#designing-for-testability)).
 - _Remote calls_ can be replaced with the test doubles from [Chapter 18](./02_consuming_data#testing-without-the-network).
 - _Stale test state_ can be removed with the lifecycle hooks from [Chapter 9](../part1/09_validation#shared-setup).
 - [_Concurrency_](https://en.wikipedia.org/wiki/Concurrent_computing) is a common and difficult source of nondeterministic failures, but it is [mostly](../part1/07_async) beyond the scope of this course.
@@ -137,7 +137,7 @@ Stating the prediction before observing stops you from accepting a result that d
 
 Several techniques can narrow the search:
 
-_Follow the dependencies._ The failing value is a status. It was displayed by the user interface, which got it from the tracker, which got it from an adapter, which derived it from a carrier's response. That chain is the dependency arrows from [Chapter 17](./01_coupling#what-coupling-is), followed from the user interface in the direction they point, and it lists every place the wrong value could have come from. This is a practical benefit of low coupling. In a loosely coupled system, the chain is short and the search covers one module. In a tightly coupled system, the arrows lead everywhere and the search covers the whole program.
+_Follow the dependencies._ The dependency graphs from [Chapter 17](./01_coupling#what-coupling-is), tell us which code depends on which, and following the arrows back tells usevery place the wrong value could have come from.In our example, the failing value was a status: it was displayed by the user interface, which got it from the tracker, which got it from an adapter, which derived it from a carrier's response. The dependency graph is particularly useful in a system with low coupling. With low coupling, the dependency chain is short and, thus, there aren't many files you need to search through. In a tightly coupled system, the arrows lead everywhere and your search may need to cover the whole program.
 
 _Start from what changed._ Most faults are recent. If the tracker worked last month and does not work now, the difference is a small set of commits, and reading them is often faster than reasoning about the code.
 
@@ -156,9 +156,9 @@ Bisecting finds the commit where the behaviour changed, which is usually, but no
 
 </details>
 
-### Two Rounds on the Parcel
+### Two Rounds of Hypothesize-Predict-Observe on the Parcel
 
-For the parcel, the reproduction has already narrowed our search to one adapter. Recall from [Chapter 20](./04_refactoring#working-in-small-steps) that each adapter now converts its carrier's status words itself, in a `toStatus` of its own. Carrier C's is a function in the same file as the class instead of a private method, so that a test can call it directly:
+For the parcel, we've already narrowed our search to one adapter through our minimal reproduction. Recall from [Chapter 20](./04_refactoring#working-in-small-steps) that each adapter now converts its carrier's status words itself, in a `toStatus` of its own. Carrier C's is a function in the same file as the class instead of a private method, so that a test can call it directly:
 
 ```typescript
 // in CarrierCClient.ts, alongside the class
@@ -191,11 +191,16 @@ expect(toStatus("NOT_DELIVERED")).not.to.equal("delivered");
 // fails: toStatus returned "delivered"
 ```
 
-The hypothesis is correct. `"NOT_DELIVERED".includes("DELIVERED")` is `true`, so the first branch matches. The fault is one line, and a test that runs in a millisecond can now reach it.
+The hypothesis is correct! `"NOT_DELIVERED".includes("DELIVERED")` is `true`, so the first branch matches. We can now write a test that runs in a millisecond and reaches the fault it.
 
-Each step narrowed our search considerably. Reproduction removed the user interface, the tracker, and four carriers. Round one ruled out the carrier. Round two ruled out everything except a single function, and turned the bug into a failing test that can strengthen our test suite. Each round was cheap because each hypothesis was precise enough to be checked with one observation.
+Each step of the debugging process narrowed our search: 
+1. Reproduction removed the user interface, the tracker, and four carriers. 
+2. Round one ruled out the carrier. 
+3. Round two ruled out everything except a single function. We could then turn the bug into a failing test that can strengthen our test suite. 
 
-The fault was not introduced by a recent edit. The substring test had been in the code since it was written, and it gave the right answer for every status the carrier sent until the carrier started sending one it had never sent before. Nothing in our repository changed: the new input was the first to expose the fault. Faults do not have to be recent to appear, and "we did not change anything" is not evidence that the fault is somewhere else.
+Each round was cheap because each hypothesis was precise enough to be checked with one observation.
+
+The fault was not introduced by a recent edit. The substring test had been in the code since it was written, and it gave the right answer for every status the carrier sent until the carrier started sending one it had never sent before. Nothing in our repository changed: the new input from the carrier exposed the fault. "We did not change anything" is not evidence that the fault is somewhere else.
 
 ## Fixing the Fault
 
