@@ -64,7 +64,7 @@ Most of these facts are written in the contract of `PlayHistory.songs()`. But th
 Let's see what happens when something changes. The user story asks for what was played this week. The current design cannot answer that question, because there's only a list of recent songs, with no information of when they were played. 
 
 
-What might we do now? Perhaps get `PlayHistory` needs to store the time of each play, not just the `Song`? We can get it to store `PlayRecord`s instead:
+What might we do now? Perhaps `PlayHistory` needs to store the time of each play, not just the `Song`? We can get it to store `PlayRecord`s instead:
 
 ```typescript
 type PlayRecord = {
@@ -82,9 +82,9 @@ Changing the internal representation from `Song[]` to `PlayRecord[]` is a small 
 - Every test that built up a history and asserted on the array that came back.
 - Any other screen, exporter, or report that asks for the history in the same way.
 
-One change to one cohesive class has forced edits incode that has no interest in how the history is stored. We could hide the change by making `PlayHistory` return the songs behind the `PlayRecord`s... but then callers could not see when each song was played, which was the reason for the change. 
+One change to one cohesive class has forced edits in code that has no interest in how the history is stored. We could hide the change by making `PlayHistory` return the songs behind the `PlayRecord`s... but then callers could not see when each song was played, which was the reason for the change. 
 
-All thesee things that break are the **ripple effect**: a change that should have been local propagates outward along the dependencies. The cost of the change depends on the _number of places that have to be revisited_, rather than on the size of the change itself. An engineer might estimate "add timestamps to the history" as an afternoon's work, and then find that most of the afternoon goes to fixing other classes.
+All these things that break are the **ripple effect**: a change that should have been local propagates outward along the dependencies. The cost of the change depends on the _number of places that have to be revisited_, rather than on the size of the change itself. An engineer might estimate "add timestamps to the history" as an afternoon's work, and then find that most of the afternoon goes to fixing other classes.
 
 The ripple effect has three costs. 
 1. The edits themselves are the most visible cost once the work begins, but also the smallest. 
@@ -368,7 +368,7 @@ class PlayHistory implements PlayLog {
 
 </CollapsibleCode>
 
-`WeeklyRecap` now depends only on the `Playlog` contract:
+`WeeklyRecap` now depends only on the `PlayLog` contract:
 
 ```typescript
 class WeeklyRecap {
@@ -699,7 +699,7 @@ In each case, the goal is to make the compile-time dependencies point in one dir
 A **concern** is a single thing the system must address, such as a rule, a responsibility, or a reason the code might need to change. **Separation of concerns** is the principle that each concern should be handled in exactly one place in the design. A design can violate separation of concerns in two ways:  
 
 - **Tangling** occurs when several concerns share one place in the design. The god class from Chapter 11 is _tangled_. Navigation, history, ratings, and sharing were all mixed together in a single `Playlist`, so we couldn't read about or change a single concern without  caring about them all.
-- **Scattering** occurs when one concern is spread across several places in the design. The `WeeklyRecap` we started with was _scattered_. Knowledge of the play history's representation was not confined to `PlayHistory`: it was spread across every class that asked for the list of songs in the history. So a single change in representation affected all these user classes. is why a single change to that representation affected all of them.
+- **Scattering** occurs when one concern is spread across several places in the design. The `WeeklyRecap` we started with was _scattered_. Knowledge of the play history's representation was not confined to `PlayHistory`: it was spread across every class that asked for the list of songs in the history. So a single change in representation affected all these user classes.
 
 We detect and fix the problems differently. You find tangling by looking inside one class and noticing several unrelated reasons to change it, and you fix it by splitting the class. You find scattering by making one change and counting the files it touched, and you fix it by giving the concern a single owner with a contract. High cohesion means there is no tangling, and low coupling means there is no scattering. Together they achieve separation of concerns.
 
