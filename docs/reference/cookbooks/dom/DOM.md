@@ -1,6 +1,6 @@
 # Working with the DOM
 
-This document explains how a TypeScript program reads and changes a web page. The first three sections describe the model: what a page is to a program, where the program runs, and what an element is. The sections after them are recipes for common DOM-related tasks.
+This document explains how a TypeScript program reads and changes a web page. [How a Page Works](#how-a-page-works) describes the model: what a page is to a program, where the program runs, and what an element is. The sections after it are recipes for common DOM-related tasks.
 
 ## The Example Page
 
@@ -33,7 +33,11 @@ Our example page shows a weather station's readings for one day. The user types 
 
 The text between angle brackets is a tag. `<button ...>` opens a button and `</button>` closes it, and what sits between the two is the button's content. The `name="value"` pairs inside an opening tag are its attributes. The `id` attribute gives an element a name that is unique on the page, and it is how a program finds the element in the page.
 
-## The Page Is a Tree of Objects
+## How a Page Works
+
+Three ideas explain most of what a page's code does: the page is a tree of objects, the code runs in the browser, and each element is an object with properties.
+
+### The Page Is a Tree of Objects
 
 `index.html` is text. When the browser loads it, the browser builds one object for every element the text describes and arranges the objects in a tree:
 
@@ -61,7 +65,7 @@ This tree is called the Document Object Model, or DOM. The browser renders the s
 
 The global variable `document` is the root of the tree and every other element is reached from this reference.
 
-## Where Your Code Runs
+### Where Your Code Runs
 
 A web page involves two programs, one on each side of a network:
 
@@ -83,7 +87,47 @@ Three details of this arrangement cause most early confusion:
 
 The `<script>` tag is the last thing in the `<body>`. The browser builds the tree from the top of the file down and runs a script when it reaches it, so a script at the end runs after every element above it exists.
 
-## Elements Are Objects
+### Elements Are Objects
+
+An element is an ordinary object, and what the page shows is held in its properties. Reading a property reads the page, and assigning to one changes the page:
+
+| Property | On | Holds |
+|---|---|---|
+| `textContent` | every element | the text inside the element |
+| `value` | `<input>`, `<select>` | what the user typed, or the `value` of the chosen `<option>`; always a string |
+| `disabled` | `<button>`, `<input>`, `<select>` | `true` when the control is turned off; a disabled button ignores clicks |
+
+```typescript
+// refresh is the object for the page's Refresh button
+refresh.textContent = "Reload";   // the button now reads Reload
+refresh.disabled = true;          // the button is greyed out and ignores clicks
+```
+
+Every time you modify an element's properties the page is automatically redrawn and the changes will become visible.
+
+Each kind of element has its own type: `HTMLButtonElement` for a `<button>`, `HTMLInputElement` for an `<input>`, `HTMLSelectElement` for a `<select>`, and `HTMLElement` for elements with nothing special about them, such as `<p>` and `<ul>`. These are the DOM types you are most likely to use:
+
+| Tag | Type | Adds |
+|---|---|---|
+| `<button>` | `HTMLButtonElement` | `disabled` |
+| `<input>` | `HTMLInputElement` | `value`, `disabled`, `checked` |
+| `<select>` | `HTMLSelectElement` | `value`, `disabled` |
+| `<option>` | `HTMLOptionElement` | `value`, `selected` |
+| `<li>` | `HTMLLIElement` | nothing you are likely to use |
+| `<canvas>` | `HTMLCanvasElement` | the surface a charting library draws on |
+| `<p>`, `<ul>`, `<ol>`, `<div>`, `<section>`, `<h1>` | `HTMLElement` is enough | the properties every element has |
+
+All element types have all of the methods and properties `HTMLElement` has, so `HTMLElement` is a safe choice when the code only uses properties that all elements share, such as `textContent`. A more specific type is needed when more specific properties are used, such as `value`.
+
+The type names do not always follow the tag: `<li>` is `HTMLLIElement`, `<ul>` is `HTMLUListElement`, and `<p>` is `HTMLParagraphElement`. The TypeScript handbook's [DOM Manipulation](https://www.typescriptlang.org/docs/handbook/dom-manipulation.html) page explains how these types fit together. MDN lists [every HTML element type](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API#html_element_interfaces_2) if you need a type that is not in the table above.
+
+[Finding Elements](#finding-elements) shows how a program gets hold of one of these objects.
+
+## Reading and Changing the Page
+
+The recipes in this section find elements, read what the user entered, and change what the page shows.
+
+### Finding Elements
 
 `document.querySelector(selector)` finds an element. It takes a selector, a string that describes which element is wanted, and returns the first element that matches, or `null` if nothing does:
 
@@ -102,23 +146,7 @@ The selector is written in the notation that stylesheets use, which is separate 
 
 A misspelled selector does not result in a compile error. It will not match anything, and `querySelector` will return `null`.
 
-Each kind of element has its own type: `HTMLButtonElement` for a `<button>`, `HTMLInputElement` for an `<input>`, `HTMLSelectElement` for a `<select>`, and `HTMLElement` for elements with nothing special about them, such as `<p>` and `<ul>`. The type in angle brackets after `querySelector` specifies which one you expect. The compiler takes your word for it and does not compare it with the page, so it is up to you to specify the type that matches the tag.
-
-These are the DOM types you are most likely to use:
-
-| Tag | Type | Adds |
-|---|---|---|
-| `<button>` | `HTMLButtonElement` | `disabled` |
-| `<input>` | `HTMLInputElement` | `value`, `disabled`, `checked` |
-| `<select>` | `HTMLSelectElement` | `value`, `disabled` |
-| `<option>` | `HTMLOptionElement` | `value`, `selected` |
-| `<li>` | `HTMLLIElement` | nothing you are likely to use |
-| `<canvas>` | `HTMLCanvasElement` | the surface a charting library draws on |
-| `<p>`, `<ul>`, `<ol>`, `<div>`, `<section>`, `<h1>` | `HTMLElement` is enough | the properties every element has |
-
-All element types have all of the methods and properties `HTMLElement` has, so `HTMLElement` is a safe choice when the code only uses properties that all elements share, such as `textContent`. A more specific type is needed when more specific properties are used, such as `value`.
-
-The type names do not always follow the tag: `<li>` is `HTMLLIElement`, `<ul>` is `HTMLUListElement`, and `<p>` is `HTMLParagraphElement`. The TypeScript handbook's [DOM Manipulation](https://www.typescriptlang.org/docs/handbook/dom-manipulation.html) page explains how these types fit together. MDN lists [every HTML element type](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API#html_element_interfaces_2) if you need a type that is not in the table above.
+The type in angle brackets after `querySelector` specifies which [element type](#elements-are-objects) you expect. The compiler takes your word for it and does not compare it with the page, so it is up to you to specify the type that matches the tag.
 
 A DOM element the program needs to function should be checked for once. This helper finds an element or throws, using the exceptions from [Chapter 8](../../../part1/08_errors#throwing-an-exception):
 
@@ -142,24 +170,13 @@ function requireElement<T extends Element>(page: Document, selector: string): T 
 
 `T extends Element` means that `T` may be any element type.
 
-An element is an ordinary object, and what the page shows is held in its properties. Reading a property reads the page, and assigning to one changes the page:
-
-| Property | On | Holds |
-|---|---|---|
-| `textContent` | every element | the text inside the element |
-| `value` | `<input>`, `<select>` | what the user typed, or the `value` of the chosen `<option>`; always a string |
-| `disabled` | `<button>`, `<input>`, `<select>` | `true` when the control is turned off; a disabled button ignores clicks |
+With the helper, finding the Refresh button takes one line:
 
 ```typescript
 const refresh: HTMLButtonElement = requireElement<HTMLButtonElement>(document, "#refresh");
-
-refresh.textContent = "Reload";   // the button now reads Reload
-refresh.disabled = true;          // the button is greyed out and ignores clicks
 ```
 
-Every time you modify an element's properties the page is automatically redrawn and the changes will become visible.
-
-## Reading What the User Entered
+### Reading What the User Entered
 
 An input's `value` is a string, independent of what the user typed. A user who types `5` has entered the string `"5"`, and a user who types nothing has entered `""`. Turning that into a number is the conversion described in [Chapter 7](../../../part1/07_async#converting-text-to-numbers), with the same checks:
 
@@ -185,7 +202,7 @@ function toTemperature(text: string): Result<number, string> {
 
 The error messages are written for the user, since the page displays them.
 
-## Changing What the Page Shows
+### Changing What the Page Shows
 
 Changing an element that already exists is an assignment to `textContent`. Showing a list whose length varies means building elements. Three operations are used to change elements:
 
@@ -219,7 +236,7 @@ function showReadings(list: HTMLElement, readings: Reading[]): void {
 
 Set text with `textContent`. Assigning to an element's `innerHTML` also changes what it shows, but the browser reads the string as HTML, so text that came from a user or a service could add elements to the page. `textContent` always shows the string as written.
 
-## Classes, Attributes, and Data
+### Classes, Attributes, and Data
 
 `showReadings` uses two more properties that every element has. The first is `classList`, which holds the element's classes. A class is a label, written in HTML as `class="freezing"`, and the stylesheet decides how elements with that label look:
 
@@ -250,7 +267,11 @@ for (const item of list.querySelectorAll<HTMLLIElement>("li")) {
 }
 ```
 
-## Responding to Events
+## Responding to the User
+
+A page does its work in response to what the user does. This section covers registering callbacks, organizing a page's state, and timers.
+
+### Responding to Events
 
 A page's script does not run from top to bottom and then finish. It runs once when the page loads, and in that run it configures the page and registers actions (callbacks) that respond to user input. After that, code runs only when something happens: the user clicks, types, or picks an option. [Chapter 7](../../../part1/07_async#callbacks) describes the mechanism. Each of these raises an event, and the browser runs the callbacks registered for it when its thread is free.
 
@@ -278,7 +299,7 @@ refresh.addEventListener("click", async (): Promise<void> => {
 
 Nothing awaits the promise such a callback returns, so callbacks must deal with every failure that might arise when they execute, usually by putting an error message on the page.
 
-## Keeping State in One Place
+### Keeping State in One Place
 
 A page has several elements and some data, and every operation on the page needs most of them. A class holds them as fields:
 
@@ -372,7 +393,7 @@ this.refresh.addEventListener("click", (): void => {
 });
 ```
 
-## Repeating on a Timer
+### Repeating on a Timer
 
 `setTimeout`, from [Chapter 7](../../../part1/07_async#callbacks), runs a callback once. `setInterval` runs one repeatedly, and returns a handle that `clearInterval` uses to stop it:
 
