@@ -1,8 +1,8 @@
 # Adding New Features
 
-The previous chapter dealt with behaviour that was supposed to work but did not. This chapter deals with behaviour that does not exist yet. Requests for new behaviour keep arriving for as long as people use a system, and that is a sign of success.
+The previous chapter dealt with behaviour that was supposed to work but did not. This chapter deals with behaviour that does not exist yet. Requests for new behaviour keep arriving for as long as people use a system, and are a sign of success.
 
-Adding a feature draws on everything in Part 3. Most of the work is reasoning: working out what is actually being asked, building a model of the system, deciding where and how the design can accommodate the change, making the change without damaging the system in some unexpected way, and knowing when you are finished.
+Adding a feature draws on everything in Part 3. Most of the work is reasoning: working out what is actually being asked, building a model of the system, deciding where and how the design can accommodate the change, making the change without damaging the system in some unexpected way, and knowing when you are finished. After the reasoning, the code change should be straightforward.
 
 #### Two Requests
 
@@ -12,13 +12,13 @@ Our tracker has been in production for a year, and two requests arrive in the sa
 
 > As a shopper, I want to be told when a parcel is delayed, so that I can act before it becomes a problem.
 
-As requirements, these look similar. Each is one sentence, each is clearly worth doing, and a plan that estimated both at a couple of days would seem reasonable in a meeting. In practice, one of them will take a couple of hours, and the other will take much longer. Most of the difference comes from the design the two requests meet, not from notifications being harder to build than carriers.
+As requirements, these look similar. A plan that estimated both  as taking a couple of days to implement would seem reasonable in a meeting. In practice, one of them will take a couple of hours, and the other will take much longer. Most of the difference comes from our current software design, not from notifications being harder to build than carriers.
 
 ## Feature Requests
 
-A request states a need. It is neither a specification nor a design, and treating it as either is the first way this work goes wrong.
+A _request_ states a need. It is neither a specification nor a design, and treating it as either is the first way this work goes wrong.
 
-People who make requests usually cannot judge what they will cost, and the reason is structural rather than a failure of communication. Software has no physical form that shows its structure. If someone asks to move a wall in a building, everyone in the room understands that this is a bigger request than moving a desk, because the difference is visible. Code gives no such cue. As text, every line looks equally easy to edit, and nothing on the page distinguishes a line that forty other places depend on from a line that nothing calls. A request that cuts across the structure of a design looks exactly like one that follows it.
+People who make requests usually cannot judge what they will cost. The reason for that is structural. Software has no physical form that shows its structure. If someone asks to move a wall in a building, everyone in the room understands that this is a bigger request than moving a desk. The difficulty of code changes is not so clear. As text, every line looks equally easy to edit. Only someone who knows the code can tell that one request fits what the system was built to accommodate and another does not.
 
 <details class="tooltip deep-dive">
 <summary>Changeability and Invisibility</summary>
@@ -27,53 +27,63 @@ Software can be changed in ways a building cannot, and that is its main advantag
 
 </details>
 
-In practice, part of receiving a request is making its cost visible to the person who asked, as early as possible. Only someone who knows the code can tell them that one request fits what the system was built to accommodate and another does not.
+Most features requests do not neatly map to a code change. For instance,
+"tell me when a parcel is delayed" leaves several decisions open:
 
-"Tell me when a parcel is delayed" leaves several decisions open:
+- What counts as delayed? It could be later than the carrier's estimate, no movement for two days, or an explicit exception status.
+- How do we tell the shopper? We could do it via email, push notification, or a badge in the app.
+- How often do we tell the shopper? If the parcel is delayed for a week, do we notify multiple times?
+- Which parcels should we notify for? Should it be every parcel? Or only the ones the shopper has asked to watch?
 
-- What counts as delayed: later than the carrier's estimate, no movement for two days, or an explicit exception status.
-- How the shopper is told: email, push notification, or a badge in the app.
-- How often they are told if the parcel stays delayed for a week.
-- Which parcels are included: every parcel, or only the ones the shopper has asked to watch.
+If the requester does not make these decisions, and a developer guesses which ones to make without consultation, it is possible the feature won't meet the requester's needs at all. This is a fundamental issue between the precision of natural language and of code. 
 
-None of these are implementation details. Each is a decision about what the feature does. If the requester does not make these decisions, a developer will end up guessing at them while writing the code.
+### User Stories
 
-Many chapters of this textbook have used a user story, which states a role, a goal, and a benefit. Turning a request into something buildable means writing a story like those, and adding acceptance criteria that are concrete enough to tell you when you are done. The questions to resolve before writing any code are the ones whose answers change the design:
+Many chapters of this textbook have used a _user story_, which states a role, a goal, and a benefit. To turn a request into something buildable, we start by writing a user story, and acceptance criteria that are concrete enough to tell us when we are done. In writing a user story, we should consider:
 
 - Who is this for, and what will they do differently once they have it?
 - What does success look like, stated as something observable?
 - What is explicitly not included?
 
-The last question is easy to skip, but without an answer the feature has no stated boundary, and a feature with no stated boundary grows while it is being built, because every related improvement looks small from inside the work.
+It's easy to skip the last question, but a feature with no stated boundary can grow far beyond the original need, because every related improvement looks small from inside the work.
 
-For the delay request, suppose the conversation settles the open decisions this way: a parcel counts as delayed when its carrier reports an `exception` status, the shopper is told once each time a parcel becomes delayed, through the existing notification channel, and other ways of being late are not included for now. That gives an acceptance criterion a test can check: the first lookup that finds a parcel delayed sends exactly one message, and later lookups of the same delayed parcel send none.
+For the delay request, suppose the conversation settles the open decisions this way: a parcel counts as delayed when its carrier reports an `exception` status, the shopper is told once each time a parcel becomes delayed, through the existing notification channel, and other ways of being late are not included for now. 
+
+These answers  give acceptance criteria we can turn into tests: the first lookup that finds a parcel delayed sends exactly one message, and later lookups of the same delayed parcel send none.
 
 "This should not be built here" is also a legitimate answer. A request that would add a payment provider to a parcel tracker, or that duplicates something another team already publishes, is better answered with a conversation than with code.
+ 
+<details class="tooltip deep-dive">
+<summary>Consulting Humans</summary>
 
+An important role in a software development team is someone who interacts with users in a systematic way, to plan user stories and acceptance criteria that actually meet users' needs. If you want to learn more, you may want to take CPSC 344 or 444. 
+</details>
+ 
 ## Reading Unfamiliar Code
 
-Assume you did not write the system. It is the normal case, and the one to practise. The goal is narrower than it might seem: you need a model of the parts the change touches, not an understanding of the whole program. On a system of any size, waiting until you understand everything means never starting.
+Assume you did not write the system. This is actually the normal case, as systems we work on are often predate our involvement in them. However, you don't need to understand the whole software system before working on a new feature: you need a good model of the parts you'll touch when making the change. On any realistic software system, waiting until you understand everything means never starting.
 
-The following approaches are listed roughly in order of how much they return for the time spent:
+Here are a few approaches for learning unfamiliar code, listed roughly in order of how much they return for the time spent:
 
-_Follow one real path from start to finish._ Pick one operation a user performs, start at the entry point, and trace it through to where it produces a result. One complete path teaches you more about how a system is organised than an hour of reading files in whatever order the editor lists them.
+_Follow one real path from start to finish._ Pick one operation a user performs, start at the entry point, and trace it through to where it produces a result. You may use a debugger or logging for this observation. One complete path teaches you more about how a system is organised than an hour of reading files in whatever order the editor lists them.
 
 _Read the tests._ A test suite is an executable description of what the code promises, written by somebody who had to be specific. Tests also show the intended way to construct objects and use the system, which is often easier to learn from than the implementation. The tracker's tests show that a `ParcelTracker` is built from a list of carriers, and that a `StubCarrier` can stand in for a real one.
 
-_Read the types and the data first._ The shapes of the data constrain what the logic can do. A `Shipment` with three fields tells you a lot about what the tracker can and cannot report before you read a single function.
+_Read the types and data definitions._ The shapes of the data constrain what the logic can do. A `Shipment` with three fields tells you a lot about what the tracker can and cannot report before you read a single function.
 
 _Follow the dependency graph, not the file listing._ The dependency arrows from [Chapter 17](./01_coupling#what-coupling-is) show what depends on what, and that is the structure to learn. For the tracker, the graph is small: `ParcelTracker` depends on `CarrierClient`, and each adapter implements it.
 
-_Run it in the debugger._ Watching one path execute with real values corrects a mental model faster than reading does. The previous chapter's reproduction, a single call to `carrier.track`, is a convenient place for a first breakpoint.
+<!---_Run it in the debugger._ Watching one path execute with real values corrects a mental model faster than reading does. The previous chapter's reproduction, a single call to `carrier.track`, is a convenient place for a first breakpoint.
+--->
 
-Here is the first approach applied to our tracker. Recall from [Chapter 19](./03_api_design#easy-to-use-hard-to-misuse) that a client looks a parcel up by passing `locate` a request. Following one lookup from the screen to the carrier takes four steps:
+Let's look at the "follow one real path" approach on our tracker. Recall from [Chapter 19](./03_api_design#easy-to-use-hard-to-misuse) that a client looks a parcel up by passing `locate` a request. Following one lookup from the user interface to the carrier takes four steps:
 
-1. The screen calls `tracker.locate({ trackingNumber: "Z2200417" })`.
+1. The user interface calls `tracker.locate({ trackingNumber: "Z2200417" })`.
 2. The request names no carrier, so `locate` asks each `CarrierClient` in its list in turn. Each of those is an adapter for one carrier's web service.
 3. The adapter that recognizes this number, `CarrierCClient`, builds a URL, calls `fetch`, and converts the response, mapping the carrier's own status words to the `ShipmentStatus` values the rest of the system uses.
 4. The adapter returns a `Result<Shipment, TrackingError>`, and `locate` returns the first successful result, or one of the `TrackingError` cases from [Chapter 19](./03_api_design#designing-the-failures) when no carrier has the parcel.
 
-After four files, we already have enough to work with:
+After four files, we have built a foundational understanding of the system:
 
 - A carrier is named in exactly two places: its adapter, and the list of carriers in `createTracker`.
 - A raw status is converted to a `ShipmentStatus` in one place for each carrier, inside its adapter.
@@ -81,14 +91,16 @@ After four files, we already have enough to work with:
 
 The first request will only need the first of these facts. The second request needs the third.
 
-Two habits help. First, when a test and a comment disagree, trust the test, because a comment can be years out of date but a passing test describes what the code does today. Second, when you notice the code disagreeing with its documentation, write the disagreement down. It is either a defect or a place where the documentation misled you, and both matter to the next reader.
+If during analysis, you notice disagreements between a test and a comment, trust the test, because a comment can be years out of date but a passing test describes what the code does today. If you notice the code disagreeing with its documentation, write the disagreement down. It is either a defect or a place where the documentation misled you, and both matter to the next reader.
 
 <details class="tooltip link-110">
 <summary>The Wish List, Again</summary>
 
 CPSC 110 gave you a technique for working on something you cannot finish yet. When a function needed a helper that did not exist, you wrote the helper's signature and purpose on a wish list, called it as though it were finished, and continued with the function you had set out to write.
 
-Reading an unfamiliar system needs a similar discipline. You will often encounter things you do not understand, and investigating each one immediately turns a two-hour orientation into a two-day one that ends nowhere near the change you came to make. Keep a list instead. Note what the thing appears to do, note that you have not checked it, and continue along the path you were following. Most entries turn out not to matter for this change, and you can investigate the few that do once you know why you need them.
+Reading an unfamiliar system needs a similar discipline. You will often encounter things you do not understand, and investigating each one immediately turns a two-hour orientation into a two-day one that ends nowhere near the change you came to make. 
+
+Instead of aiming to understand all the details at once, keep a list of what you need. Note what the thing appears to do, note that you have not checked it, and continue along the path you were following. Many entries on your list may not matter for the change at hand, and you can investigate the few that do once you know _why_ you need them.
 
 </details>
 
@@ -98,12 +110,12 @@ Once you have a model of the relevant parts, the design question is where the ch
 
 Such a place is an extension point, the term [Chapter 16](../part2/07_ocp#the-axis-of-change) used for a place where behaviour can be varied by adding code rather than editing existing code. That chapter looked at extension points from the point of view of the person creating one, who chooses an axis of change and decides whether the indirection is justified. This chapter looks at them from the point of view of someone who has inherited a design and needs to know what changes it will accept. Much of the industry literature uses a closely related term, _seam_, for a place where behaviour can be changed without editing the code around it.
 
-The last two parts of the textbook have built several kinds of extension point, and they are easy to recognize:
+The last two parts of the textbook have built several kinds of extension point, which you should be able to recognize:
 
 - An interface with more than one implementation. New behaviour is added as a new implementation.
 - An abstract class with subclasses, where the base class defines a sequence of steps and leaves some of them for subclasses to fill in.
 - A collaborator passed in through a constructor rather than created internally, which can be replaced with a different one.
-- A composition root, the one place where concrete classes are chosen and connected, from [Chapter 18](./02_consuming_data#supplying-the-dependency). This is where a new choice is registered.
+- A composition root, the one place where concrete classes are chosen and connected, from [Chapter 18](./02_consuming_data#supplying-the-dependency). 
 
 All four rely on separation of concerns, from [Chapter 17](./01_coupling#cohesion-and-coupling). An extension point exists wherever a concern has been given its own place behind a contract, such as delivery over a channel, retrieval from a carrier, or formatting a message. A concern with its own boundary can be replaced through that boundary. A concern tangled into a class that does three other things cannot be changed without changing the other three.
 
@@ -142,9 +154,9 @@ const tracker: ParcelTracker = new ParcelTracker([
 ]);
 ```
 
-As a diff, the change is one new file, one line added where the list of carriers is assembled, and one new test file. `ParcelTracker`, the existing adapters and the existing tests are all unchanged, and the existing suite still passes. The Open/Closed Principle from [Chapter 16](../part2/07_ocp#open-and-closed) promised this benefit. The system grew by addition alone, and the only new tests are the ones for the new carrier.
+Overall, the change is one new file, one line added where the list of carriers is assembled, and one new test file. `ParcelTracker`, the existing adapters and the existing tests are all unchanged, and the existing suite still passes. The Open/Closed Principle from [Chapter 16](../part2/07_ocp#open-and-closed) promised this benefit. We were able to grow the system by addition alone, and only write new tests for the new carrier.
 
-The work that made this change cheap was done earlier, when we defined `CarrierClient` instead of calling carriers directly, and when [Chapter 20](./04_refactoring#working-in-small-steps)'s refactoring moved the status vocabulary back out of the middle of the system.
+This change was cheap because of work we did earlier: defining `CarrierClient` instead of calling carriers directly, and the refactoring from [Chapter 20](./04_refactoring#working-in-small-steps), wheere we moved the status vocabulary back out of the middle of the system.
 
 ## No Extension Point
 
