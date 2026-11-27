@@ -1,4 +1,4 @@
-# Working Visual Studio Code (VSCode)
+# VSCode Cookbook
 
 This document will help you get started with your VSCode environment.
 
@@ -6,11 +6,13 @@ In CPSC 210 we will interact with projects in two main ways: either through a br
 
 Since VSCode will be used extensively, we will focus on that in this document; if you elect to use a different IDE, please adapt the instructions accordingly. If you have never used VSCode before, the official [introduction videos](https://code.visualstudio.com/docs/getstarted/introvideos) and [user interface overview](https://code.visualstudio.com/docs/getstarted/userinterface) are good places to start; this document focuses on the parts you will need for this course.
 
+If you are setting up your own computer, start with [Installing VSCode](#installing-vscode).
+
 ## Where Files Live
 
-The "Explorer" (the top icon on the left-hand bar, or `Ctrl/Cmd+Shift+E`) shows the files in your workspace.
+The **Explorer** (the top icon on the left-hand bar, or `Ctrl/Cmd+Shift+E`) shows the files in your workspace.
 
-![Explorer View](img/explorer.png)
+![Explorer View](https://raw.githubusercontent.com/ubccpsc/210/main/docs/reference/cookbooks/vscode/img/explorer.png)
 
 Every activity, midterm, and lab uses the same layout:
 
@@ -27,7 +29,7 @@ To open a file quickly without using the Explorer, press `Ctrl/Cmd+P` and start 
 
 ## Identifying Static Problems
 
-Static problems are found without running your code, and come in two kinds: compilation errors and lint errors. Both correspond to the static view of a program described in [Chapter 1](../../../part1/01_new-language#static-and-dynamic-views), and both appear in the same places in VSCode.
+Static problems are found without running your code, and come in two kinds: compilation errors and lint errors. Both correspond to the **static view** of a program described in the textbook, and both appear in the same places in VSCode.
 
 ### Compilation Errors
 
@@ -35,11 +37,11 @@ These are the problems the TypeScript compiler finds: a misspelled name, a missi
 
 - **In the editor.** Problem code is underlined in red, and the file name in the Explorer turns red with a count beside it. Hover over an underline to read the message.
 
-  ![Error in the editor](img/errorEditor.png)
+  ![Error in the editor](https://raw.githubusercontent.com/ubccpsc/210/main/docs/reference/cookbooks/vscode/img/errorEditor.png)
 
 - **In the Problems View** (`Ctrl/Cmd+Shift+M`, or the "Problems" tab in the panel along the bottom). This lists every problem in the workspace in one place. Click an entry to jump to the line. The VSCode documentation describes this in more detail under [Errors & warnings](https://code.visualstudio.com/docs/editing/editingevolved#_errors-warnings).
 
-  ![Error in the Problems View](img/errorProblem.png)
+  ![Error in the Problems View](https://raw.githubusercontent.com/ubccpsc/210/main/docs/reference/cookbooks/vscode/img/errorProblem.png)
 
 The same errors appear if you open the **Terminal View** (`` Ctrl/Cmd+` `` or the "Terminal" tab in the bottom panel; see [Terminal Basics](https://code.visualstudio.com/docs/terminal/basics) for more) and run:
 
@@ -47,8 +49,8 @@ The same errors appear if you open the **Terminal View** (`` Ctrl/Cmd+` `` or th
 pnpm build
 ```
 
-![Error Terminal Command](img/errorTerminalBefore.png)
-![Error Terminal Result](img/errorTerminalAfter.png)
+![Error Terminal Command](https://raw.githubusercontent.com/ubccpsc/210/main/docs/reference/cookbooks/vscode/img/errorTerminalBefore.png)
+![Error Terminal Result](https://raw.githubusercontent.com/ubccpsc/210/main/docs/reference/cookbooks/vscode/img/errorTerminalAfter.png)
 
 The grader runs this too, and stops there if your code does not compile. An empty Problems View is the first thing to check before you Save & Grade.
 
@@ -58,14 +60,14 @@ To fix a compilation error, go to the code that caused it and change it. Double-
 
 Some errors also offer a quick fix, which the VSCode documentation calls a [Code Action](https://code.visualstudio.com/docs/editing/editingevolved#_code-action). Quick fixes are not offered for every error and do not always do what you want, but they are often the fastest route. Here is an error that offers one:
 
-![Quick Fix Hover](img/quickFixError.png)
-![Quick Fix Options](img/quickFixErrorOpt.png)
+![Quick Fix Hover](https://raw.githubusercontent.com/ubccpsc/210/main/docs/reference/cookbooks/vscode/img/quickFixError.png)
+![Quick Fix Options](https://raw.githubusercontent.com/ubccpsc/210/main/docs/reference/cookbooks/vscode/img/quickFixErrorOpt.png)
 
-In this case the first two options fix the code and the last two do not. Read the options before choosing one; with practice you will recognize which kind of fix applies.
+In this case the first two options fix the code and the last two do not. Read the options before choosing one; with practice you will recognise which kind of fix applies.
 
 ### Lint Errors
 
-The Problems View also shows lint warnings from Biome, the linter and formatter this course uses. These are about style rather than correctness (indentation, unused imports, and the like), though they often point at problems that are hard to debug later. Most teams run a linter to keep their code consistent.
+The Problems View also shows **lint** warnings from Biome, the linter and formatter this course uses. These are about style rather than correctness (indentation, unused imports, and the like), though they often point at problems that are hard to debug later. Most teams run a linter to keep their code consistent.
 
 Most lint warnings can be fixed for you by running:
 
@@ -79,22 +81,26 @@ Lint warnings can also be fixed one at a time where they occur: click the underl
 
 ## Identifying Dynamic Problems
 
-Dynamic problems only appear when the code runs: a function that compiles but returns the wrong answer. The type checker cannot see these. Your tests can, and they correspond to the dynamic view of a program.
+Dynamic problems only appear when the code runs: a function that compiles but returns the wrong answer. The type checker cannot see these. Your tests can, and they correspond to the **dynamic view** of a program.
 
-Tests run from the "Testing View" (the beaker icon on the left-hand bar). It lists every test file and every test inside it. The official [Testing](https://code.visualstudio.com/docs/debugtest/testing) documentation covers this view in depth.
+### The Testing View
 
-![Testing View](img/beaker.png)
+Tests run from the **Testing View** (the beaker icon on the left-hand bar). It lists every test file and every test inside it. The official [Testing](https://code.visualstudio.com/docs/debugtest/testing) documentation covers this view in depth.
 
-- The "Run Tests" button at the top of the Testing View runs everything.
+![Testing View](https://raw.githubusercontent.com/ubccpsc/210/main/docs/reference/cookbooks/vscode/img/beaker.png)
 
-  ![Run tests button](img/runTests.png)
+- The **Run Tests** button at the top of the Testing View runs everything.
+
+  ![Run tests button](https://raw.githubusercontent.com/ubccpsc/210/main/docs/reference/cookbooks/vscode/img/runTests.png)
 
 - A green check means a test passed. A red `x` means it failed; click it to see what the test expected and what your function actually returned.
 - When a test file is open in the editor, each `test(...)` has a small green play arrow in the gutter to its left. Click it to run only that test. A red icon there means the last run of that test failed.
 
 When a test fails, three places report it: the Testing View marks it in the left panel, the editor annotates the failing line, and the Test Results tab at the bottom prints what the test expected and what it got. Any of them will tell you why the test did not pass.
 
-![Testing IDE](img/testing.png)
+![Testing IDE](https://raw.githubusercontent.com/ubccpsc/210/main/docs/reference/cookbooks/vscode/img/testing.png)
+
+### Running Tests from the Terminal
 
 You can also use the Terminal View at the bottom of VSCode to invoke the tests and get feedback about what is passing or failing:
 
@@ -102,10 +108,12 @@ You can also use the Terminal View at the bottom of VSCode to invoke the tests a
 pnpm test
 ```
 
-![Terminal Test Command](img/terminalTest.png)
-![Terminal Test Failure](img/terminalTestFail.png)
+![Terminal Test Command](https://raw.githubusercontent.com/ubccpsc/210/main/docs/reference/cookbooks/vscode/img/terminalTest.png)
+![Terminal Test Failure](https://raw.githubusercontent.com/ubccpsc/210/main/docs/reference/cookbooks/vscode/img/terminalTestFail.png)
 
-A few things to keep in mind:
+### Things to Keep in Mind
+
+These apply however you run the tests:
 
 - Tests that have not been written yet cannot fail. If the Testing View shows only passing tests, ask which cases you have not covered yet.
 - A test should fail against a stub before you implement the function. If it passes anyway, the test is not checking what you think it is.
@@ -144,15 +152,15 @@ The lecture activities, midterms, and final exams run entirely in the browser wo
 
 5. _VSCode Extensions_: Open the Extensions View in VSCode (the blocks icon on the left-hand bar). Extensions add language and tool support to VSCode, and the next two steps install the two this course relies on. The [Extension Marketplace](https://code.visualstudio.com/docs/configure/extensions/extension-marketplace) page explains how to find, install, and manage extensions. NOTE: you cannot install extensions in our VSCode web instance, only in your own standalone IDE. The web instance already has both of the extensions below.
 
-   ![Extensions View](img/extensions.png)
+   ![Extensions View](https://raw.githubusercontent.com/ubccpsc/210/main/docs/reference/cookbooks/vscode/img/extensions.png)
 
 6. _The Vitest extension_: In the Extensions View, search for "Vitest" and install the one published by Vitest. Without it the Testing View cannot find your tests.
 
-   ![Vitest Extension](img/vitest.png)
+   ![Vitest Extension](https://raw.githubusercontent.com/ubccpsc/210/main/docs/reference/cookbooks/vscode/img/vitest.png)
 
 7. _The Biome extension_: In the Extensions View, search for "Biome" and install the one published by biomejs. It is what puts lint warnings in the editor and the Problems View; without it, only compilation errors appear there, and you would have to run `pnpm lint` to see lint problems.
 
-   ![Biome Extension](img/biome.png)
+   ![Biome Extension](https://raw.githubusercontent.com/ubccpsc/210/main/docs/reference/cookbooks/vscode/img/biome.png)
 
 Once these steps are complete you are ready to open a project. If you cloned a repository, that clone is the folder you want. Choose **File > Open Folder** and pick the folder that contains the project's `package.json`. The first time you open a project, run `pnpm install` in the Terminal View to download its dependencies. After that, `pnpm build`, `pnpm test`, and `pnpm lint:fix` work exactly as they do in the browser workspace, and the Problems View and Testing View behave the same way.
 

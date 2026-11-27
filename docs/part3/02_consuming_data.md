@@ -110,14 +110,7 @@ TypeScript has two types for a value whose type is not known, and they behave di
 
 You haven't seen a lot of `any` so far in this course because we have configured TypeScript and our lint rules to reject it, so the type checker cannot be turned off by accident in code you write. `any` can still enter your code though through the return type of a function someone else wrote, such as `JSON.parse`.
 
-`unknown` is the safe alternative. A value of type `unknown` can be stored and passed around, but it cannot be used for anything else until its type has been checked:
-
-```typescript
-const raw: unknown = JSON.parse(text);
-raw.trackingNumber;                    // compile error: 'raw' is of type 'unknown'
-```
-
-This error is useful. `unknown` forces the check that `any` lets you skip. Annotating incoming data as `unknown` turns a hidden problem into a compilation error on the line where validation is missing. Give incoming data the type `unknown`, and use a conversion function as the only way to turn it into a more specific type.
+`unknown`, introduced in [Chapter 7](../part1/07_async#checking-parsed-data), is the safe alternative. A value of type `unknown` cannot be used until its type has been checked, so `unknown` forces the check that `any` lets you skip. Annotating incoming data as `unknown` turns a hidden problem into a compilation error on the line where validation is missing. Give incoming data the type `unknown`, and use a conversion function as the only way to turn it into a more specific type.
 
 </details>
 
@@ -132,7 +125,7 @@ const shipment: Shipment = JSON.parse(text) as Shipment;   // a claim, not a che
 <details class="tooltip ts-tips">
 <summary>The <code>as</code> Operator</summary>
 
-This is the first time we have needed `as`, and we would recommend using it absolutely as little as possible. `as` tells the compiler that a value has a type the compiler could not work out on its own:
+[Chapter 7](../part1/07_async#checking-parsed-data) used `as` once, directly after a check, and we recommend using it as little as possible. `as` tells the compiler that a value has a type the compiler could not work out on its own:
 
 ```typescript
 <expression> as <Type>
@@ -142,13 +135,13 @@ This is the first time we have needed `as`, and we would recommend using it abso
 
 TypeScript calls this operator a _type assertion_. For clarity, this chapter calls it a _claim_ instead. An `assert` tests a condition while the program runs, and halts when the condition is false. `as` tests nothing and cannot fail.
 
-There is one narrow legitimate use, described in the next section, where the surrounding code has already established the fact being claimed. Everywhere else, using `as` to make a type error go away replaces a compile-time error with a failure at runtime.
+There is one narrow legitimate use, the one Chapter 7 relied on and the next section returns to, where the surrounding code has already established the fact being claimed. Everywhere else, using `as` to make a type error go away replaces a compile-time error with a failure at runtime.
 
 </details>
 
 ## Converting, Not Claiming
 
-Instead of making a claim, we can write a function that takes an `unknown` value and returns either a value we can trust or an explanation of what was wrong. The `Result` type from [Chapter 3](../part1/03_checking-invariants#erroneous-outcomes) is designed for this job:
+Instead of making a claim, we can write a converter of the kind [Chapter 7](../part1/07_async#checking-parsed-data) wrote for a `Reading`: a function that takes an `unknown` value and returns a `Result` holding either a value we can trust or an explanation of what was wrong:
 
 <CollapsibleCode>
 
@@ -161,13 +154,10 @@ Instead of making a claim, we can write a function that takes an `unknown` value
  * ok: false with a description of the first problem found.
  */
 function toShipment(raw: unknown): Result<Shipment, string> {
-    if (typeof raw !== "object") {
-        return { ok: false, error: "response body is not an object" };
+    if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
+        return { ok: false, error: "response body is not a JSON object" };
     }
-    if (raw === null) {
-        return { ok: false, error: "response body is null" };
-    }
-    const fields: { [key: string]: unknown } = raw as { [key: string]: unknown };
+    const fields: Record<string, unknown> = raw as Record<string, unknown>;
 
     const trackingNumber: unknown = fields.trackingNumber;
     if (typeof trackingNumber !== "string") {
@@ -201,13 +191,6 @@ function toShipment(raw: unknown): Result<Shipment, string> {
 
 </CollapsibleCode>
 
-<details class="tooltip ts-tips">
-<summary><code>typeof</code> and Index Signatures</summary>
-
-`typeof x` produces a string naming the kind of value `x` holds at runtime, such as `"string"`, `"number"`, `"boolean"` or `"object"`. Checking it narrows the type, as checking a discriminator did in [Chapter 2](../part1/02_model-types#branching-on-the-case). One warning: `typeof null` is `"object"`, which is why the converter checks for `null` separately. The type `{ [key: string]: unknown }` describes an object with any string keys, whose values are not yet known.
-
-</details>
-
 The function is tedious to write, but its checks make the result trustworthy. It confirms that every field the type describes exists and has the right type. It also checks for an unrecognized status, because carriers do add new statuses over time. A value that passes these checks is a `Shipment` in the full sense that the rest of the program assumes, because its shape has been verified rather than claimed.
 
 The error messages are also useful. The message "unrecognized status: held-at-depot" tells a maintainer what changed at the carrier and what to add. A claim would have produced a `Shipment` whose status was `held-at-depot`, even though the type does not allow that value. The failure would have appeared later, in code that reasonably assumed the status was one of the three allowed values.
@@ -215,7 +198,7 @@ The error messages are also useful. The message "unrecognized status: held-at-de
 <details class="tooltip deep-dive">
 <summary>Claiming After Checking</summary>
 
-The converter uses `as` twice, even though the previous section argued against it. Both uses come after a check that establishes the fact being claimed. `raw as { [key: string]: unknown }` follows two tests confirming that `raw` is a non-null object, and `status as ShipmentStatus` follows a test confirming that `status` is one of the three permitted strings. In each case, the claim tells the compiler something the code has already checked. The claim is needed because TypeScript's type narrowing cannot work out these particular conclusions on its own.
+The converter uses `as` twice, even though the previous section argued against it. Both uses come after a check that establishes the fact being claimed. `raw as Record<string, unknown>` follows three tests confirming that `raw` is an object, is not `null`, and is not an array, as it did in Chapter 7, and `status as ShipmentStatus` follows a test confirming that `status` is one of the three permitted strings. In each case, the claim tells the compiler something the code has already checked. The claim is needed because TypeScript's type narrowing cannot work out these particular conclusions on its own.
 
 The important distinction is between a claim used _instead_ of a check and a claim used _after_ a check. A claim used instead of a check is unverified, and nothing will ever verify it. A claim used after a check works around a limitation of the type checker, and the check makes the claim true. To tell them apart, look at the code above the `as` and ask whether it has already established what is being claimed.
 
@@ -381,7 +364,7 @@ const body: unknown = await response.json();
 const shipment: Result<Shipment, string> = toShipment(body);
 ```
 
-The difference from the version in Chapter 7 is the middle line. The body is given the type `unknown` rather than the type we hope it has, so the compiler requires us to pass it through `toShipment` before any other code can use it.
+The middle line is the one that matters. The body is given the type `unknown` rather than the type we hope it has, so the compiler requires us to pass it through `toShipment` before any other code can use it.
 
 ## Three Ways a Call Fails
 
@@ -735,13 +718,10 @@ type RateTable = {
  * with a description of the first problem found.
  */
 function toRateTable(raw: unknown): Result<RateTable, string> {
-    if (typeof raw !== "object") {
-        return { ok: false, error: "response body is not an object" };
+    if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
+        return { ok: false, error: "response body is not a JSON object" };
     }
-    if (raw === null) {
-        return { ok: false, error: "response body is null" };
-    }
-    const fields: { [key: string]: unknown } = raw as { [key: string]: unknown };
+    const fields: Record<string, unknown> = raw as Record<string, unknown>;
 
     const base: unknown = fields.base;
     if (typeof base !== "string") {
@@ -754,13 +734,10 @@ function toRateTable(raw: unknown): Result<RateTable, string> {
     }
 
     const rates: unknown = fields.rates;
-    if (typeof rates !== "object") {
-        return { ok: false, error: "rates is missing or not an object" };
+    if (typeof rates !== "object" || rates === null || Array.isArray(rates)) {
+        return { ok: false, error: "rates is missing or not a JSON object" };
     }
-    if (rates === null) {
-        return { ok: false, error: "rates is null" };
-    }
-    const entries: { [key: string]: unknown } = rates as { [key: string]: unknown };
+    const entries: Record<string, unknown> = rates as Record<string, unknown>;
     const checked: { [currency: string]: number } = {};
     for (const currency of Object.keys(entries)) {   // Object.keys lists an object's property names
         const rate: unknown = entries[currency];

@@ -382,6 +382,79 @@ Files on disk are stored as raw bytes. The second argument to `readFile` names t
 
 </details>
 
+### Converting Text to Numbers
+
+`readFile` returns a string, even if the file holds numbers. A line in a temperature log that represents `-4` arrives as the string `"-4"`, and the compiler will not accept that where it requires a `number`. But we can convert strings to numbers directly in the language:
+
+```typescript
+test("a whole number converts", checkExpect(() => Number("-4"), -4));
+test("a decimal converts", checkExpect(() => Number("3.5"), 3.5));
+test("surrounding spaces are ignored", checkExpect(() => Number(" 12 "), 12));
+```
+
+`Number` always returns a number, for any string, so two kinds of text need care. The first is text with nothing in it. An empty string, or a string holding only spaces, converts to `0`:
+
+```typescript
+test("an empty string converts to 0", checkExpect(() => Number(""), 0));
+```
+
+A blank line in a temperature log would be recorded as a reading of zero degrees.
+
+The second is text that does not represent a valid number, which converts to `NaN`, short for "not a number". `NaN` is a value of type `number`, so the compiler accepts it anywhere a number is expected, but every comparison involving `NaN` is false:
+
+```typescript
+const notANumber: number = Number("mild");   // NaN
+
+test("NaN is not below 0", checkExpect(() => notANumber < 0, false));
+test("NaN is not above 23", checkExpect(() => notANumber > 23, false));
+test("NaN is not equal to itself",
+    checkExpect(() => notANumber === notANumber, false)
+);
+```
+
+The first two checks show the danger. A range check written as `hour < 0 || hour > 23` finds nothing wrong with `NaN`, so an hour that could not be read would be accepted as valid. The third check shows that comparing a value with `NaN` using `===` cannot detect it either. There are two built-in functions that can evaluate `NaN`:
+
+- `Number.isFinite(value)` returns `true` for any valid number. It is `false` for `NaN` and `Infinity`, which is what text spelling a number too large to represent converts to.
+- `Number.isInteger(value)` is `true` only for whole numbers, so it is `false` for `6.5` and for `NaN`.
+
+A conversion from text to a number has three steps: refuse empty text, convert it, and check the number before comparing it. The `Result` type from [Chapter 3](./03_checking-invariants#erroneous-outcomes) lets the function report which step failed:
+
+```typescript
+/**
+ * Converts the text of an hour into a number.
+ *
+ * @param {string} text the text to convert.
+ * @returns {Result<number, string>} ok: true with a whole number from 0 to 23,
+ * or ok: false with a description of what was wrong with the text.
+ */
+function toHour(text: string): Result<number, string> {
+    if (text.trim() === "") {
+        return { ok: false, error: "hour is empty" };
+    }
+    const hour: number = Number(text);
+    if (Number.isInteger(hour) === false) {
+        return { ok: false, error: "hour is not a whole number: " + text };
+    }
+    if (hour < 0 || hour > 23) {
+        return { ok: false, error: "hour is not from 0 to 23: " + text };
+    }
+    return { ok: true, value: hour };
+}
+
+test("an hour in range converts",
+    checkExpect(() => toHour("6"), { ok: true, value: 6 })
+);
+
+test("a word is refused",
+    checkExpect(() => toHour("noon"), {
+        ok: false,
+        error: "hour is not a whole number: noon"
+    })
+);
+```
+
+`text.trim()` removes any spaces at the start and end from `text`, so the first check refuses both an empty string and a string of spaces. The `Number.isInteger` check comes before the range check because it is the one that catches `NaN`.
+
 ### Reading and Writing JSON
 
 Programs frequently send and receive data. They save it to files, send it across the network to other machines, and exchange it with programs written in other languages. To do any of that, the data has to be captured in a format that is agreed on ahead of time. A commonly used format is **JSON**, short for *J*ava*S*cript *O*bject *N*otation. You have already seen JSON in this course: the metadata files in the learning activities, such as `package.json` and `tsconfig.json`, are JSON files.
@@ -488,9 +561,145 @@ Two cautions follow from JSON being nothing but text. The first is that the conv
 const readings: Reading[] = JSON.parse(text);   // hoped for, not checked
 ```
 
-The compiler accepts that line and then checks every later use of `readings` against a type nobody verified. If the text came from a file somebody edited by hand, from another team's program, or from an older version of the format, the values may be nothing like `Reading`, and the compiler has no way to know. For now, work with JSON your own code produced, where the shapes are known. Data from somewhere you do not control must be checked before it is trusted, as [Chapter 18](../part3/02_consuming_data#data-without-invariants) describes.
+The compiler accepts that line and then checks every later use of `readings` against a type nobody verified. If the text came from a file somebody edited by hand, from another team's program, or from an older version of the format, the values may be nothing like `Reading`, and the compiler has no way to know. JSON your own code produced has a shape you know. Data from somewhere you do not control must be checked before it is trusted.
 
 Together with `readFile` and `writeFile`, `JSON.stringify` and `JSON.parse` let a program save its data to a file and load it back later.
+
+### Checking Parsed Data
+
+A value returned by `JSON.parse` can be checked while the program runs. The first step is to give the value a type that says nothing is known about it yet. That type is `unknown`:
+
+```typescript
+const raw: unknown = JSON.parse(text);
+raw.hour;                        // compile error: 'raw' is of type 'unknown'
+const hour: number = raw;        // compile error: Type 'unknown' is not assignable to type 'number'
+```
+
+A value of type `unknown` can be stored and can be passed to a function. The two errors above show why `unknown` exists. If we used  `Reading[]` as the type annotation, the compiler would assume a data shape that had not been verified. With `unknown`, it refuses every use of the value until the code has checked to confirm what the value is.
+
+The check is the `typeof` operator. `typeof x` returns the string name of the kind of value `x` holds:
+
+| Value | `typeof` |
+|---|---|
+| `6` | `"number"` |
+| `"6"` | `"string"` |
+| `true` | `"boolean"` |
+| `undefined` | `"undefined"` |
+| `{ hour: 6 }` | `"object"` |
+| `[6, 9]` | `"object"` |
+| `null` | `"object"` |
+
+Comparing `typeof` against one of these strings narrows the type, as checking a discriminator did in [Chapter 2](./02_model-types#branching-on-the-case). Inside the `if`, the compiler knows what the value is:
+
+```typescript
+const raw: unknown = JSON.parse("21");
+if (typeof raw === "number") {
+    raw * 2;     // allowed: raw is a number here
+}
+```
+
+The last three rows of the table require specific care. An object, an array, and `null` all report `"object"`, and JSON text can hold any of the three. Establishing that a value is an object with named fields takes three checks: `typeof` is `"object"`, the value is not `null`, and `Array.isArray`, which is `true` only for an array, is `false`.
+
+After those checks the fields can be read, one at a time, as values that are themselves `unknown`. The type `Record<string, unknown>` describes an object in that state: its keys are strings and nothing is known about its values. It uses the generic notation of `Promise<T>`, with one type for the keys and one for the values.
+
+A converter for one `Reading` puts these pieces together. As `toHour` did, it returns a `Result`, so the caller receives either a reading it can trust or a description of what was wrong:
+
+```typescript
+/**
+ * Converts a parsed JSON value into a Reading.
+ *
+ * @param {unknown} raw the parsed value, of unknown shape.
+ * @returns {Result<Reading, string>} ok: true with a valid reading, or
+ * ok: false with a description of the first problem found.
+ */
+function toReading(raw: unknown): Result<Reading, string> {
+    if (typeof raw !== "object" || raw === null || Array.isArray(raw) === true) {
+        return { ok: false, error: "a reading must be a JSON object" };
+    }
+    const fields: Record<string, unknown> = raw as Record<string, unknown>;
+
+    const hour: unknown = fields.hour;
+    if (typeof hour !== "number" || Number.isInteger(hour) === false) {
+        return { ok: false, error: "hour is missing or not a whole number" };
+    }
+    if (hour < 0 || hour > 23) {
+        return { ok: false, error: "hour is not from 0 to 23" };
+    }
+
+    const tempCelsius: unknown = fields.tempCelsius;
+    if (typeof tempCelsius !== "number") {
+        return { ok: false, error: "tempCelsius is missing or not a number" };
+    }
+
+    return { ok: true, value: { hour: hour, tempCelsius: tempCelsius } };
+}
+```
+
+<details class="tooltip ts-tips">
+<summary>The <code>as</code> Operator</summary>
+
+After the first `if`, the compiler has narrowed `raw` to the type `object`, and that type does not allow a property to be read by name. `raw as Record<string, unknown>` tells the compiler to treat `raw` as the named type, which does.
+
+`as` does not check or convert anything. It is safe on this line only because the three checks above it have already established that the value is an object, is not `null`, and is not an array. Do not use `as` to just make a type error go away as this can cause hidden errors when that assumption proves false (e.g., when a text file is malformed).
+
+</details>
+
+Each field is handled the same way: read it as `unknown`, check it with `typeof`, and only then use it. A field missing in the text reads as `undefined`, whose `typeof` is `"undefined"`, so one comparison against `"number"` refuses a missing field and a field of the wrong type. A field the type does not mention, such as a `note`, is never read and is left out of the result. The returned `Reading` is built from the checked values, and the invariant on `hour` from [Chapter 5](./05_arrays) holds for it because the converter checked that too.
+
+```typescript
+test("a well-formed reading converts",
+    checkExpect(() => toReading(JSON.parse('{ "hour": 6, "tempCelsius": -4 }')), {
+        ok: true,
+        value: { hour: 6, tempCelsius: -4 }
+    })
+);
+
+test("a renamed field is reported",
+    checkExpect(() => toReading(JSON.parse('{ "hour": 6, "temp": -4 }')), {
+        ok: false,
+        error: "tempCelsius is missing or not a number"
+    })
+);
+
+test("a number sent as text is reported",
+    checkExpect(() => toReading(JSON.parse('{ "hour": "6", "tempCelsius": -4 }')), {
+        ok: false,
+        error: "hour is missing or not a whole number"
+    })
+);
+
+test("an array is not a reading",
+    checkExpect(() => toReading(JSON.parse("[6, -4]")), {
+        ok: false,
+        error: "a reading must be a JSON object"
+    })
+);
+```
+
+The third test shows why the converter checks the field with `typeof` and does not convert it with `Number`. JSON distinguishes the number `6` from the string `"6"`, and a converter that accepted both would hide a mistake in whatever produced the text.
+
+A field whose type is a union of literals needs one more kind of check, because `typeof` can only establish that the value is a string. Suppose a reading also recorded the sky. `find`, from [Chapter 5](./05_arrays), looks the value up among the allowed ones, and its result is already typed:
+
+```typescript
+type Sky = "clear" | "cloud" | "rain";
+
+const SKIES: Sky[] = ["clear", "cloud", "rain"];
+
+/**
+ * Converts a value into a Sky.
+ *
+ * @param {unknown} value the value to convert.
+ * @returns {Sky | undefined} the matching Sky, or undefined when the value is not one.
+ */
+function toSky(value: unknown): Sky | undefined {
+    return SKIES.find((sky: Sky) => sky === value);
+}
+
+test("a known sky converts", checkExpect(() => toSky("rain"), "rain"));
+test("an unknown sky does not", checkExpect(() => toSky("hail"), undefined));
+```
+
+Converters like `toReading` are tedious to write, and they are only needed where data enters the program. Once a value has been converted, the rest of the code works with a `Reading` and never needs to look at `unknown` again. [Chapter 18](../part3/02_consuming_data#data-without-invariants) applies the same technique to data from services run by other people.
 
 ### Calling Web Services
 
@@ -520,6 +729,12 @@ async function currentTemperature(stationId: string): Promise<number> {
 There are two `await`s because the answer arrives in stages. The first delivers the response once the service has begun answering. The second, `response.json()`, delivers the response's body, parsed from JSON text into an object as `JSON.parse` would, which can itself take time for a large reply. After the second `await`, `report` is an ordinary object.
 
 As with `JSON.parse`, the type annotation on `report` states our expectation, but the compiler cannot verify it. The data was produced by another machine at runtime, and the type checker cannot see across a network. If the service changes its reply format, the program will still compile, but will misbehave when it runs.
+
+A service is data from somewhere we do not control. The careful version annotates the parsed body as `unknown` and passes it to a converter written the way `toReading` was:
+
+```typescript
+const raw: unknown = await response.json();
+```
 
 ### Waiting in Parallel
 
