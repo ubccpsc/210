@@ -191,16 +191,14 @@ expect(toStatus("NOT_DELIVERED")).not.to.equal("delivered");
 // fails: toStatus returned "delivered"
 ```
 
-The hypothesis is correct! `"NOT_DELIVERED".includes("DELIVERED")` is `true`, so the first branch matches. We can now write a test that runs in a millisecond and reaches the fault it.
+The hypothesis is correct! `"NOT_DELIVERED".includes("DELIVERED")` is `true`, so the first branch matches. We can now write a test that runs in a millisecond and reaches the fault.
 
-Each step of the debugging process narrowed our search: 
+Notice how each step of the debugging process narrowed our search: 
 1. Reproduction removed the user interface, the tracker, and four carriers. 
 2. Round one ruled out the carrier. 
 3. Round two ruled out everything except a single function. We could then turn the bug into a failing test that can strengthen our test suite. 
 
-Each round was cheap because each hypothesis was precise enough to be checked with one observation.
-
-The fault was not introduced by a recent edit. The substring test had been in the code since it was written, and it gave the right answer for every status the carrier sent until the carrier started sending one it had never sent before. Nothing in our repository changed: the new input from the carrier exposed the fault. "We did not change anything" is not evidence that the fault is somewhere else.
+As a final note: the fault was not introduced by a recent edit. The substring test had been in the code since it was written, and it gave the right answer for every status the carrier sent until the carrier started sending one it had never sent before. Nothing in our repository changed: the new input from the carrier exposed the fault. "We did not change anything" is not evidence that the fault is somewhere else.
 
 ## Fixing the Fault
 
@@ -215,19 +213,22 @@ if (raw.includes("DELIVERED")) {
 }
 ```
 
-The reported failure goes away and the customer is satisfied, but the fault is still there. `PARTIALLY_DELIVERED` would cause the same failure, and so would any future status from the carrier that contains the same substring. This is a symptomatic fix: it addresses the reported instance rather than the defect that caused it.
+The reported failure goes away and the customer is satisfied, but the fault is still there. `NOT-DELIVERED` would cause the same failure, and so would any future status from the carrier that contains the same substring. This is a symptomatic fix: it addresses the reported instance rather than the defect that caused it.
 
 Three questions help distinguish a symptomatic fix from a real one.
 
-_What else could this fault cause?_ One fault usually causes several failures, and only one of them has been reported. Asking which other inputs follow the same path finds those failures before a customer does. Here, the answer is any status that contains `DELIVERED`.
+_What other failures could this fault cause?_ One fault usually causes several failures, and only one of them has been reported. If we which other inputs follow the same faulty path, we can find those failures before a customer. In the example above, we could get other failures in reporting delivery status for any raw status that includes `DELIVERED`.
 
-_Where is the fault?_ The failure appeared in the display, but the display is not wrong, because it showed what it was given. The fault is in the conversion, and that is where the fix belongs. Fixing a symptom where it was observed, rather than where it was caused, tends to leave the fault in place and add a special case on top of it.
+_Where is the fault?_ The failure appeared in the display, but the display is not wrong---it showed what is was given. The fault is in the conversion, and that's where we should apply a fix. Fixing a symptom where it was observed (e.g., by patching the display), rather than where it was caused, leaves the fault in place and adds technical debt to the project.
 
-_Why was this fault possible?_ The substring test matched an open-ended set of strings to a fixed set of meanings, which cannot be correct in general, because the carrier can always introduce a status we have never seen. The real fix is to match exactly against the statuses the carrier documents, and to reject anything unrecognized rather than guessing. The same guess is in every adapter. Each `toStatus` that [Chapter 20](./04_refactoring#working-in-small-steps) moved into an adapter still ends with `return "in-transit"`, because that refactoring had to preserve behaviour. Each adapter gets the same fix, as its own change, with a failing test first.
+_Why was this fault possible?_ The substring test matched an open-ended set of strings to a fixed set of meanings, which cannot be correct in general, because the carrier can always introduce a status we have never seen. The real fix (which has to be applied to each `toStatus` we moved to an adapter in [Chapter 20](./04_refactoring#working-in-small-steps)) is to match exactly against the statuses the carrier documents, and to reject anything unrecognized rather than guessing. 
+
+<!----The same guess is in every adapter. Each `toStatus` that [Chapter 20](./04_refactoring#working-in-small-steps) moved into an adapter still ends with `return "in-transit"`, because that refactoring had to preserve behaviour. Each adapter gets the same fix, as its own change, with a failing test first.
+---->
 
 ### Writing the Test First
 
-Before changing any code, we turn the check from round two into a permanent test, which is why it was worth narrowing the reproduction down to a single function. The test states the correct answer, which the round-two check did not:
+Before changing any code, we turn the check from round two into a permanent test. Narrowing down the reproduction to a single function helps us greatly here. The test includes the correct answer in an `expect`:
 
 ```typescript
 test("a NOT_DELIVERED status is not reported as delivered", () => {
@@ -259,9 +260,11 @@ export function toStatus(raw: string): Result<ShipmentStatus, string> {
 
 The fix changes the return type of `toStatus`, so the test's assertion becomes `expect(toStatus("NOT_DELIVERED")).to.deep.equal({ ok: true, value: "exception" })`.
 
-The compiler also rejects the place in `CarrierCClient` that used its answer as a status, and `track` now reports an unrecognized status to its caller as a `carrier-unavailable` failure, one of the `TrackingError` cases, as it already does when a request fails.
+<!---- CL note: I feel like the next para is a little hard to follow --->
 
-This is the same kind of converter as in [Chapter 18](./02_consuming_data#converting-not-claiming). The original bug was possible because an unvalidated value from outside the program was interpreted by guesswork, which is what the edge in that chapter exists to prevent. Debugging often ends in a design change, because the reason a fault was possible usually has a design answer.
+<!----The compiler also rejects the place in `CarrierCClient` that used its answer as a status, and `track` now reports an unrecognized status to its caller as a `carrier-unavailable` failure, one of the `TrackingError` cases, as it already does when a request fails.---->
+
+This is the same kind of converter as in [Chapter 18](./02_consuming_data#converting-not-claiming). The original bug was possible because an unvalidated value from outside the program was interpreted by guesswork, exactly what we tried to prevent in Chapter 18.. Debugging often ends in a design change, because usually it's often a design problemt hat leads to a fault.
 
 ## Validating the Fix
 
@@ -271,7 +274,9 @@ A change can also affect parts of the system it was not meant to touch, so run t
 
 ## Fixing a Public API
 
-Our tracker is a published library, so this fix changes a contract that other teams have written code against. Clients now receive `exception` where they used to receive `delivered`, which corrects the fault, and they receive `ok: false` where an unrecognized status used to appear as `in-transit`. Neither change alters a type, so the compiler cannot warn clients, and a client may have adapted to the wrong answer, for example by checking a second field to work out the real status. [Chapter 19](./03_api_design#breaking-changes) lists the options: release the fix as a breaking change, add a corrected version of the operation and deprecate the old one, or document the behaviour and leave the code alone. A tracker that reports undelivered parcels as delivered cannot be left as it is, so we ship this fix as a breaking change, with release notes that describe both changes.
+Our tracker is a published library, so this fix changes a contract that other teams have written code against. Clients now receive `exception` where they used to receive `delivered` (the fault fix), and they receive `ok: false` where an unrecognized status used to appear as `in-transit` (a design change). Neither change alters a type, so the compiler cannot warn clients, and a client may have adapted to the wrong answer, for example by checking a second field to work out the real status. 
+
+What do we do? As per [Chapter 19](./03_api_design#breaking-changes), either: (1) release the fix as a breaking change, (2) add a corrected version of the operation and deprecate the old one, or (3) document the behaviour and leave the code alone. We decide that we can't leave a tracker that reports undelivered parcels as delivered as-is, so we'll take path (1): ship this fix as a breaking change, with release notes that describe both changes.
 
 The severity of a bug can override all of this. A bug that loses data, exposes information, or lets someone do what they should not be able to do is fixed immediately, even if clients depend on it and get no notice, because the alternative is worse. The deep-dive example below shows this decision being made in real time. Significant functionality was disabled within hours, and the more careful design came later.
 
@@ -280,24 +285,31 @@ The severity of a bug can override all of this. A bug that loses data, exposes i
 
 The [Falador Massacre](https://en.wikipedia.org/wiki/RuneScape#Falador_Massacre) was the dramatic name given to the result of a bug in the [MMORPG](https://en.wikipedia.org/wiki/Massively_multiplayer_online_role-playing_game) RuneScape. In RuneScape, player-versus-player (PvP) combat was disabled in most of the game. It was only allowed in special areas, such as "The Wilderness" and some parts of player-owned houses. Cities such as Falador were meant to be safe from PvP combat. 
 
-In this game, a player killed by another player (in PvP) loses most of the items they were carrying. In many MMORPGs, obtaining some items takes many hours, often mapping to days and weeks of real-world time investment, of repetitive gameplay. Thus, losing items unexpectedly, as was possible with this bug, can be devastating.
+In this game, a player killed by another player (in PvP) loses the items they were carrying. In many MMORPGs, obtaining items can take many hours of repetitive gameplay, possibly mapping to days and weeks of real-world time investment. Thus, losing items unexpectedly, as was possible with this bug, can be devastating.
 
-The _fault_ was that when players were removed from a player-owned house while PvP was enabled for them, PvP stayed enabled. Some players were therefore able to attack other players in areas that were supposed to be safe, which caused a great deal of chaos.
+The _fault_ was that when players were removed from a player-owned house while PvP was enabled for them, PvP stayed enabled. The _failure_ is that some players were able to attack other players in areas that were supposed to be safe, which caused a great deal of chaos.
 
-The _failure_ was reported in the middle of the night for the game's developers. The developer on call identified the fault and [deployed a simple fix](https://youtu.be/ukbkU_dPKrU?si=A1QEkVbFlnZG5Jn_&t=3560): houses could no longer turn on PvP, and the PvP state no longer had any effect. This disabled significant PvP features in the game, but disabling them cost less than letting the "massacre" continue.
+This issue was reported in the middle of the night for the game's developers. The developer on call identified the fault and [deployed a simple, but breaking fix](https://youtu.be/ukbkU_dPKrU?si=A1QEkVbFlnZG5Jn_&t=3560): houses could no longer turn on PvP, and the PvP state no longer had any effect. This disabled significant PvP features in the game, but disabling them cost less than letting the "massacre" continue.
 
 The game code was later updated to [add a notion of "areas" to the game](https://youtu.be/ukbkU_dPKrU?si=l1K9BgG4NC9AYwYT&t=3650). Areas could be checked to ensure that states such as PvP were not enabled where they should not be.
 
 
-(We talk about video game examples not because we expect you have played them, but because they are large, complex, and often, poorly designed, pieces of software whose high-level meaning can be explained easily. An example of another bug that required a devastating fix is the [Corrupted Blood](https://en.wikipedia.org/wiki/Corrupted_Blood_incident) incident.)
+(We talk about video game examples not because we expect you have played them, but because they are large, complex, and often, poorly designed, pieces of software whose high-level meaning can be explained easily. An example of another bug that required a breaking fix is the [Corrupted Blood](https://en.wikipedia.org/wiki/Corrupted_Blood_incident) incident.)
 
 </details>
 
 #### Debugging Is a Process
 
-Each step in this chapter either shortens the chain from fault to failure or searches it systematically. Reproduce the failure, so that it can be triggered on demand and is small enough to reason about. Localize the fault by forming hypotheses and halving the search space. Fix the fault where it is, and ask why it was possible, because the answer often points to a design improvement as well as a correction. Validate the fix with a test that you saw fail first, and with a suite that checks everything else.
+Each step in this chapter either shortens the chain from fault to failure or searches it systematically: (1) Reproduce the failure, so that it can be triggered on demand and is small enough to reason about. (2) Localize the fault by forming hypotheses and halving the search space. (3) Fix the fault where it is, and ask why it was possible, because the answer often points to a design improvement as well as a correction. And finally, (4) validate the fix with a test that you saw fail first, and with a suite that checks everything else.
 
-Little of this process is new. The properties that make a system quick to debug are the same ones earlier chapters argued for, for other reasons: small units that a failing test can name, low coupling so that the chain of dependencies is short, validation at the edge so that bad data is rejected where it enters rather than misinterpreted three layers later, assertions that make incorrect state visible, and a regression suite that can check any fix. None of these were introduced as debugging techniques, but all of them help when something goes wrong.
+Little of this process is new. "Good design" properties turn out to make a system quick to debug too: 
+- small units that a failing test can name ([Chapter 11](https://ubccpsc.github.io/210/part2/02_decomposition.html)), 
+- low coupling so that the chain of dependencies is short ([Chapter 17](https://ubccpsc.github.io/210/part3/01_coupling.html)), 
+- validation at the edge so that bad data is rejected where it enters rather than misinterpreted three layers later ([Chapter 19](https://ubccpsc.github.io/210/part3/03_api_design.html)), 
+- assertions that make incorrect state visible ([Chapter 3](https://ubccpsc.github.io/210/part1/03_checking-invariants.html)), and 
+- a regression suite that can check any fix ([Chapter 9](https://ubccpsc.github.io/210/part1/09_validation.html)). 
+
+None of these were introduced as debugging techniques, but all of them help when something goes wrong.
 
 <details class="tooltip exercise">
   <summary>Exercise: The Overnight Shift Report</summary>
