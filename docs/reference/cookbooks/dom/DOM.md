@@ -1,6 +1,6 @@
-# Working with the DOM
+# DOM Cookbook
 
-This document explains how a TypeScript program reads and changes a web page. [How a Page Works](#how-a-page-works) describes the model: what a page is to a program, where the program runs, and what an element is. The sections after it are recipes for common DOM-related tasks.
+This document explains how a TypeScript program reads and changes a web page. Writing code for a page uses the same skills as the rest of the course, applied to a program that runs in a browser. The page is a set of objects with fields and methods. Your code will respond to user actions through callbacks, and a class keeps the page's state in one place. You still check input, report failure with a `Result`, and test the behaviour, exactly as you have been doing in the rest of the course. What is new is the set of objects the browser provides, the names of their fields and methods, and where the program is executing.
 
 ## The Example Page
 

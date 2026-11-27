@@ -356,6 +356,8 @@ The response includes a **status code** that says how the request went. The rang
 
 A request sends data to the service in one of three places, and the convention is consistent enough to rely on. The path identifies the resource (`/shipments/9K4T`). The **query string** adjusts the request (`?includeHistory=true`). The **body** carries content for `POST` and `PUT`.
 
+This chapter looks at a web service from the client's side. The [REST Cookbook](../reference/cookbooks/rest/REST) describes the same conventions from the server's side, including how a service chooses a status code.
+
 Reading a response uses `fetch` and `await` from [Chapter 7](../part1/07_async#calling-web-services):
 
 ```typescript

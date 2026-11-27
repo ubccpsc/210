@@ -221,6 +221,29 @@ export default defineConfig({
                 {
                 text: "Glossary",
                 link: "/reference/glossary"
+                },
+                {
+                text: "Cookbooks",
+                link: "/reference/cookbooks/",
+                items: [
+                {
+                    text: "Version Control",
+                    link: "/reference/cookbooks/git/git"
+                },
+                {
+                    text: "Development Environment",
+                    link: "/reference/cookbooks/vscode/VSCode"
+                },   {
+                    text: "Web Services",
+                    link: "/reference/cookbooks/rest/REST"
+                },   {
+                    text: "Document Object Model",
+                    link: "/reference/cookbooks/dom/DOM"
+                },{
+                    text: "Grading",
+                    link: "/reference/cookbooks/grader/Grader"
+                }
+                ],
             }],
         }, // end reference
         ],
