@@ -37,7 +37,7 @@ The text between angle brackets is a tag. `<button ...>` opens a button and `</b
 
 Three ideas explain most of what a page's code does: the page is a tree of objects, the code runs in the browser, and each element is an object with properties.
 
-### The Page Is a Tree of Objects
+### The Page as a Tree
 
 `index.html` is text. When the browser loads it, the browser builds one object for every element the text describes and arranges the objects in a tree:
 
@@ -123,7 +123,7 @@ The type names do not always follow the tag: `<li>` is `HTMLLIElement`, `<ul>` i
 
 [Finding Elements](#finding-elements) shows how a program gets hold of one of these objects.
 
-## Reading and Changing the Page
+## Working with the Page
 
 The recipes in this section find elements, read what the user entered, and change what the page shows.
 
@@ -176,7 +176,7 @@ With the helper, finding the Refresh button takes one line:
 const refresh: HTMLButtonElement = requireElement<HTMLButtonElement>(document, "#refresh");
 ```
 
-### Reading What the User Entered
+### Reading User Input
 
 An input's `value` is a string, independent of what the user typed. A user who types `5` has entered the string `"5"`, and a user who types nothing has entered `""`. Turning that into a number is the conversion described in [Chapter 7](../../../part1/07_async#converting-text-to-numbers), with the same checks:
 
@@ -202,7 +202,7 @@ function toTemperature(text: string): Result<number, string> {
 
 The error messages are written for the user, since the page displays them.
 
-### Changing What the Page Shows
+### Updating the Page
 
 Changing an element that already exists is an assignment to `textContent`. Showing a list whose length varies means building elements. Three operations are used to change elements:
 
@@ -236,7 +236,7 @@ function showReadings(list: HTMLElement, readings: Reading[]): void {
 
 Set text with `textContent`. Assigning to an element's `innerHTML` also changes what it shows, but the browser reads the string as HTML, so text that came from a user or a service could add elements to the page. `textContent` always shows the string as written.
 
-### Classes, Attributes, and Data
+### Classes and Attributes
 
 `showReadings` uses two more properties that every element has. The first is `classList`, which holds the element's classes. A class is a label, written in HTML as `class="freezing"`, and the stylesheet decides how elements with that label look:
 
@@ -299,7 +299,7 @@ refresh.addEventListener("click", async (): Promise<void> => {
 
 Nothing awaits the promise such a callback returns, so callbacks must deal with every failure that might arise when they execute, usually by putting an error message on the page.
 
-### Keeping State in One Place
+### State in One Place
 
 A page has several elements and some data, and every operation on the page needs most of them. A class holds them as fields:
 

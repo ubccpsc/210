@@ -141,7 +141,7 @@ The determination of the overall grade is entirely based on the last two cards:
 
 Real code must work, and the only way to keep it working over time is with rigorous testing. This is why testing is deeply integrated into the evaluation methodology of the course.
 
-## Using the Report as Feedback
+## Using the Feedback
 
 The report is most useful when you read it as feedback on your work rather than as a list of things to do. A few habits help.
 

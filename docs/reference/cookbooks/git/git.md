@@ -72,7 +72,7 @@ If you are in a repo that has not had any changes to it (e.g., no file changes a
 
 `git checkout <branchName>`
 
-### Copying Changes into a New Branch
+### Copying Changes to a Branch
 
 If you plan ahead, you can create a new branch before you start new development work with the command below. But if you forget and you have committed work on whatever branch you have checked out in your repo (`main` by default), you may want to move this new work to a new different dev branch. After making some local commits, but before pushing, you can move these commits to a new branch. This can be helpful especially if branch protection is enabled on your repository as you will be unable to `git push` to main in this case.
 
@@ -86,7 +86,7 @@ Once this branch is on the git server, you can create a pull request using the G
 
 Managing branches is a complex topic; a more detailed 310-centric view of branching can be found in the [branches tutorial](https://github.com/ubccpsc/310/blob/main/resources/other/branches.md).
 
-## Recovering from a Bad Git State
+## Fixing a Bad Git State
 
 Sometimes git repos get into bad states. When they do, make a copy of the repo on local disk (so you don't lose your work), and clone a fresh copy of the repo from GitHub. While this is unsatisfying, it can sometimes be easier than trying to reverse your way out of an unclear repository state.
 

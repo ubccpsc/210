@@ -27,7 +27,7 @@ The browser workspace saves your files automatically a moment after you stop typ
 
 To open a file quickly without using the Explorer, press `Ctrl/Cmd+P` and start typing its name.
 
-## Identifying Static Problems
+## Finding Static Problems
 
 Static problems are found without running your code, and come in two kinds: compilation errors and lint errors. Both correspond to the **static view** of a program described in the textbook, and both appear in the same places in VSCode.
 
@@ -79,7 +79,7 @@ To see them in the terminal without fixing anything, run `pnpm lint` instead.
 
 Lint warnings can also be fixed one at a time where they occur: click the underlined code, then the lightbulb that appears (or press `Ctrl/Cmd+.`) to see the quick fixes Biome offers. Never choose a quick fix that suppresses or ignores a rule. The grader scans for those suppressions and stops when it finds one.
 
-## Identifying Dynamic Problems
+## Finding Dynamic Problems
 
 Dynamic problems only appear when the code runs: a function that compiles but returns the wrong answer. The type checker cannot see these. Your tests can, and they correspond to the **dynamic view** of a program.
 
@@ -100,7 +100,7 @@ When a test fails, three places report it: the Testing View marks it in the left
 
 ![Testing IDE](https://raw.githubusercontent.com/ubccpsc/210/main/docs/reference/cookbooks/vscode/img/testing.png)
 
-### Running Tests from the Terminal
+### Tests in the Terminal
 
 You can also use the Terminal View at the bottom of VSCode to invoke the tests and get feedback about what is passing or failing:
 
